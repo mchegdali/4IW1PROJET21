@@ -24,7 +24,7 @@ const tailwindConfig: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ['Roboto Flex Variable', ...defaultTheme.fontFamily.sans]
+        sans: ['Inter', ...defaultTheme.fontFamily.sans]
       },
       colors: {
         border: 'hsl(var(--border))',
