@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import Button from '@/components/ui/button/Button.vue';
+import { ref } from 'vue';
+import { useFetch } from '@vueuse/core';
+import { type Product } from '@/api/products.api';
+import ProductsSection from '@/components/products/products-section.vue';
+const productsUrl = ref('https://fakestoreapi.com/products?limit=4');
+const { data: products } = useFetch(productsUrl).json<Product[]>();
+
 </script>
 
 <template>
-  <h1>Home</h1>
-  <p>Welcome to the Home page</p>
-  <Button type="button" variant="secondary">Click me</Button>
+  <ProductsSection title="Nos best-sellers" :products="products" />
+  <ProductsSection title="Nos nouveautés" :products="products" />
 </template>

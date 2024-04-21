@@ -16,7 +16,9 @@ const { product } = defineProps<{ product: Product }>();
                     <img :src="product.image" class="rounded-lg object-cover object-center w-full h-full" />
                 </AspectRatio>
             </div>
-            <CardTitle>{{ product.title }}</CardTitle>
+            <CardTitle>
+                <RouterLink :to="{ path: `/products/${product.id}` }">{{ product.title }}</RouterLink>
+            </CardTitle>
             <CardDescription class="text-primary">{{ product.category }}</CardDescription>
         </CardHeader>
         <CardContent class="flex flex-col gap-1 items-center justify-self-end">
@@ -25,4 +27,5 @@ const { product } = defineProps<{ product: Product }>();
             <AddToCartButton class="uppercase font-medium" />
         </CardContent>
     </Card>
+    <Skeleton />
 </template>
