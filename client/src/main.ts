@@ -1,3 +1,5 @@
+import '@fontsource-variable/roboto-flex'
+import '@fontsource/roboto-flex'
 import './assets/main.css'
 
 import { createApp } from 'vue'

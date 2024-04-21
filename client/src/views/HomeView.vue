@@ -1,5 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Button from '@/components/ui/button/Button.vue';
+
+</script>
 
 <template>
-  <main>home</main>
+  <h1>Home</h1>
+  <p>Welcome to the Home page</p>
+  <Button type="button" variant="secondary">Click me</Button>
 </template>
