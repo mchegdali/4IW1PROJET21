@@ -9,7 +9,6 @@ import {
     CarouselItem,
 } from '@/components/ui/carousel'
 import ProductCard from '@/components/products/product-card.vue';
-import type { CarouselProps } from '../ui/carousel/interface';
 const { products, title } = defineProps<{
     products?: Product[] | null,
     title?: string,
@@ -24,11 +23,11 @@ const { products, title } = defineProps<{
             <h2 class="text-3xl font-semibold">{{ title }}</h2>
         </slot>
         <slot>
-            <Carousel class="-mx-4" v-if="products" :opts="{
+            <Carousel class="-mx-4 pb-8 overflow-visible" v-if="products" :opts="{
                 align: 'center',
                 loop: true,
             }">
-                <CarouselContent>
+                <CarouselContent class="overflow-visible">
                     <CarouselItem class="basis-4/6" v-for="product in products" :key="product.id">
                         <ProductCard v-if="product" :product="product" />
                     </CarouselItem>
