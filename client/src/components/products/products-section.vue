@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, reactive } from 'vue';
+// import { computed, watch, reactive } from 'vue';
 
 import type { Product } from '@/api/products.api';
 import { Skeleton } from '@/components/ui/skeleton';
