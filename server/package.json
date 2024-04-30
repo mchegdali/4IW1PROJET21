@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "lint": "eslint src --ext .js",
+    "lint": "eslint . --ext .js",
     "dev": "node --watch index.js"
   },
   "keywords": [],
