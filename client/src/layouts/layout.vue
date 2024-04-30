@@ -6,7 +6,7 @@ import Appbar from '@/components/appbar.vue';
 <template>
   <div class="layout-grid">
     <Navbar class="row-start-1 row-span-1" />
-    <main class="row-start-2 row-span-1 pt-2 px-4 overflow-y-scroll">
+    <main class="row-start-2 row-span-1 pt-2 px-4 overflow-y-scroll overflow-x-clip">
       <RouterView />
     </main>
     <Appbar class="row-start-3 row-span-1" />
