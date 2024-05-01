@@ -1,21 +1,27 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, reactive } from 'vue'
+import basket from '../api/basket.json'
+import { Plus, Minus, Trash } from 'lucide-vue-next'
 
 interface Product {
+  id: number
   name: string
   description: string
+  price: number
+  quantity: number
+  image: string
 }
 
-const products = ref<Array<Product>>([])
+const products = reactive<Array<Product>>(basket.products)
 
-fetch('https://fakestoreapi.com/products')
-  .then((response) => response.json())
-  .then((data) => {
-    const fiveProducts = data.slice(0, 5)
-    products.value = fiveProducts
-    console.log(products.value)
-  })
-  .catch((error) => console.error('Erreur lors de la récupération des produits:', error))
+// fetch(basket)
+//   .then((response) => response.json())
+//   .then((data) => {
+//     const fiveProducts = data.slice(0, 5)
+//     products.push(...fiveProducts)
+//     console.log(products)
+//   })
+//   .catch((error) => console.error('Erreur lors de la récupération des produits:', error))
 
 function reduceLenghtDescription(value: string) {
   let parseValue = value.length
@@ -26,25 +32,31 @@ function reduceLenghtDescription(value: string) {
   }
 }
 
-const prices: number[] = []
-function calculPrice(price: number) {
-  prices.push(price)
-  return price;
-}
+const totalPrice = computed(() => {
+  return products.reduce((prev, curr) => {
+    return prev + curr.price
+  }, 0)
+})
 
-console.log(prices);
+// const prices = reactive<Array<any>>([])
 
-function totalPrice(prices: number[]): number {
-  let total = 0;
-  for (let i = 0; i < prices.length; i++) {
-    total += prices[i];
-    console.log(total)
-  }
-  return total;
-}
+// function calculPrice(price: number) {
+//   prices.push(price)
+//   return price;
+// }
 
-const result = totalPrice(prices);
+// console.log(prices);
 
+// function totalPrice(prices: number[]): number {
+//   let total = 0;
+//   for (let i = 0; i < prices.length; i++) {
+//     total += prices[i];
+//     console.log(total)
+//   }
+//   return total;
+// }
+
+// const result = totalPrice(prices);
 </script>
 
 <template>
@@ -54,14 +66,25 @@ const result = totalPrice(prices);
     class="w-full bg-white p-4 border-b border-gray-200"
   >
     <div class="flex gap-6">
-      <div class="w-24 h-24 bg-red-200">
-        <img class="w-24 h-full bg-slate-400" :src="product.image" :alt="product.title" />
+      <div class="w-24 h-24">
+        <img class="min-w-24 h-full bg-slate-400" :src="product.image" :alt="product.name" />
       </div>
-      <div class="flex flex-col gap-2">
-        <h2 class="font-bold">{{ calculPrice(product.price) }}$</h2>
-        <p class="text-sm text-gray-500">{{ reduceLenghtDescription(product.description) }}</p>
-        <p>Quantité: 1 {{ result }}</p>
-        <!-- Ajoutez d'autres informations du produit ici -->
+      <div class="flex flex-col gap-2 w-full">
+        <div class="flex justify-between w-full">
+          <h2 class="font-bold text-sm">{{ product.price }} €</h2>
+          <Trash />
+        </div>
+
+        <h2 class="text-sm">{{ product.name }}</h2>
+        <p class="text-sm text-gray-500 text-ellipsis">
+          {{ reduceLenghtDescription(product.description) }}
+        </p>
+        <div class="flex gap-2 w-full">
+          <p class="text-sm w-full">Quantité:</p>
+          <Button class=""><Minus /></Button>
+          <p>{{ product.quantity }}</p>
+          <Button ><Plus /></Button>
+        </div>
       </div>
     </div>
   </div>
