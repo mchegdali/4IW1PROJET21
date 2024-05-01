@@ -4,20 +4,12 @@ import Appbar from '@/components/appbar.vue';
 </script>
 
 <template>
-  <div class="layout-grid">
+  <div
+    class="grid grid-rows-[min-content_1fr_min_content] h-svh md:h-auto overflow-clip md:grid-rows-[min-content_1fr]">
     <Navbar class="row-start-1 row-span-1" />
-    <main class="row-start-2 row-span-1 pt-2 px-4 overflow-y-scroll overflow-x-clip">
+    <main class="row-start-2 row-span-1 pt-2 px-4 overflow-y-auto overflow-x-clip">
       <RouterView />
     </main>
-    <Appbar class="row-start-3 row-span-1" />
+    <Appbar class="row-start-3 row-span-1 md:hidden" />
   </div>
 </template>
-
-<style scoped>
-.layout-grid {
-  display: grid;
-  grid-template-rows: 56px calc(100svh - 56px - 48px) 48px;
-  height: 100svh;
-  overflow: clip;
-}
-</style>

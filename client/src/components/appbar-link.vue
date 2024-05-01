@@ -4,9 +4,11 @@ import Button from '@/components/ui/button/Button.vue';
 </script>
 
 <template>
-  <RouterLink :to="{ name: 'home' }" class="p-2">
-    <Button variant="link" size="icon">
+  <Button as-child>
+    <RouterLink :to="{ name: 'home' }" class="p-2 bg-transparent">
+
       <slot name="icon"></slot>
-    </Button>
-  </RouterLink>
+
+    </RouterLink>
+  </Button>
 </template>
