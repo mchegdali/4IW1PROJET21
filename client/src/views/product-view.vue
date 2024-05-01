@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router';
 import { useFetch } from '@vueuse/core';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductQuantityInput from '@/components/products/product-quantity-input.vue';
-import AddToCartButton from '@/components/products/add-to-cart-button.vue';
+import AddToBasketButton from '@/components/products/add-to-basket-button.vue';
 import ProductDescription from '@/components/products/product-description.vue';
 import ProductsSection from '@/components/products/products-section.vue';
 
@@ -44,7 +44,7 @@ watch(() => route.params.id, (id) => {
             <Skeleton v-else class="h-5 w-[10ch] rounded-xl" />
             <ProductQuantityInput v-if="!isFetching && product" class="text-xl" :product-id="product.id" />
             <Skeleton v-else class="h-5 w-[10ch] rounded-xl" />
-            <AddToCartButton v-if="!isFetching && product" class="uppercase font-medium" />
+            <AddToBasketButton v-if="!isFetching && product" class="uppercase font-medium" />
             <Skeleton v-else class="h-5 w-[10ch] rounded-xl" />
         </section>
         <section class="flex flex-col gap-1 w-full max-w-screen-xs">

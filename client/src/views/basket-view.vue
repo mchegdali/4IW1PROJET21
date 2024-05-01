@@ -5,6 +5,6 @@
 
 <template>
     <div class="md:container">
-        Cart view
+        Basket view
     </div>
 </template>

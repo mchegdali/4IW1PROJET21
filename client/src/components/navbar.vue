@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Search, ShoppingCart } from 'lucide-vue-next';
+import { Search, ShoppingBasket } from 'lucide-vue-next';
 import Input from './ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
 
@@ -24,8 +24,8 @@ import logo from '@/assets/images/fanthesie.png';
           </RouterLink>
         </Button>
         <Button variant="link" as-child class="text-white">
-          <RouterLink :to="{ name: 'cart' }" class="flex items-end">
-            <ShoppingCart class="size-8" />
+          <RouterLink :to="{ name: 'basket' }" class="flex items-end">
+            <ShoppingBasket class="size-8" />
             Panier
           </RouterLink>
         </Button>

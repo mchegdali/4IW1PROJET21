@@ -3,7 +3,7 @@ import { type Product } from '@/api/products.api';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import ProductQuantityInput from './product-quantity-input.vue';
-import AddToCartButton from './add-to-cart-button.vue';
+import AddToBasketButton from './add-to-basket-button.vue';
 
 const { product } = defineProps<{ product: Product }>();
 </script>
@@ -24,7 +24,7 @@ const { product } = defineProps<{ product: Product }>();
         <CardContent class="flex flex-col gap-1 items-center">
             <p class="text-xl font-semibold">{{ product.price }}€</p>
             <ProductQuantityInput class="text-xl" :product-id="product.id" />
-            <AddToCartButton class="uppercase font-medium" />
+            <AddToBasketButton class="uppercase font-medium" />
         </CardContent>
     </Card>
 </template>

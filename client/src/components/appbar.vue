@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Home, User, ShoppingCart } from 'lucide-vue-next';
+import { Home, User, ShoppingBasket } from 'lucide-vue-next';
 import AppbarLink from '@/components/appbar-link.vue';
 </script>
 
@@ -17,7 +17,7 @@ import AppbarLink from '@/components/appbar-link.vue';
     </AppbarLink>
     <AppbarLink>
       <template v-slot:icon>
-        <ShoppingCart class="w-6 h-6 text-primary" />
+        <ShoppingBasket class="w-6 h-6 text-primary" />
       </template>
     </AppbarLink>
   </nav>
