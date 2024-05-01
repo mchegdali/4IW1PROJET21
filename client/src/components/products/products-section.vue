@@ -27,11 +27,11 @@ const active = computed(() => {
         return false
     } else {
         return (
-            (!isMd.value && products.length > 1) ||
-            (isMd.value && !isLg.value && products.length > 2) ||
-            (isLg.value && !isXl.value && products.length > 3) ||
-            (isXl.value && !isXxl.value && products.length > 4) ||
-            (isXxl.value && products.length > 5)
+            (!isMd && products.length > 1) ||
+            (isMd && !isLg && products.length > 2) ||
+            (isLg && !isXl && products.length > 3) ||
+            (isXl && !isXxl && products.length > 4) ||
+            (isXxl && products.length > 5)
         )
     }
 });
