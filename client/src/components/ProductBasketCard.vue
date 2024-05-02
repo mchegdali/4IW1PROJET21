@@ -27,36 +27,11 @@ function reduceLenghtDescription(value: string) {
   let parseValue = value.length
 
   if (parseValue > 30) {
-    let newDescription = value.slice(0, 30)
+    let newDescription = value.slice(0, 90)
     return newDescription + '...'
   }
 }
 
-const totalPrice = computed(() => {
-  return products.reduce((prev, curr) => {
-    return prev + curr.price
-  }, 0)
-})
-
-// const prices = reactive<Array<any>>([])
-
-// function calculPrice(price: number) {
-//   prices.push(price)
-//   return price;
-// }
-
-// console.log(prices);
-
-// function totalPrice(prices: number[]): number {
-//   let total = 0;
-//   for (let i = 0; i < prices.length; i++) {
-//     total += prices[i];
-//     console.log(total)
-//   }
-//   return total;
-// }
-
-// const result = totalPrice(prices);
 </script>
 
 <template>
