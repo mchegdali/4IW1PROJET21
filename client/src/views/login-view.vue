@@ -1,10 +1,5 @@
-<script setup lang="ts">
-
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
-    <div class="md:container">
-        Login view
-    </div>
+  <div class="md:container">Login view</div>
 </template>
