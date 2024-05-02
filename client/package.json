@@ -13,9 +13,12 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.0.18",
     "@vueuse/core": "^10.9.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "embla-carousel": "^8.0.2",
+    "embla-carousel-vue": "^8.0.2",
     "lucide-vue-next": "^0.372.0",
     "pinia": "^2.1.7",
     "radix-vue": "^1.7.1",
