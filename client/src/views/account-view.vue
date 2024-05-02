@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AccountMenu from '@/components/AccountMenu.vue'
+import AccountMenu from '@/components/account-menu.vue'
 </script>
 
 <template>
