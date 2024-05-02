@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Package2, ChevronRight, Undo2, CreditCard, Home, SquareUser } from 'lucide-vue-next'
+import { Package2, ChevronRight, Undo2, CreditCard, Home, SquareUser } from 'lucide-vue-next';
 </script>
 
 <template>

@@ -1,33 +1,26 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
-import basket from '../api/basket.json'
-import { Plus, Minus, Trash } from 'lucide-vue-next'
+import { reactive } from 'vue';
+import basket from '../api/basket.json';
+import { Plus, Minus, Trash } from 'lucide-vue-next';
 
 interface Product {
-  id: number
-  name: string
-  description: string
-  price: number
-  quantity: number
-  image: string
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  image: string;
 }
 
-const products = reactive<Array<Product>>(basket.products)
-
-// fetch(basket)
-//   .then((response) => response.json())
-//   .then((data) => {
-//     const fiveProducts = data.slice(0, 5)
-//     products.push(...fiveProducts)
-//     console.log(products)
-//   })
-//   .catch((error) => console.error('Erreur lors de la récupération des produits:', error))
-
-
+const products = reactive<Array<Product>>(basket.products);
 </script>
 
 <template>
-  <div v-for="product in products" :key="product.id" class="w-full bg-white p-4 border-b border-gray-200">
+  <div
+    v-for="product in products"
+    :key="product.id"
+    class="w-full bg-white p-4 border-b border-gray-200"
+  >
     <div class="flex gap-6">
       <div class="w-24 h-24">
         <img class="min-w-24 h-full bg-slate-400" :src="product.image" :alt="product.name" />

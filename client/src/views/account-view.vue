@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AccountMenu from '@/components/account-menu.vue'
+import AccountMenu from '@/components/account-menu.vue';
 </script>
 
 <template>
@@ -12,11 +12,10 @@ import AccountMenu from '@/components/account-menu.vue'
     />
   </div>
 
-<div class="flex flex-col text-center mt-10">
-  <p>Bonjour,</p>
-  <p class="font-bold text-2xl">Jean Dupon</p>
-</div>
-
+  <div class="flex flex-col text-center mt-10">
+    <p>Bonjour,</p>
+    <p class="font-bold text-2xl">Jean Dupon</p>
+  </div>
 
   <div class="mt-10"><AccountMenu /></div>
 </template>

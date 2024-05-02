@@ -2,7 +2,7 @@
 import { RouterLink, type RouteLocationRaw } from 'vue-router';
 import Button from '@/components/ui/button/Button.vue';
 
-const { to } = defineProps<{ to: RouteLocationRaw }>()
+const { to } = defineProps<{ to: RouteLocationRaw }>();
 </script>
 
 <template>

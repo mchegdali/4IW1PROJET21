@@ -1,36 +1,36 @@
 {
-    "products": [
-        {
-            "id": 1,
-            "name": "Infusion de Thé Vert",
-            "description": "Commencez votre journée avec une infusion de thé vert. Rafraîchissante et pleine d'antioxydants, cette infusion vous donne un coup de fouet naturel pour démarrer votre journée.",
-            "price": 10.99,
-            "quantity": 1,
-            "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCrlB84Mzx_7KTi9psgj5gZi6uz7ApsykjYCfilg1G2w&s"
-        },
-        {
-            "id": 2,
-            "name": "Thé Noir Assam",
-            "description": "Dégustez un thé noir Assam authentique et corsé. Avec ses notes maltées et terreuses, ce thé est parfait pour une pause détente ou pour accompagner vos repas.",
-            "price": 19.99,
-            "quantity": 1,
-            "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCrlB84Mzx_7KTi9psgj5gZi6uz7ApsykjYCfilg1G2w&s"
-        },
-        {
-            "id": 3,
-            "name": "Thé Oolong Wu Yi",
-            "description": "Découvrez la subtilité du thé oolong Wu Yi. Ce thé semi-oxydé offre un équilibre parfait entre les arômes floraux et boisés, créant une expérience de dégustation unique.",
-            "price": 5.99,
-            "quantity": 1,
-            "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCrlB84Mzx_7KTi9psgj5gZi6uz7ApsykjYCfilg1G2w&s"
-        },
-        {
-            "id": 4,
-            "name": "Tisane aux Fruits Rouges",
-            "description": "Offrez-vous une tisane aux fruits rouges savoureuse et rafraîchissante. Cette infusion sans caféine est parfaite pour se détendre après une longue journée.",
-            "price": 5.99,
-            "quantity": 1,
-            "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCrlB84Mzx_7KTi9psgj5gZi6uz7ApsykjYCfilg1G2w&s"
-        }
-    ]
+  "products": [
+    {
+      "id": 1,
+      "name": "Infusion de Thé Vert",
+      "description": "Commencez votre journée avec une infusion de thé vert. Rafraîchissante et pleine d'antioxydants, cette infusion vous donne un coup de fouet naturel pour démarrer votre journée.",
+      "price": 10.99,
+      "quantity": 1,
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCrlB84Mzx_7KTi9psgj5gZi6uz7ApsykjYCfilg1G2w&s"
+    },
+    {
+      "id": 2,
+      "name": "Thé Noir Assam",
+      "description": "Dégustez un thé noir Assam authentique et corsé. Avec ses notes maltées et terreuses, ce thé est parfait pour une pause détente ou pour accompagner vos repas.",
+      "price": 19.99,
+      "quantity": 1,
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCrlB84Mzx_7KTi9psgj5gZi6uz7ApsykjYCfilg1G2w&s"
+    },
+    {
+      "id": 3,
+      "name": "Thé Oolong Wu Yi",
+      "description": "Découvrez la subtilité du thé oolong Wu Yi. Ce thé semi-oxydé offre un équilibre parfait entre les arômes floraux et boisés, créant une expérience de dégustation unique.",
+      "price": 5.99,
+      "quantity": 1,
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCrlB84Mzx_7KTi9psgj5gZi6uz7ApsykjYCfilg1G2w&s"
+    },
+    {
+      "id": 4,
+      "name": "Tisane aux Fruits Rouges",
+      "description": "Offrez-vous une tisane aux fruits rouges savoureuse et rafraîchissante. Cette infusion sans caféine est parfaite pour se détendre après une longue journée.",
+      "price": 5.99,
+      "quantity": 1,
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCrlB84Mzx_7KTi9psgj5gZi6uz7ApsykjYCfilg1G2w&s"
+    }
+  ]
 }

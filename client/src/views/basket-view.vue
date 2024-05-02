@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import BasketInformation from '@/components/basket-information.vue'
-import ProductBasketCard from '@/components/product-basket-card.vue'
-import Button from '@/components/ui/button/Button.vue'
+import BasketInformation from '@/components/basket-information.vue';
+import ProductBasketCard from '@/components/product-basket-card.vue';
+import Button from '@/components/ui/button/Button.vue';
 </script>
 
 <template>
