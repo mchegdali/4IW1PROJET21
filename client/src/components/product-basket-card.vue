@@ -23,23 +23,11 @@ const products = reactive<Array<Product>>(basket.products)
 //   })
 //   .catch((error) => console.error('Erreur lors de la récupération des produits:', error))
 
-function reduceLenghtDescription(value: string) {
-  let parseValue = value.length
-
-  if (parseValue > 30) {
-    let newDescription = value.slice(0, 90)
-    return newDescription + '...'
-  }
-}
 
 </script>
 
 <template>
-  <div
-    v-for="product in products"
-    :key="product.id"
-    class="w-full bg-white p-4 border-b border-gray-200"
-  >
+  <div v-for="product in products" :key="product.id" class="w-full bg-white p-4 border-b border-gray-200">
     <div class="flex gap-6">
       <div class="w-24 h-24">
         <img class="min-w-24 h-full bg-slate-400" :src="product.image" :alt="product.name" />
@@ -51,14 +39,18 @@ function reduceLenghtDescription(value: string) {
         </div>
 
         <h2 class="text-sm">{{ product.name }}</h2>
-        <p class="text-sm text-gray-500 text-ellipsis">
-          {{ reduceLenghtDescription(product.description) }}
+        <p class="text-sm text-gray-500 line-clamp-2">
+          {{ product.description }}
         </p>
         <div class="flex gap-2 w-full">
           <p class="text-sm w-full">Quantité:</p>
-          <Button class=""><Minus /></Button>
+          <Button class="">
+            <Minus />
+          </Button>
           <p>{{ product.quantity }}</p>
-          <Button ><Plus /></Button>
+          <Button>
+            <Plus />
+          </Button>
         </div>
       </div>
     </div>
