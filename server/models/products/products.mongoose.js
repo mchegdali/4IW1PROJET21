@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
+import { mongoDb } from '../../config/db';
 
-const ProductSchema = new mongoose.Schema({
+const ProductSchema = new mongoDb.Schema({
   _id: {
-    type: mongoose.Schema.Types.UUID,
+    type: mongoDb.Schema.Types.UUID,
     required: true,
   },
   title: {
@@ -22,7 +22,7 @@ const ProductSchema = new mongoose.Schema({
     required: true,
   },
   price: {
-    type: mongoose.Schema.Types.Decimal128,
+    type: mongoDb.Schema.Types.Decimal128,
     required: true,
     get: (v) => {
       return v.toFixed(2);
@@ -30,6 +30,6 @@ const ProductSchema = new mongoose.Schema({
   },
 });
 
-const ProductMongo = mongoose.model('Product', ProductSchema);
+const ProductMongo = mongoDb.model('Product', ProductSchema);
 
 export default ProductMongo;
