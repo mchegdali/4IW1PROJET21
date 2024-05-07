@@ -1,7 +1,10 @@
 import { Sequelize } from 'sequelize';
 import mongoose from 'mongoose';
 
-const sequelize = new Sequelize(process.env.DB_CONNECTION_STRING);
+/**
+ * @type {Sequelize}
+ */
+let sequelize = null;
 
 /**
  * @type {mongoose}
@@ -12,6 +15,12 @@ async function initDb() {
   if (!process.env.MONGO_CONNECTION_STRING) {
     throw new Error('MONGO_CONNECTION_STRING is not set');
   }
+
+  if (!process.env.PG_CONNECTION_STRING) {
+    throw new Error('PG_CONNECTION_STRING is not set');
+  }
+
+  sequelize = new Sequelize(process.env.PG_CONNECTION_STRING);
 
   try {
     const [, mongooseConnection] = await Promise.all([
