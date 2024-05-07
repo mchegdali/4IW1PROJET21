@@ -1,4 +1,4 @@
-import { mongoDb } from '../../config/db';
+import { mongoDb } from '../../db';
 
 const ProductSchema = new mongoDb.Schema({
   _id: {
