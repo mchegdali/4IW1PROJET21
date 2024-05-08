@@ -80,8 +80,10 @@ const passwordError = computed(() => {
       </RouterLink>
       <Button class="w-full">Connexion</Button>
     </div>
-    <a href="/" class="text-center">Mot de passe oublié ?</a>
   </form>
+  <div class="text-center mt-5">
+    <a href="/" class="text-center">Mot de passe oublié ?</a>
+  </div>
 </template>
 
 <style scoped>
