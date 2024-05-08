@@ -43,6 +43,11 @@ const router = createRouter({
           name: 'register',
           path: '/register',
           component: () => import('../views/register-view.vue')
+        },
+        {
+          name: 'create-account',
+          path: '/create-account',
+          component: () => import('../views/create-account-view.vue')
         }
       ]
     },

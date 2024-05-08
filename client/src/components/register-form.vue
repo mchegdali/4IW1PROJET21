@@ -60,7 +60,6 @@ const passwordError = computed(() => {
 
   return parsedPassword.error.issues[0].message;
 });
-
 </script>
 
 <template>
@@ -105,6 +104,8 @@ const passwordError = computed(() => {
     <Button class="w-full">Confirmer</Button>
   </form>
   <div class="text-center mt-5">
-    <a href="/" class="text-center">Déja un compte ?</a>
+    <RouterLink :to="{ name: 'login' }">
+      <a href="/" class="text-center">Déja un compte ?</a>
+    </RouterLink>
   </div>
 </template>
