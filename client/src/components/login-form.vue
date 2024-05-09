@@ -24,19 +24,23 @@ function handleSubmit() {
 </script>
 
 <template>
+  <img :src="logo" alt="Fanthesie" class="bg-tea-600 p-5 rounded-lg mb-5" />
   <div class="border p-5 rounded-lg shadow-lg">
-    <img :src="logo" alt="Fanthesie" class="bg-tea-600 p-5 rounded-lg mb-5" />
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
       <div>
-        <label>Adresse e-mail</label>
-        <Input id="email" v-model="email" autofocus />
+        <label
+          >Adresse e-mail
+          <Input id="email" v-model="email" autofocus />
+        </label>
         <small class="error" v-if="showEmailError">
           {{ emailError }}
         </small>
       </div>
       <div>
-        <label>Mot de passe</label>
-        <Input id="password" type="password" v-model="password" required />
+        <label
+          >Mot de passe
+          <Input id="password" type="password" v-model="password" required />
+        </label>
       </div>
       <div class="flex gap-4">
         <RouterLink :to="{ name: 'register' }" class="w-1/2">
@@ -47,6 +51,14 @@ function handleSubmit() {
         <Button type="submit" class="w-1/2">Connexion</Button>
       </div>
     </form>
+    <div class="mt-5">
+      <p>
+        En continuant, vous acceptez les
+        <a href="/" class="text-tea-600">conditions d'utilisation et de vente</a> de Fanthésie.
+        Consultez notre <a href="/" class="text-tea-600">déclaration de confidentialité</a>, notre
+        <a href="/" class="text-tea-600">politique relative aux cookies</a> ainsi que notre.
+      </p>
+    </div>
     <div class="text-center mt-5">
       <a href="/" class="text-center">Mot de passe oublié ?</a>
     </div>
