@@ -1,8 +1,17 @@
 export interface Product {
-  id: string;
+  _id: string;
   title: string;
   category: string;
   image: string;
-  price: number;
+  price: string;
   description: string;
+}
+
+export interface ProductsResponse {
+  metadata: {
+    total: number;
+    page: number;
+    totalPages: number;
+  };
+  data: Product[];
 }

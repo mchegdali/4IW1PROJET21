@@ -12,14 +12,14 @@ import QuantityInput from '@/components/shared/quantity-input.vue';
 
 const route = useRoute();
 const productId = route.params.id;
-const productUrl = ref(`https://fakestoreapi.com/products/${productId}`);
-const productsUrl = ref(`https://fakestoreapi.com/products?limit=4`);
+const productUrl = ref(`http://localhost:3000/products/${productId}`);
+const productsUrl = ref(`http://localhost:3000/products?page=1`);
 
 const { data: product, isFetching } = useFetch(productUrl, { refetch: true }).json<Product>();
 const { data: products } = useFetch(productsUrl, { refetch: true }).json<Product[]>();
 
 const relatedProducts = computed(() =>
-  products.value?.filter((product) => `${product.id}` !== productId)
+  products.value?.filter((product) => `${product._id}` !== productId)
 );
 
 watch(
@@ -68,8 +68,16 @@ function handleAddToBasketClick() {
     <section class="flex flex-col gap-1 items-center">
       <p v-if="!isFetching && product" class="text-xl font-semibold">{{ product.price }}€</p>
       <Skeleton v-else class="h-5 w-[10ch] rounded-xl" />
+<<<<<<< HEAD
       <QuantityInput v-if="!isFetching && product" @decrement="onDecrement" @increment="onIncrement" :value="count"
         :is-decrease-disabled="count <= 0" />
+=======
+      <ProductQuantityInput
+        v-if="!isFetching && product"
+        class="text-xl"
+        :product-id="product._id"
+      />
+>>>>>>> f7e1d43 (IW1S2G21-62 text search on products)
       <Skeleton v-else class="h-5 w-[10ch] rounded-xl" />
       <Button v-if="!isFetching && product" class="uppercase font-medium" @click="handleAddToBasketClick">
         Ajouter au panier

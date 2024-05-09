@@ -38,7 +38,7 @@ function handleAddToBasketClick() {
         </AspectRatio>
       </div>
       <CardTitle class="text-xl">
-        <RouterLink :to="{ path: `/products/${product.id}` }">{{ product.title }}</RouterLink>
+        <RouterLink :to="{ path: `/products/${product._id}` }">{{ product.title }}</RouterLink>
       </CardTitle>
       <CardDescription class="text-primary">{{ product.category }}</CardDescription>
     </CardHeader>
