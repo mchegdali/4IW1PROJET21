@@ -45,9 +45,9 @@ const router = createRouter({
           component: () => import('../views/register-view.vue')
         },
         {
-          name: 'create-account',
-          path: '/create-account',
-          component: () => import('../views/create-account-view.vue')
+          name: 'no-connected',
+          path: '/no-connected',
+          component: () => import('../views/no-connected-view.vue')
         }
       ]
     },
