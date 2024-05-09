@@ -4,7 +4,9 @@ import RegisterForm from '@/components/register-form.vue';
 
 <template>
   <h1 class="text-3xl font-bold m-2">Inscription</h1>
-  <div class="mt-11 mx-4">
-    <RegisterForm />
+  <div class="flex justify-center items-center">
+    <div class="sm:mt-20 mt-8 mx-auto sm:w-1/4 w-full mb-5">
+      <RegisterForm />
+    </div>
   </div>
 </template>
