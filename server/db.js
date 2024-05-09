@@ -1,37 +1,36 @@
 import { Sequelize } from 'sequelize';
 import mongoose from 'mongoose';
 
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connected');
+});
+
 /**
  * @type {Sequelize}
  */
 let sequelize = null;
 
-/**
- * @type {mongoose}
- */
-let mongoDb;
-
-async function initDb() {
-  if (!process.env.MONGO_CONNECTION_STRING) {
-    throw new Error('MONGO_CONNECTION_STRING is not set');
+async function connectToDb() {
+  if (!process.env.MONGODB_CONNECTION_STRING) {
+    throw new Error('MONGODB_CONNECTION_STRING is not set');
   }
 
-  if (!process.env.PG_CONNECTION_STRING) {
-    throw new Error('PG_CONNECTION_STRING is not set');
+  if (!process.env.POSTGRES_CONNECTION_STRING) {
+    throw new Error('POSTGRES_CONNECTION_STRING is not set');
   }
 
-  sequelize = new Sequelize(process.env.PG_CONNECTION_STRING);
+  sequelize = new Sequelize(process.env.POSTGRES_CONNECTION_STRING);
 
-  try {
-    const [, mongooseConnection] = await Promise.all([
-      sequelize.authenticate(),
-      mongoose.connect(process.env.MONGO_CONNECTION_STRING),
-    ]);
-    mongoDb = mongooseConnection;
-    console.log('Connection has been established successfully.');
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
-  }
+  await Promise.all([
+    sequelize.authenticate(),
+    mongoose.connect(process.env.MONGODB_CONNECTION_STRING, {
+      dbName: 'fanthesie',
+      auth: {
+        username: process.env.MONGODB_USER,
+        password: process.env.MONGODB_PASSWORD,
+      },
+    }),
+  ]);
 }
 
-export { sequelize, mongoDb, initDb };
+export { sequelize, connectToDb };

@@ -1,33 +1,127 @@
-import ProductMongo from '../models/products/products.mongoose';
+import vine, { errors } from '@vinejs/vine';
+import ProductMongo from '../models/products/products.mongoose.js';
+import { productQuerySchema } from '../schemas/products.schema.js';
+import errorReporter from '../utils/error-reporter.js';
+
+const PAGE_SIZE = 10;
 
 // async function createProduct(req, res) {
 //   try {
-//     const product = new Product(req.body);
-//     await product.save();
+//     // create a product in Postgres
+//     const data = await ProductSequelize.create(req.body);
+
+//     // denormalize the data
+//     const product = {
+//       _id: data.id,
+//       title: data.title,
+//       description: data.description,
+//       category: data.category,
+//       image: data.image,
+//       price: data.price,
+//     };
+
+//     // create a product in MongoDB
+//     const productDoc = new ProductMongo(product);
+//     await productDoc.save();
 //     res.status(201).json(product);
 //   } catch (error) {
 //     res.status(500).json({ message: error.message });
 //   }
 // }
 
+/**
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns
+ */
 async function getProducts(req, res) {
   try {
-    const products = await ProductMongo.find().lean();
-    return res.json(products);
+    const { page, text } = await vine.validate({
+      schema: productQuerySchema,
+      data: {
+        page: req.query.page || 1,
+        text: req.query.text,
+      },
+    });
+
+    if (text) {
+      const products = await ProductMongo.find(
+        {
+          $text: {
+            $search: text,
+          },
+        },
+        {
+          score: { $meta: 'textScore' },
+        },
+      )
+        .sort({
+          score: { $meta: 'textScore' },
+        })
+        .select({
+          score: 0,
+        });
+
+      return res.json(products);
+    } else {
+      const products = await ProductMongo.aggregate([
+        {
+          $facet: {
+            metadata: [
+              { $count: 'total' },
+              {
+                $addFields: {
+                  page,
+                  totalPages: {
+                    $ceil: { $divide: ['$total', PAGE_SIZE] },
+                  },
+                },
+              },
+            ],
+            data: [
+              { $skip: (page - 1) * PAGE_SIZE },
+              { $limit: PAGE_SIZE },
+              {
+                $set: {
+                  price: { $toString: '$price' },
+                },
+              },
+            ],
+          },
+        },
+      ]);
+
+      return res.json({
+        metadata: products[0].metadata[0],
+        data: products[0].data,
+      });
+    }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error instanceof errors.E_VALIDATION_ERROR) {
+      return res.status(400).json({
+        errors: errorReporter(error),
+      });
+    }
+    return res.status(400).json({ message: error.message });
   }
 }
 
+/**
+ *
+ * @param {import('express').Request<{id: string}>} req
+ * @param {import('express').Response} res
+ * @returns
+ */
 async function getProduct(req, res) {
   try {
     const product = await ProductMongo.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: 'Produit introuvable' });
     }
-    res.json(product);
+    return res.json(product);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 }
 
@@ -57,3 +151,6 @@ async function getProduct(req, res) {
 //     res.status(500).json({ message: error.message });
 //   }
 // }
+
+const productsController = { getProducts, getProduct };
+export default productsController;
