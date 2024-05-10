@@ -131,7 +131,7 @@ function handleSubmit() {
         En continuant, vous acceptez les
         <a href="/" class="text-tea-600">conditions d'utilisation et de vente</a> de Fanthésie.
         Consultez notre <a href="/" class="text-tea-600">déclaration de confidentialité</a>, notre
-        <a href="/" class="text-tea-600">politique relative aux cookies</a> ainsi que notre.
+        <a href="/" class="text-tea-600">politique relative aux cookies</a>.
       </p>
     </div>
     <div class="text-center mt-5">
