@@ -2,10 +2,34 @@
 import { type Product } from '@/api/products.api';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import ProductQuantityInput from './product-quantity-input.vue';
-import AddToBasketButton from './add-to-basket-button.vue';
+import QuantityInput from '@/components/quantity-input.vue';
+import { ref } from 'vue';
+import Button from '../ui/button/Button.vue';
 
 const { product } = defineProps<{ product: Product }>();
+
+const count = ref(0);
+
+function onIncrement() {
+  count.value++;
+  console.log('onIncrement', count.value);
+}
+
+function onDecrement() {
+  if (count.value > 0) {
+    count.value--;
+  }
+  console.log('onDecrement', count.value);
+}
+
+function onInput(value: number) {
+  count.value = value;
+  console.log('onDecrement', count.value);
+}
+
+function handleAddToBasketClick() {
+  console.log('Add to basket clicked');
+}
 </script>
 
 <template>
@@ -23,8 +47,16 @@ const { product } = defineProps<{ product: Product }>();
     </CardHeader>
     <CardContent class="flex flex-col gap-1 items-center">
       <p class="text-xl font-semibold">{{ product.price }}€</p>
-      <ProductQuantityInput class="text-xl" :product-id="product.id" />
-      <AddToBasketButton class="uppercase font-medium" />
+      <QuantityInput
+        @decrement="onDecrement"
+        @increment="onIncrement"
+        @input="onInput"
+        :value="count"
+        :is-decrease-disabled="count <= 0"
+      />
+      <Button class="uppercase font-medium" @click="handleAddToBasketClick">
+        Ajouter au panier
+      </Button>
     </CardContent>
   </Card>
 </template>

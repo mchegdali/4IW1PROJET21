@@ -1,30 +1,28 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import { Plus, Minus } from 'lucide-vue-next';
-// import { type Product } from '@/api/products.api';
 import Input from '@/components/ui/input/Input.vue';
 
-// TODO - Use for basket quantity management
-// const props = defineProps<{ productId: Product['id'] }>();
+const { isDecreaseDisabled, value } = withDefaults(
+  defineProps<{ isDecreaseDisabled: boolean; value: number }>(),
+  {
+    value: 0,
+    isDecreaseDisabled: false
+  }
+);
+const emit = defineEmits(['increment', 'decrement', 'input']);
 
-const quantity = ref(0);
-
-const isDecreaseDisabled = computed(() => quantity.value === 0);
+function onInput(inputValue: string | number) {
+  const value = parseInt(`${inputValue}`.replace(/\D/g, ''), 10);
+  emit('input', value);
+}
 
 function onDecrement() {
-  if (quantity.value > 0) {
-    quantity.value--;
-  }
+  emit('decrement');
 }
 
 function onIncrement() {
-  quantity.value++;
-}
-
-function onInput(event: InputEvent) {
-  const target = event.target as HTMLInputElement;
-  quantity.value = target.valueAsNumber;
+  emit('increment');
 }
 </script>
 
@@ -40,14 +38,16 @@ function onInput(event: InputEvent) {
       @click="onDecrement"
       :disabled="isDecreaseDisabled"
     >
-      <Minus width="16" height="16" />
+      <slot name="minus">
+        <Minus width="16" height="16" />
+      </slot>
     </Button>
     <Input
       class="text-lg font-semibold max-w-16 text-end focus-visible:ring-0 focus-visible:ring-offset-0"
-      type="number"
-      min="0"
-      v-bind:model-value="quantity"
-      @input="onInput"
+      type="text"
+      pattern="\d+"
+      @update:model-value="onInput"
+      :model-value="value"
     />
     <Button class="rounded" type="button" size="icon" @click="onIncrement">
       <Plus width="16" height="16" />
