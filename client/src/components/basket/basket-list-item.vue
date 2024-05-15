@@ -1,8 +1,29 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { Product } from '@/api/products.api';
-import ProductQuantityInput from '@/components/products/product-quantity-input.vue';
-
+import QuantityInput from '@/components/shared/quantity-input.vue';
+import { useBasketStore } from '@/stores/basket';
+import { Minus, Trash } from 'lucide-vue-next';
 const { product } = defineProps<{ product: Product }>();
+
+const basketStore = useBasketStore();
+const productCount = computed(() => {
+  return basketStore.products.filter((p) => p.id === product.id).length;
+})
+
+function onIncrement() {
+  basketStore.addProduct(product);
+}
+
+function onDecrement() {
+  if (productCount.value > 0) {
+    basketStore.removeProduct(product);
+  }
+}
+
+function onInput(value: number) {
+  basketStore.setProductNumber(product, value);
+}
 </script>
 
 <template>
@@ -20,7 +41,13 @@ const { product } = defineProps<{ product: Product }>();
         {{ product.description }}
       </p>
       <div class="flex gap-2 w-full">
-        <ProductQuantityInput :product="product" />
+        <QuantityInput @decrement="onDecrement" @increment="onIncrement" @input="onInput" :value="productCount"
+          :is-decrease-disabled="productCount <= 0">
+          <template v-slot:minus>
+            <Minus v-if="productCount > 1" width="16" height="16" />
+            <Trash v-else width="16" height="16" />
+          </template>
+        </QuantityInput>
       </div>
     </div>
   </div>
