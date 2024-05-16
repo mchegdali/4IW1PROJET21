@@ -1,29 +1,20 @@
-<script>
+<script setup lang="ts">
 import Input from '../components/ui/input/Input.vue';
-import {ref} from 'vue';
-export default {
-  mounted() {
-    
-    
-    let carteDeCreditRadio =document.getElementById('bordered-radio-3');
-    let carteDeCreditForm = document.getElementById('carteDeCreditForm');
-    // Fonction pour détecter le clic sur le bouton radio
-    const handleClick = () => {
-      // Vérifier si le bouton radio est coché
-      if (carteDeCreditRadio.checked) {
-        // Afficher un message dans la console
-        console.log("Le bouton radio Carte de Crédit a été sélectionné.");
-        // Afficher le formulaire de carte de crédit
-        carteDeCreditForm.style.display = 'block';
-      } else if(!(carteDeCreditRadio.checked)) {
-        // Masquer le formulaire de carte de crédit si le bouton radio n'est pas sélectionné
-        carteDeCreditForm.style.display = 'none';
-      }
-    };
+import Button from '../components/ui/button/Button.vue';
+import {ref} from "vue";
+import {z} from "zod";
+const email = ref("");
+const nomPrenom= ref("");
+const dispCred = ref({display:"none"});
+const dispPay = ref ({display:"none"});
 
-    // Ajouter un écouteur d'événement pour le clic sur le bouton radio
-    carteDeCreditRadio.addEventListener('click', handleClick);
-  }
+const displayCredForm = () => {
+  dispCred.value = {display:"block"};
+  dispPay.value = {display:"none"};
+}
+const displayPayPalForm = () => {
+  dispPay.value = {display:"block"};
+  dispCred.value = {display:"none"};
 }
 </script>
 <template>
@@ -48,9 +39,9 @@ export default {
                 <option value="Belgique"/>
             </datalist>
             <div class="flex">
-                <Input placeholder="nom" /> <Input placeholder="prenom" />
+                <Input placeholder="nom prénom" />
             </div>
-            <input
+            <Input
             id="#"
             type="text"
             placeholder="Adresse"
@@ -81,21 +72,28 @@ export default {
             <div>
                 <h1> Paiement </h1>
                 <fieldset>
-                    <div class=" flex-col items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
-                        <Input  @click="deroulForm" id="bordered-radio-3" type="radio" value="" name="bordered-radio-payment" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
+                    <div class=" flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
+                        <Input @click="displayCredForm" id="bordered-radio-3" type="radio" value="" name="bordered-radio-payment" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
                         <label for="bordered-radio-3" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"> Carte de Credit</label>
-                        <div id="carteDeCreditForm" style="display: none;">
+                        <div id="carteDeCreditForm" v-bind:style="dispCred">
                                     <!-- Formulaire pour Carte de Crédit -->
                                     <!-- Ajoutez ici vos champs de formulaire pour la carte de crédit -->
                                     <!-- Par exemple : -->
-                                    <input type="text" placeholder="Numéro de carte">
-                                    <input type="text" placeholder="Date d'expiration"> 
-                                    <input type="text" placeholder="Code de sécurité">
+                                    <Input type="text" placeholder="Numéro de carte"/>
+                                    <Input type="text" placeholder="Date d'expiration"/>
+                                    <Input type="text" placeholder="Code de sécurité"/>
                         </div>
                     </div>
-                    <div class="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
+                    <div @click="displayPayPalForm" class="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
                         <Input checked id="bordered-radio-4" type="radio" value="" name="bordered-radio-payment" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                         <label for="bordered-radio-4" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300" > PayPal </label>
+                      <div id="paypalForm" v-bind:style="dispPay">
+                        <!-- Formulaire pour Carte de Crédit -->
+                        <!-- Ajoutez ici vos champs de formulaire pour la carte de crédit -->
+                        <!-- Par exemple : -->
+                        <p> Aprèes avoir cliqué sur "Payer avec PayPal" Vous serez redirigé(e) vers PayPal pour finaliser votre achat de façon sécurisée </p>
+                      </div>
+
                     </div>
                 </fieldset>
                     
@@ -104,8 +102,6 @@ export default {
                 <Button> Payer Maintenant </Button>
             </div>
         </section>
-        <section>
 
-        </section>
     </div>
   </template>
