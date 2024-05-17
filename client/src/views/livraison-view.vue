@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Input from '../components/ui/input/Input.vue';
 import Button from '../components/ui/button/Button.vue';
-import {displayCredForm,displayPayPalForm,dispCred,dispPayPal,disPayPalButt } from "../Script/livraisonPaymentScript"
+import {displayCredForm,displayPayPalForm,dispCred,dispPayPal,disPayPalButt } from "../Script/livraisonPaymentScript";
+import {emailError } from "../Script/verifLivraisonForm";
 
 </script>
 <template>
