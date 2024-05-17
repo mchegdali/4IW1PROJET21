@@ -60,7 +60,7 @@ import {displayCredForm,displayPayPalForm,dispCred,dispPayPal,disPayPalButt } fr
                 <h1> Paiement </h1>
                 <fieldset>
                     <div class=" items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
-                        <Input @click="displayCredForm" id="bordered-radio-3" type="radio" value="" name="bordered-radio-payment" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
+                        <Input @click="displayCredForm" id="bordered-radio-3" type="radio" value="" name="bordered-radio-payment" class="inline-flex w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
                         <label for="bordered-radio-3" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"> Carte de Credit</label>
                         <div class="flex-auto" id="carteDeCreditForm" v-bind:style="dispCred">
                                     <Input type="text" placeholder="Numéro de carte"/>
@@ -69,7 +69,7 @@ import {displayCredForm,displayPayPalForm,dispCred,dispPayPal,disPayPalButt } fr
                         </div>
                     </div>
                     <div @click="displayPayPalForm" class="items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
-                        <Input checked id="bordered-radio-4" type="radio" value="" name="bordered-radio-payment" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
+                        <Input checked id="bordered-radio-4" type="radio" value="" name="bordered-radio-payment" class="inline-flex w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
                         <label for="bordered-radio-4" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300" > PayPal </label>
                       <div id="paypalForm" v-bind:style="dispPayPal">
                         <p> Après avoir cliqué sur "Payer avec PayPal" Vous serez redirigé(e) vers PayPal pour finaliser votre achat de façon sécurisée </p>
