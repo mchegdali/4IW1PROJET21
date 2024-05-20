@@ -1,4 +1,5 @@
 # Node.js
+.npm
 node_modules/
 npm-debug.log
 yarn-error.log
@@ -29,3 +30,4 @@ logs
 # OS generated files
 .DS_Store
 Thumbs.db
+.ash_history

@@ -4,10 +4,11 @@ import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useFetch } from '@vueuse/core';
 import { Skeleton } from '@/components/ui/skeleton';
-import ProductQuantityInput from '@/components/products/product-quantity-input.vue';
-import AddToBasketButton from '@/components/products/add-to-basket-button.vue';
 import ProductDescription from '@/components/products/product-description.vue';
 import ProductsSection from '@/components/products/products-section.vue';
+import { useBasketStore } from '@/stores/basket';
+import Button from '@/components/ui/button/Button.vue';
+import QuantityInput from '@/components/shared/quantity-input.vue';
 
 const route = useRoute();
 const productId = route.params.id;
@@ -27,6 +28,27 @@ watch(
     productUrl.value = `https://fakestoreapi.com/products/${id}`;
   }
 );
+
+const basketStore = useBasketStore();
+
+const count = ref(0);
+
+function onIncrement() {
+  count.value++;
+}
+
+function onDecrement() {
+  if (count.value > 0) {
+    count.value--;
+  }
+}
+
+function handleAddToBasketClick() {
+  if (product.value) {
+    basketStore.addProduct(product.value, count.value);
+    count.value = 0;
+  }
+}
 </script>
 
 <template>
@@ -39,25 +61,19 @@ watch(
       </p>
       <Skeleton v-else class="h-5 w-[10ch] rounded-xl" />
       <span v-if="!isFetching && product" class="flex justify-center">
-        <img
-          :src="product.image"
-          alt="product"
-          class="object-contain object-center h-64 w-64"
-          height="256"
-        />
+        <img :src="product.image" alt="product" class="object-contain object-center h-64 w-64" height="256" />
       </span>
       <Skeleton v-else class="self-center h-64 w-64 rounded-xl" />
     </header>
     <section class="flex flex-col gap-1 items-center">
       <p v-if="!isFetching && product" class="text-xl font-semibold">{{ product.price }}€</p>
       <Skeleton v-else class="h-5 w-[10ch] rounded-xl" />
-      <ProductQuantityInput
-        v-if="!isFetching && product"
-        class="text-xl"
-        :product-id="product.id"
-      />
+      <QuantityInput v-if="!isFetching && product" @decrement="onDecrement" @increment="onIncrement" :value="count"
+        :is-decrease-disabled="count <= 0" />
       <Skeleton v-else class="h-5 w-[10ch] rounded-xl" />
-      <AddToBasketButton v-if="!isFetching && product" class="uppercase font-medium" />
+      <Button v-if="!isFetching && product" class="uppercase font-medium" @click="handleAddToBasketClick">
+        Ajouter au panier
+      </Button>
       <Skeleton v-else class="h-5 w-[10ch] rounded-xl" />
     </section>
     <section class="flex flex-col gap-1 w-full max-w-screen-xs">
