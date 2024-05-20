@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  node:
+    image: node:20.12.2-alpine
+    user: node
+    tty: true
+    stdin_open: true
+    working_dir: /home/node
+    entrypoint: sh -c
+    command: '"npm install && npm run dev"'
+    depends_on:
+      - mongo
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/home/node
+
+  mongo:
+    image: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - 27017:27017
+
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      # POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      # POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      # POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      # POSTGRES_INITDB_ARGS=--auth-host: scram-sha-256
+    ports:
+      - 5432:5432
