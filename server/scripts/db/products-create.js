@@ -1,4 +1,4 @@
-import { connectToDb } from '../../db.js';
+import { connectToDb } from '../../mongo.js/index.js';
 import ProductMongo from '../../models/products/products.mongoose.js';
 
 const products = [
@@ -170,8 +170,22 @@ const products = [
   },
 ];
 
-connectToDb()
-  .then(async () => {
-    await ProductMongo.insertMany(products);
+async function createProducts() {
+  await connectToDb();
+  const productsCount = await ProductMongo.countDocuments();
+  if (productsCount > 0) {
+    throw new Error('Products already created');
+  }
+
+  await ProductMongo.insertMany(products);
+}
+
+createProducts()
+  .then(() => {
+    console.log('Products created');
+    process.exit(0);
   })
-  .catch(console.error);
+  .catch((err) => {
+    console.error('Error creating products', err);
+    process.exit(1);
+  });

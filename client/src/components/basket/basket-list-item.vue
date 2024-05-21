@@ -8,7 +8,7 @@ const { product } = defineProps<{ product: Product }>();
 
 const basketStore = useBasketStore();
 const productCount = computed(() => {
-  return basketStore.products.filter((p) => p.id === product.id).length;
+  return basketStore.products.filter((p) => p._id === product._id).length;
 })
 
 function onIncrement() {

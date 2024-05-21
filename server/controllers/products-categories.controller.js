@@ -9,9 +9,9 @@ import { ZodError } from 'zod';
 
 const PAGE_SIZE = 10;
 
-async function createProduct(req, res) {
+async function createProductCategory(req, res) {
   try {
-    const productCreateBody = await productCreateSchema.parseAsync(req.body);
+    const productCreateBody = await pro.parseAsync(req.body);
     const data = await ProductsSequelize.create(productCreateBody);
 
     console.log(data);

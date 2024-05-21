@@ -1,10 +1,8 @@
-import { connectToDb } from './db.js';
 import init from './init.js';
 import getApp from './server.js';
 
-connectToDb()
+init()
   .then(() => {
-    init();
     const PORT = parseInt(process.env.PORT) || 3000;
     const app = getApp();
 

@@ -1,16 +1,15 @@
-import vine, { SimpleMessagesProvider } from '@vinejs/vine';
+import { z } from 'zod';
+import errorMap from './utils/zod-error-map.js';
+import { connectToMongo } from './mongo.js';
+import { connectToSQL, sequelize } from './sequelize.js';
 
 /**
  * Initialize various parts of the application
  */
-function init() {
-  vine.messagesProvider = new SimpleMessagesProvider({
-    // Applicable for all fields
-    required: 'Le champ {{ field }} est requis',
-    string: 'La valeur du champ {{ field }} doit être une chaîne de caractères',
-    email: "La valeur n'est pas une adresse email valide",
-    number: 'La valeur du champ {{ field }} doit être un nombre',
-  });
+async function init() {
+  await Promise.all([connectToMongo(), connectToSQL()]);
+
+  z.setErrorMap(errorMap);
 }
 
 export default init;

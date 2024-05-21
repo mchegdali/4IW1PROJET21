@@ -50,10 +50,10 @@ const ProductSchema = new mongoose.Schema(
 );
 
 ProductSchema.index(
-  { title: 'text', description: 'text', category: 'text' },
+  { title: 'text', description: 'text' },
   {
     name: 'products_search_index',
-    weights: { title: 10, description: 5, category: 1 },
+    weights: { title: 10, description: 5 },
   },
 );
 
