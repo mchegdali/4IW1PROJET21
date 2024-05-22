@@ -1,5 +1,5 @@
-import { ref } from "vue";
-import { z, ZodSchema } from "zod";
+import { ref } from 'vue';
+import { z, ZodSchema } from 'zod';
 
 export const useForm = <T extends Record<string, any>>(schema: ZodSchema<T>, initialData: T) => {
   const formData = ref<T>(initialData);
@@ -8,7 +8,7 @@ export const useForm = <T extends Record<string, any>>(schema: ZodSchema<T>, ini
 
   const validateForm = () => {
     try {
-      schema.parse(formData.value);
+      schema.parse(formData.value as T);
       formErrors.value = {};
       return true;
     } catch (error) {
@@ -32,9 +32,9 @@ export const useForm = <T extends Record<string, any>>(schema: ZodSchema<T>, ini
 
     formSubmitting.value = true;
     try {
-      await callback(formData.value);
+      await callback(formData.value as T);
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error('Error submitting form:', error);
     } finally {
       formSubmitting.value = false;
     }
