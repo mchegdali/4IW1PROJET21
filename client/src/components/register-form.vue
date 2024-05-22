@@ -12,7 +12,7 @@ const loginSchema = z
     email: z
       .string()
       .email({ message: "L'e-mail doit être sous cette forme : exemple@example.com" }),
-    name: z.string().regex(/^[a-zA-ZÀ-ÿ' -]+$/, {
+    name: z.string().regex(/^[a-zA-ZÀ-ÿ' -]+ [a-zA-ZÀ-ÿ' -]+$/, {
       message: 'Ne peut contenir que des lettres, des apostrophes, des tirets et des accents.'
     }),
     password: z.string().regex(passwordRegex, {
@@ -43,7 +43,7 @@ const handleSubmit = () => {
 
 <template>
   <div class="border p-5 rounded-lg shadow-lg">
-    <h1 class="text-3xl bold mb-5">Créer un compte </h1>
+    <h1 class="text-3xl bold mb-5">Créer un compte</h1>
     <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
       <div>
         <label>
