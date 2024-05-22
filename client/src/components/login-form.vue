@@ -33,11 +33,11 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(loginSchema
           <Input
             id="email"
             v-model="formData.email"
-            :class="{ 'error-border': formErrors.email }"
+            :class="{ 'border-destructive': formErrors.email }"
             autofocus
           />
         </label>
-        <small class="error" v-if="formErrors.email">
+        <small class="text-destructive" v-if="formErrors.email">
           {{ formErrors.email }}
         </small>
       </div>
@@ -48,10 +48,10 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(loginSchema
             id="password"
             type="password"
             v-model="formData.password"
-            :class="{ 'error-border': formErrors.email }"
+            :class="{ 'border-destructive': formErrors.password }"
           />
         </label>
-        <small class="error" v-if="formErrors.password">
+        <small class="text-destructive" v-if="formErrors.password">
           {{ formErrors.password }}
         </small>
       </div>
@@ -73,12 +73,16 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(loginSchema
       </p>
     </div>
     <div class="text-center mt-5">
-      <a href="/" class="text-center">Mot de passe oublié ?</a>
+      <div class="flex items-center justify-center">
+        <div class="flex-grow border-t border-current text-gray-300"></div>
+        <a href="/" class="text-center font-bold text-tea-600 mx-4">Mot de passe oublié ?</a>
+        <div class="flex-grow border-t border-current text-gray-300"></div>
+      </div>
     </div>
   </div>
 </template>
 
-<style scoped>
+<!-- <style scoped>
 .error {
   color: red;
   display: block;
@@ -89,4 +93,4 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(loginSchema
   border: 1px solid red;
   padding: 5px;
 }
-</style>
+</style> -->

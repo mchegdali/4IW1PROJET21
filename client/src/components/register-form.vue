@@ -52,10 +52,10 @@ const handleSubmit = () => {
             id="email"
             v-model="formData.email"
             autofocus
-            :class="{ 'error-border': formErrors.email }"
+            :class="{ 'border-destructive': formErrors.email }"
           />
         </label>
-        <small class="error" v-if="formErrors.email">
+        <small class="text-destructive" v-if="formErrors.email">
           {{ formErrors.email }}
         </small>
       </div>
@@ -66,10 +66,10 @@ const handleSubmit = () => {
             id="name"
             type="text"
             v-model="formData.name"
-            :class="{ 'error-border': formErrors.name }"
+            :class="{ 'border-destructive': formErrors.name }"
           />
         </label>
-        <small class="error" v-if="formErrors.name">
+        <small class="text-destructive" v-if="formErrors.name">
           {{ formErrors.name }}
         </small>
       </div>
@@ -80,7 +80,7 @@ const handleSubmit = () => {
             id="password"
             type="password"
             v-model="formData.password"
-            :class="{ 'error-border': formErrors.password }"
+            :class="{ 'border-destructive': formErrors.password }"
           />
         </label>
         <div class="rounded-lg my-2 flex gap-2">
@@ -90,7 +90,7 @@ const handleSubmit = () => {
             chiffre et un symbole, et doit avoir au moins 8 caractères.
           </p>
         </div>
-        <small class="error" v-if="formErrors.password">
+        <small class="text-destructive" v-if="formErrors.password">
           {{ formErrors.password }}
         </small>
       </div>
@@ -101,10 +101,10 @@ const handleSubmit = () => {
             id="confirmPassword"
             type="password"
             v-model="formData.confirmPassword"
-            :class="{ 'error-border': formErrors.confirmPassword }"
+            :class="{ 'border-destructive': formErrors.confirmPassword }"
           />
         </label>
-        <small class="error" v-if="formErrors.confirmPassword">
+        <small class="text-destructive" v-if="formErrors.confirmPassword">
           {{ formErrors.confirmPassword }}
         </small>
       </div>
@@ -119,11 +119,15 @@ const handleSubmit = () => {
       </p>
     </div>
     <div class="text-center mt-5">
+    <h4>Déja un compte chez Fanthésie ?</h4>
+    <div class="text-center mt-2">
       <RouterLink :to="{ name: 'login' }">
-        <a href="/" class="text-center">Déjà un compte ?</a>
+        <Button href="/" class="w-full text-center bg-white text-tea-600 border hover:bg-gray-100">S'identifier</Button>
       </RouterLink>
     </div>
   </div>
+  </div>
+  
 </template>
 
 <style scoped>
