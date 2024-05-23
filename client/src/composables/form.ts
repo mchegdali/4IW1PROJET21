@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { z, ZodSchema } from 'zod';
+import { z, ZodSchema } from 'Zod';
 
 export const useForm = <T extends Record<string, any>>(schema: ZodSchema<T>, initialData: T) => {
   const formData = ref<T>(initialData);
