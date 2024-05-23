@@ -1,82 +1,70 @@
-import {computed, ref} from "vue";
-import {z} from "Zod";
+import { fullName, address } from './verifLivraisonForm';
+// verifLivraisonForm.ts
+import { computed, ref } from 'vue';
+import { z } from 'Zod';
 
-export const emailSchema = z.string().min(5, {
-    message: "5 characters minimum"
-}).max(30, {
-    message: "30 characters maximum"
-}).email({
-    message: "Invalid email"
-});
-export const fullNameSchema = z.string().min(4,{
-    message: "4 characters minimum"
-}).max(50,{
-    message:"50 characters maximum"
-}).regex(/^[a-zA-Zà-öø-ÿÀ-ÖØ-ß\s'-]+$/, {
-    message: "contiens des caractères invalides"
-});
-export const addressSchema = z.string().min(5,{
-    message: "5 characters minimum"
-}).max(60,{
-    message:"50 characters maximum"
-}).regex( /^(?=.*[a-zA-Z])(?=.*\d).+$/, {
-    message: "adresse invalid"
-});
-export const codePostalSchema = z.string().min(4,{
-    message: "4 characters minimum"
-}).max(6,{
-    message:"6 characters maximum"
-}).regex( /^\d+$/, {
-    message: "code postale invalid"
-});
-export const citySchema = z.string().min(2,{
-    message: "2 characters minimum"
-}).max(25,{
-    message:"25 characters maximum"
-}).regex( /^[a-zA-Z]+$/, {
-    message: "ville invalid"
-});
+const emailSchema = z.string()
+    .min(5, { message: "5 characters minimum" })
+    .max(30, {  message: "30 characters maximum" })
+    .email({ message: "Invalid email" });
+const fullNameSchema = z.string()
+    .min(4, { message: "4 characters minimum" })
+    .max(50, { message: "50 characters maximum" })
+    .regex(/^[a-zA-Zà-öø-ÿÀ-ÖØ-ß\s'-]+$/, { message: "Contains invalid characters" });
+const addressSchema = z.string()
+    .min(10, { message: "10 characters minimum" })
+    .max(60, { message: "60 characters maximum" })
+    .regex(/^(?=.*[a-zA-Z])(?=.*\d).+$/, { message: "Invalid address" });
+const codePostalSchema = z.coerce.number()
+    .gte(1000, { message: "Postal code must be at least 4 digits" })
+    .lte(9999, { message: "Postal code must be at most 4 digits" });
+const phoneNumberSchema = z.string()
+    .length(10, { message: "Phone number must be 10 digits" })
+    .regex(/^\d{10}$/, { message: "Invalid phone number" });
+const citySchema = z.string()
+    .min(2, { message: "2 characters minimum" })
+    .max(25, { message: "25 characters maximum" })
+    .regex(/^[a-zA-Z]+$/, { message: "Invalid city" });
 
-export const email= ref("");
-export const fullName = ref("");
-export const address = ref("");
-export const codePostal = ref(0);
-export const city = ref("");
+const email = ref("");
+const fullName = ref("");
+const address = ref("");
+const phoneNumber = ref("");
+const city = ref("");
+const codePostal = ref("");
 
-export const emailError = computed(() => {
-    const parsedEmail = emailSchema.safeParse(email.value);
-    if(parsedEmail.success) {
-        return "" ;
-    }
-    return parsedEmail.error.issues[0].message;
-});
-export const fullNameError = computed(() => {
-    const parsedFullName = fullNameSchema.safeParse(fullName.value);
-    if(parsedFullName.success) {
-        return "" ;
-    }
-    return parsedFullName.error.issues[0].message;
-});
-export const addressError = computed(() => {
-    const parsedAddress = addressSchema.safeParse(address.value);
-    if(parsedAddress.success) {
-        return "" ;
-    }
-    return parsedAddress.error.issues[0].message;
-});
-export const codePostalError = computed(()=> {
-    const parsedCodePostale = codePostalSchema.safeParse(codePostal.value);
-    if(parsedCodePostale.success) {
-        return "";
-    }
-    return parsedCodePostale.error.issues[0].message;
-})
-export const cityError = computed(() => {
-    const parsedcity = addressSchema.safeParse(address.value);
-    if(parsedcity.success) {
-        return "" ;
-    }
-    return parsedcity.error.issues[0].message;
+const formSchema = z.object({
+  email: emailSchema,
+  fullName: fullNameSchema,
+  address: addressSchema,
+  phoneNumber: phoneNumberSchema,
+  codePostal: codePostalSchema,
+  city: citySchema,
 });
 
-export default {emailError, fullNameError, addressError,codePostalError,cityError}
+const formErrors = computed(() => {
+  const formData = {
+    email: email.value,
+    fullName: fullName.value,
+    address: address.value,
+    phoneNumber: phoneNumber.value,
+    codePostal: codePostal.value,
+    city: city.value,
+  };
+  
+  const result = formSchema.safeParse(formData);
+  if (result.success) {
+    return {};
+  }
+  
+  return result.error.issues.reduce((acc: Record<string, string>, issue) => {
+    if (typeof issue.path[0] === 'string') {
+      acc[issue.path[0]] = issue.message;
+    }
+    return acc;
+  }, {});
+});
+
+ const isFormValid = computed(() => {
+  return Object.keys(formErrors.value).length === 0;
+});
