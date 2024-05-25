@@ -1,42 +1,88 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 
-const items = ref<Array<any>>([]);
+const orders = ref<Array<any>>([]);
 
-fetch("http://localhost:3000/products")
+fetch('http://localhost:3000/orders')
   .then((response) => response.json())
   .then((data) => {
-    items.value = data;
+    orders.value = data;
   });
-
-console.log(items);
-
-const displayedItems = computed(() => {
-  return items.value.slice(0, 3);
-});
-
-const extraItemsCount = computed(() => {
-  return items.value.length > 3 ? items.value.length - 3 : 0;
-});
 </script>
 
-<template>  
-  <div class="rounded-lg p-5 shadow-lg flex flex-col gap-4">
-    <h1 class="font-bold">Commande du 31 Janv. 2024</h1>
-    <div class="flex justify-between w-full">
-      <div v-for="(item, index) in displayedItems" :key="item.id" class="relative w-24 h-24">
+<template>
+  <div
+    v-for="order in orders"
+    :key="order.orderId"
+    class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white"
+  >
+    <div class="flex justify-between items-center">
+      <h1 class="font-bold text-lg">
+        Commande du
+        {{
+          new Date(order.orderDate).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          })
+        }}
+      </h1>
+      <div
+        class="border border-tea-600 px-2 rounded-full font-bold text-sm"
+        v-if="order.deliveryStatus === true"
+      >
+        Livré
+      </div>
+      <div class="font-bold border border-tea-600 px-4 rounded-full text-sm text-center" v-else>
+        Livraison prévue le
+        {{
+          new Date(order.shippingDate).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          })
+        }}
+      </div>
+    </div>
+
+    <div
+      class="flex w-full"
+      :class="{
+        'justify-start gap-4': order.items.length < 3,
+        'justify-between': order.items.length >= 3
+      }"
+    >
+      <div
+        v-for="(item, index) in order.items.slice(0, 3)"
+        :key="item.id"
+        class="relative w-24 h-24"
+      >
         <img class="min-w-24 h-full bg-slate-400" :src="item.image" alt="" />
-        <div v-if="index === 2 && extraItemsCount > 0" class="extra-items-count w-full h-full flex justify-center items-center font-bold text-2xl top-0 right-0 text-white absolute bg-black bg-opacity-55">
-          +{{ extraItemsCount }}
+        <div
+          v-if="index === 2 && order.items.length > 3"
+          class="extra-items-count w-full h-full flex justify-center items-center font-bold text-2xl top-0 right-0 text-white absolute bg-black bg-opacity-55"
+        >
+          +{{ order.items.length - 3 }}
         </div>
       </div>
     </div>
     <div class="border-b border-t border-gray-200 py-2">
-      <a href="">Suivre le colis</a>
+      <a href="" class="text-tea-600">Suivre le colis</a>
     </div>
     <div>
-      <p>N° de commande: 785216169</p>
-      <p>Date d'éxpedition: 29 janv. 2024</p>
+      <p>
+        N° de commande: <span class="font-bold">{{ order.orderNumber }}</span>
+      </p>
+      <p>
+        Date d'expédition:
+        <span class="font-bold">{{
+          new Date(order.shippingDate).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          })
+        }}</span>
+      </p>
     </div>
   </div>
 </template>
