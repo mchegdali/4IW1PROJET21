@@ -29,10 +29,7 @@ const handleSubmit = () => {
 
 
 const shippingSchema = z.object({
-  email: z.string()
-    .min(5, { message: "5 caractères minimum" })
-    .max(30, { message: "30 caractères maximum" })
-    .email({ message: "Email invalide" }),
+
   fullName: z.string()
     .min(4, { message: "4 caractères minimum" })
     .max(50, { message: "50 caractères maximum" })
@@ -54,7 +51,6 @@ const shippingSchema = z.object({
 });
 
 const livraisonData = {
-  email: '',
   fullName: '',
   address: '',
   codePostal: '',
@@ -69,21 +65,11 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(shippingSch
   <div class="md:max-w-screen-md flex flex-col items-center">
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
       <section id="shipping">
-        <div>
-          <h1>Contact</h1>
-          <label> adresse e-mail </label>
-          <Input id="email" type="text" placeholder="email ex: arthur@gmail.com" 
-          :class="{ 'border-destructive': formErrors.email }"
-           v-model="formData.email" 
-           required autofocus />
-           <small class="text-destructive" v-if="formErrors.email">
-          {{ formErrors.email }}
-        </small>
-        </div>
+        
 
         <h1>Livraison</h1>
         <div class="flex">
-          <label> Nom prénom </label>
+          
           <Input v-model="formData.fullName"  :class="{ 'border-destructive': formErrors.fullName }" placeholder="nom prénom ex: MACRON emmanuelle" required autofocus />
           <small v-if="formErrors.fullName">{{ formErrors.fullName  }}</small>
         </div>
@@ -96,19 +82,19 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(shippingSch
           <option value="Londres" />
           <option value="Belgique" />
         </datalist>
-        <label> adresse </label>
+       
         <Input id="address" v-model="formData.address" :class="{ 'border-destructive': formErrors.address }" type="text" placeholder="Adresse ex: 101 avenue de la république" />
         <small v-if="formErrors.address">{{ formErrors.address }}</small>
         
         <div class="flex">
-          <label> code postale </label>
+         
           <Input v-model="formData.codePostal" :class="{'border-destructive': formErrors.codePostal}" placeholder="Code Postal ex: 75016" />
           <small v-if="formErrors.codePostal">{{ formErrors.codePostal }}</small>
-          <label> ville </label>
+          
           <Input v-model="formData.city" :class="{ 'border-destructive': formErrors.city }" placeholder="ville ex: Paris" required autofocus />
           <small v-if="formErrors.city ">{{formErrors.city  }}</small>
         </div>
-        <label>numéros de téléphone </label>
+        
         <Input id="phoneNumber" v-model="formData.phoneNumber" :class="{'border-destructive': formErrors.phoneNumber}" type="text" placeholder="Téléphone ex: 0654841238" required autofocus />
         <small v-if="formErrors.phoneNumber">{{ formErrors.phoneNumber}}</small>
         
@@ -150,13 +136,12 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(shippingSch
         </div>
         
         <div v-if="disPayPalButt" class="#">
-          <Button class="bg-blue-900">Payer avec PayPal</Button>
+          <Button type="submit" class="w-1/2 bg-blue-900" :disabled="formSubmitting">Payer avec PayPal</Button>
+          
         </div>
         
         <div v-else>
-          <Button class="#">
-            Payer Maintenant
-          </Button>
+         <Button type="submit" class="w-1/2" :disabled="formSubmitting">Payer Maintenant</Button>
         </div>
       </section>
     </form>
