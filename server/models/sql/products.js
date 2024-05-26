@@ -2,7 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import slugify from '@sindresorhus/slugify';
 
 import { sequelize } from '../../sequelize.js';
-import ProductsCategoriesSequelize from '../products-categories/products-categories.sequelize.js';
+import ProductsCategoriesSequelize from './products-categories.sql.js';
 
 class ProductsSequelize extends Model {}
 

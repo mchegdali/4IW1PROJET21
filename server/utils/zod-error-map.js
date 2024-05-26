@@ -5,7 +5,7 @@ import { ZodIssueCode, ZodParsedType, util } from 'zod';
  * @type {import("zod").ZodErrorMap}
  * @returns
  */
-const errorMap = (issue, _ctx) => {
+const zodErrorMap = (issue, _ctx) => {
   let message;
   switch (issue.code) {
     case ZodIssueCode.invalid_type:
@@ -151,4 +151,4 @@ const errorMap = (issue, _ctx) => {
   return { message };
 };
 
-export default errorMap;
+export default zodErrorMap;

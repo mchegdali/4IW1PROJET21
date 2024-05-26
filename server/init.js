@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import errorMap from './utils/zod-error-map.js';
+import zodErrorMap from './utils/zod-error-map.js';
 import { connectToMongo } from './mongo.js';
 import { connectToSQL, sequelize } from './sequelize.js';
 
@@ -9,7 +9,7 @@ import { connectToSQL, sequelize } from './sequelize.js';
 async function init() {
   await Promise.all([connectToMongo(), connectToSQL()]);
 
-  z.setErrorMap(errorMap);
+  z.setErrorMap(zodErrorMap);
 }
 
 export default init;

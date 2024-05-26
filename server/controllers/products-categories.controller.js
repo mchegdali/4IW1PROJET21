@@ -1,34 +1,61 @@
-import ProductMongo from '../models/products/products.mongoose.js';
-import {
-  productCreateSchema,
-  productQuerySchema,
-} from '../schemas/products.schema.js';
 import formatZodError from '../utils/format-zod-error.js';
-import ProductsSequelize from '../models/products/products.sequelize.js';
 import { ZodError } from 'zod';
+import ProductsCategoriesSequelize from '../models/sql/products-categories.sql.js';
+import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
+import { productCategoryCreateSchema } from '../schemas/products-categories.schema.js';
+import { ValidationError } from 'sequelize';
+import { sequelize } from '../sequelize.js';
+import validator from 'validator';
+import { Op } from 'sequelize';
 
-const PAGE_SIZE = 10;
-
-async function createProductCategory(req, res) {
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+export async function createProductCategory(req, res) {
   try {
-    const productCreateBody = await pro.parseAsync(req.body);
-    const data = await ProductsSequelize.create(productCreateBody);
+    const result = await sequelize.transaction(async (t) => {
+      const productCategoryCreateBody =
+        await productCategoryCreateSchema.parseAsync(req.body);
+      const product = await ProductsCategoriesSequelize.create(
+        productCategoryCreateBody,
+        { transaction: t },
+      );
 
-    console.log(data);
-    // // denormalize the data
-    // const product = {
-    //   _id: data.id,
-    //   title: data.title,
-    //   description: data.description,
-    //   category: data.category,
-    //   image: data.image,
-    //   price: data.price,
-    // };
+      const productCategoryMongo = {
+        _id: product.id,
+        name: product.name,
+        slug: product.slug,
+      };
 
-    // // create a product in MongoDB
-    // const productDoc = new ProductMongo(product);
-    // const createdProduct = await productDoc.save();
-    return res.status(201).json(data);
+      const productCategoryDoc =
+        await ProductsCategoriesMongo.create(productCategoryMongo);
+
+      return productCategoryDoc;
+    });
+
+    return res.status(201).json(result);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ errors: error.errors });
+    }
+    if (error instanceof ZodError) {
+      return res.status(400).json({ errors: formatZodError(error) });
+    }
+    res.status(500).json({ message: error.message });
+  }
+}
+
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+export async function getProductCategories(req, res) {
+  try {
+    const productsCategories = await ProductsCategoriesMongo.find({}).lean({});
+    return res.json(productsCategories);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -36,120 +63,74 @@ async function createProductCategory(req, res) {
 
 /**
  *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * @type {import('express').RequestHandler}
  * @returns
  */
-async function getProducts(req, res) {
+export async function getProductCategory(req, res) {
   try {
-    const { page, text } = await productQuerySchema.parseAsync(req.query);
+    const isUUID = validator.isUUID(req.params.category);
 
-    if (text) {
-      const products = await ProductMongo.find(
-        {
-          $text: {
-            $search: text,
-          },
-        },
-        {
-          score: { $meta: 'textScore' },
-        },
-      )
-        .sort({
-          score: { $meta: 'textScore' },
-        })
-        .select({
-          score: 0,
-        });
+    const $orFilter = [];
 
-      return res.json(products);
+    if (isUUID) {
+      $orFilter.push({ _id: req.params.category });
     } else {
-      const products = await ProductMongo.aggregate([
-        {
-          $facet: {
-            metadata: [
-              { $count: 'total' },
-              {
-                $addFields: {
-                  page,
-                  totalPages: {
-                    $ceil: { $divide: ['$total', PAGE_SIZE] },
-                  },
-                },
-              },
-            ],
-            data: [
-              { $skip: (page - 1) * PAGE_SIZE },
-              { $limit: PAGE_SIZE },
-              {
-                $set: {
-                  price: { $toString: '$price' },
-                },
-              },
-            ],
-          },
-        },
-      ]);
+      $orFilter.push({ slug: req.params.category });
+    }
 
-      return res.json({
-        metadata: products[0].metadata[0],
-        data: products[0].data,
-      });
-    }
+    const productCategory = await ProductsCategoriesMongo.findOne({
+      $or: $orFilter,
+    }).lean();
+
+    return res.json(productCategory);
   } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(400).json({
-        errors: formatZodError(error),
-      });
-    }
-    return res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 }
 
 /**
  *
- * @param {import('express').Request<{id: string}>} req
- * @param {import('express').Response} res
+ * @type {import('express').RequestHandler}
  * @returns
  */
-async function getProduct(req, res) {
+export async function updateProductCategory(req, res) {
   try {
-    const product = await ProductMongo.findById(req.params.id);
-    if (!product) {
+    const productCategory = await ProductsCategoriesSequelize.findByPk(
+      req.params.category,
+    );
+    if (!productCategory) {
       return res.status(404).json({ message: 'Produit introuvable' });
     }
-    return res.json(product);
+
+    await productCategory.save();
+    return res.json(productCategory);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 }
 
-// async function updateProduct(req, res) {
-//   try {
-//     const product = await Product.findById(req.params.id);
-//     if (!product) {
-//       return res.status(404).json({ message: 'Product not found' });
-//     }
-//     Object.assign(product, req.body);
-//     await product.save();
-//     res.json(product);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// }
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+export async function deleteProductCategory(req, res) {
+  const isUUID = validator.isUUID(req.params.category);
+  const sqlWhere = {
+    [isUUID ? 'id' : 'slug']: req.params.category,
+  };
+  const mongoWhere = {
+    [isUUID ? '_id' : 'slug']: req.params.category,
+  };
 
-// async function deleteProduct(req, res) {
-//   try {
-//     const product = await Product.findById(req.params.id);
-//     if (!product) {
-//       return res.status(404).json({ message: 'Product not found' });
-//     }
-//     await product.remove();
-//     res.json({ message: 'Product deleted' });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// }
+  const [deletedCountSql, deletedCountMongo] = await Promise.all([
+    ProductsCategoriesSequelize.destroy({ where: sqlWhere }),
+    ProductsCategoriesMongo.deleteOne(mongoWhere),
+  ]);
 
-const productsController = { getProducts, getProduct };
-export default productsController;
+  if (deletedCountSql === 0 && deletedCountMongo.deletedCount === 0) {
+    return res.status(404).json({ message: 'Catégorie introuvable' });
+  }
+
+  return res.status(204).json({ message: 'Catégorie supprimée' });
+}

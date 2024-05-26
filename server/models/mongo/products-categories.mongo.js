@@ -17,6 +17,7 @@ const ProductsCategoriesSchema = new mongoose.Schema(
     },
   },
   {
+    timestamps: false,
     toObject: {
       getters: true,
     },

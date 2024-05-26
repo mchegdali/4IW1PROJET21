@@ -1,11 +1,11 @@
-import ProductMongo from '../models/products/products.mongoose.js';
+import { ZodError } from 'zod';
+import ProductMongo from '../models/mongo/products.js';
 import {
   productCreateSchema,
   productQuerySchema,
 } from '../schemas/products.schema.js';
 import formatZodError from '../utils/format-zod-error.js';
-import ProductsSequelize from '../models/products/products.sequelize.js';
-import { ZodError } from 'zod';
+import ProductsSequelize from '../models/sql/products.js';
 
 const PAGE_SIZE = 10;
 
@@ -112,7 +112,7 @@ async function getProducts(req, res) {
  * @param {import('express').Response} res
  * @returns
  */
-async function getProduct(req, res) {
+async function getProductById(req, res) {
   try {
     const product = await ProductMongo.findById(req.params.id);
     if (!product) {
@@ -151,5 +151,5 @@ async function getProduct(req, res) {
 //   }
 // }
 
-const productsController = { getProducts, getProduct };
+const productsController = { getProducts, getProductById };
 export default productsController;
