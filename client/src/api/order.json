@@ -13,7 +13,8 @@
             "description": "Commencez votre journée avec une infusion de thé vert. Rafraîchissante et pleine d'antioxydants, cette infusion vous donne un coup de fouet naturel pour démarrer votre journée.",
             "price": 10.99,
             "category": "thé vert",
-            "image": "https://ideogram.ai/assets/image/list/response/StxsigUlSHanNdMmSXTtLg"
+            "image": "https://ideogram.ai/assets/image/list/response/StxsigUlSHanNdMmSXTtLg",
+            "quantity": 1
         },
           {
             "id": "2",
@@ -21,7 +22,8 @@
             "description": "Dégustez un thé noir Assam authentique et corsé. Avec ses notes maltées et terreuses, ce thé est parfait pour une pause détente ou pour accompagner vos repas.",
             "price": 19.99,
             "category": "thé noir",
-            "image": "https://ideogram.ai/assets/image/list/response/0iVcWGNeTPihYaVu1f0Sxg"
+            "image": "https://ideogram.ai/assets/image/list/response/0iVcWGNeTPihYaVu1f0Sxg",
+            "quantity": 1 
           }
         ]
       },
@@ -38,7 +40,8 @@
             "description": "Découvrez la subtilité du thé oolong Wu Yi. Ce thé semi-oxydé offre un équilibre parfait entre les arômes floraux et boisés, créant une expérience de dégustation unique.",
             "price": 5.99,
             "category": "thé oolong",
-            "image": "https://ideogram.ai/assets/image/list/response/CMLFMJgzRem6OJamWoQwcA"
+            "image": "https://ideogram.ai/assets/image/list/response/CMLFMJgzRem6OJamWoQwcA",
+            "quantity": 1
           },
           {
             "id": "5",
@@ -46,7 +49,8 @@
             "description": "Savourez la délicatesse du thé blanc Pai Mu Tan. Avec ses notes douces et florales, ce thé est parfait pour une pause détente et relaxation.",
             "price": 14.99,
             "category": "thé blanc",
-            "image": "https://ideogram.ai/assets/image/list/response/DeuSYVS5QRiJQ4JXXQJ-bA"
+            "image": "https://ideogram.ai/assets/image/list/response/DeuSYVS5QRiJQ4JXXQJ-bA",
+            "quantity": 1
           },
           {
             "id": "4",
@@ -54,7 +58,8 @@
             "description": "Offrez-vous une tisane aux fruits rouges savoureuse et rafraîchissante. Cette infusion sans caféine est parfaite pour se détendre après une longue journée.",
             "price": 5.99,
             "category": "tisane",
-            "image": "https://ideogram.ai/assets/image/list/response/FCmoueCkS4q5zbI4xWnW4g"
+            "image": "https://ideogram.ai/assets/image/list/response/FCmoueCkS4q5zbI4xWnW4g",
+            "quantity": 1
           },
           {
             "id": "1",
@@ -62,7 +67,8 @@
             "description": "Commencez votre journée avec une infusion de thé vert. Rafraîchissante et pleine d'antioxydants, cette infusion vous donne un coup de fouet naturel pour démarrer votre journée.",
             "price": 10.99,
             "category": "thé vert",
-            "image": "https://ideogram.ai/assets/image/list/response/StxsigUlSHanNdMmSXTtLg"
+            "image": "https://ideogram.ai/assets/image/list/response/StxsigUlSHanNdMmSXTtLg",
+            "quantity": 1
         },
           {
             "id": "2",
@@ -70,7 +76,8 @@
             "description": "Dégustez un thé noir Assam authentique et corsé. Avec ses notes maltées et terreuses, ce thé est parfait pour une pause détente ou pour accompagner vos repas.",
             "price": 19.99,
             "category": "thé noir",
-            "image": "https://ideogram.ai/assets/image/list/response/0iVcWGNeTPihYaVu1f0Sxg"
+            "image": "https://ideogram.ai/assets/image/list/response/0iVcWGNeTPihYaVu1f0Sxg",
+            "quantity": 1
           }
         ]
       },
@@ -87,7 +94,8 @@
             "description": "Commencez votre journée avec une infusion de thé vert. Rafraîchissante et pleine d'antioxydants, cette infusion vous donne un coup de fouet naturel pour démarrer votre journée.",
             "price": 10.99,
             "category": "thé vert",
-            "image": "https://ideogram.ai/assets/image/list/response/StxsigUlSHanNdMmSXTtLg"
+            "image": "https://ideogram.ai/assets/image/list/response/StxsigUlSHanNdMmSXTtLg",
+            "quantity": 1
           },
           {
             "id": "3",
@@ -95,7 +103,8 @@
             "description": "Découvrez la subtilité du thé oolong Wu Yi. Ce thé semi-oxydé offre un équilibre parfait entre les arômes floraux et boisés, créant une expérience de dégustation unique.",
             "price": 5.99,
             "category": "thé oolong",
-            "image": "https://ideogram.ai/assets/image/list/response/CMLFMJgzRem6OJamWoQwcA"
+            "image": "https://ideogram.ai/assets/image/list/response/CMLFMJgzRem6OJamWoQwcA",
+            "quantity": 1
           },
           {
             "id": "5",
@@ -103,7 +112,8 @@
             "description": "Savourez la délicatesse du thé blanc Pai Mu Tan. Avec ses notes douces et florales, ce thé est parfait pour une pause détente et relaxation.",
             "price": 14.99,
             "category": "thé blanc",
-            "image": "https://ideogram.ai/assets/image/list/response/DeuSYVS5QRiJQ4JXXQJ-bA"
+            "image": "https://ideogram.ai/assets/image/list/response/DeuSYVS5QRiJQ4JXXQJ-bA",
+            "quantity": 1
           }
         ]
       },
@@ -120,7 +130,8 @@
             "description": "Dégustez un thé noir Assam authentique et corsé. Avec ses notes maltées et terreuses, ce thé est parfait pour une pause détente ou pour accompagner vos repas.",
             "price": 19.99,
             "category": "thé noir",
-            "image": "https://ideogram.ai/assets/image/list/response/0iVcWGNeTPihYaVu1f0Sxg"
+            "image": "https://ideogram.ai/assets/image/list/response/0iVcWGNeTPihYaVu1f0Sxg",
+            "quantity": 1
           },
           {
             "id": "4",
@@ -128,7 +139,8 @@
             "description": "Offrez-vous une tisane aux fruits rouges savoureuse et rafraîchissante. Cette infusion sans caféine est parfaite pour se détendre après une longue journée.",
             "price": 5.99,
             "category": "tisane",
-            "image": "https://ideogram.ai/assets/image/list/response/FCmoueCkS4q5zbI4xWnW4g"
+            "image": "https://ideogram.ai/assets/image/list/response/FCmoueCkS4q5zbI4xWnW4g",
+            "quantity": 1
           }
         ]
       },
@@ -145,7 +157,8 @@
             "description": "Commencez votre journée avec une infusion de thé vert. Rafraîchissante et pleine d'antioxydants, cette infusion vous donne un coup de fouet naturel pour démarrer votre journée.",
             "price": 10.99,
             "category": "thé vert",
-            "image": "https://ideogram.ai/assets/image/list/response/StxsigUlSHanNdMmSXTtLg"
+            "image": "https://ideogram.ai/assets/image/list/response/StxsigUlSHanNdMmSXTtLg",
+            "quantity": 1
           },
           {
             "id": "2",
@@ -153,7 +166,8 @@
             "description": "Dégustez un thé noir Assam authentique et corsé. Avec ses notes maltées et terreuses, ce thé est parfait pour une pause détente ou pour accompagner vos repas.",
             "price": 19.99,
             "category": "thé noir",
-            "image": "https://ideogram.ai/assets/image/list/response/0iVcWGNeTPihYaVu1f0Sxg"
+            "image": "https://ideogram.ai/assets/image/list/response/0iVcWGNeTPihYaVu1f0Sxg",
+            "quantity": 1
           },
           {
             "id": "4",
@@ -161,7 +175,8 @@
             "description": "Offrez-vous une tisane aux fruits rouges savoureuse et rafraîchissante. Cette infusion sans caféine est parfaite pour se détendre après une longue journée.",
             "price": 5.99,
             "category": "tisane",
-            "image": "https://ideogram.ai/assets/image/list/response/FCmoueCkS4q5zbI4xWnW4g"
+            "image": "https://ideogram.ai/assets/image/list/response/FCmoueCkS4q5zbI4xWnW4g",
+            "quantity": 1
           },
           {
             "id": "5",
@@ -169,7 +184,8 @@
             "description": "Savourez la délicatesse du thé blanc Pai Mu Tan. Avec ses notes douces et florales, ce thé est parfait pour une pause détente et relaxation.",
             "price": 14.99,
             "category": "thé blanc",
-            "image": "https://ideogram.ai/assets/image/list/response/DeuSYVS5QRiJQ4JXXQJ-bA"
+            "image": "https://ideogram.ai/assets/image/list/response/DeuSYVS5QRiJQ4JXXQJ-bA",
+            "quantity": 1
           }
         ]
       }

@@ -1,20 +1,24 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import ordersData from '@/api/order.json';
 
-const orders = ref<Array<any>>([]);
+const orders = ref<Array<any>>(ordersData.orders); 
 
-fetch('http://localhost:3000/orders')
-  .then((response) => response.json())
-  .then((data) => {
-    orders.value = data;
-  });
+// fetch('http://localhost:3000/orders')
+//   .then((response) => response.json())
+//   .then((data) => {
+//     orders.value = data;
+//   });
+
 </script>
 
 <template>
-  <div
+  
+  <RouterLink
     v-for="order in orders"
     :key="order.orderId"
     class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white"
+    :to="{ name: 'deli' , params: { id: order.orderId }}"
   >
     <div class="flex justify-between items-center">
       <h1 class="font-bold text-lg">
@@ -28,12 +32,12 @@ fetch('http://localhost:3000/orders')
         }}
       </h1>
       <div
-        class="border border-tea-600 px-2 rounded-full font-bold text-sm"
+        class="border border-tea-600 text-tea-600 px-2 rounded-full font-bold text-sm"
         v-if="order.deliveryStatus === true"
       >
         Livré
       </div>
-      <div class="font-bold border border-tea-600 px-4 rounded-full text-sm text-center" v-else>
+      <div class="font-bold border border-tea-600 text-tea-600 px-4 rounded-full text-sm text-center" v-else>
         Livraison prévue le
         {{
           new Date(order.shippingDate).toLocaleDateString('fr-FR', {
@@ -67,7 +71,7 @@ fetch('http://localhost:3000/orders')
       </div>
     </div>
     <div class="border-b border-t border-gray-200 py-2">
-      <a href="" class="text-tea-600">Suivre le colis</a>
+      <RouterLink :to="{ name: 'deli' , params: { id: order.orderId }}" class="w-1/2 text-tea-600">Suivre le colis</RouterLink>
     </div>
     <div>
       <p>
@@ -84,5 +88,6 @@ fetch('http://localhost:3000/orders')
         }}</span>
       </p>
     </div>
-  </div>
+  </RouterLink>
+ 
 </template>

@@ -53,6 +53,11 @@ const router = createRouter({
           name: 'order',
           path: '/order',
           component: () => import('../views/order-view.vue')
+        },
+        {
+          name: 'deli',
+          path: '/deli/:id',
+          component: () => import('../views/order-tracking-view.vue')
         }
       ]
     },
