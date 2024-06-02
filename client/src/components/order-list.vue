@@ -70,7 +70,7 @@ const orders = ref<Array<any>>(ordersData.orders);
         </div>
       </div>
     </div>
-    <div class="border-b border-t border-gray-200 py-2">
+    <div class="border-b border-t border-gray-200 py-2" v-if="order.deliveryStatus === false">
       <RouterLink :to="{ name: 'deli' , params: { id: order.orderId }}" class="w-1/2 text-tea-600">Suivre le colis</RouterLink>
     </div>
     <div>
