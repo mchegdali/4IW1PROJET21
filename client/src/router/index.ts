@@ -50,13 +50,13 @@ const router = createRouter({
           component: () => import('../views/no-connected-view.vue')
         },
         {
-          name: 'order',
-          path: '/order',
+          name: 'orders',
+          path: '/orders',
           component: () => import('../views/order-view.vue')
         },
         {
-          name: 'deli',
-          path: '/deli/:id',
+          name: 'order',
+          path: '/order/:id',
           component: () => import('../views/order-details-view.vue')
         }
       ]

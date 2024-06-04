@@ -17,7 +17,7 @@ const orders = ref<Array<any>>(ordersData.orders);
       v-for="order in orders"
       :key="order.orderId"
       class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white sm:w-2/3"
-      :to="{ name: 'deli', params: { id: order.orderId } }"
+      :to="{ name: 'order', params: { id: order.orderId } }"
     >
       <div class="flex justify-between items-center">
         <h1 class="font-bold text-lg">
@@ -73,7 +73,7 @@ const orders = ref<Array<any>>(ordersData.orders);
         </div>
       </div>
       <div class="border-b border-t border-gray-200 py-2" v-if="order.deliveryStatus === false">
-        <RouterLink :to="{ name: 'deli', params: { id: order.orderId } }" class="w-1/2 text-tea-600"
+        <RouterLink :to="{ name: 'order', params: { id: order.orderId } }" class="w-1/2 text-tea-600"
           >Suivre le colis</RouterLink
         >
       </div>

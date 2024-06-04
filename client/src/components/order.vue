@@ -143,7 +143,7 @@ console.log(order);
       <div class="w-full h-0.5 bg-gray-200"></div>
       <div v-if="order.deliveryStatus === false" class="bg-white px-2 sm:px-4 p-2 rounded-lg">
         <RouterLink
-          :to="{ name: 'deli', params: { id: order.orderId } }"
+          :to="{ name: 'order', params: { id: order.orderId } }"
           class="w-1/2 text-tea-600 sm:text-lg"
           >Suivre le colis</RouterLink
         >
