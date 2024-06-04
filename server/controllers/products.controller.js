@@ -5,51 +5,100 @@ import {
   productQuerySchema,
 } from '../schemas/products.schema.js';
 import formatZodError from '../utils/format-zod-error.js';
-import ProductsSequelize from '../models/sql/products.js';
+import ProductsSequelize from '../models/sql/products.sql.js';
+import { ValidationError } from 'sequelize';
+import { sequelize } from '../sequelize.js';
+import validator from 'validator';
 
 const PAGE_SIZE = 10;
 
-async function createProduct(req, res) {
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+export async function createProduct(req, res) {
   try {
-    const productCreateBody = await productCreateSchema.parseAsync(req.body);
-    const data = await ProductsSequelize.create(productCreateBody);
+    const result = await sequelize.transaction(async (t) => {
+      const productCreateBody = await productCreateSchema.parseAsync(req.body);
 
-    console.log(data);
-    // // denormalize the data
-    // const product = {
-    //   _id: data.id,
-    //   title: data.title,
-    //   description: data.description,
-    //   category: data.category,
-    //   image: data.image,
-    //   price: data.price,
-    // };
+      const data = await ProductsSequelize.create(productCreateBody, {
+        transaction: t,
+      });
 
-    // // create a product in MongoDB
-    // const productDoc = new ProductMongo(product);
-    // const createdProduct = await productDoc.save();
-    return res.status(201).json(data);
+      const newData = await ProductsSequelize.scope('toMongo').findByPk(
+        data.id,
+        {
+          transaction: t,
+        },
+      );
+
+      const product = {
+        _id: newData.id,
+        name: newData.name,
+        description: newData.description,
+        category: {
+          id: newData.category.id,
+          name: newData.category.name,
+          slug: newData.category.slug,
+        },
+        image: newData.image,
+        price: newData.price,
+        slug: newData.slug,
+      };
+
+      const productDoc = await ProductMongo.create(product);
+
+      return productDoc;
+    });
+
+    return res.status(201).json(result);
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ errors: error.errors });
+    }
+    if (error instanceof ZodError) {
+      return res.status(400).json({ errors: formatZodError(error) });
+    }
+
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 }
 
 /**
  *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * @type {import('express').RequestHandler}
  * @returns
  */
-async function getProducts(req, res) {
+export async function getProducts(req, res) {
   try {
+    const category = req.params.category;
+    console.log(category);
     const { page, text } = await productQuerySchema.parseAsync(req.query);
 
     if (text) {
-      const products = await ProductMongo.find(
+      const andFilter = [
         {
           $text: {
             $search: text,
+            $diacriticSensitive: false,
+            $caseSensitive: false,
+            $language: 'fr',
           },
+        },
+      ];
+
+      if (category) {
+        andFilter.push({
+          category: {
+            $eq: category,
+          },
+        });
+      }
+      const products = await ProductMongo.find(
+        {
+          $and: andFilter,
         },
         {
           score: { $meta: 'textScore' },
@@ -64,6 +113,23 @@ async function getProducts(req, res) {
 
       return res.json(products);
     } else {
+      const dataFilter = [];
+
+      if (category) {
+        dataFilter.push({
+          $match: { $and: [{ category: { $eq: category } }] },
+        });
+      }
+      dataFilter.push(
+        { $skip: (page - 1) * PAGE_SIZE },
+        { $limit: PAGE_SIZE },
+        {
+          $set: {
+            price: { $toString: '$price' },
+          },
+        },
+      );
+
       const products = await ProductMongo.aggregate([
         {
           $facet: {
@@ -78,15 +144,7 @@ async function getProducts(req, res) {
                 },
               },
             ],
-            data: [
-              { $skip: (page - 1) * PAGE_SIZE },
-              { $limit: PAGE_SIZE },
-              {
-                $set: {
-                  price: { $toString: '$price' },
-                },
-              },
-            ],
+            data: dataFilter,
           },
         },
       ]);
@@ -108,13 +166,18 @@ async function getProducts(req, res) {
 
 /**
  *
- * @param {import('express').Request<{id: string}>} req
- * @param {import('express').Response} res
+ * @type {import('express').RequestHandler}
  * @returns
  */
-async function getProductById(req, res) {
+export async function getProduct(req, res) {
   try {
-    const product = await ProductMongo.findById(req.params.id);
+    const isUUID = validator.isUUID(req.params.product);
+
+    const filter = {
+      [isUUID ? '_id' : 'slug']: req.params.product,
+    };
+
+    const product = await ProductMongo.findOne(filter);
     if (!product) {
       return res.status(404).json({ message: 'Produit introuvable' });
     }
@@ -150,6 +213,3 @@ async function getProductById(req, res) {
 //     res.status(500).json({ message: error.message });
 //   }
 // }
-
-const productsController = { getProducts, getProductById };
-export default productsController;

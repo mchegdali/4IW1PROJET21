@@ -44,9 +44,9 @@ ProductsCategoriesSequelize.init(
     modelName: 'ProductsCategories',
     timestamps: false,
     hooks: {
-      beforeValidate: (productCategory) => {
-        if (!productCategory.slug) {
-          productCategory.slug = slugify(productCategory.name);
+      beforeValidate: (item) => {
+        if (!item.slug) {
+          item.slug = slugify(item.name);
         }
       },
     },

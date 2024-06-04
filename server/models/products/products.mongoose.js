@@ -5,13 +5,14 @@ const ProductSchema = new mongoose.Schema(
     _id: {
       type: mongoose.Schema.Types.UUID,
       required: true,
+      default: () => new mongoose.Types.UUID(),
     },
     slug: {
       type: String,
       required: true,
       unique: true,
     },
-    name: {
+    title: {
       type: String,
       required: true,
     },
@@ -49,11 +50,14 @@ const ProductSchema = new mongoose.Schema(
   },
 );
 
+// ProductSchema.
+
 ProductSchema.index(
-  { title: 'text', description: 'text' },
+  { title: 'text', description: 'text', category: 'text' },
   {
     name: 'products_search_index',
-    weights: { title: 10, description: 5 },
+    weights: { title: 10, description: 5, category: 1 },
+    default_language: 'fr',
   },
 );
 

@@ -2,11 +2,13 @@ import formatZodError from '../utils/format-zod-error.js';
 import { ZodError } from 'zod';
 import ProductsCategoriesSequelize from '../models/sql/products-categories.sql.js';
 import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
-import { productCategoryCreateSchema } from '../schemas/products-categories.schema.js';
+import {
+  productCategoryCreateSchema,
+  productCategoryUpdateSchema,
+} from '../schemas/products-categories.schema.js';
 import { ValidationError } from 'sequelize';
 import { sequelize } from '../sequelize.js';
 import validator from 'validator';
-import { Op } from 'sequelize';
 
 /**
  *
@@ -70,17 +72,12 @@ export async function getProductCategory(req, res) {
   try {
     const isUUID = validator.isUUID(req.params.category);
 
-    const $orFilter = [];
+    const filter = {
+      [isUUID ? '_id' : 'slug']: req.params.category,
+    };
 
-    if (isUUID) {
-      $orFilter.push({ _id: req.params.category });
-    } else {
-      $orFilter.push({ slug: req.params.category });
-    }
-
-    const productCategory = await ProductsCategoriesMongo.findOne({
-      $or: $orFilter,
-    }).lean();
+    const productCategory =
+      await ProductsCategoriesMongo.findOne(filter).lean();
 
     return res.json(productCategory);
   } catch (error) {
@@ -95,16 +92,34 @@ export async function getProductCategory(req, res) {
  */
 export async function updateProductCategory(req, res) {
   try {
-    const productCategory = await ProductsCategoriesSequelize.findByPk(
-      req.params.category,
-    );
-    if (!productCategory) {
-      return res.status(404).json({ message: 'Produit introuvable' });
-    }
+    const result = await sequelize.transaction(async (t) => {
+      const productCategoryUpdateBody =
+        await productCategoryUpdateSchema.parseAsync(req.body);
+      const product = await ProductsCategoriesSequelize.create(
+        productCategoryUpdateBody,
+        { transaction: t },
+      );
 
-    await productCategory.save();
-    return res.json(productCategory);
+      const productCategoryMongo = {
+        _id: product.id,
+        name: product.name,
+        slug: product.slug,
+      };
+
+      const productCategoryDoc =
+        await ProductsCategoriesMongo.create(productCategoryMongo);
+
+      return productCategoryDoc;
+    });
+
+    return res.status(201).json(result);
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ errors: error.errors });
+    }
+    if (error instanceof ZodError) {
+      return res.status(400).json({ errors: formatZodError(error) });
+    }
     res.status(500).json({ message: error.message });
   }
 }

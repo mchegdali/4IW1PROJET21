@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import zodErrorMap from './utils/zod-error-map.js';
 import { connectToMongo } from './mongo.js';
-import { connectToSQL, sequelize } from './sequelize.js';
+import { connectToSQL } from './sequelize.js';
 
 /**
  * Initialize various parts of the application

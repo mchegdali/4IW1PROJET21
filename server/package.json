@@ -27,6 +27,7 @@
   "devDependencies": {
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
-    "umzug": "^3.8.0"
+    "umzug": "^3.8.0",
+    "zod-fixture": "^2.5.2"
   }
 }

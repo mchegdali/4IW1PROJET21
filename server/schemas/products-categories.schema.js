@@ -7,7 +7,7 @@ const productCategoryCreateSchema = z.object({
   name: z.string().min(2),
 });
 
-const productCategoryUpdateSchema = productCategoryCreateSchema.partial();
+const productCategoryUpdateSchema = productCategoryCreateSchema;
 
 const productCategorySchema = productCategoryCreateSchema
   .merge(slugSchema)

@@ -20,9 +20,6 @@ ProductsSequelize.init(
     slug: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue() {
-        return slugify(this.name);
-      },
       unique: true,
     },
     price: {
@@ -41,11 +38,39 @@ ProductsSequelize.init(
   {
     sequelize,
     modelName: 'Products',
+    hooks: {
+      beforeValidate: (item) => {
+        /**
+         * @type {string}
+         */
+        const id = item.getDataValue('id');
+        const lastPart = id.split('-').at(-1);
+        if (!item.slug) {
+          item.slug = slugify(`${item.name}-${lastPart}`);
+        } else {
+          item.slug = slugify(`${item.slug}-${lastPart}`);
+        }
+      },
+    },
+    scopes: {
+      toMongo: {
+        attributes: ['id', 'name', 'slug', 'price', 'description', 'image'],
+        include: ['category'],
+      },
+    },
   },
 );
 
 // 1:M relationship between Products and ProductsCategories
-ProductsSequelize.belongsTo(ProductsCategoriesSequelize);
-ProductsCategoriesSequelize.hasMany(ProductsSequelize);
+ProductsSequelize.belongsTo(ProductsCategoriesSequelize, {
+  as: 'category',
+  targetKey: 'id',
+});
+
+ProductsCategoriesSequelize.hasMany(ProductsSequelize, {
+  as: 'product',
+  sourceKey: 'id',
+  foreignKey: 'categoryId',
+});
 
 export default ProductsSequelize;
