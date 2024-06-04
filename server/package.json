@@ -7,7 +7,10 @@
   "scripts": {
     "start": "node index.js",
     "lint": "eslint . --ext .js",
-    "dev": "node --watch index.js"
+    "dev": "node --watch index.js",
+    "db:migrate:up": "node migrate.js up",
+    "db:migrate:down": "node migrate.js down",
+    "db:seed": "node seed.js"
   },
   "keywords": [],
   "author": "",

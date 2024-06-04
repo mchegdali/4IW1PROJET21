@@ -12,8 +12,6 @@ const context = {
   mongoose,
 };
 
-console.log(import.meta.dirname);
-
 const migrator = new Umzug({
   create: {
     folder: 'migrations',
