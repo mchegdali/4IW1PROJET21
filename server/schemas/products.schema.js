@@ -14,24 +14,18 @@ const productCreateSchema = z
     name: z.string().min(2),
     price: z.number().min(0.01),
     description: z.string().min(2),
-    category: z.string().uuid(),
+    categoryId: z.string().uuid(),
     image: z
       .string()
       .url()
       .default('https://placehold.co/256x256/38664D/FFF/png'),
   })
-  .transform((data) => ({
-    name: data.name,
-    price: data.price,
-    description: data.description,
-    categoryId: data.category,
-    image: data.image,
-  }));
+  .merge(entitySchema.partial())
+  .merge(slugSchema.partial());
 
-const productUpdateSchema = productCreateSchema.innerType().partial();
+const productUpdateSchema = productCreateSchema.partial();
 
 const productSchema = productCreateSchema
-  .innerType()
   .merge(slugSchema)
   .merge(entitySchema)
   .merge(timestampsSchema);

@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+import { createFixture } from 'zod-fixture';
 
 /**
  * @typedef { Object } MigrationParams
@@ -30,4 +31,4 @@ export const up = async ({ context: { sequelize } }) => {
  * @param {MigrationParams} params
  *
  */
-export const down = async ({ context: { sequelize } }) => {};
+export const down = async ({ context: { sequelize, mongoose } }) => {};

@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+import { underscore } from 'inflection';
 
 /**
  * @typedef { Object } MigrationParams

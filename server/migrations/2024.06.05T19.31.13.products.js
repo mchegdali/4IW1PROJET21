@@ -1,3 +1,4 @@
+import { underscore } from 'inflection';
 import { DataTypes } from 'sequelize';
 
 /**
@@ -44,15 +45,19 @@ export const up = async ({ context: { sequelize } }) => {
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
+      field: underscore('createdAt'),
     },
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
+      field: underscore('updatedAt'),
     },
     categoryId: {
       type: DataTypes.UUID,
-      field: 'category_id',
-      allowNull: true,
+      field: underscore('categoryId'),
+      allowNull: false,
       references: {
         model: 'products_categories',
         key: 'id',

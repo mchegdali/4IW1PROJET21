@@ -15,12 +15,13 @@ import { underscore } from 'inflection';
  *
  */
 export const up = async ({ context: { sequelize } }) => {
+  const queryInterface = sequelize.getQueryInterface();
   try {
-    await sequelize.getQueryInterface().createSchema('public');
+    await queryInterface.createSchema('public');
   } catch {
     /* empty */
   } finally {
-    await sequelize.getQueryInterface().createTable('products_categories', {
+    await queryInterface.createTable('products_categories', {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -37,30 +38,26 @@ export const up = async ({ context: { sequelize } }) => {
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: DataTypes.NOW,
+        defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
         field: underscore('createdAt'),
       },
       updatedAt: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: DataTypes.NOW,
+        defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
         field: underscore('updatedAt'),
       },
     });
 
-    await sequelize
-      .getQueryInterface()
-      .addIndex('products_categories', ['name'], {
-        name: 'idx_unique_products_categories_name',
-        unique: true,
-      });
+    await queryInterface.addIndex('products_categories', ['name'], {
+      name: 'idx_unique_products_categories_name',
+      unique: true,
+    });
 
-    await sequelize
-      .getQueryInterface()
-      .addIndex('products_categories', ['slug'], {
-        name: 'idx_unique_products_categories_slug',
-        unique: true,
-      });
+    await queryInterface.addIndex('products_categories', ['slug'], {
+      name: 'idx_unique_products_categories_slug',
+      unique: true,
+    });
   }
 };
 
