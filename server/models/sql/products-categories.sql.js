@@ -42,7 +42,8 @@ ProductsCategoriesSequelize.init(
   {
     sequelize,
     modelName: 'ProductsCategories',
-    timestamps: false,
+    tableName: 'products_categories',
+    underscored: true,
     hooks: {
       beforeValidate: (item) => {
         if (!item.slug) {

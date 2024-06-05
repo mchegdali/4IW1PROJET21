@@ -38,6 +38,8 @@ ProductsSequelize.init(
   {
     sequelize,
     modelName: 'Products',
+    tableName: 'products',
+    underscored: true,
     hooks: {
       beforeValidate: (item) => {
         /**
@@ -54,7 +56,9 @@ ProductsSequelize.init(
     },
     scopes: {
       toMongo: {
-        attributes: ['id', 'name', 'slug', 'price', 'description', 'image'],
+        fieldMap: {
+          id: '_id',
+        },
         include: ['category'],
       },
     },
@@ -65,6 +69,9 @@ ProductsSequelize.init(
 ProductsSequelize.belongsTo(ProductsCategoriesSequelize, {
   as: 'category',
   targetKey: 'id',
+  foreignKey: 'categoryId',
+  onDelete: 'SET NULL',
+  onUpdate: 'CASCADE',
 });
 
 ProductsCategoriesSequelize.hasMany(ProductsSequelize, {

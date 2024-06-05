@@ -6,6 +6,7 @@ import { DataTypes } from 'sequelize';
  * @property { string } [path]
  * @property { Object } context
  * @property { import('sequelize').Sequelize } context.sequelize
+ * @property { import('mongoose').Mongoose } context.mongoose
  */
 
 /**
@@ -16,13 +17,11 @@ import { DataTypes } from 'sequelize';
 export const up = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
   try {
-    await queryInterface.createSchema('public');
+    /*
+     add your seeder here
+    */
   } catch {
     /* empty */
-  } finally {
-    /*
-     add your migration here
-    */
   }
 };
 

@@ -10,7 +10,13 @@
     "dev": "node --watch index.js",
     "db:migrate:up": "node migrate.js up",
     "db:migrate:down": "node migrate.js down",
-    "db:seed": "node seed.js"
+    "db:migrate:down-all": "node migrate.js down --to 0",
+    "db:migrate:create": "node migrate.js create --name",
+    "db:migrate:status": "node migrate.js pending",
+    "db:seed:up": "node seed.js up",
+    "db:seed:down": "node seed.js down",
+    "db:seed:down-all": "node seed.js down --to 0",
+    "db:seed:create": "node seed.js create --name"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +35,7 @@
   },
   "devDependencies": {
     "eslint": "^8.57.0",
+    "inflection": "^3.0.0",
     "prettier": "^3.2.5",
     "umzug": "^3.8.0",
     "zod-fixture": "^2.5.2"

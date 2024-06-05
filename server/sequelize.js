@@ -8,7 +8,6 @@ const sequelize = new Sequelize(process.env.POSTGRES_CONNECTION_STRING);
 
 async function connectToSQL() {
   await sequelize.authenticate();
-  await sequelize.sync();
 }
 
 export { sequelize, connectToSQL };

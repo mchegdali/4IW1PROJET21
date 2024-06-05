@@ -7,10 +7,6 @@ import { connectToMongo } from './mongo.js';
 const mongoose = await connectToMongo();
 
 const connection = mongoose.connection.db;
-const context = {
-  sequelize,
-  mongoose,
-};
 
 const migrator = new Umzug({
   create: {
@@ -29,7 +25,9 @@ const migrator = new Umzug({
   migrations: {
     glob: ['migrations/*.js', { cwd: import.meta.dirname }],
   },
-  context,
+  context: {
+    sequelize,
+  },
   storage: new MongoDBStorage({
     connection,
     collectionName: 'migrations',
@@ -38,10 +36,24 @@ const migrator = new Umzug({
 });
 
 const seeder = new Umzug({
+  create: {
+    folder: 'seeders',
+    template: (filepath) => [
+      [
+        filepath,
+        fs
+          .readFileSync(path.join(import.meta.dirname, 'templates/seeder.js'))
+          .toString(),
+      ],
+    ],
+  },
   migrations: {
     glob: ['seeders/*.js', { cwd: import.meta.dirname }],
   },
-  context,
+  context: {
+    sequelize,
+    mongoose,
+  },
   storage: new MongoDBStorage({
     connection,
     collectionName: 'seeders',
