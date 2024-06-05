@@ -64,14 +64,9 @@ const login = async (req, res) => {
       authConfig.refreshTokenSecret,
     );
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: process.env.NODE_ENV === 'production',
-    });
-
     return res.json({
       accessToken,
+      refreshToken,
     });
   } catch (error) {
     if (error instanceof ZodError) {
