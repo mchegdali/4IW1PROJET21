@@ -68,13 +68,13 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(shippingSch
         
 
         <h1>Livraison</h1>
-        <div class="flex">
-          
-          <Input v-model="formData.fullName"  :class="{ 'border-destructive': formErrors.fullName }" placeholder="nom prénom ex: MACRON emmanuelle" required autofocus />
+        <div class="flex flex-col">
+          <label> Nom et Prénom </label>
+          <Input v-model="formData.fullName"  :class="{ 'border-destructive': formErrors.fullName }" required autofocus />
           <small v-if="formErrors.fullName">{{ formErrors.fullName  }}</small>
         </div>
-        
-        <Input list="country" name="country" id="country" placeholder="France" required />
+        <label> Pays </label>
+        <Input list="country" name="country" id="country" required />
         <datalist id="country">
           <option value="Espagne" />
           <option value="Portugal" />
@@ -82,50 +82,57 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(shippingSch
           <option value="Londres" />
           <option value="Belgique" />
         </datalist>
-       
-        <Input id="address" v-model="formData.address" :class="{ 'border-destructive': formErrors.address }" type="text" placeholder="Adresse ex: 101 avenue de la république" />
+        <label> Adresse </label>
+        <Input id="address" v-model="formData.address" :class="{ 'border-destructive': formErrors.address }" type="text" />
         <small v-if="formErrors.address">{{ formErrors.address }}</small>
         
-        <div class="flex">
-         
-          <Input v-model="formData.codePostal" :class="{'border-destructive': formErrors.codePostal}" placeholder="Code Postal ex: 75016" />
+        <div class="flex flex-col">
+          <label> Code postale </label>
+          <Input v-model="formData.codePostal" :class="{'border-destructive': formErrors.codePostal}"  />
           <small v-if="formErrors.codePostal">{{ formErrors.codePostal }}</small>
-          
-          <Input v-model="formData.city" :class="{ 'border-destructive': formErrors.city }" placeholder="ville ex: Paris" required autofocus />
+          <label> Ville </label>
+          <Input v-model="formData.city" :class="{ 'border-destructive': formErrors.city }"  required autofocus />
           <small v-if="formErrors.city ">{{formErrors.city  }}</small>
         </div>
-        
-        <Input id="phoneNumber" v-model="formData.phoneNumber" :class="{'border-destructive': formErrors.phoneNumber}" type="text" placeholder="Téléphone ex: 0654841238" required autofocus />
+        <label> Téléphone </label>
+        <Input id="phoneNumber" v-model="formData.phoneNumber" :class="{'border-destructive': formErrors.phoneNumber}" type="text" required autofocus />
         <small v-if="formErrors.phoneNumber">{{ formErrors.phoneNumber}}</small>
         
-        <div>
+        <div class="flex flex-col">
           <h1>Mode D'expedition</h1>
           <fieldset>
+            <label> Livraison Domicile </label>
             <div class="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
               <Input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
               <label for="bordered-radio-1" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Livraison Colissimo</label>
             </div>
+            <label> Livraison Point relais </label>
             <div class="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
               <Input checked id="bordered-radio-2" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
               <label for="bordered-radio-2" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Livraison en point de retrait Mondial Relay (choix du point relais après paiement)</label>
             </div>
           </fieldset>
         </div>
-        
-        <div>
+
+        <div class="flex flex-col">
           <h1>Paiement</h1>
           <fieldset>
+             <label> Carte Bleu </label>
             <div class="items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
               <Input @click="displayCredForm" id="bordered-radio-3" type="radio" value="" name="bordered-radio-payment" class="inline-flex w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
               <label for="bordered-radio-3" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Carte de Credit</label>
               <div class="flex-auto" id="carteDeCreditForm" :style="dispCred">
-                <Input type="text" placeholder="Numéro de carte" />
-                <Input type="text" placeholder="Date d'expiration" />
-                <Input type="text" placeholder="Code de sécurité" />
+                <label> Numéro de Carte</label>
+                <Input type="text"/>
+                <label> Date d'expiration </label>
+                <Input type="text" />
+                <label> Code de sécurité </label>
+                <Input type="text" />
               </div>
             </div>
-            
+            <label> PayPal </label>
             <div @click="displayPayPalForm" class="items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
+              
               <Input checked id="bordered-radio-4" type="radio" value="" name="bordered-radio-payment" class="inline-flex w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
               <label for="bordered-radio-4" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">PayPal</label>
               <div id="paypalForm" v-bind:style="dispPayPal">
