@@ -1,16 +1,11 @@
 import { ZodError } from 'zod';
 import LivraisonMongo from '../models/mongo/livraison.js';
-import {
-  livraisonCreateSchema,
-  livraisonQuerySchema,
-} from '../schemas/livraison.schema.js';
+import {livraisonCreateSchema} from '../schemas/livraison.schema.js';
 import formatZodError from '../utils/format-zod-error.js';
 import LivraisonSequelize from '../models/sql/livraison.sql.js';
 import { ValidationError } from 'sequelize';
 import { sequelize } from '../sequelize.js';
-import validator from 'validator';
 
-const PAGE_SIZE = 10;
 
 /**
  *
@@ -40,7 +35,6 @@ export async function createLivraison(req, res) {
         street: newData.street,
         zipCode: newData.zipCode,
         price: newData.price,
-        
       };
 
       const livraisonDoc = await LivraisonMongo.create(livraison);
