@@ -2,9 +2,9 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../sequelize.js';
 
 
-class LivraisonSequelize extends Model {}
+class ShippingSequelize extends Model {}
 
-LivraisonSequelize.init({
+ShippingSequelize.init({
     _id: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -34,7 +34,7 @@ LivraisonSequelize.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    // livraisonMode : {
+    // shippingMode : {
     //     type: DataTypes.ENUM('Colissimo', 'Mondial Relay'),
     //     allowNull: false,
     // },
@@ -44,7 +44,7 @@ LivraisonSequelize.init({
     // },
 }, {
     sequelize,
-    modelName: 'LivraisonSequelize',
+    modelName: 'Shipping',
 });
 
-export default LivraisonSequelize;
+export default ShippingSequelize;

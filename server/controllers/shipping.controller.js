@@ -1,8 +1,8 @@
 import { ZodError } from 'zod';
-import LivraisonMongo from '../models/mongo/livraison.js';
-import {livraisonCreateSchema} from '../schemas/livraison.schema.js';
+import ShippingMongo from '../models/mongo/shipping.js';
+import {shippingCreateSchema} from '../schemas/shipping.schema.js';
 import formatZodError from '../utils/format-zod-error.js';
-import LivraisonSequelize from '../models/sql/livraison.sql.js';
+import ShippingSequelize from '../models/sql/shipping.sql.js';
 import { ValidationError } from 'sequelize';
 import { sequelize } from '../sequelize.js';
 
@@ -12,23 +12,23 @@ import { sequelize } from '../sequelize.js';
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function createLivraison(req, res) {
+export async function createShipping(req, res) {
   try {
     const result = await sequelize.transaction(async (t) => {
-      const productCreateBody = await livraisonCreateSchema.parseAsync(req.body);
+      const productCreateBody = await shippingCreateSchema.parseAsync(req.body);
 
-      const data = await LivraisonSequelize.create(productCreateBody, {
+      const data = await ShippingSequelize.create(productCreateBody, {
         transaction: t,
       });
 
-      const newData = await LivraisonSequelize.scope('toMongo').findByPk(
+      const newData = await ShippingSequelize.scope('toMongo').findByPk(
         data.id,
         {
           transaction: t,
         },
       );
 
-      const livraison = {
+      const shipping = {
         _id: newData.id,
         emailCustomer: newData.emailCustomer,
         country: newData.country,
@@ -37,9 +37,9 @@ export async function createLivraison(req, res) {
         price: newData.price,
       };
 
-      const livraisonDoc = await LivraisonMongo.create(livraison);
+      const shippingDoc = await ShippingMongo.create(shipping);
 
-      return livraisonDoc;
+      return shippingDoc;
     });
 
     return res.status(201).json(result);
@@ -61,10 +61,10 @@ export async function createLivraison(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getLivraison(req, res) {
+export async function getShipping(req, res) {
   try {
-    const livraison = req.params.livraison;
-    console.log(livraison);
+    const shipping = req.params.shipping;
+    console.log(shipping);
   }catch(error) {
     if (error instanceof ValidationError) {
       return res.status(400).json({ errors: error.errors });
@@ -88,7 +88,7 @@ export async function getLivraison(req, res) {
 export async function getProduct(req, res) {
   try {
 
-    const product = await LivraisonMongo.findOne();
+    const product = await ShippingMongo.findOne();
     if (!product) {
       return res.status(404).json({ message: 'Produit introuvable' });
     }

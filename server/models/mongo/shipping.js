@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const livraisonSchema = new mongoose.schema ({
+const shippingSchema = new mongoose.Schema ({
     _id: {
         type: mongoose.Schema.Types.UUID,
         required : true,
@@ -31,7 +31,7 @@ const livraisonSchema = new mongoose.schema ({
         type: String,
         required: true,
     },
-    // livraisonMode : {
+    // shippingMode : {
     //     type: String,
     //     enum: ['Colissimo', 'Mondial Relay'],
     //     required: true,
@@ -50,13 +50,13 @@ const livraisonSchema = new mongoose.schema ({
     },
    },
 );
-livraisonSchema.index(
+shippingSchema.index(
     {
         title: 'text',
         description: 'text'
     },
     {
-      name: 'livraison_search_index',
+      name: 'shipping_search_index',
       weights: {
         title: 10,
         description: 5
@@ -64,5 +64,5 @@ livraisonSchema.index(
     },
 )
 
-const Livraison = mongoose.model('Livraison', livraisonSchema);
-export default Livraison;
+const shipping = mongoose.model('shipping', shippingSchema);
+export default shipping;

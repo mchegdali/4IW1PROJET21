@@ -10,7 +10,7 @@ PaymentSequelize.init({
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
     },
-    livraisonMode : {
+    shippingMode : {
         type: DataTypes.ENUM('Colissimo', 'Mondial Relay'),
         allowNull: false,
     },

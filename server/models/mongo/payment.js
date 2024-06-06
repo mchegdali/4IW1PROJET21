@@ -5,7 +5,7 @@ const paymentSchema = new mongoose.schema ({
         type: mongoose.Schema.Types.UUID,
         required : true,
     },
-    livraisonMode : {
+    shippingMode : {
         type: String,
         enum: ['Colissimo', 'Mondial Relay'],
         required: true,
@@ -30,7 +30,7 @@ paymentSchema.index(
         description: 'text'
     },
     {
-      name: 'livraison_search_index',
+      name: 'shipping_search_index',
       weights: {
         title: 10,
         description: 5
@@ -38,5 +38,5 @@ paymentSchema.index(
     },
 )
 
-const Payment = mongoose.model('Livraison', paymentSchema);
+const Payment = mongoose.model('shipping', paymentSchema);
 export default Payment;
