@@ -1,15 +1,15 @@
-import express from 'express';
-import cors from 'cors';
-import appRouter from './routes/index.js';
+import init from './init.js';
+import getApp from './server.js';
 
-const PORT = parseInt(process.env.PORT) || 3000;
+init()
+  .then(() => {
+    const PORT = parseInt(process.env.PORT) || 3000;
+    const app = getApp();
 
-const app = express();
-app.use(express.json());
-app.use(cors());
-
-app.use(appRouter);
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+    app.listen(PORT, () => {
+      console.log('Server is running');
+    });
+  })
+  .catch((error) => {
+    console.error('Failed to connect to the database', error);
+  });
