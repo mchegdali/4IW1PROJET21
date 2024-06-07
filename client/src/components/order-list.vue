@@ -23,7 +23,7 @@ const orders = ref<Array<any>>(ordersData.orders);
         :class="
           order.deliveryStatus
             ? 'flex justify-between items-center'
-            : 'flex flex-col sm:flex-row justify-between items-center'
+            : 'flex flex-col lg:flex-row sm:justify-between lg:items-center'
         "
       >
         <h1 class="font-bold text-lg">
@@ -42,7 +42,7 @@ const orders = ref<Array<any>>(ordersData.orders);
         >
           Livré
         </div>
-        <div class="font-bold border border-tea-600 text-tea-600 px-4 rounded-full text-sm" v-else>
+        <div class="font-bold border border-tea-600 text-tea-600 px-4 rounded-full text-sm w-64" v-else>
           Livraison prévue le
           {{
             new Date(order.shippingDate).toLocaleDateString('fr-FR', {

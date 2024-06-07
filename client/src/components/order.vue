@@ -19,8 +19,8 @@ console.log(order);
 
 <template>
   <div class="items-center flex justify-center flex-col">
-    <div v-if="order" class="sm:w-2/3 sm:flex flex-row justify-center">
-      <div class="sm:w-2/3">
+    <div v-if="order" class="sm:w-2/3 sm:flex flex-row justify-center md:w-full">
+      <div>
         <!-- premiere infos -->
         <div class="p-2 flex flex-col gap-2 mt-2 sm:p-4">
           <div class="flex gap-4 text-xs items-center sm:text-lg">
@@ -45,20 +45,20 @@ console.log(order);
 
         <!-- deuximeme infos -->
         <h6 class="font-bold text-xs p-2 text-gray-700 sm:text-lg sm:p-4">
-          INFORMATION DE PAIEMENT
+          INFORMATION SUR LA LIVRAISON
         </h6>
         <div class="p-2 sm:p-4">
           <h1 class="text-xs font-bold text-gray-700 sm:text-sm">ADRESSE DE COLLECTE</h1>
           <div class="text-xs p-2 sm:text-sm border-b">
-            <p>19 rue de la paix</p>
-            <p>77000 PARIS</p>
-            <p>France</p>
+            <p>{{ order.shippingAddress.street }}</p>
+            <p>{{ order.shippingAddress.postalCode }} {{ order.shippingAddress.city }}</p>
+            <p>{{ order.shippingAddress.country }}</p>
           </div>
 
           <h1 class="text-xs font-bold text-gray-700 mt-2 sm:text-sm">VOS COORDONNÉES</h1>
           <div class="text-xs p-2 sm:text-sm">
-            <p>Jhon Doe</p>
-            <p>07 23 45 11 54</p>
+            <p>{{order.contactDetails.name}}</p>
+            <p>{{ order.contactDetails.phoneNumber }}</p>
           </div>
         </div>
 
@@ -94,7 +94,7 @@ console.log(order);
             </div>
           </div>
 
-          <div class="w-full h-3 bg-gray-200 overflow-hidden">
+          <div class="w-full h-3 bg-gray-200 overflow-hidden rounded-xl">
             <div class="h-full bg-tea-600" style="width: 45%"></div>
           </div>
 
