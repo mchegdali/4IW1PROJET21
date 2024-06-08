@@ -28,15 +28,13 @@ const zodErrorMap = (issue, _ctx) => {
       )}`;
       break;
     case ZodIssueCode.invalid_union:
-      message = `Entrée invalide`;
+      message = issue.unionErrors[0].issues[0].message;
       break;
     case ZodIssueCode.invalid_union_discriminator:
-      message = `Valeur de discriminateur invalide. Attendu ${util.joinValues(
-        issue.options,
-      )}`;
+      message = `Valeur invalide. Attendu ${util.joinValues(issue.options)}`;
       break;
     case ZodIssueCode.invalid_enum_value:
-      message = `Valeur d'énumération invalide. Attendu ${util.joinValues(
+      message = `Valeur invalide. Attendu ${util.joinValues(
         issue.options,
       )}, reçu '${issue.received}'`;
       break;

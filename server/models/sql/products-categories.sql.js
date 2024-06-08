@@ -38,17 +38,29 @@ ProductsCategoriesSequelize.init(
         },
       },
     },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
   },
   {
     sequelize,
     modelName: 'ProductsCategories',
     tableName: 'products_categories',
-    underscored: true,
+
     hooks: {
       beforeValidate: (item) => {
         if (!item.slug) {
           item.slug = slugify(item.name);
         }
+      },
+    },
+    scopes: {
+      toMongo: {
+        attributes: {
+          include: [['id', '_id']],
+          exclude: ['id'],
+        },
       },
     },
   },

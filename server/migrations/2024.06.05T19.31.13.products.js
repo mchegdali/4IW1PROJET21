@@ -1,4 +1,3 @@
-import { underscore } from 'inflection';
 import { DataTypes } from 'sequelize';
 import ProductMongo from '../models/mongo/products.mongo.js';
 
@@ -46,31 +45,26 @@ export const up = async ({ context: { sequelize } }) => {
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
-      field: underscore('createdAt'),
+      defaultValue: sequelize.fn('NOW'),
     },
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
-      field: underscore('updatedAt'),
+      defaultValue: sequelize.fn('NOW'),
     },
     categoryId: {
       type: DataTypes.UUID,
-      field: underscore('categoryId'),
-      allowNull: false,
-      references: {
-        model: 'products_categories',
-        key: 'id',
-      },
+      allowNull: true,
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE',
+      references: {
+        model: {
+          tableName: 'products_categories',
+          schema: 'public',
+        },
+        key: 'id',
+      },
     },
-  });
-
-  await queryInterface.addIndex('products', ['slug'], {
-    name: 'idx_unique_products_slug',
-    unique: true,
   });
 };
 

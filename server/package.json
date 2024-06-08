@@ -25,6 +25,7 @@
     "@sindresorhus/slugify": "^2.2.1",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "http-errors": "^2.0.0",
     "jose": "^5.2.3",
     "mongoose": "^8.3.4",
     "pg": "^8.11.5",

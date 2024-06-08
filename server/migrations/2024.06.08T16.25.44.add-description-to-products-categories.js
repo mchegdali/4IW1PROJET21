@@ -15,12 +15,10 @@ import { DataTypes } from 'sequelize';
  */
 export const up = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
-  /* ONLY ADD CREATE SCHEMA AT FIRST MIGRATION */
-  // await sequelize.query('CREATE SCHEMA IF NOT EXISTS public');
-
-  /*
-     add your migration here
-    */
+  await queryInterface.addColumn('products_categories', 'description', {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  });
 };
 
 /**
@@ -28,4 +26,7 @@ export const up = async ({ context: { sequelize } }) => {
  * @param {MigrationParams} params
  *
  */
-export const down = async ({ context: { sequelize } }) => {};
+export const down = async ({ context: { sequelize } }) => {
+  const queryInterface = sequelize.getQueryInterface();
+  await queryInterface.removeColumn('products_categories', 'description');
+};

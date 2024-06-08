@@ -4,7 +4,10 @@ import slugify from '@sindresorhus/slugify';
 import { fakerFR as faker } from '@faker-js/faker';
 import crypto from 'node:crypto';
 import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
+import { QueryTypes, ValidationError } from 'sequelize';
 
+const minProducts = 2;
+const maxProducts = 5;
 const imageFormats = ['png', 'jpg', 'jpeg', 'avif', 'webp'];
 
 function getRandomImageFormat() {
@@ -58,7 +61,8 @@ function createProduct(categoryId) {
  * @param {MigrationParams} params
  *
  */
-export const up = async () => {
+export const up = async ({ context: { sequelize } }) => {
+  const queryInterface = sequelize.getQueryInterface();
   const productsCategories = await ProductsCategoriesMongo.find(
     {},
     {
@@ -74,24 +78,35 @@ export const up = async () => {
     const _id = category._id.toString('utf-8');
     categoriesMap.set(_id, category);
 
-    for (let i = 0; i < faker.number.int({ min: 1, max: 10 }); i++) {
+    for (
+      let i = 0;
+      i < faker.number.int({ min: minProducts, max: maxProducts });
+      i++
+    ) {
       const product = createProduct(_id);
       products.push(product);
     }
   }
 
-  const createdProducts = await ProductsSequelize.bulkCreate(products, {
-    validate: true,
-  });
+  const createdProducts = await queryInterface.bulkInsert(
+    'products',
+    products,
+    {
+      validate: true,
+      returning: true,
+    },
+  );
+
+  console.log(createdProducts[0]);
 
   const createdProductsMongo = createdProducts.map((p) => ({
-    _id: p.getDataValue('id'),
-    slug: p.getDataValue('slug'),
-    name: p.getDataValue('name'),
-    description: p.getDataValue('description'),
-    category: categoriesMap.get(p.getDataValue('categoryId')),
-    image: p.getDataValue('image'),
-    price: p.getDataValue('price'),
+    _id: p.id,
+    slug: p.slug,
+    name: p.name,
+    description: p.description,
+    category: categoriesMap.get(p.categoryId),
+    image: p.image,
+    price: p.price,
   }));
 
   await ProductMongo.insertMany(createdProductsMongo);
