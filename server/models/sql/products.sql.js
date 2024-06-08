@@ -69,7 +69,11 @@ ProductsSequelize.init(
 ProductsSequelize.belongsTo(ProductsCategoriesSequelize, {
   as: 'category',
   targetKey: 'id',
-  foreignKey: 'categoryId',
+  foreignKey: {
+    allowNull: false,
+    field: 'category_id',
+    name: 'categoryId',
+  },
   onDelete: 'SET NULL',
   onUpdate: 'CASCADE',
 });

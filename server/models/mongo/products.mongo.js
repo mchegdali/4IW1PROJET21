@@ -20,8 +20,18 @@ const ProductSchema = new mongoose.Schema(
       required: true,
     },
     category: {
-      type: String,
-      required: true,
+      _id: {
+        type: mongoose.Schema.Types.UUID,
+        required: true,
+      },
+      name: {
+        type: String,
+        required: true,
+      },
+      slug: {
+        type: String,
+        required: true,
+      },
     },
     image: {
       type: String,
@@ -46,14 +56,16 @@ const ProductSchema = new mongoose.Schema(
     toJSON: {
       getters: true,
     },
+    timestamps: true,
   },
 );
 
 ProductSchema.index(
-  { title: 'text', description: 'text' },
+  { name: 'text', description: 'text', 'category.name': 'text' },
   {
     name: 'products_search_index',
-    weights: { title: 10, description: 5 },
+    weights: { name: 100, description: 25, 'category.name': 50 },
+    default_language: 'french',
   },
 );
 

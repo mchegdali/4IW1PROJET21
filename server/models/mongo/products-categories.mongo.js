@@ -17,13 +17,13 @@ const ProductsCategoriesSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: false,
     toObject: {
       getters: true,
     },
     toJSON: {
       getters: true,
     },
+    timestamps: true,
   },
 );
 

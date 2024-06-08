@@ -1,5 +1,5 @@
 import { ZodError } from 'zod';
-import ProductMongo from '../models/mongo/products.js';
+import ProductMongo from '../models/mongo/products.mongo.js';
 import {
   productCreateSchema,
   productQuerySchema,
@@ -74,91 +74,85 @@ export async function createProduct(req, res) {
 export async function getProducts(req, res) {
   try {
     const category = req.params.category;
-    console.log(category);
     const { page, text } = await productQuerySchema.parseAsync(req.query);
 
+    /**
+     * @type {import('mongoose').PipelineStage[]  }
+     */
+    const pipelineStages = [];
+    /**
+     * @type {import('mongoose').PipelineStage  }
+     */
+    let matchStage;
+
+    /**
+     * @type {import('mongoose').PipelineStage  }
+     */
+    let sortStage;
+
     if (text) {
-      const andFilter = [
-        {
+      matchStage = {
+        $match: {
           $text: {
             $search: text,
             $diacriticSensitive: false,
             $caseSensitive: false,
-            $language: 'fr',
           },
         },
-      ];
-
-      if (category) {
-        andFilter.push({
-          category: {
-            $eq: category,
-          },
-        });
-      }
-      const products = await ProductMongo.find(
-        {
-          $and: andFilter,
-        },
-        {
-          score: { $meta: 'textScore' },
-        },
-      )
-        .sort({
-          score: { $meta: 'textScore' },
-        })
-        .select({
-          score: 0,
-        });
-
-      return res.json(products);
-    } else {
-      const dataFilter = [];
-
-      if (category) {
-        dataFilter.push({
-          $match: { $and: [{ category: { $eq: category } }] },
-        });
-      }
-      dataFilter.push(
-        { $skip: (page - 1) * PAGE_SIZE },
-        { $limit: PAGE_SIZE },
-        {
-          $set: {
-            price: { $toString: '$price' },
-          },
-        },
-      );
-
-      const products = await ProductMongo.aggregate([
-        {
-          $facet: {
-            metadata: [
-              { $count: 'total' },
-              {
-                $addFields: {
-                  page,
-                  totalPages: {
-                    $ceil: { $divide: ['$total', PAGE_SIZE] },
-                  },
-                },
-              },
-            ],
-            data: dataFilter,
-          },
-        },
-      ]);
-
-      return res.json({
-        metadata: products[0].metadata[0],
-        data: products[0].data,
-      });
+      };
+      sortStage = {
+        $sort: { score: { $meta: 'textScore' } },
+      };
     }
+
+    if (category) {
+      if (!matchStage) {
+        matchStage = {};
+      }
+
+      matchStage.$or = [
+        { 'category._id': category },
+        { 'category.slug': category },
+      ];
+    }
+
+    if (matchStage) {
+      pipelineStages.push(matchStage);
+    }
+
+    if (sortStage) {
+      pipelineStages.push(sortStage);
+    }
+
+    pipelineStages.push(
+      { $skip: (page - 1) * PAGE_SIZE },
+      { $limit: PAGE_SIZE },
+      { $project: { score: 0 } },
+      {
+        $facet: {
+          metadata: [
+            { $count: 'total' },
+            {
+              $addFields: {
+                page,
+                totalPages: { $ceil: { $divide: ['$total', PAGE_SIZE] } },
+              },
+            },
+          ],
+          data: [{ $set: { price: { $toString: '$price' } } }],
+        },
+      },
+    );
+
+    const products = await ProductMongo.aggregate(pipelineStages);
+
+    return res.json({
+      metadata: products[0].metadata[0],
+      data: products[0].data,
+    });
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json({
-        errors: formatZodError(error),
-      });
+      return res.status(400).json({ errors: formatZodError(error) });
     }
     return res.status(400).json({ message: error.message });
   }

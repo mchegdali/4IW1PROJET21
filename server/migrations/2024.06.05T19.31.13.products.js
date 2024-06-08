@@ -1,5 +1,6 @@
 import { underscore } from 'inflection';
 import { DataTypes } from 'sequelize';
+import ProductMongo from '../models/mongo/products.mongo.js';
 
 /**
  * @typedef { Object } MigrationParams
@@ -20,7 +21,7 @@ export const up = async ({ context: { sequelize } }) => {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: sequelize.fn('gen_random_uuid'),
     },
     name: {
       type: DataTypes.STRING,
@@ -80,4 +81,5 @@ export const up = async ({ context: { sequelize } }) => {
  */
 export const down = async ({ context: { sequelize } }) => {
   await sequelize.getQueryInterface().dropTable('products', { force: true });
+  await ProductMongo.db.dropCollection(ProductMongo.collection.name);
 };

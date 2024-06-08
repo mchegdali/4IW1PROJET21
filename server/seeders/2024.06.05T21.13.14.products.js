@@ -1,18 +1,48 @@
-import { DataTypes, QueryTypes } from 'sequelize';
-import { zocker } from 'zocker';
-import { productCreateSchema } from '../schemas/products.schema.js';
-import ProductsCategoriesSequelize from '../models/sql/products-categories.sql.js';
-import ProductMongo from '../models/mongo/products.js';
+import ProductMongo from '../models/mongo/products.mongo.js';
 import ProductsSequelize from '../models/sql/products.sql.js';
 import slugify from '@sindresorhus/slugify';
+import { fakerFR as faker } from '@faker-js/faker';
+import crypto from 'node:crypto';
+import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
 
-const mockProductCreateSchema = productCreateSchema.transform((p) => ({
-  ...p,
-  id: crypto.randomUUID(),
-  slug: slugify(p.name),
-}));
+const imageFormats = ['png', 'jpg', 'jpeg', 'avif', 'webp'];
 
-const zock = zocker(mockProductCreateSchema);
+function getRandomImageFormat() {
+  return faker.helpers.arrayElement(imageFormats);
+}
+
+/**
+ *
+ * @param {string} categoryId
+ * @returns
+ */
+function createProduct(categoryId) {
+  const id = crypto.randomUUID();
+  const productIdLastPart = id.split('-').at(-1);
+  const name = faker.commerce.productName();
+  const description = faker.commerce.productDescription();
+  const slug = slugify(`${name}-${productIdLastPart}`);
+  const image = faker.image.urlPlaceholder({
+    width: 200,
+    height: 200,
+    format: getRandomImageFormat(),
+    text: name,
+  });
+  const price = faker.commerce.price({ min: 10, max: 1000 });
+  const now = new Date();
+
+  return {
+    id,
+    name,
+    slug,
+    description,
+    image,
+    price,
+    categoryId,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
 
 /**
  * @typedef { Object } MigrationParams
@@ -28,61 +58,43 @@ const zock = zocker(mockProductCreateSchema);
  * @param {MigrationParams} params
  *
  */
-export const up = async ({ context: { sequelize, mongoose } }) => {
-  const queryInterface = sequelize.getQueryInterface();
-  const productsCategories = await queryInterface.sequelize.query(
-    'SELECT * FROM products_categories',
+export const up = async () => {
+  const productsCategories = await ProductsCategoriesMongo.find(
+    {},
     {
-      type: QueryTypes.SELECT,
-      model: ProductsCategoriesSequelize,
-      mapToModel: true,
+      name: 1,
+      slug: 1,
     },
-  );
+  ).lean();
 
   const products = [];
+  const categoriesMap = new Map();
 
-  for (let i = 0; i < productsCategories.length; i++) {
-    const category = productsCategories[i].getDataValue('id');
-    products.push(
-      ...zock
-        .supply(productCreateSchema.shape.categoryId, category)
-        .generateMany(10),
-    );
+  for (const category of productsCategories) {
+    const _id = category._id.toString('utf-8');
+    categoriesMap.set(_id, category);
+
+    for (let i = 0; i < faker.number.int({ min: 1, max: 10 }); i++) {
+      const product = createProduct(_id);
+      products.push(product);
+    }
   }
 
-  const createdProducts = await queryInterface.bulkInsert(
-    'products',
-    products.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      name: p.name,
-      description: p.description,
-      category_id: p.categoryId,
-      image: p.image,
-      price: p.price,
-    })),
-    {
-      fieldMap: {
-        id: '_id',
-      },
-      mapToModel: true,
-      model: ProductsSequelize,
-      include: [ProductsCategoriesSequelize],
-    },
-  );
+  const createdProducts = await ProductsSequelize.bulkCreate(products, {
+    validate: true,
+  });
 
-  console.log(createdProducts);
-  // await ProductMongo.insertMany(
-  //   products.map((p) => ({
-  //     _id: p.id,
-  //     slug: p.slug,
-  //     name: p.name,
-  //     description: p.description,
-  //     category: p.categoryId,
-  //     image: p.image,
-  //     price: p.price,
-  //   })),
-  // );
+  const createdProductsMongo = createdProducts.map((p) => ({
+    _id: p.getDataValue('id'),
+    slug: p.getDataValue('slug'),
+    name: p.getDataValue('name'),
+    description: p.getDataValue('description'),
+    category: categoriesMap.get(p.getDataValue('categoryId')),
+    image: p.getDataValue('image'),
+    price: p.getDataValue('price'),
+  }));
+
+  await ProductMongo.insertMany(createdProductsMongo);
 };
 
 /**
@@ -93,4 +105,5 @@ export const up = async ({ context: { sequelize, mongoose } }) => {
 export const down = async ({ context: { sequelize, mongoose } }) => {
   const queryInterface = sequelize.getQueryInterface();
   await queryInterface.bulkDelete('products', null, {});
+  await ProductMongo.deleteMany({});
 };

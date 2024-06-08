@@ -23,10 +23,7 @@ productsCategoriesRouter.use('/:category/products', productsRouter);
 
 productsCategoriesRouter
   .route('/:category')
-  .get((req, res, next) => {
-    console.log(req.params.category);
-    next();
-  }, getProductCategory)
+  .get(getProductCategory)
   .patch(updateProductCategory)
   .delete(deleteProductCategory);
 
