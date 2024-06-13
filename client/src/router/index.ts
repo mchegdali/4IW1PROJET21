@@ -56,6 +56,16 @@ const router = createRouter({
           name: 'no-connected',
           path: '/no-connected',
           component: () => import('../views/no-connected-view.vue')
+        },
+        {
+          name: 'orders',
+          path: '/orders',
+          component: () => import('../views/order-view.vue')
+        },
+        {
+          name: 'order',
+          path: '/order/:id',
+          component: () => import('../views/order-details-view.vue')
         }
       ]
     },
