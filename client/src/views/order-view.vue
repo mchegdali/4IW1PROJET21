@@ -6,5 +6,5 @@ import OrderList from '@/components/order-list.vue';
 
 <template>
   <h1 class="text-3xl font-bold m-2">Mes commandes</h1>
-  <div><OrderList/></div>
+  <div class="mt-6"><OrderList/></div>
 </template>
