@@ -3,7 +3,8 @@ import { computed, ref } from 'vue';
 import { useFetch } from '@vueuse/core';
 import { type ProductsResponse } from '@/api/products.api';
 import ProductsSection from '@/components/products/products-section.vue';
-const productsUrl = ref('http://localhost:3000/products?page=1');
+
+const productsUrl = ref(`${import.meta.env.VITE_API_BASE_URL}/products?page=1`);
 const { data } = useFetch(productsUrl).json<ProductsResponse>();
 
 const products = computed(() => {

@@ -5,10 +5,12 @@ import {
   getProducts,
   updateProduct,
   deleteProduct,
+  getRelatedProducts,
 } from '../controllers/products.controller.js';
 
 const productsRouter = Router({ mergeParams: true });
 
+productsRouter.get('/:product/related', getRelatedProducts);
 productsRouter
   .route('/:product')
   .get(getProduct)

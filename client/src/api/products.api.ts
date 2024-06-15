@@ -1,7 +1,14 @@
+export type ProductCategory = {
+  _id: string;
+  name: string;
+  slug: string;
+};
+
 export interface Product {
   _id: string;
-  title: string;
-  category: string;
+  slug: string;
+  name: string;
+  category: ProductCategory;
   image: string;
   price: string;
   description: string;

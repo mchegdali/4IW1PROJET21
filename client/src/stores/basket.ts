@@ -7,7 +7,12 @@ export const useBasketStore = defineStore('basket', {
   getters: {
     totalPrice(state) {
       return (
-        Math.round(state.products.reduce((acc, product) => acc + product.price, 0) * 100) / 100
+        Math.round(
+          state.products.reduce((acc, product) => {
+            const price = parseFloat(product.price);
+            return acc + price;
+          }, 0) * 100
+        ) / 100
       );
     },
     view(state) {
@@ -15,7 +20,7 @@ export const useBasketStore = defineStore('basket', {
       const products: Product[] = [];
 
       for (let i = 0; i < productsLen; i++) {
-        if (!products.find((p) => p.id === state.products[i].id)) {
+        if (!products.find((p) => p._id === state.products[i]._id)) {
           products.push(state.products[i]);
         }
       }
@@ -35,10 +40,10 @@ export const useBasketStore = defineStore('basket', {
       }
 
       if (count === 0) {
-        this.products = this.products.filter((p) => p.id !== product.id);
+        this.products = this.products.filter((p) => p._id !== product._id);
       }
 
-      const productCount = this.products.filter((p) => p.id === product.id);
+      const productCount = this.products.filter((p) => p._id === product._id);
       const diff = count - productCount.length;
       const absDiff = Math.abs(diff);
       for (let i = 0; i < absDiff; i++) {
@@ -51,7 +56,7 @@ export const useBasketStore = defineStore('basket', {
     },
     removeProduct(product: Product) {
       //@ts-ignore
-      const lastIndex = this.products.findLastIndex((p) => p.id === product.id);
+      const lastIndex = this.products.findLastIndex((p) => p._id === product._id);
 
       if (lastIndex !== -1) {
         this.products.splice(lastIndex, 1);

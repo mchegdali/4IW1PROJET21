@@ -207,6 +207,35 @@ export async function getProduct(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
+export async function getRelatedProducts(req, res) {
+  try {
+    const isUUID = validator.isUUID(req.params.product);
+
+    const filter = {
+      [isUUID ? '_id' : 'slug']: req.params.product,
+    };
+
+    const product = await ProductMongo.findOne(filter);
+    if (!product) {
+      return res.status(404).json({ message: 'Produit introuvable' });
+    }
+
+    const relatedProducts = await ProductMongo.find({
+      category: product.category,
+      _id: { $ne: product._id },
+    }).limit(5);
+
+    return res.status(200).json(relatedProducts);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
 export async function updateProduct(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
