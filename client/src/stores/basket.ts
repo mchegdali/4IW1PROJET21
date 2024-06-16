@@ -1,9 +1,10 @@
 import type { Product } from '@/api/products.api';
 import { defineStore } from 'pinia';
-import basketData from '@/api/basket.json';
+
+const defaultProducts: Product[] = [];
 
 export const useBasketStore = defineStore('basket', {
-  state: () => ({ products: basketData.products as Product[] }),
+  state: () => ({ products: defaultProducts }),
   getters: {
     totalPrice(state) {
       return (
