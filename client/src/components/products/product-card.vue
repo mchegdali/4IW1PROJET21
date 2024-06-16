@@ -30,7 +30,7 @@ function handleAddToBasketClick() {
 </script>
 
 <template>
-  <Card class="shadow-xl min-w-80 max-w-xs h-full flex flex-col">
+  <Card class="shadow-sm shadow-primary/25 min-w-80 max-w-xs flex flex-col">
     <CardHeader>
       <div class="w-32 self-center">
         <AspectRatio :ratio="1" class="bg-muted object-center">
@@ -38,14 +38,18 @@ function handleAddToBasketClick() {
         </AspectRatio>
       </div>
       <CardTitle class="text-xl">
-        <RouterLink :to="{ path: `/products/${product.id}` }">{{ product.title }}</RouterLink>
+        <RouterLink :to="{ path: `/products/${product._id}` }">{{ product.name }}</RouterLink>
       </CardTitle>
-      <CardDescription class="text-primary">{{ product.category }}</CardDescription>
+      <CardDescription class="text-primary line-clamp-2">{{ product.description }}</CardDescription>
     </CardHeader>
     <CardContent class="flex flex-col gap-1 items-center">
       <p class="text-xl font-semibold">{{ product.price }}€</p>
-      <QuantityInput @decrement="onDecrement" @increment="onIncrement" :value="count"
-        :is-decrease-disabled="count <= 0" />
+      <QuantityInput
+        @decrement="onDecrement"
+        @increment="onIncrement"
+        :value="count"
+        :is-decrease-disabled="count <= 0"
+      />
       <Button class="uppercase font-medium" @click="handleAddToBasketClick">
         Ajouter au panier
       </Button>

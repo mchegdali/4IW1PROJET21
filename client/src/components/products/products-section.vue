@@ -1,35 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import type { Product } from '@/api/products.api';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
+} from '@/components/ui/carousel';
 import ProductCard from '@/components/products/product-card.vue';
+
 const { products, title } = defineProps<{
   products?: Product[] | null;
   title?: string;
 }>();
-
-const breakpoints = useBreakpoints(breakpointsTailwind);
-
-const isMd = breakpoints.isSmaller('lg');
-const isLg = breakpoints.isSmaller('xl');
-const isXl = breakpoints.isSmaller('2xl');
-const isXxl = breakpoints.isGreaterOrEqual('2xl');
-
-const active = computed(() => {
-  if (!Array.isArray(products)) {
-    return false;
-  } else {
-    return (
-      (!isMd && products.length > 1) ||
-      (isMd && !isLg && products.length > 2) ||
-      (isLg && !isXl && products.length > 3) ||
-      (isXl && !isXxl && products.length > 4) ||
-      (isXxl && products.length > 5)
-    );
-  }
-});
 </script>
 
 <template>
@@ -39,36 +22,16 @@ const active = computed(() => {
     </slot>
     <slot>
       <Carousel
-        class="-mx-4 overflow-visible"
-        v-if="products"
-        :opts="{
-          loop: true,
-          active
-        }"
+        class="relative w-full max-w-xs md:max-w-screen-sm lg:max-w-screen-lg xl:max-w-screen-xl overflow-hidden"
       >
-        <CarouselContent class="overflow-visible">
-          <CarouselItem
-            class="basis-3/4 md:basis-auto"
-            v-for="product in products"
-            :key="product.id"
-          >
+        <CarouselContent class="gap-2">
+          <CarouselItem v-for="product in products" :key="product._id">
             <ProductCard v-if="product" :product="product" />
           </CarouselItem>
         </CarouselContent>
-      </Carousel>
-      <Carousel
-        class="-mx-4"
-        v-else
-        :opts="{
-          loop: true,
-          active: false
-        }"
-      >
-        <CarouselContent>
-          <CarouselItem class="basis-3/4" v-for="index in [0, 1, 2, 3]" :key="index">
-            <Skeleton class="w-full max-w-sm h-96" />
-          </CarouselItem>
-        </CarouselContent>
+
+        <CarouselPrevious />
+        <CarouselNext />
       </Carousel>
     </slot>
   </section>

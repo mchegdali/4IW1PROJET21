@@ -7,20 +7,38 @@
   "scripts": {
     "start": "node index.js",
     "lint": "eslint . --ext .js",
-    "dev": "node --watch index.js"
+    "dev": "node --watch index.js",
+    "db:migrate:up": "node migrate.js up",
+    "db:migrate:down": "node migrate.js down",
+    "db:migrate:down-all": "node migrate.js down --to 0",
+    "db:migrate:create": "node migrate.js create --name",
+    "db:migrate:status": "node migrate.js pending",
+    "db:seed:up": "node seed.js up",
+    "db:seed:down": "node seed.js down",
+    "db:seed:down-all": "node seed.js down --to 0",
+    "db:seed:create": "node seed.js create --name"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sindresorhus/slugify": "^2.2.1",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "http-errors": "^2.0.0",
     "jose": "^5.2.3",
-    "mongoose": "^8.2.4",
-    "sequelize": "^6.37.2"
+    "mongoose": "^8.3.4",
+    "pg": "^8.11.5",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.2",
+    "validator": "^13.12.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5"
+    "inflection": "^3.0.0",
+    "prettier": "^3.2.5",
+    "umzug": "^3.8.0"
   }
 }
