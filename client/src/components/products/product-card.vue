@@ -30,7 +30,7 @@ function handleAddToBasketClick() {
 </script>
 
 <template>
-  <Card class="shadow-xl min-w-80 max-w-xs h-full flex flex-col">
+  <Card class="shadow-sm shadow-primary/25 min-w-80 max-w-xs flex flex-col">
     <CardHeader>
       <div class="w-32 self-center">
         <AspectRatio :ratio="1" class="bg-muted object-center">

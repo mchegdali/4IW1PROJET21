@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useFetch } from '@vueuse/core';
 import { type ProductsResponse } from '@/api/products.api';
 import ProductsSection from '@/components/products/products-section.vue';
