@@ -15,15 +15,19 @@ const ProductsCategoriesSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    description: {
+      type: String,
+      required: true,
+    },
   },
   {
-    timestamps: false,
     toObject: {
       getters: true,
     },
     toJSON: {
       getters: true,
     },
+    timestamps: true,
   },
 );
 

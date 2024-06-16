@@ -1,5 +1,5 @@
+/* eslint-disable no-unused-vars */
 import { DataTypes } from 'sequelize';
-import { underscore } from 'inflection';
 
 /**
  * @typedef { Object } MigrationParams
@@ -16,15 +16,12 @@ import { underscore } from 'inflection';
  */
 export const up = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
-  try {
-    await queryInterface.createSchema('public');
-  } catch {
-    /* empty */
-  } finally {
-    /*
+  /* ONLY ADD CREATE SCHEMA AT FIRST MIGRATION */
+  // await sequelize.query('CREATE SCHEMA IF NOT EXISTS public');
+
+  /*
      add your migration here
     */
-  }
 };
 
 /**

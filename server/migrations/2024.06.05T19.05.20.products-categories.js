@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { underscore } from 'inflection';
+import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
 
 /**
  * @typedef { Object } MigrationParams
@@ -20,45 +20,43 @@ export const up = async ({ context: { sequelize } }) => {
     await queryInterface.createSchema('public');
   } catch {
     /* empty */
-  } finally {
-    await queryInterface.createTable('products_categories', {
-      id: {
-        type: DataTypes.UUID,
-        primaryKey: true,
-        defaultValue: DataTypes.UUIDV4,
-      },
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      slug: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
-        field: underscore('createdAt'),
-      },
-      updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
-        field: underscore('updatedAt'),
-      },
-    });
-
-    await queryInterface.addIndex('products_categories', ['name'], {
-      name: 'idx_unique_products_categories_name',
-      unique: true,
-    });
-
-    await queryInterface.addIndex('products_categories', ['slug'], {
-      name: 'idx_unique_products_categories_slug',
-      unique: true,
-    });
   }
+
+  await queryInterface.createTable('products_categories', {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: sequelize.fn('gen_random_uuid'),
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('NOW'),
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('NOW'),
+    },
+  });
+
+  await queryInterface.addIndex('products_categories', ['name'], {
+    name: 'idx_unique_products_categories_name',
+    unique: true,
+  });
+
+  await queryInterface.addIndex('products_categories', ['slug'], {
+    name: 'idx_unique_products_categories_slug',
+    unique: true,
+  });
 };
 
 /**
@@ -70,4 +68,7 @@ export const down = async ({ context: { sequelize } }) => {
   await sequelize
     .getQueryInterface()
     .dropTable('products_categories', { force: true });
+  await ProductsCategoriesMongo.db.dropCollection(
+    ProductsCategoriesMongo.collection.name,
+  );
 };

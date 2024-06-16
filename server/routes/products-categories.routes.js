@@ -6,27 +6,30 @@ import {
   updateProductCategory,
   deleteProductCategory,
 } from '../controllers/products-categories.controller.js';
-import productsRouter from './products.routes.js';
-import validator from 'validator';
+import isUUIDOrSlug from '../utils/is-uuid-or-slug.js';
+import { getProducts } from '../controllers/products.controller.js';
 
 const productsCategoriesRouter = Router();
 productsCategoriesRouter.param('category', (req, res, next, category) => {
-  if (!validator.isUUID(category) && !validator.isSlug(category)) {
+  const { isSlug, isUUID } = isUUIDOrSlug(category);
+  if (!isUUID && !isSlug) {
     return res.status(400).json({
       message: 'Catégorie non valide',
     });
   }
+
+  res.locals.category = {
+    isSlug,
+    isUUID,
+  };
   return next();
 });
 
-productsCategoriesRouter.use('/:category/products', productsRouter);
+productsCategoriesRouter.get('/:category/products', getProducts);
 
 productsCategoriesRouter
   .route('/:category')
-  .get((req, res, next) => {
-    console.log(req.params.category);
-    next();
-  }, getProductCategory)
+  .get(getProductCategory)
   .patch(updateProductCategory)
   .delete(deleteProductCategory);
 

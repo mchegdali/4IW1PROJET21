@@ -1,5 +1,5 @@
-import { underscore } from 'inflection';
 import { DataTypes } from 'sequelize';
+import ProductMongo from '../models/mongo/products.mongo.js';
 
 /**
  * @typedef { Object } MigrationParams
@@ -20,7 +20,7 @@ export const up = async ({ context: { sequelize } }) => {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: sequelize.fn('gen_random_uuid'),
     },
     name: {
       type: DataTypes.STRING,
@@ -45,31 +45,26 @@ export const up = async ({ context: { sequelize } }) => {
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
-      field: underscore('createdAt'),
+      defaultValue: sequelize.fn('NOW'),
     },
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: sequelize.literal(sequelize.fn('NOW')).val,
-      field: underscore('updatedAt'),
+      defaultValue: sequelize.fn('NOW'),
     },
     categoryId: {
       type: DataTypes.UUID,
-      field: underscore('categoryId'),
-      allowNull: false,
-      references: {
-        model: 'products_categories',
-        key: 'id',
-      },
+      allowNull: true,
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE',
+      references: {
+        model: {
+          tableName: 'products_categories',
+          schema: 'public',
+        },
+        key: 'id',
+      },
     },
-  });
-
-  await queryInterface.addIndex('products', ['slug'], {
-    name: 'idx_unique_products_slug',
-    unique: true,
   });
 };
 
@@ -80,4 +75,5 @@ export const up = async ({ context: { sequelize } }) => {
  */
 export const down = async ({ context: { sequelize } }) => {
   await sequelize.getQueryInterface().dropTable('products', { force: true });
+  await ProductMongo.db.dropCollection(ProductMongo.collection.name);
 };

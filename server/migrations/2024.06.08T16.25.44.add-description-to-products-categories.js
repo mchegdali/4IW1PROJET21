@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { DataTypes } from 'sequelize';
 
 /**
@@ -7,7 +6,6 @@ import { DataTypes } from 'sequelize';
  * @property { string } [path]
  * @property { Object } context
  * @property { import('sequelize').Sequelize } context.sequelize
- * @property { import('mongoose').Mongoose } context.mongoose
  */
 
 /**
@@ -17,13 +15,10 @@ import { DataTypes } from 'sequelize';
  */
 export const up = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
-  try {
-    /*
-     add your seeder here
-    */
-  } catch {
-    /* empty */
-  }
+  await queryInterface.addColumn('products_categories', 'description', {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  });
 };
 
 /**
@@ -31,4 +26,7 @@ export const up = async ({ context: { sequelize } }) => {
  * @param {MigrationParams} params
  *
  */
-export const down = async ({ context: { sequelize, mongoose } }) => {};
+export const down = async ({ context: { sequelize } }) => {
+  const queryInterface = sequelize.getQueryInterface();
+  await queryInterface.removeColumn('products_categories', 'description');
+};
