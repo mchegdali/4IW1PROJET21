@@ -1,5 +1,5 @@
+/* eslint-disable no-unused-vars */
 import { DataTypes } from 'sequelize';
-import { createFixture } from 'zod-fixture';
 
 /**
  * @typedef { Object } MigrationParams

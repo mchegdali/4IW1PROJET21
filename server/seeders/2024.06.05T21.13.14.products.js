@@ -1,10 +1,8 @@
 import ProductMongo from '../models/mongo/products.mongo.js';
-import ProductsSequelize from '../models/sql/products.sql.js';
 import slugify from '@sindresorhus/slugify';
 import { fakerFR as faker } from '@faker-js/faker';
 import crypto from 'node:crypto';
 import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
-import { QueryTypes, ValidationError } from 'sequelize';
 
 const minProducts = 2;
 const maxProducts = 5;
@@ -117,7 +115,7 @@ export const up = async ({ context: { sequelize } }) => {
  * @param {MigrationParams} params
  *
  */
-export const down = async ({ context: { sequelize, mongoose } }) => {
+export const down = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
   await queryInterface.bulkDelete('products', null, {});
   await ProductMongo.deleteMany({});

@@ -89,7 +89,7 @@ export const up = async () => {
  * @param {MigrationParams} params
  *
  */
-export const down = async ({ context: { sequelize, mongoose } }) => {
+export const down = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
   await queryInterface.bulkDelete('products_categories', null, {});
   await ProductsCategoriesMongo.deleteMany({});
