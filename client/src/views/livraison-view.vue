@@ -3,6 +3,7 @@ import Input from '../components/ui/input/Input.vue';
 import Button from '../components/ui/button/Button.vue';
 import { useForm } from '@/composables/form';
 import {z} from 'zod';
+import {z} from 'zod';
 import {ref} from 'vue';
 
 
@@ -82,16 +83,11 @@ const handleSubmit = () => {
 };
 </script>
 <template>
-   <h1 class="text-3xl font-bold m-2">Livraison</h1>
-  <div class="flex flex-col items-center">
-   
-    <form @submit.prevent="handleSubmit" class="flex flex-col">
-      <div id="shipping" class="space-y-5">
-        <div class="flex flex-col">
-          <label> email </label>
-          <Input v-model="formData.emailCustomer"  :class="{ 'border-destructive': formErrors.emailCustomer }" required autofocus />
-          <small v-if="formErrors.emailCustomer">{{ formErrors.emailCustomer  }}</small>
-        </div>
+<h1 class="text-3xl bold mb-5"> livraison </h1>
+  <div class="flex flex-col items-center space-y-20">
+    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4 ">
+      <section id="shipping">
+      
         <div class="flex flex-col">
           <label> Nom et Prénom </label>
           <Input v-model="formData.fullname"  :class="{ 'border-destructive': formErrors.fullname }" required autofocus />
