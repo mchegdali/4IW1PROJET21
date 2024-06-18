@@ -8,6 +8,8 @@ const orders = ref<Array<any>>(ordersData.orders);
 const searchQuery = ref('');
 const selectedStatus = ref('');
 const selectedDate = ref('');
+const selectedStartDate = ref('');
+const selectedEndDate = ref('');
 const isMobile = ref(false);
 
 const checkScreenSize = () => {
@@ -33,8 +35,13 @@ const filteredOrders = computed(() => {
         ? order.deliveryStatus === true
         : order.deliveryStatus === false
       : true;
-    const matchesDate = selectedDate.value ? order.orderDate === selectedDate.value : true;
-    return matchesSearchQuery && matchesStatus && matchesDate;
+    const matchesDate = selectedDate.value
+      ? order.orderDate === selectedDate.value
+      : true;
+    const matchesDateRange = selectedStartDate.value && selectedEndDate.value
+      ? new Date(order.orderDate) >= new Date(selectedStartDate.value) && new Date(order.orderDate) <= new Date(selectedEndDate.value)
+      : true;
+    return matchesSearchQuery && matchesStatus && matchesDate && matchesDateRange;
   });
 });
 </script>
@@ -73,6 +80,26 @@ const filteredOrders = computed(() => {
           class="w-full p-2 border border-gray-300 rounded mb-4"
         />
       </label>
+      <div class="flex gap-4">
+
+
+<label for="startDate" class="block text-gray-700 font-semibold mb-2">Date de début
+    <input
+      type="date"
+      id="startDate"
+      v-model="selectedStartDate"
+      class="w-full p-2 border border-gray-300 rounded mb-4"
+    />
+  </label>
+    <label for="endDate" class="block text-gray-700 font-semibold mb-2">Date de fin
+    <input
+      type="date"
+      id="endDate"
+      v-model="selectedEndDate"
+      class="w-full p-2 border border-gray-300 rounded mb-4"
+    />
+  </label>
+</div>
       </div>
     </details>
 
@@ -104,6 +131,27 @@ const filteredOrders = computed(() => {
           class="w-full p-2 border border-gray-300 rounded mb-4"
         />
       </label>
+
+   <div class="flex gap-4">
+
+
+    <label for="startDate" class="block text-gray-700 font-semibold mb-2">Date de début
+        <input
+          type="date"
+          id="startDate"
+          v-model="selectedStartDate"
+          class="w-full p-2 border border-gray-300 rounded mb-4"
+        />
+      </label>
+        <label for="endDate" class="block text-gray-700 font-semibold mb-2">Date de fin
+        <input
+          type="date"
+          id="endDate"
+          v-model="selectedEndDate"
+          class="w-full p-2 border border-gray-300 rounded mb-4"
+        />
+      </label>
+   </div>
       </div>
     </div>
 
