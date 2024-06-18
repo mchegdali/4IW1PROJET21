@@ -17,29 +17,14 @@ import mongoose from 'mongoose';
  * @return {Promise<mongoose>} A promise that resolves to the MongoDB connection.
  * @throws {Error} If any of the required environment variables are not set.
  */
-async function connectToMongo() {
-  if (!process.env.MONGODB_CONNECTION_STRING) {
-    throw new Error('MONGODB_CONNECTION_STRING is not set');
+async function connectToMongo(url, dbName) {
+  if (!process.env.MONGODB_URL) {
+    throw new Error('MONGODB_URL is not set');
   }
 
-  if (!process.env.MONGODB_USER) {
-    throw new Error('MONGODB_USER is not set');
-  }
-
-  if (!process.env.MONGODB_PASSWORD) {
-    throw new Error('MONGODB_PASSWORD is not set');
-  }
-
-  const connection = await mongoose.connect(
-    process.env.MONGODB_CONNECTION_STRING,
-    {
-      dbName: 'fanthesie',
-      auth: {
-        username: process.env.MONGODB_USER,
-        password: process.env.MONGODB_PASSWORD,
-      },
-    },
-  );
+  const connection = await mongoose.connect(url, {
+    dbName,
+  });
 
   return connection;
 }

@@ -5,6 +5,9 @@ const authConfig = {
   refreshTokenSecret: new TextEncoder().encode(
     process.env.REFRESH_TOKEN_SECRET,
   ),
+  confirmationTokenSecret: new TextEncoder().encode(
+    process.env.CONFIRM_TOKEN_SECRET,
+  ),
   /**
    * @type {import("@node-rs/argon2").Options}
    * @see {@link https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id}
@@ -12,9 +15,9 @@ const authConfig = {
   hashOptions: {
     algorithm: Algorithm.Argon2id,
     parallelism: 1,
-    timeCost: 2,
+    timeCost: 3,
     salt: new TextEncoder().encode(process.env.PASSWORD_SECRET),
-    memoryCost: 19 * 1024,
+    memoryCost: 12288, // 12MiB
   },
 };
 

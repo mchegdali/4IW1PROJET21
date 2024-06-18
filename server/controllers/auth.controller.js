@@ -1,17 +1,12 @@
 import * as jose from 'jose';
-import { hashSync, verify } from '@node-rs/argon2';
+import { verify, hash } from '@node-rs/argon2';
 import authConfig from '../config/auth.config.js';
-import { loginSchema } from '../schemas/auth.schema.js';
+import { loginSchema, registerSchema } from '../schemas/auth.schema.js';
 import { ZodError } from 'zod';
-
-const users = [
-  {
-    id: crypto.randomUUID(),
-    email: 'admin@admin.fr',
-    password: hashSync('password', authConfig.hashOptions),
-    role: 'admin',
-  },
-];
+import UserMongo from '../models/mongo/user.mongo.js';
+import dayjs from 'dayjs';
+import crypto from 'node:crypto';
+import { sendConfirmationEmail } from '../config/email.config.js';
 
 /**
  *
@@ -21,7 +16,7 @@ const login = async (req, res) => {
   try {
     const { email, password } = await loginSchema.parseAsync(req.body);
 
-    const user = users.find((user) => user.email === email);
+    const user = await UserMongo.findOne({ email });
 
     if (!user) {
       return res.status(401).json({
@@ -37,28 +32,33 @@ const login = async (req, res) => {
       });
     }
 
+    const now = dayjs();
+    const issuedAt = now.unix();
+    const accessTokenExpiredAt = now.add(60, 'minute').unix();
+
     const accessTokenSign = new jose.SignJWT({
-      sub: user.id,
       email: user.email,
       role: user.role,
     })
-      .setIssuedAt()
-      .setExpirationTime('1h')
+      .setSubject(user.id)
+      .setIssuedAt(issuedAt)
+      .setExpirationTime(accessTokenExpiredAt)
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-      .setNotBefore(new Date());
+      .setNotBefore(issuedAt);
 
     const accessToken = await accessTokenSign.sign(
       authConfig.accessTokenSecret,
     );
 
+    const refreshTokenExpiredAt = now.add(30, 'day').unix();
+
     const refreshTokenSign = new jose.SignJWT({
       sub: user.id,
-      email: user.email,
     })
-      .setIssuedAt()
-      .setExpirationTime('30d')
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-      .setNotBefore(new Date());
+      .setIssuedAt(issuedAt)
+      .setExpirationTime(refreshTokenExpiredAt)
+      .setNotBefore(issuedAt);
 
     const refreshToken = await refreshTokenSign.sign(
       authConfig.refreshTokenSecret,
@@ -91,11 +91,72 @@ const login = async (req, res) => {
  *
  * @type {import("express").RequestHandler}
  */
-const refreshToken = async (req, res) => {
+const register = async (req, res) => {
   try {
-  } catch (error) {}
+    const { fullname, email, password } = await registerSchema.parseAsync(
+      req.body,
+    );
+
+    const user = await UserMongo.exists({ email });
+
+    if (user) {
+      return res.status(400).json({
+        message: 'Cet email est déjà utilisé',
+      });
+    }
+
+    const newPassword = await hash(password, authConfig.hashOptions);
+
+    const newUser = await UserMongo.create({
+      _id: crypto.randomUUID(),
+      fullname,
+      email,
+      password: newPassword,
+      addresses: [],
+      isVerified: false,
+    });
+
+    const now = dayjs();
+    const issuedAt = now.unix();
+    const confirmationTokenExpiredAt = now.add(15, 'minute').unix();
+
+    const confirmationTokenSign = new jose.SignJWT({
+      email: newUser.email,
+      role: newUser.role,
+    })
+      .setSubject(newUser._id)
+      .setIssuedAt(issuedAt)
+      .setExpirationTime(confirmationTokenExpiredAt)
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setNotBefore(issuedAt);
+
+    const confirmationToken = await confirmationTokenSign.sign(
+      authConfig.confirmationTokenSecret,
+    );
+
+    await sendConfirmationEmail(
+      { email: newUser.email, fullname: newUser.fullname },
+      confirmationToken,
+    );
+
+    return res.sendStatus(201);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        errors: error,
+      });
+    }
+
+    if (error instanceof Error) {
+      return res.status(400).json({
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      message: 'Erreur interne',
+    });
+  }
 };
 
-const authController = { login };
-
-export default authController;
+export { login, register };
