@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import ordersData from '@/api/order.json';
 import { Input } from './ui/input';
+import { Badge } from '@/components/ui/badge'
 
 const orders = ref<Array<any>>(ordersData.orders);
 const searchQuery = ref('');
@@ -131,25 +132,18 @@ const filteredOrders = computed(() => {
               })
             }}
           </h1>
-          <div
-            class="border border-tea-600 text-tea-600 px-2 rounded-full font-bold text-sm"
-            v-if="order.deliveryStatus === true"
-          >
-            Livré
-          </div>
-          <div
-            class="font-bold border border-tea-600 text-tea-600 px-4 rounded-full text-sm w-72"
-            v-else
-          >
-            Livraison prévue le
+         
+          <Badge variant="outline" class="border-tea-600 text-tea-600" v-if="order.deliveryStatus === true">Livré</Badge>
+            
+          <Badge variant="outline" class="border-tea-600 text-tea-600" v-else>Livraison prévue le
             {{
               new Date(order.shippingDate).toLocaleDateString('fr-FR', {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric'
               })
-            }}
-          </div>
+            }}</Badge>
+         
         </div>
 
         <div
