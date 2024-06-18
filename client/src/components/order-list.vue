@@ -183,7 +183,7 @@ const filteredOrders = computed(() => {
          
           <Badge variant="outline" class="border-tea-600 text-tea-600" v-if="order.deliveryStatus === true">Livré</Badge>
             
-          <Badge variant="outline" class="border-tea-600 text-tea-600" v-else>Livraison prévue le
+          <Badge variant="outline" class="border-tea-600 text-tea-600 w-fit" v-else>Livraison prévue le
             {{
               new Date(order.shippingDate).toLocaleDateString('fr-FR', {
                 day: 'numeric',
