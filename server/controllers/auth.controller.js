@@ -24,6 +24,12 @@ const login = async (req, res) => {
       });
     }
 
+    if (!user.isVerified) {
+      return res.status(401).json({
+        message: "Votre compte n'est pas encore vérifié",
+      });
+    }
+
     const isValidPassword = await verify(user.password, password);
 
     if (!isValidPassword) {
@@ -159,4 +165,58 @@ const register = async (req, res) => {
   }
 };
 
-export { login, register };
+/**
+ *
+ * @type {import("express").RequestHandler}
+ */
+const confirm = async (req, res) => {
+  try {
+    if (!req.query.token) {
+      return res.status(401).json({
+        message: 'Token invalide',
+      });
+    }
+    const token = req.query.token;
+
+    const decoded = await jose.jwtVerify(
+      token,
+      authConfig.confirmationTokenSecret,
+    );
+
+    const updateResult = await UserMongo.updateOne(
+      { _id: decoded.payload.sub },
+      {
+        isVerified: true,
+      },
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(401).json({
+        message: 'Identifiants incorrects',
+      });
+    }
+
+    return res.status(200).json({
+      message:
+        'Votre compte a été vérifié avec succès. Vous pouvez vous connecter.',
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        errors: error,
+      });
+    }
+
+    if (error instanceof Error) {
+      return res.status(400).json({
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      message: 'Erreur interne',
+    });
+  }
+};
+
+export { login, register, confirm };
