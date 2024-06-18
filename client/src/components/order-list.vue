@@ -53,7 +53,7 @@ const filteredOrders = computed(() => {
           placeholder="Nº commande : 78524263"
           class="w-full p-2 border border-gray-300 rounded mb-4"
         />
-        <label for="status" class="block text-gray-700 font-semibold mb-2">Statut
+        <label for="status" class="block text-gray-700 font-semibold mb-2">Statut de la commande
         <select
           id="status"
           v-model="selectedStatus"
@@ -64,7 +64,7 @@ const filteredOrders = computed(() => {
           <option value="en cours">En cours</option>
         </select>
       </label>
-        <label for="date" class="block text-gray-700 font-semibold mb-2">Date
+        <label for="date" class="block text-gray-700 font-semibold mb-2">Date de commande
         <input
           type="date"
           id="date"
