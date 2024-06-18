@@ -1,8 +1,11 @@
 import * as jose from 'jose';
 import { verify, hash } from '@node-rs/argon2';
 import authConfig from '../config/auth.config.js';
-import { loginSchema, registerSchema } from '../schemas/auth.schema.js';
-import { ZodError } from 'zod';
+import {
+  confirmSchema,
+  loginSchema,
+  registerSchema,
+} from '../schemas/auth.schema.js';
 import UserMongo from '../models/mongo/user.mongo.js';
 import dayjs from 'dayjs';
 import crypto from 'node:crypto';
@@ -12,7 +15,7 @@ import { sendConfirmationEmail } from '../config/email.config.js';
  *
  * @type {import("express").RequestHandler}
  */
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, password } = await loginSchema.parseAsync(req.body);
 
@@ -75,21 +78,7 @@ const login = async (req, res) => {
       refreshToken,
     });
   } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(400).json({
-        message: error.format(),
-      });
-    }
-
-    if (error instanceof Error) {
-      return res.status(400).json({
-        message: error.message,
-      });
-    }
-
-    return res.status(500).json({
-      message: 'Erreur interne',
-    });
+    return next(error);
   }
 };
 
@@ -97,7 +86,7 @@ const login = async (req, res) => {
  *
  * @type {import("express").RequestHandler}
  */
-const register = async (req, res) => {
+const register = async (req, res, next) => {
   try {
     const { fullname, email, password } = await registerSchema.parseAsync(
       req.body,
@@ -147,21 +136,7 @@ const register = async (req, res) => {
 
     return res.sendStatus(201);
   } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(400).json({
-        errors: error,
-      });
-    }
-
-    if (error instanceof Error) {
-      return res.status(400).json({
-        message: error.message,
-      });
-    }
-
-    return res.status(500).json({
-      message: 'Erreur interne',
-    });
+    return next(error);
   }
 };
 
@@ -169,9 +144,46 @@ const register = async (req, res) => {
  *
  * @type {import("express").RequestHandler}
  */
-const confirm = async (req, res) => {
+const confirm = async (req, res, next) => {
   try {
-    if (!req.query.token) {
+    const query = confirmSchema.parse(req.query);
+
+    const token = query.token;
+
+    const decoded = await jose.jwtVerify(
+      token,
+      authConfig.confirmationTokenSecret,
+    );
+
+    const updateResult = await UserMongo.updateOne(
+      { _id: decoded.payload.sub },
+      {
+        isVerified: true,
+      },
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(401).json({
+        message: 'Identifiants incorrects',
+      });
+    }
+
+    return res.status(200).json({
+      message:
+        'Votre compte a été vérifié avec succès. Vous pouvez vous connecter.',
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @type {import("express").RequestHandler}
+ */
+const forgotPassword = async (req, res, next) => {
+  try {
+    if (!req.body.token) {
       return res.status(401).json({
         message: 'Token invalide',
       });
@@ -201,21 +213,7 @@ const confirm = async (req, res) => {
         'Votre compte a été vérifié avec succès. Vous pouvez vous connecter.',
     });
   } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(400).json({
-        errors: error,
-      });
-    }
-
-    if (error instanceof Error) {
-      return res.status(400).json({
-        message: error.message,
-      });
-    }
-
-    return res.status(500).json({
-      message: 'Erreur interne',
-    });
+    return next(error);
   }
 };
 

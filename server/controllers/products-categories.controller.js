@@ -1,12 +1,9 @@
-import formatZodError from '../utils/format-zod-error.js';
-import { ZodError } from 'zod';
 import ProductsCategoriesSequelize from '../models/sql/products-categories.sql.js';
 import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
 import {
   productCategoryCreateSchema,
   productCategoryUpdateSchema,
 } from '../schemas/products-categories.schema.js';
-import { ValidationError } from 'sequelize';
 import { sequelize } from '../sequelize.js';
 import httpErrors from 'http-errors';
 import ProductMongo from '../models/mongo/products.mongo.js';
@@ -16,11 +13,11 @@ const { NotFound } = httpErrors;
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function createProductCategory(req, res) {
+export async function createProductCategory(req, res, next) {
   try {
+    const productCategoryCreateBody =
+      await productCategoryCreateSchema.parseAsync(req.body);
     const result = await sequelize.transaction(async (t) => {
-      const productCategoryCreateBody =
-        await productCategoryCreateSchema.parseAsync(req.body);
       const product = await ProductsCategoriesSequelize.create(
         productCategoryCreateBody,
         { transaction: t },
@@ -40,13 +37,7 @@ export async function createProductCategory(req, res) {
 
     return res.status(201).json(result);
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -55,12 +46,12 @@ export async function createProductCategory(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getProductCategories(req, res) {
+export async function getProductCategories(req, res, next) {
   try {
     const productsCategories = await ProductsCategoriesMongo.find({}).lean({});
     return res.json(productsCategories);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -69,7 +60,7 @@ export async function getProductCategories(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getProductCategory(req, res) {
+export async function getProductCategory(req, res, next) {
   try {
     /**
      * @type {boolean}
@@ -89,7 +80,7 @@ export async function getProductCategory(req, res) {
 
     return res.json(productCategory);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -98,7 +89,7 @@ export async function getProductCategory(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function updateProductCategory(req, res) {
+export async function updateProductCategory(req, res, next) {
   try {
     const isUUID = res.locals.category.isUUID;
     const sqlWhere = {
@@ -108,8 +99,9 @@ export async function updateProductCategory(req, res) {
       [isUUID ? '_id' : 'slug']: req.params.category,
     };
 
-    const productCategoryUpdateBody =
-      await productCategoryUpdateSchema.parseAsync(req.body);
+    const productCategoryUpdateBody = productCategoryUpdateSchema.parse(
+      req.body,
+    );
     const updatedKeys = Object.keys(productCategoryUpdateBody);
 
     const result = await sequelize.transaction(async (t) => {
@@ -127,7 +119,7 @@ export async function updateProductCategory(req, res) {
 
       const productCategory = await ProductsCategoriesSequelize.scope(
         'toMongo',
-      ).findByPk(affectedRows[0].getDataValue('id'), {
+      ).se.findByPk(affectedRows[0].getDataValue('id'), {
         transaction: t,
       });
 
@@ -165,13 +157,7 @@ export async function updateProductCategory(req, res) {
 
     return res.status(200).json(result);
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -180,7 +166,7 @@ export async function updateProductCategory(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function deleteProductCategory(req, res) {
+export async function deleteProductCategory(req, res, next) {
   try {
     const isUUID = res.locals.category.isUUID;
 
@@ -213,12 +199,6 @@ export async function deleteProductCategory(req, res) {
 
     return res.status(204).json({ message: 'Catégorie supprimée' });
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 }

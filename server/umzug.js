@@ -4,7 +4,10 @@ import { Umzug, MongoDBStorage } from 'umzug';
 import { sequelize } from './sequelize.js';
 import { connectToMongo } from './mongo.js';
 
-const mongoose = await connectToMongo();
+const mongoose = await connectToMongo(
+  process.env.MONGODB_URL,
+  process.env.MONGODB_DBNAME,
+);
 
 const connection = mongoose.connection.db;
 

@@ -34,11 +34,14 @@ const UserSchema = new mongoose.Schema(
     passwordValidUntil: {
       type: Date,
       required: true,
-      default: () => dayjs().add(60, 'day').toDate(),
     },
     addresses: {
       type: [
         {
+          id: {
+            type: mongoose.Schema.Types.UUID,
+            required: true,
+          },
           street: {
             type: String,
             required: true,
@@ -49,17 +52,7 @@ const UserSchema = new mongoose.Schema(
             required: true,
             trim: true,
           },
-          state: {
-            type: String,
-            required: true,
-            trim: true,
-          },
-          country: {
-            type: String,
-            required: true,
-            trim: true,
-          },
-          zip: {
+          zipCode: {
             type: String,
             required: true,
             trim: true,
@@ -67,6 +60,7 @@ const UserSchema = new mongoose.Schema(
         },
       ],
       required: true,
+      default: [],
     },
     isVerified: {
       type: Boolean,
@@ -82,6 +76,15 @@ const UserSchema = new mongoose.Schema(
       getters: true,
     },
     timestamps: true,
+  },
+);
+
+UserSchema.index(
+  { fullname: 'text', email: 'text' },
+  {
+    name: 'users_search_index',
+    weights: { fullname: 2, email: 1 },
+    default_language: 'french',
   },
 );
 

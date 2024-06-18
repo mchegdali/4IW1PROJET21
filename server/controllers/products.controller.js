@@ -19,10 +19,11 @@ const { NotFound } = httpErrors;
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function createProduct(req, res) {
+export async function createProduct(req, res, next) {
   try {
+    const productCreateBody = await productCreateSchema.parseAsync(req.body);
+
     const result = await sequelize.transaction(async (t) => {
-      const productCreateBody = await productCreateSchema.parseAsync(req.body);
       if (productCreateBody.categoryId) {
         const category = await ProductsCategoriesMongo.findById(
           productCreateBody.categoryId,
@@ -55,17 +56,7 @@ export async function createProduct(req, res) {
 
     return res.status(201).json(result);
   } catch (error) {
-    if (httpErrors.isHttpError(error)) {
-      return res.status(error.statusCode).json({ message: error.message });
-    }
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
-
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -74,7 +65,7 @@ export async function createProduct(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getProducts(req, res) {
+export async function getProducts(req, res, next) {
   try {
     const category = req.params.category;
     const categoryIsUUID = res.locals.category?.isUUID;
@@ -172,10 +163,7 @@ export async function getProducts(req, res) {
       data: products[0].data,
     });
   } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
-    return res.status(400).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -184,7 +172,7 @@ export async function getProducts(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getProduct(req, res) {
+export async function getProduct(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
 
@@ -198,7 +186,7 @@ export async function getProduct(req, res) {
     }
     return res.json(product);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -207,7 +195,7 @@ export async function getProduct(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getRelatedProducts(req, res) {
+export async function getRelatedProducts(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
 
@@ -227,7 +215,7 @@ export async function getRelatedProducts(req, res) {
 
     return res.status(200).json(relatedProducts);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -294,15 +282,6 @@ export async function updateProduct(req, res, next) {
 
     return res.status(200).json(result);
   } catch (error) {
-    if (httpErrors.isHttpError(error)) {
-      return res.status(error.statusCode).json({ message: error.message });
-    }
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
     return next(error);
   }
 }
@@ -334,16 +313,6 @@ export async function deleteProduct(req, res, next) {
 
     return res.sendStatus(204);
   } catch (error) {
-    if (httpErrors.isHttpError(error)) {
-      return res.status(error.statusCode).json({ message: error.message });
-    }
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
     return next(error);
   }
 }

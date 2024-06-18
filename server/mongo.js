@@ -18,10 +18,6 @@ import mongoose from 'mongoose';
  * @throws {Error} If any of the required environment variables are not set.
  */
 async function connectToMongo(url, dbName) {
-  if (!process.env.MONGODB_URL) {
-    throw new Error('MONGODB_URL is not set');
-  }
-
   const connection = await mongoose.connect(url, {
     dbName,
   });

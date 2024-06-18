@@ -16,39 +16,23 @@ import UserMongo from '../models/mongo/user.mongo.js';
  */
 export const up = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
-  await queryInterface.createTable('users', {
+  await queryInterface.createTable('addresses', {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: sequelize.fn('gen_random_uuid'),
     },
-    fullname: {
+    street: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    password: {
+    city: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    passwordValidUntil: {
-      type: DataTypes.DATE,
+    zipCode: {
+      type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: sequelize.literal("NOW() + INTERVAL '60 days'"),
-    },
-    role: {
-      type: DataTypes.ENUM('user', 'admin', 'accountant'),
-      allowNull: false,
-      defaultValue: 'user',
-    },
-    isVerified: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -60,6 +44,19 @@ export const up = async ({ context: { sequelize } }) => {
       allowNull: false,
       defaultValue: sequelize.fn('NOW'),
     },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+      references: {
+        model: {
+          tableName: 'users',
+          schema: 'public',
+        },
+        key: 'id',
+      },
+    },
   });
 };
 
@@ -69,6 +66,5 @@ export const up = async ({ context: { sequelize } }) => {
  *
  */
 export const down = async ({ context: { sequelize } }) => {
-  await sequelize.getQueryInterface().dropTable('users', { force: true });
-  await UserMongo.db.dropCollection(UserMongo.collection.name);
+  await sequelize.getQueryInterface().dropTable('addresses', { force: true });
 };
