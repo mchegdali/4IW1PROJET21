@@ -57,7 +57,7 @@ console.log(order);
 
           <h1 class="text-xs font-bold text-gray-700 mt-2 sm:text-sm">VOS COORDONNÉES</h1>
           <div class="text-sm p-2 sm:text-sm">
-            <p>{{order.contactDetails.name}}</p>
+            <p>{{ order.contactDetails.name }}</p>
             <p>{{ order.contactDetails.phoneNumber }}</p>
           </div>
         </div>
@@ -87,10 +87,11 @@ console.log(order);
             >
               <Truck />
               <RouterLink
-                :to="{ name: 'order', params: { id: order.orderId } }"
+                :to="{ name: 'tracking', params: { id: order.orderId } }"
                 class="text-tea-600 sm:text-lg"
-                >Suivre le colis</RouterLink
               >
+                Suivre le colis
+              </RouterLink>
             </div>
           </div>
 

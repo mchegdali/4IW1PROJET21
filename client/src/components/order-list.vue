@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import ordersData from '@/api/order.json';
 import { Input } from './ui/input';
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/badge';
 
 const orders = ref<Array<any>>(ordersData.orders);
 const searchQuery = ref('');
@@ -35,12 +35,12 @@ const filteredOrders = computed(() => {
         ? order.deliveryStatus === true
         : order.deliveryStatus === false
       : true;
-    const matchesDate = selectedDate.value
-      ? order.orderDate === selectedDate.value
-      : true;
-    const matchesDateRange = selectedStartDate.value && selectedEndDate.value
-      ? new Date(order.orderDate) >= new Date(selectedStartDate.value) && new Date(order.orderDate) <= new Date(selectedEndDate.value)
-      : true;
+    const matchesDate = selectedDate.value ? order.orderDate === selectedDate.value : true;
+    const matchesDateRange =
+      selectedStartDate.value && selectedEndDate.value
+        ? new Date(order.orderDate) >= new Date(selectedStartDate.value) &&
+          new Date(order.orderDate) <= new Date(selectedEndDate.value)
+        : true;
     return matchesSearchQuery && matchesStatus && matchesDate && matchesDateRange;
   });
 });
@@ -61,50 +61,54 @@ const filteredOrders = computed(() => {
           placeholder="Nº commande : 78524263"
           class="w-full p-2 border border-gray-300 rounded mb-4"
         />
-        <label for="status" class="block text-gray-700 font-semibold mb-2">Statut de la commande
-        <select
-          id="status"
-          v-model="selectedStatus"
-          class="w-full p-2 border border-gray-300 rounded mb-4"
-        >
-          <option value="">Tous</option>
-          <option value="livré">Livré</option>
-          <option value="en cours">En cours</option>
-        </select>
-      </label>
-        <label for="date" class="block text-gray-700 font-semibold mb-2">Date de commande
-        <input
-          type="date"
-          id="date"
-          v-model="selectedDate"
-          class="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-      </label>
-      <div class="flex gap-4">
-
-
-<label for="startDate" class="block text-gray-700 font-semibold mb-2">Date de début
-    <input
-      type="date"
-      id="startDate"
-      v-model="selectedStartDate"
-      class="w-full p-2 border border-gray-300 rounded mb-4"
-    />
-  </label>
-    <label for="endDate" class="block text-gray-700 font-semibold mb-2">Date de fin
-    <input
-      type="date"
-      id="endDate"
-      v-model="selectedEndDate"
-      class="w-full p-2 border border-gray-300 rounded mb-4"
-    />
-  </label>
-</div>
+        <label for="status" class="block text-gray-700 font-semibold mb-2"
+          >Statut de la commande
+          <select
+            id="status"
+            v-model="selectedStatus"
+            class="w-full p-2 border border-gray-300 rounded mb-4"
+          >
+            <option value="">Tous</option>
+            <option value="livré">Livré</option>
+            <option value="en cours">En cours</option>
+          </select>
+        </label>
+        <label for="date" class="block text-gray-700 font-semibold mb-2"
+          >Date de commande
+          <input
+            type="date"
+            id="date"
+            v-model="selectedDate"
+            class="w-full p-2 border border-gray-300 rounded mb-4"
+          />
+        </label>
+        <div class="flex gap-4">
+          <label for="startDate" class="block text-gray-700 font-semibold mb-2"
+            >Date de début
+            <input
+              type="date"
+              id="startDate"
+              v-model="selectedStartDate"
+              class="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+          </label>
+          <label for="endDate" class="block text-gray-700 font-semibold mb-2"
+            >Date de fin
+            <input
+              type="date"
+              id="endDate"
+              v-model="selectedEndDate"
+              class="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+          </label>
+        </div>
       </div>
     </details>
 
     <div v-else class="shadow-lg mb-4 w-full flex flex-col gap-4 sm:w-1/4 sm:mr-4 rounded-lg">
-      <div class="font-semibold text-white p-4 text-2xl bg-tea-600 rounded-t-lg">Filtrer les commandes</div>
+      <div class="font-semibold text-white p-4 text-2xl bg-tea-600 rounded-t-lg">
+        Filtrer les commandes
+      </div>
       <div class="p-6">
         <Input
           v-model="searchQuery"
@@ -112,46 +116,48 @@ const filteredOrders = computed(() => {
           placeholder="Nº commande : 78524263"
           class="w-full p-2 border border-gray-300 rounded mb-4"
         />
-        <label for="status" class="block font-semibold mb-2 text-gray-700">Statut de la commande
-        <select
-          id="status"
-          v-model="selectedStatus"
-          class="w-full p-2 border border-gray-300 rounded mb-4 bg-white"
-        >
-          <option value="">Tous</option>
-          <option value="livré">Livré</option>
-          <option value="en cours">En cours</option>
-        </select>
-      </label>
-        <label for="date" class="block text-gray-700 font-semibold mb-2">Date de commande
-        <input
-          type="date"
-          id="date"
-          v-model="selectedDate"
-          class="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-      </label>
+        <label for="status" class="block font-semibold mb-2 text-gray-700"
+          >Statut de la commande
+          <select
+            id="status"
+            v-model="selectedStatus"
+            class="w-full p-2 border border-gray-300 rounded mb-4 bg-white"
+          >
+            <option value="">Tous</option>
+            <option value="livré">Livré</option>
+            <option value="en cours">En cours</option>
+          </select>
+        </label>
+        <label for="date" class="block text-gray-700 font-semibold mb-2"
+          >Date de commande
+          <input
+            type="date"
+            id="date"
+            v-model="selectedDate"
+            class="w-full p-2 border border-gray-300 rounded mb-4"
+          />
+        </label>
 
-   <div class="flex gap-4">
-
-
-    <label for="startDate" class="block text-gray-700 font-semibold mb-2">Date de début
-        <input
-          type="date"
-          id="startDate"
-          v-model="selectedStartDate"
-          class="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-      </label>
-        <label for="endDate" class="block text-gray-700 font-semibold mb-2">Date de fin
-        <input
-          type="date"
-          id="endDate"
-          v-model="selectedEndDate"
-          class="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-      </label>
-   </div>
+        <div class="flex gap-4">
+          <label for="startDate" class="block text-gray-700 font-semibold mb-2"
+            >Date de début
+            <input
+              type="date"
+              id="startDate"
+              v-model="selectedStartDate"
+              class="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+          </label>
+          <label for="endDate" class="block text-gray-700 font-semibold mb-2"
+            >Date de fin
+            <input
+              type="date"
+              id="endDate"
+              v-model="selectedEndDate"
+              class="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+          </label>
+        </div>
       </div>
     </div>
 
@@ -180,18 +186,24 @@ const filteredOrders = computed(() => {
               })
             }}
           </h1>
-         
-          <Badge variant="outline" class="border-tea-600 text-tea-600" v-if="order.deliveryStatus === true">Livré</Badge>
-            
-          <Badge variant="outline" class="border-tea-600 text-tea-600 w-fit" v-else>Livraison prévue le
+
+          <Badge
+            variant="outline"
+            class="border-tea-600 text-tea-600"
+            v-if="order.deliveryStatus === true"
+            >Livré</Badge
+          >
+
+          <Badge variant="outline" class="border-tea-600 text-tea-600 w-fit" v-else
+            >Livraison prévue le
             {{
               new Date(order.shippingDate).toLocaleDateString('fr-FR', {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric'
               })
-            }}</Badge>
-         
+            }}</Badge
+          >
         </div>
 
         <div
@@ -217,7 +229,7 @@ const filteredOrders = computed(() => {
         </div>
         <div class="border-b border-t border-gray-200 py-2" v-if="order.deliveryStatus === false">
           <RouterLink
-            :to="{ name: 'order', params: { id: order.orderId } }"
+            :to="{ name: 'tracking', params: { id: order.orderId } }"
             class="w-1/2 text-tea-600"
           >
             Suivre le colis

@@ -66,7 +66,12 @@ const router = createRouter({
           name: 'order',
           path: '/order/:id',
           component: () => import('../views/order-details-view.vue')
-        }
+        },
+        {
+          name: 'tracking',
+          path: '/tracking/:id',
+          component: () => import('../views/order-tracking-view.vue')
+        },
       ]
     },
   ]
