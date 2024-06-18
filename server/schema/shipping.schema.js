@@ -16,9 +16,9 @@ const shippingCreateSchema = z
         message: "Invalid email"
     }),
 
-    country: z.number().min(0.01),
+    country: z.string().min(0.01),
     street: z.string().min(5),
-    zipCode: z.number().min(2),
+    zipCode: z.string().min(2),
     city: z.string.min(2),
     phone: z.string.min(10)
     

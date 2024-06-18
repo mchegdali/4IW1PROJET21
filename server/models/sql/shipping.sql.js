@@ -5,7 +5,7 @@ import { sequelize } from '../../sequelize.js';
 class ShippingSequelize extends Model {}
 
 ShippingSequelize.init({
-    _id: {
+    id: {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
@@ -14,10 +14,11 @@ ShippingSequelize.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    country: {
+    fullname: {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    
     street: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -34,17 +35,14 @@ ShippingSequelize.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    // shippingMode : {
-    //     type: DataTypes.ENUM('Colissimo', 'Mondial Relay'),
-    //     allowNull: false,
-    // },
-    // paymentMode: {
-    //     type: DataTypes.ENUM('Carte de Credit', 'Paypal'),
-    //     allowNull: false,
-    // },
+    shippingMode : {
+        type: DataTypes.ENUM('Colissimo', 'Mondial Relay'),
+        allowNull: false,
+    },
 }, {
     sequelize,
     modelName: 'Shipping',
+    tableName: 'shippings'
 });
 
 export default ShippingSequelize;

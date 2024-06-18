@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
+    "dev:legacy:": "nodemon -L index.js",
     "lint": "eslint . --ext .js",
     "dev": "node --watch index.js",
     "db:migrate:up": "node migrate.js up",
@@ -38,6 +39,7 @@
     "@faker-js/faker": "^8.4.1",
     "eslint": "^8.57.0",
     "inflection": "^3.0.0",
+    "nodemon": "^3.1.3",
     "prettier": "^3.2.5",
     "umzug": "^3.8.0"
   }

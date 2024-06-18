@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Input from './ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
-import { z } from 'Zod';
+import { z } from 'zod';
 import { useForm } from '@/composables/form';
 
 const handleSubmit = () => {

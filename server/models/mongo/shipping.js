@@ -1,20 +1,20 @@
 import mongoose from 'mongoose';
 
 const shippingSchema = new mongoose.Schema ({
-    _id: {
+    id: {
         type: mongoose.Schema.Types.UUID,
         required : true,
     },
     emailCustomer: {
         type: String,
         required: true,
-        unique: true,
+
     },
-    country: {
-        type: String,
+    fullname: {
+        type:  String,
         required: true,
-        unique: true,
     },
+
     street: {
         type: String,
         required: true,

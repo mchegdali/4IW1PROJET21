@@ -15,20 +15,20 @@ const shippingCreateSchema = z
     }).email({
         message: "Invalid email"
     }),
-
-    country: z.number().min(0.01),
+    fullname: z.string().min(2),
     street: z.string().min(5),
-    zipCode: z.number().min(2),
-    city: z.number().min(2),
+    zipCode: z.string().min(2),
+    city: z.string().min(2),
     phone: z.string().min(10)
     
   })
   .transform((data) => ({
     emailCustomer: data.emailCustomer,
-    country: data.country,
+    fullname: data.fullname,
     street: data.street,
     city: data.city,
     phone: data.phone,
+    zipCode: data.zipCode,
   }));
 
 const shippingUpdateSchema = shippingCreateSchema.innerType().partial();
