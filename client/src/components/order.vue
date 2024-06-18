@@ -23,12 +23,12 @@ console.log(order);
       <div>
         <!-- premiere infos -->
         <div class="p-2 flex flex-col gap-2 mt-2 sm:p-4">
-          <div class="flex gap-4 text-xs items-center sm:text-lg">
+          <div class="flex gap-4 text-sm items-center sm:text-lg">
             <Package2 />
             N° de commande: <span class="font-bold">{{ order.orderNumber }}</span>
           </div>
 
-          <div class="flex gap-4 text-xs items-center sm:text-lg">
+          <div class="flex gap-4 text-sm items-center sm:text-lg">
             <Calendar />
             <p>
               Date de commande:
@@ -44,19 +44,19 @@ console.log(order);
         </div>
 
         <!-- deuximeme infos -->
-        <h6 class="font-bold text-xs p-2 text-gray-700 sm:text-lg sm:p-4">
+        <h6 class="font-bold text-sm p-2 text-gray-700 sm:text-lg sm:p-4">
           INFORMATION SUR LA LIVRAISON
         </h6>
         <div class="p-2 sm:p-4">
           <h1 class="text-xs font-bold text-gray-700 sm:text-sm">ADRESSE DE COLLECTE</h1>
-          <div class="text-xs p-2 sm:text-sm border-b">
+          <div class="text-sm p-2 sm:text-sm border-b">
             <p>{{ order.shippingAddress.street }}</p>
             <p>{{ order.shippingAddress.postalCode }} {{ order.shippingAddress.city }}</p>
             <p>{{ order.shippingAddress.country }}</p>
           </div>
 
           <h1 class="text-xs font-bold text-gray-700 mt-2 sm:text-sm">VOS COORDONNÉES</h1>
-          <div class="text-xs p-2 sm:text-sm">
+          <div class="text-sm p-2 sm:text-sm">
             <p>{{order.contactDetails.name}}</p>
             <p>{{ order.contactDetails.phoneNumber }}</p>
           </div>
@@ -70,7 +70,7 @@ console.log(order);
           </div>
 
           <div class="sm:flex w-full items-center justify-between">
-            <p class="text-xs font-bold text-gray-700 sm:text-sm">
+            <p class="text-sm font-bold text-gray-700 sm:text-sm">
               DATE PRÉVUE DE LIVRAISON :
               {{
                 new Date(order.shippingDate).toLocaleDateString('fr-FR', {
@@ -110,7 +110,7 @@ console.log(order);
             <p class="text-gray-700 sm:text-lg">{{ order.items.length }} <span>Produits</span></p>
           </div>
 
-          <p class="text-xs font-bold text-gray-700 sm:text-lg">
+          <p class="text-sm font-bold text-gray-700 sm:text-lg">
             LIVRAISON LE :
             {{
               new Date(order.shippingDate).toLocaleDateString('fr-FR', {
@@ -152,7 +152,7 @@ console.log(order);
 
       <div>
         <!-- cinquieme infos -->
-        <h6 class="font-bold text-xs p-2 sm:text-lg sm:p-4 text-gray-700">
+        <h6 class="font-bold text-sm p-2 sm:text-lg sm:p-4 text-gray-700">
           INFORMATION DE PAIEMENT
         </h6>
         <div class="flex gap-4 items-center p-2 sm:p-4 text-xs">
@@ -162,7 +162,7 @@ console.log(order);
               src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png"
               alt=""
             />
-            <h1 class="px-2 sm:text-lg">Paypal</h1></span
+            <h1 class="px-2 text-sm sm:text-lg">Paypal</h1></span
           >
 
           <span v-if="order.typePayement == 'cb'" class="flex gap-4 items-center">
@@ -171,12 +171,12 @@ console.log(order);
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/300px-MasterCard_Logo.svg.png"
               alt=""
             />
-            <h1 class="px-2 sm:text-lg">Carte bancaire</h1></span
+            <h1 class="px-2 text-sm sm:text-lg">Carte bancaire</h1></span
           >
         </div>
 
         <!-- sixieme infos -->
-        <h6 class="font-bold text-xs p-2 sm:text-lg sm:p-4 text-gray-700">TOTAL DE COMMANDE</h6>
+        <h6 class="font-bold text-sm p-2 sm:text-lg sm:p-4 text-gray-700">TOTAL DE COMMANDE</h6>
         <div class="p-2 mb-4 sm:p-4">
           <p class="flex justify-between text-sm sm:text-lg">
             Sous-total <span>{{ calculateTotalPrice(order.items) }} €</span>
