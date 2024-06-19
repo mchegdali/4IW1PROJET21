@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../sequelize.js';
+import DeliveryChoiceSequelize from './deliveryChoice.sql.js';
 
 
 class ShippingSequelize extends Model {}
@@ -18,7 +19,6 @@ ShippingSequelize.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    
     street: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -35,14 +35,22 @@ ShippingSequelize.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    shippingMode : {
-        type: DataTypes.ENUM('Colissimo', 'Mondial Relay'),
-        allowNull: false,
-    },
-}, {
+    
+},{
     sequelize,
     modelName: 'Shipping',
-    tableName: 'shippings'
+    tableName: 'shippings',
+});
+// 1:M relationship between Products and ProductsCategories
+ShippingSequelize.belongsTo(DeliveryChoiceSequelize, {
+  as: 'deliveryChoice',
+  targetKey: 'id',
+  foreignKey: {
+    field: 'deliveryChoiceId',
+    name: 'deliveryChoiceId',
+  },
+  onDelete: 'SET NULL',
+  onUpdate: 'CASCADE',
 });
 
 export default ShippingSequelize;

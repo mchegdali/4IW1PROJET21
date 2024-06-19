@@ -1,19 +1,11 @@
 import mongoose from 'mongoose';
 
-const paymentSchema = new mongoose.schema ({
+const deliveryChoiceSchema = new mongoose.Schema ({
     id: {
         type: mongoose.Schema.Types.UUID,
         required : true,
     },
-    numberCard: {
-        type: String,
-        required: true,
-    },
-    expiryAt: {
-        type: Date,
-        required: true,
-    },
-    cardCode: {
+    name: {
         type: String,
         required: true,
     },
@@ -27,13 +19,14 @@ const paymentSchema = new mongoose.schema ({
     },
    },
 );
-paymentSchema.index(
+
+deliveryChoiceSchema.index(
     {
         title: 'text',
         description: 'text'
     },
     {
-      name: 'payment_index',
+      name: 'delivery_choice_index',
       weights: {
         title: 10,
         description: 5
@@ -41,5 +34,5 @@ paymentSchema.index(
     },
 )
 
-const Payment = mongoose.model('Payment', paymentSchema);
-export default Payment;
+const deliveryChoice = mongoose.model('deliveryChoice', deliveryChoiceSchema);
+export default deliveryChoice;

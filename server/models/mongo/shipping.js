@@ -31,15 +31,6 @@ const shippingSchema = new mongoose.Schema ({
         type: String,
         required: true,
     },
-    // shippingMode : {
-    //     type: String,
-    //     enum: ['Colissimo', 'Mondial Relay'],
-    //     required: true,
-    // },
-    // paymentMode: {
-    //     type: [String],
-    //     required: true,
-    // },
 },
 {
     toObject: {

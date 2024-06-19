@@ -5,22 +5,27 @@ import { sequelize } from '../../sequelize.js';
 class PaymentSequelize extends Model {}
 
 PaymentSequelize.init({
-    _id: {
+    id: {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
     },
-    shippingMode : {
-        type: DataTypes.ENUM('Colissimo', 'Mondial Relay'),
+    numberCard : {
+        type: DataTypes.String,
         allowNull: false,
     },
-    paymentMode: {
-        type: DataTypes.ENUM('Carte de Credit', 'Paypal'),
+    expiryAt: {
+        type: DataTypes.Date,
         allowNull: false,
     },
+    cardCode: {
+        type: DataTypes.String,
+        allowNull: false,
+    }
 }, {
     sequelize,
-    modelName: 'PaymentSequelize',
+    modelName: 'Payment',
+    tableName: 'payments'
 });
 
 export default PaymentSequelize;
