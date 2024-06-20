@@ -3,6 +3,8 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../sequelize.js';
 import AddressesSequelize from './addresses.sql.js';
 import dayjs from 'dayjs';
+import { hash } from '@node-rs/argon2';
+import authConfig from '../../config/auth.config.js';
 
 class UsersSequelize extends Model {}
 
@@ -64,6 +66,17 @@ UsersSequelize.init(
             attributes: ['name', 'slug', ['id', '_id']],
           },
         ],
+      },
+    },
+    hooks: {
+      afterValidate: async (user) => {
+        if (user.changed('password')) {
+          const newPassword = await hash(
+            user.get('password'),
+            authConfig.hashOptions,
+          );
+          user.set('password', newPassword);
+        }
       },
     },
   },

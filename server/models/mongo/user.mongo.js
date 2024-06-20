@@ -84,7 +84,7 @@ UserSchema.index(
   {
     name: 'users_search_index',
     weights: { fullname: 2, email: 1 },
-    default_language: 'french',
+    // default_language: 'french',
   },
 );
 
