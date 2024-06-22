@@ -1,17 +1,14 @@
-import { ZodError } from 'zod';
+import httpErrors from 'http-errors';
+import validator from 'validator';
+import sequelize from '../models/sql/db.js';
+import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
 import ProductMongo from '../models/mongo/products.mongo.js';
+import ProductsSequelize from '../models/sql/products.sql.js';
 import {
   productCreateSchema,
   productQuerySchema,
   productUpdateSchema,
 } from '../schemas/products.schema.js';
-import formatZodError from '../utils/format-zod-error.js';
-import ProductsSequelize from '../models/sql/products.sql.js';
-import { ValidationError } from 'sequelize';
-import { sequelize } from '../sequelize.js';
-import validator from 'validator';
-import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
-import httpErrors from 'http-errors';
 const { NotFound } = httpErrors;
 
 /**
@@ -80,7 +77,7 @@ export async function getProducts(req, res, next) {
       });
 
       if (!categoryDoc) {
-        return res.status(404).json({ message: 'Catégorie introuvable' });
+        return res.sendStatus(404);
       }
     }
 
@@ -111,6 +108,7 @@ export async function getProducts(req, res, next) {
       };
     }
 
+    // if (true) {
     if (text) {
       textMatchStage = {
         $match: {
@@ -133,10 +131,6 @@ export async function getProducts(req, res, next) {
       pipelineStages.push(textMatchStage);
     }
 
-    if (sortStage) {
-      pipelineStages.push(sortStage);
-    }
-
     pipelineStages.push(
       { $skip: (page - 1) * limit },
       { $project: { score: 0 } },
@@ -156,7 +150,11 @@ export async function getProducts(req, res, next) {
       },
     );
 
-    const products = await ProductMongo.aggregate(pipelineStages);
+    if (sortStage) {
+      pipelineStages.push(sortStage);
+    }
+
+    const products = await ProductMongo.aggregate(pipelineStages).exec();
 
     return res.json({
       metadata: products[0].metadata[0],
@@ -182,7 +180,7 @@ export async function getProduct(req, res, next) {
 
     const product = await ProductMongo.findOne(filter);
     if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable' });
+      return res.sendStatus(404);
     }
     return res.json(product);
   } catch (error) {
@@ -205,7 +203,7 @@ export async function getRelatedProducts(req, res, next) {
 
     const product = await ProductMongo.findOne(filter);
     if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable' });
+      return res.sendStatus(404);
     }
 
     const relatedProducts = await ProductMongo.find({
@@ -308,7 +306,7 @@ export async function deleteProduct(req, res, next) {
     ]);
 
     if (deletedCountSql === 0 && deletedCountMongo.deletedCount === 0) {
-      return res.status(404).json({ message: 'Produit introuvable' });
+      return res.sendStatus(404);
     }
 
     return res.sendStatus(204);

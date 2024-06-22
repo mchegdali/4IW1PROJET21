@@ -10,10 +10,11 @@ import isUUIDOrSlug from '../utils/is-uuid-or-slug.js';
 import { getProducts } from '../controllers/products.controller.js';
 
 const productsCategoriesRouter = Router();
+
 productsCategoriesRouter.param('category', (req, res, next, category) => {
   const { isSlug, isUUID } = isUUIDOrSlug(category);
   if (!isUUID && !isSlug) {
-    return res.status(400).json({
+    return res.status(422).json({
       message: 'Catégorie non valide',
     });
   }

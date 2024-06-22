@@ -4,7 +4,7 @@ import {
   productCategoryCreateSchema,
   productCategoryUpdateSchema,
 } from '../schemas/products-categories.schema.js';
-import { sequelize } from '../sequelize.js';
+import sequelize from '../models/sql/db.js';
 import httpErrors from 'http-errors';
 import ProductMongo from '../models/mongo/products.mongo.js';
 const { NotFound } = httpErrors;
@@ -75,7 +75,7 @@ export async function getProductCategory(req, res, next) {
       await ProductsCategoriesMongo.findOne(filter).lean();
 
     if (!productCategory) {
-      return res.status(404).json({ message: 'Catégorie introuvable' });
+      return res.sendStatus(404);
     }
 
     return res.json(productCategory);
@@ -183,7 +183,7 @@ export async function deleteProductCategory(req, res, next) {
     ]);
 
     if (deletedCountSql === 0 && deletedCountMongo.deletedCount === 0) {
-      return res.status(404).json({ message: 'Catégorie introuvable' });
+      return res.sendStatus(404);
     }
 
     await ProductMongo.updateMany(

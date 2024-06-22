@@ -1,8 +1,8 @@
-import ProductMongo from '../models/mongo/products.mongo.js';
+import ProductMongo from '../../models/mongo/products.mongo.js';
 import slugify from '@sindresorhus/slugify';
 import { fakerFR as faker } from '@faker-js/faker';
 import crypto from 'node:crypto';
-import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
+import ProductsCategoriesMongo from '../../models/mongo/products-categories.mongo.js';
 
 const minProducts = 2;
 const maxProducts = 5;
@@ -50,8 +50,6 @@ function createProduct(categoryId) {
  * @property { string } name
  * @property { string } [path]
  * @property { Object } context
- * @property { import('sequelize').Sequelize } context.sequelize
- * @property { import('mongoose').Mongoose } context.mongoose
  */
 
 /**
@@ -60,7 +58,7 @@ function createProduct(categoryId) {
  *
  */
 export const up = async ({ context: { sequelize } }) => {
-  const queryInterface = sequelize.getQueryInterface();
+  const queryInterface = sequelize.connection.getQueryInterface();
   const productsCategories = await ProductsCategoriesMongo.find(
     {},
     {
@@ -116,7 +114,7 @@ export const up = async ({ context: { sequelize } }) => {
  *
  */
 export const down = async ({ context: { sequelize } }) => {
-  const queryInterface = sequelize.getQueryInterface();
+  const queryInterface = sequelize.connection.getQueryInterface();
   await queryInterface.bulkDelete('products', null, {});
   await ProductMongo.deleteMany({});
 };

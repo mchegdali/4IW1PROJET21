@@ -86,6 +86,38 @@ const login = async (req, res, next) => {
  *
  * @type {import("express").RequestHandler}
  */
+const confirm = async (req, res, next) => {
+  try {
+    const query = confirmSchema.parse(req.query);
+
+    const token = query.token;
+
+    const decoded = await jose.jwtVerify(
+      token,
+      authConfig.confirmationTokenSecret,
+    );
+
+    const updateResult = await UserMongo.updateOne(
+      { _id: decoded.payload.sub },
+      {
+        isVerified: true,
+      },
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      return res.sendStatus(401);
+    }
+
+    return res.sendStatus(204);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @type {import("express").RequestHandler}
+ */
 const register = async (req, res, next) => {
   try {
     const { fullname, email, password } = await registerSchema.parseAsync(
@@ -95,8 +127,8 @@ const register = async (req, res, next) => {
     const user = await UserMongo.exists({ email });
 
     if (user) {
-      return res.status(400).json({
-        message: 'Cet email est déjà utilisé',
+      return res.status(401).json({
+        email: ['Cet email est déjà utilisé'],
       });
     }
 
@@ -135,43 +167,6 @@ const register = async (req, res, next) => {
     );
 
     return res.sendStatus(201);
-  } catch (error) {
-    return next(error);
-  }
-};
-
-/**
- *
- * @type {import("express").RequestHandler}
- */
-const confirm = async (req, res, next) => {
-  try {
-    const query = confirmSchema.parse(req.query);
-
-    const token = query.token;
-
-    const decoded = await jose.jwtVerify(
-      token,
-      authConfig.confirmationTokenSecret,
-    );
-
-    const updateResult = await UserMongo.updateOne(
-      { _id: decoded.payload.sub },
-      {
-        isVerified: true,
-      },
-    );
-
-    if (updateResult.modifiedCount === 0) {
-      return res.status(401).json({
-        message: 'Identifiants incorrects',
-      });
-    }
-
-    return res.status(200).json({
-      message:
-        'Votre compte a été vérifié avec succès. Vous pouvez vous connecter.',
-    });
   } catch (error) {
     return next(error);
   }

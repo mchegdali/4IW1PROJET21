@@ -7,33 +7,18 @@ import authConfig from '../config/auth.config.js';
  */
 const validateAuthorizationHeader = (req, res, next) => {
   if (!req.headers.authorization) {
-    return res.status(401).json({
-      error: {
-        code: 'invalid_token',
-        message: 'Veuillez vous connecter pour accéder à cette ressource',
-      },
-    });
+    return res.sendStatus(401);
   }
 
   const tokenParts = req.headers.authorization.split(' ');
   if (tokenParts.length !== 2) {
-    return res.status(401).json({
-      error: {
-        code: 'invalid_token',
-        message: "Le token doit être au format 'Bearer <token>'",
-      },
-    });
+    return res.sendStatus(401);
   }
 
   const [bearer, token] = tokenParts;
 
   if (bearer !== 'Bearer' || !token) {
-    return res.status(401).json({
-      error: {
-        code: 'invalid_token',
-        message: "Le token doit être au format 'Bearer <token>'",
-      },
-    });
+    return res.sendStatus(401);
   }
 
   res.locals.token = token;
@@ -65,12 +50,7 @@ const validateAccessToken = async (req, res, next) => {
     return next();
   } catch (error) {
     if (error instanceof jose.errors.JOSEError) {
-      return res.status(401).json({
-        error: {
-          code: error.code,
-          message: error.message,
-        },
-      });
+      return res.sendStatus(401);
     }
   }
 };
@@ -82,21 +62,11 @@ const validateAccessToken = async (req, res, next) => {
  */
 const validateRoles = (roles) => (req, res, next) => {
   if (!res.locals.user.role) {
-    return res.status(401).json({
-      error: {
-        code: 'invalid_token',
-        message: 'Veuillez vous connecter pour accéder à cette ressource',
-      },
-    });
+    return res.sendStatus(401);
   }
 
   if (!roles.includes(res.locals.user.role)) {
-    return res.status(403).json({
-      error: {
-        code: 'forbidden',
-        message: "Vous n'avez pas les droits pour accéder à cette ressource",
-      },
-    });
+    return res.sendStatus(403);
   }
 
   return next();

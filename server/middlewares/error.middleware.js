@@ -8,13 +8,13 @@ import createHttpError from 'http-errors';
  */
 const errorMiddleware = (error, req, res, next) => {
   if (error instanceof ZodError) {
-    return res.status(400).json({
+    return res.status(422).json({
       errors: error.formErrors.fieldErrors,
     });
   }
 
   if (error instanceof ValidationError) {
-    return res.status(400).json({ errors: error.errors });
+    return res.status(422).json({ errors: error.errors });
   }
 
   if (createHttpError.isHttpError(error)) {

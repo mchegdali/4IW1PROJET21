@@ -1,7 +1,6 @@
 import slugify from '@sindresorhus/slugify';
 import crypto from 'node:crypto';
-import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
-import ProductsCategoriesSequelize from '../models/sql/products-categories.sql.js';
+import ProductsCategoriesMongo from '../../models/mongo/products-categories.mongo.js';
 
 const now = new Date();
 const productsCategories = [
@@ -57,8 +56,6 @@ const productsCategories = [
  * @property { string } name
  * @property { string } [path]
  * @property { Object } context
- * @property { import('sequelize').Sequelize } context.sequelize
- * @property { import('mongoose').Mongoose } context.mongoose
  */
 
 /**
@@ -66,7 +63,10 @@ const productsCategories = [
  * @param {MigrationParams} params
  *
  */
-export const up = async () => {
+export const up = async ({ context: { sequelize } }) => {
+  console.log(sequelize);
+  const ProductsCategoriesSequelize = sequelize.ProductsCategoriesSequelize;
+
   const productsCategoriesSequelize =
     await ProductsCategoriesSequelize.bulkCreate(productsCategories, {
       validate: true,
@@ -90,7 +90,7 @@ export const up = async () => {
  *
  */
 export const down = async ({ context: { sequelize } }) => {
-  const queryInterface = sequelize.getQueryInterface();
+  const queryInterface = sequelize.connection.getQueryInterface();
   await queryInterface.bulkDelete('products_categories', null, {});
   await ProductsCategoriesMongo.deleteMany({});
 };

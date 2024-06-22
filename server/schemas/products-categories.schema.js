@@ -2,6 +2,12 @@
 import { z } from 'zod';
 import entitySchema from './entity.schema.js';
 import slugSchema from './slug.schema.js';
+import isUUIDOrSlug from '../utils/is-uuid-or-slug.js';
+
+const productCategoryUUIDOrSlug = z.string().refine((category) => {
+  const { isSlug, isUUID } = isUUIDOrSlug(category);
+  return isUUID || isSlug;
+}, "L'identifiant de la catégorie n'est pas valide");
 
 const productCategoryCreateSchema = z
   .object({
@@ -28,4 +34,5 @@ export {
   productCategoryCreateSchema,
   productCategoryUpdateSchema,
   productCategorySchema,
+  productCategoryUUIDOrSlug,
 };

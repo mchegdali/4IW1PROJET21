@@ -1,8 +1,12 @@
+import { z } from 'zod';
 import app from './app.js';
-import init from './init.js';
+import zodErrorMap from './utils/zod-error-map.js';
+import './models/sql/db.js';
+import './models/mongo/db.js';
 
-init().then(() => {
-  app.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
-  });
+// Initialize translated error messages
+z.setErrorMap(zodErrorMap);
+
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
 });
