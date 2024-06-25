@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { DataTypes } from 'sequelize';
+const { DataTypes } = require('sequelize');
 
 /**
  * @typedef { Object } MigrationParams
@@ -14,7 +14,7 @@ import { DataTypes } from 'sequelize';
  * @param {MigrationParams} params
  *
  */
-export const up = async ({ context: { sequelize } }) => {
+const up = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
   /* ONLY ADD CREATE SCHEMA AT FIRST MIGRATION */
   // await sequelize.query('CREATE SCHEMA IF NOT EXISTS public');
@@ -29,4 +29,6 @@ export const up = async ({ context: { sequelize } }) => {
  * @param {MigrationParams} params
  *
  */
-export const down = async ({ context: { sequelize } }) => {};
+const down = async ({ context: { sequelize } }) => {};
+
+module.exports = { up, down };

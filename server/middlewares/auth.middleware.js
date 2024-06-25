@@ -1,11 +1,13 @@
-import * as jose from 'jose';
-import authConfig from '../config/auth.config.js';
+const jose = require('jose');
+const authConfig = require('../config/auth.config');
+const sequelize = require('../models/sql');
+const Users = sequelize.model('users');
 
 /**
  *
  * @type {import("express").RequestHandler}
  */
-const validateAuthorizationHeader = (req, res, next) => {
+const checkAuthHeader = (req, res, next) => {
   if (!req.headers.authorization) {
     return res.sendStatus(401);
   }
@@ -30,22 +32,24 @@ const validateAuthorizationHeader = (req, res, next) => {
  * @description
  * Check if the token is valid.
  *
- * Use after `isValidAuthorization` middleware.
+ * Use after `checkAuthHeader` middleware.
  * @type {import("express").RequestHandler}
  */
-const validateAccessToken = async (req, res, next) => {
-  const token = res.locals.token;
+const checkAccessToken = async (req, res, next) => {
   try {
+    const token = res.locals.token;
     const decodedToken = await jose.jwtVerify(
       token,
       authConfig.accessTokenSecret,
     );
 
-    res.locals.user = {
-      id: decodedToken.payload.sub,
-      role: decodedToken.payload.role,
-      email: decodedToken.payload.email,
-    };
+    const user = await Users.findByPk(decodedToken.payload.sub);
+
+    if (!user) {
+      return res.sendStatus(401);
+    }
+
+    req.user = user;
 
     return next();
   } catch (error) {
@@ -57,19 +61,37 @@ const validateAccessToken = async (req, res, next) => {
 
 /**
  *
- * @param {string[]} roles
+ * @param {"admin"|"accountant"|"user"} role
  * @returns {import("express").RequestHandler}
  */
-const validateRoles = (roles) => (req, res, next) => {
-  if (!res.locals.user.role) {
-    return res.sendStatus(401);
-  }
-
-  if (!roles.includes(res.locals.user.role)) {
+const checkRole = (role) => (req, res, next) => {
+  if (!req.user.role) {
     return res.sendStatus(403);
   }
+
+  const isAdmin = req.user.role === 'admin';
+  const isAccountant = req.user.role === 'accountant';
+  const isUser = req.user.role === 'user';
+
+  if (!isAdmin && !isAccountant && !isUser) {
+    return res.sendStatus(403);
+  }
+
+  if (role === 'admin' && !isAdmin) {
+    return res.sendStatus(403);
+  } else if (role === 'accountant' && !(isAccountant || isAdmin)) {
+    return res.sendStatus(403);
+  } else if (role === 'user' && !(isUser || isAccountant || isAdmin)) {
+    return res.sendStatus(403);
+  }
+
+  console.groupEnd();
 
   return next();
 };
 
-export { validateAccessToken, validateAuthorizationHeader, validateRoles };
+module.exports = {
+  checkAccessToken,
+  checkAuthHeader,
+  checkRole,
+};

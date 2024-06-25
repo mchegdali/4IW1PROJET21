@@ -1,5 +1,4 @@
-import mongoose from 'mongoose';
-import dayjs from 'dayjs';
+const mongoose = require('./db');
 
 const UserSchema = new mongoose.Schema(
   {
@@ -38,7 +37,7 @@ const UserSchema = new mongoose.Schema(
     addresses: {
       type: [
         {
-          id: {
+          _id: {
             type: mongoose.Schema.Types.UUID,
             required: true,
           },
@@ -84,10 +83,10 @@ UserSchema.index(
   {
     name: 'users_search_index',
     weights: { fullname: 2, email: 1 },
-    // default_language: 'french',
+    default_language: 'french',
   },
 );
 
 const UserMongo = mongoose.model('User', UserSchema);
 
-export default UserMongo;
+module.exports = UserMongo;

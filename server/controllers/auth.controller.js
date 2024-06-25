@@ -1,15 +1,16 @@
-import * as jose from 'jose';
-import { verify, hash } from '@node-rs/argon2';
-import authConfig from '../config/auth.config.js';
-import {
-  confirmSchema,
+const { verify } = require('@node-rs/argon2');
+const dayjs = require('dayjs');
+const jose = require('jose');
+const authConfig = require('../config/auth.config');
+const { sendForgotPasswordEmail } = require('../config/email.config');
+const UserMongo = require('../models/mongo/user.mongo');
+const { UsersSequelize, connection } = require('../models/sql');
+const { Unauthorized } = require('http-errors');
+const {
   loginSchema,
-  registerSchema,
-} from '../schemas/auth.schema.js';
-import UserMongo from '../models/mongo/user.mongo.js';
-import dayjs from 'dayjs';
-import crypto from 'node:crypto';
-import { sendConfirmationEmail } from '../config/email.config.js';
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} = require('../schemas/auth.schema');
 
 /**
  *
@@ -17,28 +18,22 @@ import { sendConfirmationEmail } from '../config/email.config.js';
  */
 const login = async (req, res, next) => {
   try {
-    const { email, password } = await loginSchema.parseAsync(req.body);
+    const { email, password } = loginSchema.parse(req.body);
 
     const user = await UserMongo.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({
-        message: 'Identifiants incorrects',
-      });
+      return res.sendStatus(401);
     }
 
     if (!user.isVerified) {
-      return res.status(401).json({
-        message: "Votre compte n'est pas encore vérifié",
-      });
+      return res.sendStatus(403);
     }
 
     const isValidPassword = await verify(user.password, password);
 
     if (!isValidPassword) {
-      return res.status(401).json({
-        message: 'Identifiants incorrects',
-      });
+      return res.sendStatus(401);
     }
 
     const now = dayjs();
@@ -47,7 +42,6 @@ const login = async (req, res, next) => {
 
     const accessTokenSign = new jose.SignJWT({
       email: user.email,
-      role: user.role,
     })
       .setSubject(user.id)
       .setIssuedAt(issuedAt)
@@ -61,9 +55,8 @@ const login = async (req, res, next) => {
 
     const refreshTokenExpiredAt = now.add(30, 'day').unix();
 
-    const refreshTokenSign = new jose.SignJWT({
-      sub: user.id,
-    })
+    const refreshTokenSign = new jose.SignJWT()
+      .setSubject(user.id)
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
       .setIssuedAt(issuedAt)
       .setExpirationTime(refreshTokenExpiredAt)
@@ -88,23 +81,29 @@ const login = async (req, res, next) => {
  */
 const confirm = async (req, res, next) => {
   try {
-    const query = confirmSchema.parse(req.query);
-
-    const token = query.token;
+    const token = res.locals.token;
 
     const decoded = await jose.jwtVerify(
       token,
       authConfig.confirmationTokenSecret,
-    );
-
-    const updateResult = await UserMongo.updateOne(
-      { _id: decoded.payload.sub },
       {
-        isVerified: true,
+        requiredClaims: ['sub'],
+        maxTokenAge: '15 minutes',
       },
     );
 
-    if (updateResult.modifiedCount === 0) {
+    const nbUpdated = await UsersSequelize.update(
+      {
+        isVerified: true,
+      },
+      {
+        where: {
+          id: decoded.payload.sub,
+        },
+      },
+    );
+
+    if (nbUpdated === 0) {
       return res.sendStatus(401);
     }
 
@@ -118,55 +117,36 @@ const confirm = async (req, res, next) => {
  *
  * @type {import("express").RequestHandler}
  */
-const register = async (req, res, next) => {
+const forgotPassword = async (req, res, next) => {
   try {
-    const { fullname, email, password } = await registerSchema.parseAsync(
-      req.body,
-    );
+    const { email } = forgotPasswordSchema.parse(req.body);
 
-    const user = await UserMongo.exists({ email });
+    const user = await UserMongo.findOne({ email });
 
-    if (user) {
-      return res.status(401).json({
-        email: ['Cet email est déjà utilisé'],
-      });
+    if (!user) {
+      return res.sendStatus(204);
     }
-
-    const newPassword = await hash(password, authConfig.hashOptions);
-
-    const newUser = await UserMongo.create({
-      _id: crypto.randomUUID(),
-      fullname,
-      email,
-      password: newPassword,
-      addresses: [],
-      isVerified: false,
-    });
 
     const now = dayjs();
     const issuedAt = now.unix();
-    const confirmationTokenExpiredAt = now.add(15, 'minute').unix();
 
-    const confirmationTokenSign = new jose.SignJWT({
-      email: newUser.email,
-      role: newUser.role,
-    })
-      .setSubject(newUser._id)
+    const forgotPasswordTokenSign = new jose.SignJWT()
+      .setSubject(user.id)
       .setIssuedAt(issuedAt)
-      .setExpirationTime(confirmationTokenExpiredAt)
+      .setExpirationTime('15 minutes')
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
       .setNotBefore(issuedAt);
 
-    const confirmationToken = await confirmationTokenSign.sign(
-      authConfig.confirmationTokenSecret,
+    const forgotPasswordToken = await forgotPasswordTokenSign.sign(
+      authConfig.forgotPasswordTokenSecret,
     );
 
-    await sendConfirmationEmail(
-      { email: newUser.email, fullname: newUser.fullname },
-      confirmationToken,
+    await sendForgotPasswordEmail(
+      { email: user.email, fullname: user.fullname },
+      forgotPasswordToken,
     );
 
-    return res.sendStatus(201);
+    return res.sendStatus(204);
   } catch (error) {
     return next(error);
   }
@@ -176,40 +156,52 @@ const register = async (req, res, next) => {
  *
  * @type {import("express").RequestHandler}
  */
-const forgotPassword = async (req, res, next) => {
+const resetPassword = async (req, res, next) => {
   try {
-    if (!req.body.token) {
-      return res.status(401).json({
-        message: 'Token invalide',
-      });
-    }
-    const token = req.query.token;
+    const { password } = resetPasswordSchema.parse(req.body);
+    const token = res.locals.token;
 
     const decoded = await jose.jwtVerify(
       token,
-      authConfig.confirmationTokenSecret,
-    );
-
-    const updateResult = await UserMongo.updateOne(
-      { _id: decoded.payload.sub },
+      authConfig.forgotPasswordTokenSecret,
       {
-        isVerified: true,
+        requiredClaims: ['sub'],
+        maxTokenAge: '15 minutes',
       },
     );
 
-    if (updateResult.modifiedCount === 0) {
-      return res.status(401).json({
-        message: 'Identifiants incorrects',
-      });
+    const user = await UserMongo.findById(decoded.payload.sub);
+
+    if (!user) {
+      return res.sendStatus(401);
     }
 
-    return res.status(200).json({
-      message:
-        'Votre compte a été vérifié avec succès. Vous pouvez vous connecter.',
+    const result = await connection.transaction(async (t) => {
+      const [nbUpdated, updatedUsers] = await UsersSequelize.update(
+        {
+          password,
+        },
+        {
+          where: {
+            id: user._id,
+          },
+          returning: true,
+          individualHooks: true,
+        },
+      );
+
+      if (nbUpdated === 0) {
+        // throw instead of directly return because of the transaction
+        throw new Unauthorized();
+      }
+
+      throw new Error('test');
     });
+
+    return res.sendStatus(204);
   } catch (error) {
     return next(error);
   }
 };
 
-export { login, register, confirm };
+module.exports = { confirm, login, forgotPassword, resetPassword };

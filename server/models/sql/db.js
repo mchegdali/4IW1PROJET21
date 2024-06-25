@@ -1,7 +1,9 @@
-import { Sequelize } from 'sequelize';
+const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize(process.env.POSTGRES_URL);
 
-await sequelize.authenticate();
+sequelize.authenticate().then(() => {
+  console.log('[SQL] Connected to database');
+});
 
-export default sequelize;
+module.exports = sequelize;

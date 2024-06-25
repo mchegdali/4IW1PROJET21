@@ -1,8 +1,6 @@
-import { z } from 'zod';
-import app from './app.js';
-import zodErrorMap from './utils/zod-error-map.js';
-import './models/sql/db.js';
-import './models/mongo/db.js';
+const { z } = require('zod');
+const app = require('./app');
+const zodErrorMap = require('./utils/zod-error-map');
 
 // Initialize translated error messages
 z.setErrorMap(zodErrorMap);

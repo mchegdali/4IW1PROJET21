@@ -1,8 +1,8 @@
-import ProductMongo from '../../models/mongo/products.mongo.js';
-import slugify from '@sindresorhus/slugify';
-import { fakerFR as faker } from '@faker-js/faker';
-import crypto from 'node:crypto';
-import ProductsCategoriesMongo from '../../models/mongo/products-categories.mongo.js';
+const ProductMongo = require('../../models/mongo/products.mongo');
+const slugify = require('../../utils/slugify');
+const { fakerFR: faker } = require('@faker-js/faker');
+const crypto = require('node:crypto');
+const CategoriesMongo = require('../../models/mongo/categories.mongo');
 
 const minProducts = 2;
 const maxProducts = 5;
@@ -50,6 +50,8 @@ function createProduct(categoryId) {
  * @property { string } name
  * @property { string } [path]
  * @property { Object } context
+ * @property { import("../../models/sql") } context.sequelize
+ * @property { Object } context.mongoose
  */
 
 /**
@@ -57,53 +59,34 @@ function createProduct(categoryId) {
  * @param {MigrationParams} params
  *
  */
-export const up = async ({ context: { sequelize } }) => {
-  const queryInterface = sequelize.connection.getQueryInterface();
-  const productsCategories = await ProductsCategoriesMongo.find(
-    {},
-    {
-      name: 1,
-      slug: 1,
-    },
-  ).lean();
+const up = async ({ context: { sequelize } }) => {
+  const Categories = sequelize.model('categories');
+  const Products = sequelize.model('products');
+  const categories = await Categories.findAll();
 
   const products = [];
-  const categoriesMap = new Map();
 
-  for (const category of productsCategories) {
-    const _id = category._id.toString('utf-8');
-    categoriesMap.set(_id, category);
-
+  for (const category of categories) {
     for (
       let i = 0;
       i < faker.number.int({ min: minProducts, max: maxProducts });
       i++
     ) {
-      const product = createProduct(_id);
+      const product = createProduct(category.id);
       products.push(product);
     }
   }
 
-  const createdProducts = await queryInterface.bulkInsert(
-    'products',
-    products,
-    {
-      validate: true,
-      returning: true,
-    },
+  // throw new Error('TODO');
+
+  const createdProducts = await Products.bulkCreate(products, {
+    validate: true,
+    returning: true,
+  });
+
+  const createdProductsMongo = await Promise.all(
+    createdProducts.map((p) => p.toMongo()),
   );
-
-  console.log(createdProducts[0]);
-
-  const createdProductsMongo = createdProducts.map((p) => ({
-    _id: p.id,
-    slug: p.slug,
-    name: p.name,
-    description: p.description,
-    category: categoriesMap.get(p.categoryId),
-    image: p.image,
-    price: p.price,
-  }));
 
   await ProductMongo.insertMany(createdProductsMongo);
 };
@@ -113,8 +96,10 @@ export const up = async ({ context: { sequelize } }) => {
  * @param {MigrationParams} params
  *
  */
-export const down = async ({ context: { sequelize } }) => {
-  const queryInterface = sequelize.connection.getQueryInterface();
-  await queryInterface.bulkDelete('products', null, {});
+const down = async ({ context: { sequelize } }) => {
+  const Products = sequelize.model('products');
+  await Products.destroy({ truncate: true, cascade: true, force: true });
   await ProductMongo.deleteMany({});
 };
+
+module.exports = { up, down };

@@ -1,22 +1,25 @@
-import { DataTypes, Model } from 'sequelize';
+const { DataTypes, Model } = require('sequelize');
 
 const AddressesSequelize = (sequelize) => {
-  class AddressesSequelize extends Model {
+  class Addresses extends Model {
     static associate(models) {
-      AddressesSequelize.belongsTo(models.UsersSequelize, {
-        as: 'user',
-        targetKey: 'id',
-        foreignKey: {
-          field: 'userId',
-          name: 'userId',
-        },
+      Addresses.belongsTo(models.users, {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       });
     }
+
+    toMongo() {
+      return {
+        _id: this.id,
+        street: this.street,
+        city: this.city,
+        zipCode: this.zipCode,
+      };
+    }
   }
 
-  AddressesSequelize.init(
+  Addresses.init(
     {
       id: {
         type: DataTypes.UUID,
@@ -38,11 +41,11 @@ const AddressesSequelize = (sequelize) => {
     },
     {
       sequelize,
-      tableName: 'addresses',
+      modelName: 'addresses',
     },
   );
 
-  return AddressesSequelize;
+  return Addresses;
 };
 
-export default AddressesSequelize;
+module.exports = AddressesSequelize;

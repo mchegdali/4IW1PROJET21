@@ -1,23 +1,33 @@
-import { DataTypes, Model } from 'sequelize';
+const { DataTypes, Model } = require('sequelize');
 
-import AddressesSequelize from './addresses.sql.js';
-import dayjs from 'dayjs';
-import { hash } from '@node-rs/argon2';
-import authConfig from '../../config/auth.config.js';
+const dayjs = require('dayjs');
+const { hash } = require('@node-rs/argon2');
+const authConfig = require('../../config/auth.config');
 
 const UsersSequelize = (sequelize) => {
-  class UsersSequelize extends Model {
+  class Users extends Model {
     static associate(models) {
-      UsersSequelize.hasMany(models.AddressesSequelize, {
-        as: 'addresses',
-        foreignKey: 'userId',
+      Users.hasMany(models.addresses, {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       });
     }
+
+    toMongo() {
+      return {
+        _id: this.id,
+        fullname: this.fullname,
+        email: this.email,
+        password: this.password,
+        passwordValidUntil: this.passwordValidUntil,
+        isVerified: this.isVerified,
+        role: this.role,
+        addresses: this.addresses.map((address) => address.toMongo()),
+      };
+    }
   }
 
-  UsersSequelize.init(
+  Users.init(
     {
       id: {
         type: DataTypes.UUID,
@@ -55,30 +65,25 @@ const UsersSequelize = (sequelize) => {
       },
       role: {
         type: DataTypes.ENUM('user', 'admin', 'accountant'),
+        defaultValue: 'user',
         allowNull: false,
       },
     },
     {
       sequelize,
-      tableName: 'users',
-      scopes: {
-        toMongo: {
-          attributes: {
-            include: [['id', '_id']],
-            exclude: ['id'],
-          },
-          include: [
-            {
-              as: 'addresses',
-              model: AddressesSequelize,
-              attributes: ['name', 'slug', ['id', '_id']],
-            },
-          ],
-        },
-      },
+      modelName: 'users',
       hooks: {
         beforeCreate: async (user) => {
           if (user.changed('password')) {
+            const newPassword = await hash(
+              user.get('password'),
+              authConfig.hashOptions,
+            );
+            user.set('password', newPassword);
+          }
+        },
+        beforeUpdate: async (user, { fields }) => {
+          if (fields.includes('password')) {
             const newPassword = await hash(
               user.get('password'),
               authConfig.hashOptions,
@@ -90,7 +95,7 @@ const UsersSequelize = (sequelize) => {
     },
   );
 
-  return UsersSequelize;
+  return Users;
 };
 
-export default UsersSequelize;
+module.exports = UsersSequelize;

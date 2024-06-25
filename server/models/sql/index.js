@@ -1,39 +1,20 @@
-import fs from 'node:fs/promises';
+const fs = require('node:fs');
+const path = require('node:path');
+const sequelize = require('./db');
 
-import sequelize from './db.js';
+const files = fs.readdirSync(__dirname);
 
-const db = {
-  connection: sequelize,
-};
-
-async function importDefault(filePath) {
-  const module = await import(filePath);
-  return module.default;
-}
-
-async function initModels() {
-  const files = await fs.readdir(import.meta.dirname);
-
-  const importsPromises = [];
-
-  for (const file of files) {
-    if (file.endsWith('.sql.js')) {
-      importsPromises.push(importDefault(`./${file}`));
-    }
-  }
-
-  const modelFunctions = await Promise.all(importsPromises);
-
-  for (const modelFunction of modelFunctions) {
-    const model = modelFunction(db.connection);
-    db[model.name] = model;
-  }
-
-  for (const key in db) {
-    if (db[key].associate) {
-      db[key].associate(db);
-    }
+for (const file of files) {
+  if (file.endsWith('.sql.js')) {
+    require(path.join(__dirname, file))(sequelize);
   }
 }
 
-export { db, initModels };
+for (let modelName in sequelize.models) {
+  if (sequelize.models[modelName] === sequelize) continue;
+  if (typeof sequelize.models[modelName].associate === 'function') {
+    sequelize.models[modelName].associate(sequelize.models);
+  }
+}
+
+module.exports = sequelize;

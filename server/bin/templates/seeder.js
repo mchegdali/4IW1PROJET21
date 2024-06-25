@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { DataTypes } from 'sequelize';
+const { DataTypes } = require('sequelize');
 
 /**
  * @typedef { Object } MigrationParams
@@ -15,7 +15,7 @@ import { DataTypes } from 'sequelize';
  * @param {MigrationParams} params
  *
  */
-export const up = async ({ context: { sequelize } }) => {
+const up = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
   try {
     /*
@@ -31,4 +31,6 @@ export const up = async ({ context: { sequelize } }) => {
  * @param {MigrationParams} params
  *
  */
-export const down = async ({ context: { sequelize, mongoose } }) => {};
+const down = async ({ context: { sequelize, mongoose } }) => {};
+
+module.exports = { up, down };

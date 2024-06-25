@@ -1,24 +1,39 @@
-import { DataTypes, Model } from 'sequelize';
-import slugify from '@sindresorhus/slugify';
-import ProductsCategoriesSequelize from './products-categories.sql.js';
+const { DataTypes, Model } = require('sequelize');
+const slugify = require('../../utils/slugify');
 
 const ProductsSequelize = (sequelize) => {
-  class ProductsSequelize extends Model {
+  class Products extends Model {
     static associate(models) {
-      ProductsSequelize.belongsTo(models.ProductsCategoriesSequelize, {
-        as: 'category',
-        targetKey: 'id',
-        foreignKey: {
-          field: 'categoryId',
-          name: 'categoryId',
-        },
+      Products.belongsTo(models.categories, {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
     }
+
+    /**
+     * @description
+     * Transform the model into a MongoDB-like object
+     * Use after a creation or update
+     * @returns
+     */
+    async toMongo() {
+      const category = await this.sequelize.models.categories.findByPk(
+        this.categoryId,
+      );
+
+      return {
+        _id: this.id,
+        slug: this.slug,
+        name: this.name,
+        description: this.description,
+        category: category.toMongo(),
+        image: this.image,
+        price: this.price,
+      };
+    }
   }
 
-  ProductsSequelize.init(
+  Products.init(
     {
       id: {
         type: DataTypes.UUID,
@@ -49,8 +64,7 @@ const ProductsSequelize = (sequelize) => {
     },
     {
       sequelize,
-      tableName: 'products',
-
+      modelName: 'products',
       hooks: {
         beforeValidate: (item) => {
           /**
@@ -65,25 +79,10 @@ const ProductsSequelize = (sequelize) => {
           }
         },
       },
-      scopes: {
-        toMongo: {
-          attributes: {
-            include: [['id', '_id']],
-            exclude: ['id', 'categoryId'],
-          },
-          include: [
-            {
-              as: 'category',
-              model: ProductsCategoriesSequelize,
-              attributes: ['name', 'slug', ['id', '_id']],
-            },
-          ],
-        },
-      },
     },
   );
 
-  return ProductsSequelize;
+  return Products;
 };
 
-export default ProductsSequelize;
+module.exports = ProductsSequelize;

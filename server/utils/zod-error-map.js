@@ -1,4 +1,4 @@
-import { ZodIssueCode, ZodParsedType, util } from 'zod';
+const { ZodIssueCode, ZodParsedType, util } = require('zod');
 
 /**
  *
@@ -149,4 +149,4 @@ const zodErrorMap = (issue, _ctx) => {
   return { message };
 };
 
-export default zodErrorMap;
+module.exports = zodErrorMap;

@@ -1,4 +1,4 @@
-import { Algorithm } from '@node-rs/argon2';
+const { Algorithm } = require('@node-rs/argon2');
 
 const authConfig = {
   accessTokenSecret: new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET),
@@ -7,6 +7,9 @@ const authConfig = {
   ),
   confirmationTokenSecret: new TextEncoder().encode(
     process.env.CONFIRM_TOKEN_SECRET,
+  ),
+  forgotPasswordTokenSecret: new TextEncoder().encode(
+    process.env.FORGOT_PASSWORD_TOKEN_SECRET,
   ),
   /**
    * @type {import("@node-rs/argon2").Options}
@@ -21,4 +24,4 @@ const authConfig = {
   },
 };
 
-export default authConfig;
+module.exports = authConfig;

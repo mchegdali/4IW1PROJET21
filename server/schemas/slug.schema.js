@@ -1,5 +1,6 @@
-import validator from 'validator';
-import { z } from 'zod';
+//@ts-check
+const validator = require('validator');
+const { z } = require('zod');
 
 const slugSchema = z.object({
   slug: z
@@ -9,4 +10,4 @@ const slugSchema = z.object({
 
 /** @typedef { z.infer<typeof slugSchema>} Slug */
 
-export default slugSchema;
+module.exports = slugSchema;

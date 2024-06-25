@@ -1,14 +1,13 @@
-import httpErrors from 'http-errors';
-import validator from 'validator';
-import sequelize from '../models/sql/db.js';
-import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
-import ProductMongo from '../models/mongo/products.mongo.js';
-import ProductsSequelize from '../models/sql/products.sql.js';
-import {
+const httpErrors = require('http-errors');
+const validator = require('validator');
+const { connection, Products } = require('../models/sql');
+const CategoriesMongo = require('../models/mongo/categories.mongo');
+const ProductMongo = require('../models/mongo/products.mongo');
+const {
   productCreateSchema,
   productQuerySchema,
   productUpdateSchema,
-} from '../schemas/products.schema.js';
+} = require('../schemas/products.schema');
 const { NotFound } = httpErrors;
 
 /**
@@ -16,13 +15,13 @@ const { NotFound } = httpErrors;
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function createProduct(req, res, next) {
+async function createProduct(req, res, next) {
   try {
     const productCreateBody = await productCreateSchema.parseAsync(req.body);
 
-    const result = await sequelize.transaction(async (t) => {
+    const result = await connection.transaction(async (t) => {
       if (productCreateBody.categoryId) {
-        const category = await ProductsCategoriesMongo.findById(
+        const category = await CategoriesMongo.findById(
           productCreateBody.categoryId,
         );
 
@@ -31,17 +30,16 @@ export async function createProduct(req, res, next) {
         }
       }
 
-      const data = await ProductsSequelize.create(productCreateBody, {
+      const data = await Products.create(productCreateBody, {
         transaction: t,
         include: ['category'],
       });
 
-      const newData = await ProductsSequelize.scope('toMongo').findByPk(
-        data.id,
-        {
-          transaction: t,
-        },
-      );
+      throw new Error('test');
+
+      const newData = await Products.scope('toMongo').findByPk(data.id, {
+        transaction: t,
+      });
       const product = newData.get({
         plain: true,
       });
@@ -62,7 +60,7 @@ export async function createProduct(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getProducts(req, res, next) {
+async function getProducts(req, res, next) {
   try {
     const category = req.params.category;
     const categoryIsUUID = res.locals.category?.isUUID;
@@ -72,7 +70,7 @@ export async function getProducts(req, res, next) {
     );
 
     if (category) {
-      const categoryDoc = await ProductsCategoriesMongo.findOne({
+      const categoryDoc = await CategoriesMongo.findOne({
         [categoryIsUUID ? '_id' : 'slug']: category,
       });
 
@@ -170,7 +168,7 @@ export async function getProducts(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getProduct(req, res, next) {
+async function getProduct(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
 
@@ -193,7 +191,7 @@ export async function getProduct(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getRelatedProducts(req, res, next) {
+async function getRelatedProducts(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
 
@@ -222,7 +220,7 @@ export async function getRelatedProducts(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function updateProduct(req, res, next) {
+async function updateProduct(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
     const sqlWhere = {
@@ -235,8 +233,8 @@ export async function updateProduct(req, res, next) {
     const productUpdateBody = await productUpdateSchema.parseAsync(req.body);
     const updatedKeys = Object.keys(productUpdateBody);
 
-    const result = await sequelize.transaction(async (t) => {
-      const [affectedRowsCount, affectedRows] = await ProductsSequelize.update(
+    const result = await connection.transaction(async (t) => {
+      const [affectedRowsCount, affectedRows] = await Products.update(
         productUpdateBody,
         {
           where: sqlWhere,
@@ -250,7 +248,7 @@ export async function updateProduct(req, res, next) {
         throw new NotFound('Produit introuvable');
       }
 
-      const product = await ProductsSequelize.scope('toMongo').findByPk(
+      const product = await Products.scope('toMongo').findByPk(
         affectedRows[0].getDataValue('id'),
         {
           transaction: t,
@@ -289,7 +287,7 @@ export async function updateProduct(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function deleteProduct(req, res, next) {
+async function deleteProduct(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
 
@@ -301,7 +299,7 @@ export async function deleteProduct(req, res, next) {
     };
 
     const [deletedCountSql, deletedCountMongo] = await Promise.all([
-      ProductsSequelize.destroy({ where: sqlWhere }),
+      Products.destroy({ where: sqlWhere }),
       ProductMongo.deleteOne(mongoWhere),
     ]);
 
@@ -314,3 +312,12 @@ export async function deleteProduct(req, res, next) {
     return next(error);
   }
 }
+
+module.exports = {
+  createProduct,
+  getProducts,
+  getProduct,
+  getRelatedProducts,
+  updateProduct,
+  deleteProduct,
+};

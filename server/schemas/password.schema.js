@@ -1,5 +1,6 @@
-import { z } from 'zod';
-import validator from 'validator';
+//@ts-check
+const { z } = require('zod');
+const validator = require('validator');
 
 const passwordSchema = z.string().refine(
   (pwd) => {
@@ -17,4 +18,4 @@ const passwordSchema = z.string().refine(
   },
 );
 
-export default passwordSchema;
+module.exports = passwordSchema;

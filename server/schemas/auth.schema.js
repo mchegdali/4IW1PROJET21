@@ -1,23 +1,28 @@
-import { z } from 'zod';
-import passwordSchema from './password.schema.js';
+//@ts-check
+const { z } = require('zod');
+const passwordSchema = require('./password.schema');
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
 });
 
-const registerSchema = z.object({
-  fullname: z.string().min(2).trim(),
-  email: z.string().email().trim(),
-  password: passwordSchema,
-});
-
-const confirmSchema = z.object({
-  token: z.string('Le token est obligatoire'),
-});
-
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
 });
 
-export { loginSchema, registerSchema, confirmSchema, forgotPasswordSchema };
+const resetPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: passwordSchema,
+  })
+  .refine(({ password, confirmPassword }) => password === confirmPassword, {
+    message: 'Les mots de passe ne correspondent pas',
+    path: ['confirmPassword'],
+  });
+
+module.exports = {
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+};

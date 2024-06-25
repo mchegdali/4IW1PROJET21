@@ -1,68 +1,69 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { Umzug, MongoDBStorage } from 'umzug';
-import { db, initModels } from '../models/sql/index.js';
-import mongoose from '../models/mongo/db.js';
+const fs = require('node:fs');
+const path = require('node:path');
+const { Umzug, MongoDBStorage } = require('umzug');
+const sequelize = require('../models/sql');
+const mongoose = require('mongoose');
 
-const connection = mongoose.connection.db;
+async function umzug() {
+  const _mongoose = await mongoose.connect(process.env.MONGODB_URL, {
+    dbName: process.env.MONGODB_DBNAME,
+  });
 
-// const migrator = new Umzug({
-//   create: {
-//     folder: 'migrations',
-//     template: (filepath) => [
-//       [
-//         filepath,
-//         fs
-//           .readFileSync(
-//             path.join(import.meta.dirname, 'templates/migration.js'),
-//           )
-//           .toString(),
-//       ],
-//     ],
-//   },
-//   migrations: {
-//     glob: ['migrations/*.js', { cwd: import.meta.dirname }],
-//   },
-//   context: {
-//     sequelize,
-//   },
-//   storage: new MongoDBStorage({
-//     connection,
-//     collectionName: 'migrations',
-//   }),
-//   logger: console,
-// });
+  const connection = _mongoose.connection.db;
 
-const seeder = new Umzug({
-  create: {
-    folder: 'seeders',
-    template: (filepath) => [
-      [
-        filepath,
-        fs
-          .readFileSync(path.join(import.meta.dirname, 'templates/seeder.js'))
-          .toString(),
+  // const migrator = new Umzug({
+  //   create: {
+  //     folder: 'migrations',
+  //     template: (filepath) => [
+  //       [
+  //         filepath,
+  //         fs
+  //           .readFileSync(path.join(__dirname, 'templates/migration'))
+  //           .toString(),
+  //       ],
+  //     ],
+  //   },
+  //   migrations: {
+  //     glob: ['migrations/*', { cwd: __dirname }],
+  //   },
+  //   context: {
+  //     sequelize: db,
+  //   },
+  //   storage: new MongoDBStorage({
+  //     connection,
+  //     collectionName: 'migrations',
+  //   }),
+  //   logger: console,
+  // });
+
+  const seeder = new Umzug({
+    create: {
+      folder: 'seeders',
+      template: (filepath) => [
+        [
+          filepath,
+          fs.readFileSync(path.join(__dirname, 'templates/seeder')).toString(),
+        ],
       ],
-    ],
-  },
-  migrations: {
-    glob: ['seeders/*.js', { cwd: import.meta.dirname }],
-  },
-  context: async () => {
-    await initModels();
-    db.connection.sync();
-
-    return {
-      sequelize: db,
+    },
+    migrations: {
+      glob: ['seeders/*', { cwd: __dirname }],
+    },
+    context: {
+      sequelize,
       mongoose,
-    };
-  },
-  storage: new MongoDBStorage({
-    connection,
-    collectionName: 'seeders',
-  }),
-  logger: console,
-});
+    },
+    storage: new MongoDBStorage({
+      connection,
+      collectionName: 'seeders',
+    }),
+    logger: console,
+  });
 
-export { seeder };
-// export { migrator, seeder };
+  return {
+    // migrator,
+    seeder,
+  };
+}
+
+module.exports = umzug;

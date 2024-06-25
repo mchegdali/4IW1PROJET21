@@ -1,18 +1,15 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-// mongoose.set('toJSON', {
-//   virtuals: true,
-//   transform: (doc, ret) => {
-//     console.log(doc);
-//     console.log(ret);
-//     delete ret._id;
-//     delete ret.__v;
-//     return ret;
-//   },
-// });
+mongoose
+  .connect(process.env.MONGODB_URL, {
+    dbName: process.env.MONGODB_DBNAME,
+  })
+  .then(() => {
+    console.log('[MongoDB] Connected to database');
+  })
+  .catch((err) => {
+    console.error('[MongoDB] Error connecting to database', err);
+    process.exit(1);
+  });
 
-await mongoose.connect(process.env.MONGODB_URL, {
-  dbName: process.env.MONGODB_DBNAME,
-});
-
-export default mongoose;
+module.exports = mongoose;

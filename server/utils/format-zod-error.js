@@ -6,4 +6,4 @@ function formatZodError(error) {
   return error.flatten();
 }
 
-export default formatZodError;
+module.exports = formatZodError;

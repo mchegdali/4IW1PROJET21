@@ -1,4 +1,5 @@
-import { z } from 'zod';
+//@ts-check
+const { z } = require('zod');
 
 const entitySchema = z.object({
   id: z.string().uuid(),
@@ -6,4 +7,4 @@ const entitySchema = z.object({
 
 /** @typedef { z.infer<typeof entitySchema>} Entity */
 
-export default entitySchema;
+module.exports = entitySchema;

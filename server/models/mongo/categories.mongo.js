@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+const mongoose = require('./db');
 
-const ProductsCategoriesSchema = new mongoose.Schema(
+const CategoriesSchema = new mongoose.Schema(
   {
     _id: {
       type: mongoose.Schema.Types.UUID,
@@ -31,17 +31,14 @@ const ProductsCategoriesSchema = new mongoose.Schema(
   },
 );
 
-ProductsCategoriesSchema.index(
+CategoriesSchema.index(
   { name: 'text', slug: 'text' },
   {
-    name: 'products_categories_search_index',
+    name: 'categories_search_index',
     weights: { name: 1, slug: 1 },
   },
 );
 
-const ProductsCategoriesMongo = mongoose.model(
-  'ProductsCategories',
-  ProductsCategoriesSchema,
-);
+const CategoriesMongo = mongoose.model('Categories', CategoriesSchema);
 
-export default ProductsCategoriesMongo;
+module.exports = CategoriesMongo;

@@ -1,4 +1,4 @@
-import validator from 'validator';
+const validator = require('validator');
 
 /**
  *
@@ -15,4 +15,4 @@ function isUUIDOrSlug(value) {
   };
 }
 
-export default isUUIDOrSlug;
+module.exports = isUUIDOrSlug;

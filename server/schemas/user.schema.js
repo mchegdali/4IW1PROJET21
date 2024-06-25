@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import passwordSchema from './password.schema.js';
-import entitySchema from './entity.schema.js';
-import timestampsSchema from './timestamps.schema.js';
+const { z } = require('zod');
+const passwordSchema = require('./password.schema');
+const entitySchema = require('./entity.schema');
+const timestampsSchema = require('./timestamps.schema');
 
 const limitValues = [10, 25, 50, 100];
 const offsetValues = [0, 10, 25, 50, 100];
@@ -29,8 +29,8 @@ const userCreateSchema = z.object({
   fullname: z.string().min(2).trim(),
   email: z.string().email().trim(),
   password: passwordSchema,
-  isVerified: z.boolean(),
-  role: z.enum(['user', 'admin', 'accountant']),
+  isVerified: z.boolean().default(false),
+  role: z.enum(['user', 'admin', 'accountant']).default('user'),
 });
 
 const userUpdateSchema = userCreateSchema.partial().refine((a) => {
@@ -44,4 +44,9 @@ const userSchema = userCreateSchema.merge(entitySchema).merge(timestampsSchema);
 /** @typedef { z.infer<typeof userSchema>} User */
 /** @typedef { z.infer<typeof userQuerySchema>} UserQuery */
 
-export { userCreateSchema, userUpdateSchema, userSchema, userQuerySchema };
+module.exports = {
+  userCreateSchema,
+  userUpdateSchema,
+  userSchema,
+  userQuerySchema,
+};

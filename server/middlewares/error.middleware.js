@@ -1,12 +1,13 @@
-import { ValidationError } from 'sequelize';
-import { ZodError } from 'zod';
-import createHttpError from 'http-errors';
+const { ValidationError } = require('sequelize');
+const { ZodError } = require('zod');
+const createHttpError = require('http-errors');
 
 /**
  *
  * @type {import("express").ErrorRequestHandler}
  */
 const errorMiddleware = (error, req, res, next) => {
+  console.error(error);
   if (error instanceof ZodError) {
     return res.status(422).json({
       errors: error.formErrors.fieldErrors,
@@ -34,4 +35,4 @@ const errorMiddleware = (error, req, res, next) => {
   });
 };
 
-export default errorMiddleware;
+module.exports = errorMiddleware;

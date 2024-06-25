@@ -1,26 +1,17 @@
-import { Router } from 'express';
-import { createUser, getUsers } from '../controllers/users.controller.js';
-import {
-  validateAccessToken,
-  validateAuthorizationHeader,
-  validateRoles,
-} from '../middlewares/auth.middleware.js';
+const { Router } = require('express');
+const { createUser, getUsers } = require('../controllers/users.controller');
+const {
+  checkAccessToken,
+  checkAuthHeader,
+  checkRole,
+} = require('../middlewares/auth.middleware');
 
 const usersRouter = Router();
 
-// usersRouter
-//   .route('/:userId')
-//   .get(getProduct)
-//   .patch(updateProduct)
-//   .delete(deleteProduct);
 usersRouter
-  .route('/')
-  //   .all(
-  //     validateAuthorizationHeader,
-  //     validateAccessToken,
-  //     validateRoles(['admin']),
-  //   )
-  .post(createUser)
-  .get(getUsers);
+  .route('/users')
+  .all(checkAuthHeader, checkAccessToken)
+  .post(checkRole('user'), createUser)
+  .get(checkRole('admin'), getUsers);
 
-export default usersRouter;
+module.exports = usersRouter;
