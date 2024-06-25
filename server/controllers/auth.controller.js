@@ -4,7 +4,7 @@ const jose = require('jose');
 const authConfig = require('../config/auth.config');
 const { sendForgotPasswordEmail } = require('../config/email.config');
 const UserMongo = require('../models/mongo/user.mongo');
-const { UsersSequelize, connection } = require('../models/sql');
+const sequelize = require('../models/sql');
 const { Unauthorized } = require('http-errors');
 const {
   loginSchema,
@@ -12,6 +12,7 @@ const {
   resetPasswordSchema,
 } = require('../schemas/auth.schema');
 
+const Users = sequelize.model('users');
 /**
  *
  * @type {import("express").RequestHandler}
@@ -92,7 +93,7 @@ const confirm = async (req, res, next) => {
       },
     );
 
-    const nbUpdated = await UsersSequelize.update(
+    const nbUpdated = await Users.update(
       {
         isVerified: true,
       },
@@ -159,43 +160,31 @@ const forgotPassword = async (req, res, next) => {
 const resetPassword = async (req, res, next) => {
   try {
     const { password } = resetPasswordSchema.parse(req.body);
-    const token = res.locals.token;
+    const user = req.user;
 
-    const decoded = await jose.jwtVerify(
-      token,
-      authConfig.forgotPasswordTokenSecret,
-      {
-        requiredClaims: ['sub'],
-        maxTokenAge: '15 minutes',
-      },
-    );
-
-    const user = await UserMongo.findById(decoded.payload.sub);
-
-    if (!user) {
-      return res.sendStatus(401);
-    }
-
-    const result = await connection.transaction(async (t) => {
-      const [nbUpdated, updatedUsers] = await UsersSequelize.update(
+    await sequelize.transaction(async (t) => {
+      const result = await req.user.update(
         {
           password,
         },
         {
           where: {
-            id: user._id,
+            id: user.id,
           },
           returning: true,
           individualHooks: true,
+          transaction: t,
         },
       );
 
-      if (nbUpdated === 0) {
+      console.log(result);
+
+      throw new Error('test');
+
+      if (result === 0) {
         // throw instead of directly return because of the transaction
         throw new Unauthorized();
       }
-
-      throw new Error('test');
     });
 
     return res.sendStatus(204);

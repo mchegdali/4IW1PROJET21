@@ -15,14 +15,17 @@ const UsersSequelize = (sequelize) => {
 
     toMongo() {
       return {
-        _id: this.id,
-        fullname: this.fullname,
-        email: this.email,
-        password: this.password,
-        passwordValidUntil: this.passwordValidUntil,
-        isVerified: this.isVerified,
-        role: this.role,
-        addresses: this.addresses.map((address) => address.toMongo()),
+        _id: this.getDataValue('id'),
+
+        fullname: this.getDataValue('fullname'),
+        email: this.getDataValue('email'),
+        password: this.getDataValue('password'),
+        passwordValidUntil: this.getDataValue('passwordValidUntil'),
+        isVerified: this.getDataValue('isVerified'),
+        role: this.getDataValue('role'),
+        addresses:
+          this.getDataValue('addresses')?.map((address) => address.toMongo()) ??
+          [],
       };
     }
   }
@@ -73,24 +76,36 @@ const UsersSequelize = (sequelize) => {
       sequelize,
       modelName: 'users',
       hooks: {
-        beforeCreate: async (user) => {
-          if (user.changed('password')) {
-            const newPassword = await hash(
-              user.get('password'),
-              authConfig.hashOptions,
-            );
-            user.set('password', newPassword);
-          }
-        },
-        beforeUpdate: async (user, { fields }) => {
+        afterValidate: async (user, { fields }) => {
           if (fields.includes('password')) {
             const newPassword = await hash(
-              user.get('password'),
+              user.password,
               authConfig.hashOptions,
             );
-            user.set('password', newPassword);
+            user.password = newPassword;
+            user.passwordValidUntil = dayjs().add(60, 'day').toDate();
           }
         },
+        // beforeUpsert: async function (user, { fields }) {
+        //   if (fields.includes('password')) {
+        //     const newPassword = await hash(
+        //       user.password,
+        //       authConfig.hashOptions,
+        //     );
+        //     user.password = newPassword;
+        //     user.passwordValidUntil = dayjs().add(60, 'day').toDate();
+        //   }
+        // },
+        // beforeUpdate: async (user, { fields }) => {
+        //   if (fields.includes('password')) {
+        //     const newPassword = await hash(
+        //       user.password,
+        //       authConfig.hashOptions,
+        //     );
+        //     user.password = newPassword;
+        //     user.passwordValidUntil = dayjs().add(60, 'day').toDate();
+        //   }
+        // },
       },
     },
   );
