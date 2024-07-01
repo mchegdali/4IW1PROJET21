@@ -1,8 +1,0 @@
-[build]
-command = "echo 'Building Functions'"
-
-[[redirects]]
-force = true
-from = "/api/*"
-status = 200
-to = "/.netlify/functions/api/:splat"
