@@ -31,3 +31,5 @@ logs
 .DS_Store
 Thumbs.db
 .ash_history
+# Local Netlify folder
+.netlify
