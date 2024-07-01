@@ -6,7 +6,7 @@
     <div class="text-justify mt-6 space-y-8 sm:p-8">
       <section>
         <p>
-          Bienvenue sur Fanthésie (le "Site"). Nous prenons très au sérieux la confidentialité de
+          Bienvenue sur Fanthésie. Nous prenons très au sérieux la confidentialité de
           vos informations personnelles. Cette déclaration de confidentialité explique quelles
           informations nous collectons, comment nous les utilisons et les protégeons, ainsi que vos
           droits concernant vos informations personnelles.
