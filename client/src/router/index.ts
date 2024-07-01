@@ -130,6 +130,21 @@ const router = createRouter({
           name: 'tracking',
           path: '/tracking/:id',
           component: () => import('../views/order-tracking-view.vue')
+        },
+        {
+          name: 'conditions',
+          path: '/conditions',
+          component: () => import('../views/conditions-sale-use-view.vue')
+        },
+        {
+          name: 'confidentiality-declaration',
+          path: '/confidentiality-declaration',
+          component: () => import('../views/confidentiality-declaration-view.vue')
+        },
+        {
+          name: 'cookie-policy',
+          path: '/cookie-policy',
+          component: () => import('../views/cookie-policy-view.vue')
         }
       ]
     }
