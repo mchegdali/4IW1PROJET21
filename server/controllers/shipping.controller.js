@@ -2,9 +2,10 @@ const { ZodError } = require('zod');
 const ShippingMongo = require('../models/mongo/shipping');
 const { shippingCreateSchema } = require('../schemas/shipping.schema');
 const formatZodError = require('../utils/format-zod-error');
-const ShippingSequelize = require('../models/sql/shipping.sql');
 const { ValidationError } = require('sequelize');
-const { sequelize } = require('../sequelize');
+const sequelize = require('../models/sql');
+
+const Shipping = sequelize.model('shippings');
 
 /**
  *
@@ -18,7 +19,7 @@ async function createShipping(req, res, next) {
         req.body,
       );
 
-      const newData = await ShippingSequelize.create(shippingCreateBody, {
+      const newData = await Shipping.create(shippingCreateBody, {
         transaction: t,
       });
 
@@ -95,7 +96,7 @@ async function getProduct(req, res, next) {
     }
     return res.json(product);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 

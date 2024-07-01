@@ -1,6 +1,6 @@
 const httpErrors = require('http-errors');
 const validator = require('validator');
-const { connection, Products } = require('../models/sql');
+const sequelize = require('../models/sql');
 const CategoriesMongo = require('../models/mongo/categories.mongo');
 const ProductMongo = require('../models/mongo/products.mongo');
 const {
@@ -9,6 +9,7 @@ const {
   productUpdateSchema,
 } = require('../schemas/products.schema');
 const { NotFound } = httpErrors;
+const Products = sequelize.model('products');
 
 /**
  *
@@ -19,7 +20,7 @@ async function createProduct(req, res, next) {
   try {
     const productCreateBody = await productCreateSchema.parseAsync(req.body);
 
-    const result = await connection.transaction(async (t) => {
+    const result = await sequelize.transaction(async (t) => {
       if (productCreateBody.categoryId) {
         const category = await CategoriesMongo.findById(
           productCreateBody.categoryId,
@@ -35,16 +36,9 @@ async function createProduct(req, res, next) {
         include: ['category'],
       });
 
-      throw new Error('test');
+      const productMongo = await data.toMongo();
 
-      const newData = await Products.scope('toMongo').findByPk(data.id, {
-        transaction: t,
-      });
-      const product = newData.get({
-        plain: true,
-      });
-
-      const productDoc = await ProductMongo.create(product);
+      const productDoc = await ProductMongo.create(productMongo);
 
       return productDoc;
     });
@@ -205,7 +199,7 @@ async function getRelatedProducts(req, res, next) {
     }
 
     const relatedProducts = await ProductMongo.find({
-      category: product.category,
+      'category._id': product.category._id,
       _id: { $ne: product._id },
     }).limit(5);
 
@@ -233,7 +227,7 @@ async function updateProduct(req, res, next) {
     const productUpdateBody = await productUpdateSchema.parseAsync(req.body);
     const updatedKeys = Object.keys(productUpdateBody);
 
-    const result = await connection.transaction(async (t) => {
+    const result = await sequelize.transaction(async (t) => {
       const [affectedRowsCount, affectedRows] = await Products.update(
         productUpdateBody,
         {

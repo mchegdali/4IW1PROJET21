@@ -1,48 +1,53 @@
-import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../sequelize.js';
+const { DataTypes, Model } = require('sequelize');
 
+const ShippingSequelize = (sequelize) => {
+  class Shipping extends Model {}
 
-class ShippingSequelize extends Model {}
-
-ShippingSequelize.init({
-    id: {
+  Shipping.init(
+    {
+      id: {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
-    },
-    emailCustomer: {
+      },
+      emailCustomer: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    fullname: {
+      },
+      fullname: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    
-    street: {
+      },
+
+      street: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    zipCode: {
+      },
+      zipCode: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    city: {
+      },
+      city: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    phone: {
+      },
+      phone: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    shippingMode : {
+      },
+      shippingMode: {
         type: DataTypes.ENUM('Colissimo', 'Mondial Relay'),
         allowNull: false,
+      },
     },
-}, {
-    sequelize,
-    modelName: 'Shipping',
-    tableName: 'shippings'
-});
+    {
+      sequelize,
+      modelName: 'shippings',
+      tableName: 'shippings',
+    },
+  );
 
-export default ShippingSequelize;
+  return Shipping;
+};
+
+module.exports = ShippingSequelize;

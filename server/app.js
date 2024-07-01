@@ -4,9 +4,9 @@ const cors = require('cors');
 const authRouter = require('./routes/auth.routes');
 const productsRouter = require('./routes/products.routes');
 const categoriesRouter = require('./routes/categories.routes');
-const errorMiddleware = require('./middlewares/error.middleware');
 const usersRouter = require('./routes/users.routes');
 const shippingRouter = require('./routes/shipping.routes');
+const errorMiddleware = require('./middlewares/error.middleware');
 
 const app = express();
 app.use(express.json());

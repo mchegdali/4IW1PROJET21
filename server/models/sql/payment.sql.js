@@ -1,26 +1,31 @@
-import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../sequelize.js';
+const { DataTypes, Model } = require('sequelize');
 
+const PaymentSequelize = (sequelize) => {
+  class Payment extends Model {}
 
-class PaymentSequelize extends Model {}
-
-PaymentSequelize.init({
-    _id: {
+  Payment.init(
+    {
+      _id: {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
-    },
-    shippingMode : {
+      },
+      shippingMode: {
         type: DataTypes.ENUM('Colissimo', 'Mondial Relay'),
         allowNull: false,
-    },
-    paymentMode: {
+      },
+      paymentMode: {
         type: DataTypes.ENUM('Carte de Credit', 'Paypal'),
         allowNull: false,
+      },
     },
-}, {
-    sequelize,
-    modelName: 'PaymentSequelize',
-});
+    {
+      sequelize,
+      modelName: 'payments',
+    },
+  );
 
-export default PaymentSequelize;
+  return Payment;
+};
+
+module.exports = PaymentSequelize;

@@ -2,7 +2,6 @@ const ProductMongo = require('../../models/mongo/products.mongo');
 const slugify = require('../../utils/slugify');
 const { fakerFR: faker } = require('@faker-js/faker');
 const crypto = require('node:crypto');
-const CategoriesMongo = require('../../models/mongo/categories.mongo');
 
 const minProducts = 2;
 const maxProducts = 5;

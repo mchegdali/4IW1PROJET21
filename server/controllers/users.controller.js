@@ -13,6 +13,7 @@ const { getPaginationLinks } = require('../utils/get-pagination-links');
 const { NotFound } = require('http-errors');
 
 const Users = sequelize.model('users');
+
 /**
  *
  * @type {import('express').RequestHandler}
@@ -32,7 +33,7 @@ async function createUser(req, res, next) {
         include: ['addresses'],
       });
 
-      const userMongo = data.toMongo();
+      const userMongo = await data.toMongo();
 
       const userDoc = await UserMongo.create(userMongo);
 
@@ -71,6 +72,8 @@ async function createUser(req, res, next) {
 
     return res.status(201).json(newUser);
   } catch (error) {
+    console.error(error.name);
+
     return next(error);
   }
 }

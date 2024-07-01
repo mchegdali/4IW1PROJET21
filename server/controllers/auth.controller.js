@@ -5,7 +5,6 @@ const authConfig = require('../config/auth.config');
 const { sendForgotPasswordEmail } = require('../config/email.config');
 const UserMongo = require('../models/mongo/user.mongo');
 const sequelize = require('../models/sql');
-const { Unauthorized } = require('http-errors');
 const {
   loginSchema,
   forgotPasswordSchema,
@@ -163,7 +162,7 @@ const resetPassword = async (req, res, next) => {
     const user = req.user;
 
     await sequelize.transaction(async (t) => {
-      const result = await req.user.update(
+      await req.user.update(
         {
           password,
         },
@@ -176,15 +175,6 @@ const resetPassword = async (req, res, next) => {
           transaction: t,
         },
       );
-
-      console.log(result);
-
-      throw new Error('test');
-
-      if (result === 0) {
-        // throw instead of directly return because of the transaction
-        throw new Unauthorized();
-      }
     });
 
     return res.sendStatus(204);

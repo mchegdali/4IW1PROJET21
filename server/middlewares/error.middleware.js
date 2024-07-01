@@ -1,4 +1,4 @@
-const { ValidationError } = require('sequelize');
+const { ValidationError, UniqueConstraintError } = require('sequelize');
 const { ZodError } = require('zod');
 const createHttpError = require('http-errors');
 
@@ -6,7 +6,8 @@ const createHttpError = require('http-errors');
  *
  * @type {import("express").ErrorRequestHandler}
  */
-const errorMiddleware = (error, req, res) => {
+// eslint-disable-next-line no-unused-vars
+const errorMiddleware = (error, req, res, _next) => {
   if (error instanceof ZodError) {
     const flattenedErrors = {};
     for (const err of error.issues) {
@@ -14,6 +15,16 @@ const errorMiddleware = (error, req, res) => {
     }
 
     return res.status(422).json(flattenedErrors);
+  }
+
+  if (error instanceof UniqueConstraintError) {
+    const flattenedErrors = {};
+
+    for (const err of error.errors) {
+      flattenedErrors[err.path] = err.message;
+    }
+
+    return res.status(409).json(flattenedErrors);
   }
 
   if (error instanceof ValidationError) {
