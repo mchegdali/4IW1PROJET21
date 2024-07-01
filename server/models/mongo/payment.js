@@ -1,42 +1,43 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-const paymentSchema = new mongoose.schema ({
+const paymentSchema = new mongoose.schema(
+  {
     _id: {
-        type: mongoose.Schema.Types.UUID,
-        required : true,
+      type: mongoose.Schema.Types.UUID,
+      required: true,
     },
-    shippingMode : {
-        type: String,
-        enum: ['Colissimo', 'Mondial Relay'],
-        required: true,
+    shippingMode: {
+      type: String,
+      enum: ['Colissimo', 'Mondial Relay'],
+      required: true,
     },
     paymentMode: {
-        type: [String],
-        required: true,
+      type: [String],
+      required: true,
     },
-},
-{
+  },
+  {
     toObject: {
       getters: true,
     },
     toJSON: {
       getters: true,
     },
-   },
+  },
 );
 paymentSchema.index(
-    {
-        title: 'text',
-        description: 'text'
+  {
+    title: 'text',
+    description: 'text',
+  },
+  {
+    name: 'shipping_search_index',
+    weights: {
+      title: 10,
+      description: 5,
     },
-    {
-      name: 'shipping_search_index',
-      weights: {
-        title: 10,
-        description: 5
-      },
-    },
-)
+  },
+);
 
 const Payment = mongoose.model('shipping', paymentSchema);
-export default Payment;
+module.exports = Payment;

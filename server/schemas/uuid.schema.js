@@ -1,5 +1,6 @@
-import { z } from 'zod';
+//@ts-check
+const { z } = require('zod');
 
 const uuidSchema = z.string().uuid();
 
-export default uuidSchema;
+module.exports = uuidSchema;

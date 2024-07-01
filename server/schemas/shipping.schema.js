@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import entitySchema from './entity.schema.js';
-import timestampsSchema from './timestamps.schema.js';
-import slugSchema from './slug.schema.js';
+const { z } = require('zod');
+const entitySchema = require('./entity.schema.js');
+const timestampsSchema = require('./timestamps.schema.js');
+const slugSchema = require('./slug.schema.js');
 
 const shippingQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -10,17 +10,19 @@ const shippingQuerySchema = z.object({
 
 const shippingCreateSchema = z
   .object({
-    emailCustomer: z.string().min(5, {
-        message: "5 characters minimum"
-    }).email({
-        message: "Invalid email"
-    }),
+    emailCustomer: z
+      .string()
+      .min(5, {
+        message: '5 characters minimum',
+      })
+      .email({
+        message: 'Invalid email',
+      }),
     fullname: z.string().min(2),
     street: z.string().min(5),
     zipCode: z.string().min(2),
     city: z.string().min(2),
-    phone: z.string().min(10)
-    
+    phone: z.string().min(10),
   })
   .transform((data) => ({
     emailCustomer: data.emailCustomer,
@@ -44,7 +46,7 @@ const shippingSchema = shippingCreateSchema
 /** @typedef { z.infer<typeof productSchema>} Product */
 /** @typedef { z.infer<typeof productQuerySchema>} ProductQuery */
 
-export {
+module.exports = {
   shippingQuerySchema,
   shippingCreateSchema,
   shippingUpdateSchema,

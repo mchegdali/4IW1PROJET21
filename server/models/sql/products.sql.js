@@ -1,91 +1,88 @@
-import { DataTypes, Model } from 'sequelize';
-import slugify from '@sindresorhus/slugify';
+const { DataTypes, Model } = require('sequelize');
+const slugify = require('../../utils/slugify');
 
-import { sequelize } from '../../sequelize.js';
-import ProductsCategoriesSequelize from './products-categories.sql.js';
+const ProductsSequelize = (sequelize) => {
+  class Products extends Model {
+    static associate(models) {
+      Products.belongsTo(models.categories, {
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+      });
+    }
 
-class ProductsSequelize extends Model {}
+    /**
+     * @description
+     * Transform the model into a MongoDB-like object
+     * Use after a creation or update
+     * @returns
+     */
+    async toMongo() {
+      const category = await this.sequelize.models.categories.findByPk(
+        this.categoryId,
+      );
 
-ProductsSequelize.init(
-  {
-    id: {
-      type: DataTypes.UUID,
-      primaryKey: true,
-      defaultValue: DataTypes.UUIDV4,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    slug: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    price: {
-      type: DataTypes.DECIMAL.UNSIGNED,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    image: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'Products',
-    tableName: 'products',
+      return {
+        _id: this.id,
+        slug: this.slug,
+        name: this.name,
+        description: this.description,
+        category: category.toMongo(),
+        image: this.image,
+        price: this.price,
+      };
+    }
+  }
 
-    hooks: {
-      beforeValidate: (item) => {
-        /**
-         * @type {string}
-         */
-        const id = item.getDataValue('id');
-        const lastPart = id.split('-').at(-1);
-        if (!item.slug) {
-          item.slug = slugify(`${item.name}-${lastPart}`);
-        } else {
-          item.slug = slugify(`${item.slug}-${lastPart}`);
-        }
+  Products.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      slug: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      price: {
+        type: DataTypes.DECIMAL.UNSIGNED,
+        allowNull: false,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
+      image: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
     },
-    scopes: {
-      toMongo: {
-        attributes: {
-          include: [['id', '_id']],
-          exclude: ['id', 'categoryId'],
+    {
+      sequelize,
+      modelName: 'products',
+      hooks: {
+        beforeValidate: (item) => {
+          /**
+           * @type {string}
+           */
+          const id = item.getDataValue('id');
+          const lastPart = id.split('-').at(-1);
+          if (!item.slug) {
+            item.slug = slugify(`${item.name}-${lastPart}`);
+          } else {
+            item.slug = slugify(`${item.slug}-${lastPart}`);
+          }
         },
-        include: [
-          {
-            as: 'category',
-            model: ProductsCategoriesSequelize,
-            attributes: ['name', 'slug', ['id', '_id']],
-          },
-        ],
       },
     },
-  },
-);
+  );
 
-// 1:M relationship between Products and ProductsCategories
-ProductsSequelize.belongsTo(ProductsCategoriesSequelize, {
-  as: 'category',
-  targetKey: 'id',
-  foreignKey: {
-    field: 'categoryId',
-    name: 'categoryId',
-  },
-  onDelete: 'SET NULL',
-  onUpdate: 'CASCADE',
-});
+  return Products;
+};
 
-ProductsCategoriesSequelize.hasMany(ProductsSequelize, {
-  as: 'product',
-});
-
-export default ProductsSequelize;
+module.exports = ProductsSequelize;

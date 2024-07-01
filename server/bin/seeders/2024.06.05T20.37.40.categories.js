@@ -1,10 +1,9 @@
-import slugify from '@sindresorhus/slugify';
-import crypto from 'node:crypto';
-import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
-import ProductsCategoriesSequelize from '../models/sql/products-categories.sql.js';
+const slugify = require('../../utils/slugify');
+const crypto = require('node:crypto');
+const CategoriesMongo = require('../../models/mongo/categories.mongo');
 
 const now = new Date();
-const productsCategories = [
+const categories = [
   {
     id: crypto.randomUUID(),
     name: 'Thé vert',
@@ -57,8 +56,8 @@ const productsCategories = [
  * @property { string } name
  * @property { string } [path]
  * @property { Object } context
- * @property { import('sequelize').Sequelize } context.sequelize
- * @property { import('mongoose').Mongoose } context.mongoose
+ * @property { import("../../models/sql") } context.sequelize
+ * @property { Object } context.mongoose
  */
 
 /**
@@ -66,13 +65,14 @@ const productsCategories = [
  * @param {MigrationParams} params
  *
  */
-export const up = async () => {
-  const productsCategoriesSequelize =
-    await ProductsCategoriesSequelize.bulkCreate(productsCategories, {
-      validate: true,
-    });
+const up = async ({ context: { sequelize } }) => {
+  const CategoriesSequelize = sequelize.model('categories');
 
-  const productsCategoriesMongo = productsCategoriesSequelize.map((p) => ({
+  const categoriesSequelize = await CategoriesSequelize.bulkCreate(categories, {
+    validate: true,
+  });
+
+  const categoriesMongo = categoriesSequelize.map((p) => ({
     _id: p.getDataValue('id'),
     slug: p.getDataValue('slug'),
     name: p.getDataValue('name'),
@@ -81,7 +81,7 @@ export const up = async () => {
     updatedAt: p.getDataValue('updatedAt'),
   }));
 
-  await ProductsCategoriesMongo.create(productsCategoriesMongo);
+  await CategoriesMongo.create(categoriesMongo);
 };
 
 /**
@@ -89,8 +89,14 @@ export const up = async () => {
  * @param {MigrationParams} params
  *
  */
-export const down = async ({ context: { sequelize } }) => {
-  const queryInterface = sequelize.getQueryInterface();
-  await queryInterface.bulkDelete('products_categories', null, {});
-  await ProductsCategoriesMongo.deleteMany({});
+const down = async ({ context: { sequelize } }) => {
+  const CategoriesSequelize = sequelize.model('categories');
+  await CategoriesSequelize.destroy({
+    truncate: true,
+    cascade: true,
+    force: true,
+  });
+  await CategoriesMongo.deleteMany({});
 };
+
+module.exports = { up, down };

@@ -1,15 +1,10 @@
-import init from './init.js';
-import getApp from './server.js';
+const { z } = require('zod');
+const app = require('./app');
+const zodErrorMap = require('./utils/zod-error-map');
 
-init()
-  .then(() => {
-    const PORT = parseInt(process.env.PORT) || 3000;
-    const app = getApp();
+// Initialize translated error messages
+z.setErrorMap(zodErrorMap);
 
-    app.listen(PORT, () => {
-      console.log('Server is running');
-    });
-  })
-  .catch((error) => {
-    console.error('Failed to connect to the database', error);
-  });
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
+});
