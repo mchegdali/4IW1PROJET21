@@ -11,8 +11,8 @@ const userQuerySchema = z
   .merge(paginationSchema);
 
 const userCreateSchema = z.object({
-  fullname: z.string().min(2).trim(),
-  email: z.string().email().trim(),
+  fullname: z.string().min(2, 'Veuillez renseigner votre nom').trim(),
+  email: z.string().email('Adresse email invalide').trim(),
   password: passwordSchema,
   isVerified: z.boolean().default(false),
   role: z.enum(['user', 'admin', 'accountant']).default('user'),

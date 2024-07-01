@@ -6,15 +6,15 @@ const Users = sequelize.model('users');
  * @description
  * Check if the token is valid.
  *
- * @param {boolean} nullIfNoHeader
+ * @param {boolean} skipIfNoHeader
  * @returns {import("express").RequestHandler}
  */
 const checkAuth =
-  (secret, nullIfNoHeader = false) =>
+  (secret, skipIfNoHeader = false) =>
   async (req, res, next) => {
     try {
       if (!req.headers.authorization) {
-        if (nullIfNoHeader) {
+        if (skipIfNoHeader) {
           req.user = null;
           return next();
         }
@@ -52,7 +52,7 @@ const checkAuth =
 
 /**
  *
- * @param {"admin"|"accountant"|"user"} allowedRoles
+ * @param {("admin"|"accountant"|"user")[]} allowedRoles
  * @returns {import("express").RequestHandler}
  */
 const checkRole =
@@ -63,19 +63,16 @@ const checkRole =
     }
 
     const isAdmin = req.user.role === 'admin';
-    const isAccountant = req.user.role === 'accountant';
-    const isUser = req.user.role === 'user';
+    const isAccountant = req.user.role === 'accountant' || isAdmin;
+    const isUser = req.user.role === 'user' || isAccountant;
 
     if (!isAdmin && !isAccountant && !isUser) {
       return res.sendStatus(403);
     }
 
-    if (allowedRoles.includes('user') && !(isUser || isAccountant || isAdmin)) {
+    if (allowedRoles.includes('user') && !isUser) {
       return res.sendStatus(403);
-    } else if (
-      allowedRoles.includes('accountant') &&
-      !(isAccountant || isAdmin)
-    ) {
+    } else if (allowedRoles.includes('accountant') && !isAccountant) {
       return res.sendStatus(403);
     } else if (allowedRoles.includes('admin') && !isAdmin) {
       return res.sendStatus(403);

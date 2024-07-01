@@ -6,33 +6,31 @@ const createHttpError = require('http-errors');
  *
  * @type {import("express").ErrorRequestHandler}
  */
-const errorMiddleware = (error, req, res, next) => {
-  console.error(error);
+const errorMiddleware = (error, req, res) => {
   if (error instanceof ZodError) {
-    return res.status(422).json({
-      errors: error.formErrors.fieldErrors,
-    });
+    const flattenedErrors = {};
+    for (const err of error.issues) {
+      flattenedErrors[err.path] = err.message;
+    }
+
+    return res.status(422).json(flattenedErrors);
   }
 
   if (error instanceof ValidationError) {
-    return res.status(422).json({ errors: error.errors });
+    const flattenedErrors = {};
+
+    for (const err of error.errors) {
+      flattenedErrors[err.path] = err.message;
+    }
+
+    return res.status(422).json(flattenedErrors);
   }
 
   if (createHttpError.isHttpError(error)) {
-    return res.status(error.statusCode).json({
-      message: error.message,
-    });
+    return res.sendStatus(error.statusCode);
   }
 
-  if (error instanceof Error) {
-    return res.status(400).json({
-      message: error.message,
-    });
-  }
-
-  return res.status(500).json({
-    message: 'Erreur interne',
-  });
+  return res.sendStatus(500);
 };
 
 module.exports = errorMiddleware;

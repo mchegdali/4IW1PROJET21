@@ -44,7 +44,9 @@ const UsersSequelize = (sequelize) => {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: {
+          msg: 'Adresse email déjà utilisée',
+        },
         validate: {
           notNull: { msg: 'Adresse email obligatoire' },
           isEmail: {

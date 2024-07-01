@@ -21,7 +21,7 @@ const Users = sequelize.model('users');
 async function createUser(req, res, next) {
   try {
     const userCreationData = userCreateSchema.parse(req.body);
-    if (req.user.role !== 'admin') {
+    if (!req.user || req.user.role !== 'admin') {
       userCreationData.role = 'user';
       userCreationData.isVerified = true;
     }
