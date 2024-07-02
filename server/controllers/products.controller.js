@@ -1,30 +1,28 @@
-import { ZodError } from 'zod';
-import ProductMongo from '../models/mongo/products.mongo.js';
-import {
+const httpErrors = require('http-errors');
+const validator = require('validator');
+const sequelize = require('../models/sql');
+const CategoriesMongo = require('../models/mongo/categories.mongo');
+const ProductMongo = require('../models/mongo/products.mongo');
+const {
   productCreateSchema,
   productQuerySchema,
   productUpdateSchema,
-} from '../schemas/products.schema.js';
-import formatZodError from '../utils/format-zod-error.js';
-import ProductsSequelize from '../models/sql/products.sql.js';
-import { ValidationError } from 'sequelize';
-import { sequelize } from '../sequelize.js';
-import validator from 'validator';
-import ProductsCategoriesMongo from '../models/mongo/products-categories.mongo.js';
-import httpErrors from 'http-errors';
+} = require('../schemas/products.schema');
 const { NotFound } = httpErrors;
+const Products = sequelize.model('products');
 
 /**
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function createProduct(req, res) {
+async function createProduct(req, res, next) {
   try {
+    const productCreateBody = await productCreateSchema.parseAsync(req.body);
+
     const result = await sequelize.transaction(async (t) => {
-      const productCreateBody = await productCreateSchema.parseAsync(req.body);
       if (productCreateBody.categoryId) {
-        const category = await ProductsCategoriesMongo.findById(
+        const category = await CategoriesMongo.findById(
           productCreateBody.categoryId,
         );
 
@@ -33,39 +31,21 @@ export async function createProduct(req, res) {
         }
       }
 
-      const data = await ProductsSequelize.create(productCreateBody, {
+      const data = await Products.create(productCreateBody, {
         transaction: t,
         include: ['category'],
       });
 
-      const newData = await ProductsSequelize.scope('toMongo').findByPk(
-        data.id,
-        {
-          transaction: t,
-        },
-      );
-      const product = newData.get({
-        plain: true,
-      });
+      const productMongo = await data.toMongo();
 
-      const productDoc = await ProductMongo.create(product);
+      const productDoc = await ProductMongo.create(productMongo);
 
       return productDoc;
     });
 
     return res.status(201).json(result);
   } catch (error) {
-    if (httpErrors.isHttpError(error)) {
-      return res.status(error.statusCode).json({ message: error.message });
-    }
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
-
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -74,7 +54,7 @@ export async function createProduct(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getProducts(req, res) {
+async function getProducts(req, res, next) {
   try {
     const category = req.params.category;
     const categoryIsUUID = res.locals.category?.isUUID;
@@ -84,12 +64,12 @@ export async function getProducts(req, res) {
     );
 
     if (category) {
-      const categoryDoc = await ProductsCategoriesMongo.findOne({
+      const categoryDoc = await CategoriesMongo.findOne({
         [categoryIsUUID ? '_id' : 'slug']: category,
       });
 
       if (!categoryDoc) {
-        return res.status(404).json({ message: 'Catégorie introuvable' });
+        return res.sendStatus(404);
       }
     }
 
@@ -120,6 +100,7 @@ export async function getProducts(req, res) {
       };
     }
 
+    // if (true) {
     if (text) {
       textMatchStage = {
         $match: {
@@ -142,10 +123,6 @@ export async function getProducts(req, res) {
       pipelineStages.push(textMatchStage);
     }
 
-    if (sortStage) {
-      pipelineStages.push(sortStage);
-    }
-
     pipelineStages.push(
       { $skip: (page - 1) * limit },
       { $project: { score: 0 } },
@@ -165,17 +142,18 @@ export async function getProducts(req, res) {
       },
     );
 
-    const products = await ProductMongo.aggregate(pipelineStages);
+    if (sortStage) {
+      pipelineStages.push(sortStage);
+    }
+
+    const products = await ProductMongo.aggregate(pipelineStages).exec();
 
     return res.json({
       metadata: products[0].metadata[0],
       data: products[0].data,
     });
   } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
-    return res.status(400).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -184,7 +162,7 @@ export async function getProducts(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getProduct(req, res) {
+async function getProduct(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
 
@@ -194,11 +172,11 @@ export async function getProduct(req, res) {
 
     const product = await ProductMongo.findOne(filter);
     if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable' });
+      return res.sendStatus(404);
     }
     return res.json(product);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -207,7 +185,7 @@ export async function getProduct(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getRelatedProducts(req, res) {
+async function getRelatedProducts(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
 
@@ -217,17 +195,17 @@ export async function getRelatedProducts(req, res) {
 
     const product = await ProductMongo.findOne(filter);
     if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable' });
+      return res.sendStatus(404);
     }
 
     const relatedProducts = await ProductMongo.find({
-      category: product.category,
+      'category._id': product.category._id,
       _id: { $ne: product._id },
     }).limit(5);
 
     return res.status(200).json(relatedProducts);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -236,7 +214,7 @@ export async function getRelatedProducts(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function updateProduct(req, res, next) {
+async function updateProduct(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
     const sqlWhere = {
@@ -250,7 +228,7 @@ export async function updateProduct(req, res, next) {
     const updatedKeys = Object.keys(productUpdateBody);
 
     const result = await sequelize.transaction(async (t) => {
-      const [affectedRowsCount, affectedRows] = await ProductsSequelize.update(
+      const [affectedRowsCount, affectedRows] = await Products.update(
         productUpdateBody,
         {
           where: sqlWhere,
@@ -264,7 +242,7 @@ export async function updateProduct(req, res, next) {
         throw new NotFound('Produit introuvable');
       }
 
-      const product = await ProductsSequelize.scope('toMongo').findByPk(
+      const product = await Products.scope('toMongo').findByPk(
         affectedRows[0].getDataValue('id'),
         {
           transaction: t,
@@ -294,15 +272,6 @@ export async function updateProduct(req, res, next) {
 
     return res.status(200).json(result);
   } catch (error) {
-    if (httpErrors.isHttpError(error)) {
-      return res.status(error.statusCode).json({ message: error.message });
-    }
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
     return next(error);
   }
 }
@@ -312,7 +281,7 @@ export async function updateProduct(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function deleteProduct(req, res, next) {
+async function deleteProduct(req, res, next) {
   try {
     const isUUID = validator.isUUID(req.params.product);
 
@@ -324,26 +293,25 @@ export async function deleteProduct(req, res, next) {
     };
 
     const [deletedCountSql, deletedCountMongo] = await Promise.all([
-      ProductsSequelize.destroy({ where: sqlWhere }),
+      Products.destroy({ where: sqlWhere }),
       ProductMongo.deleteOne(mongoWhere),
     ]);
 
     if (deletedCountSql === 0 && deletedCountMongo.deletedCount === 0) {
-      return res.status(404).json({ message: 'Produit introuvable' });
+      return res.sendStatus(404);
     }
 
     return res.sendStatus(204);
   } catch (error) {
-    if (httpErrors.isHttpError(error)) {
-      return res.status(error.statusCode).json({ message: error.message });
-    }
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
     return next(error);
   }
 }
+
+module.exports = {
+  createProduct,
+  getProducts,
+  getProduct,
+  getRelatedProducts,
+  updateProduct,
+  deleteProduct,
+};

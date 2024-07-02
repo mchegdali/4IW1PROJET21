@@ -1,8 +1,8 @@
 //@ts-check
-import { z } from 'zod';
-import entitySchema from './entity.schema.js';
-import timestampsSchema from './timestamps.schema.js';
-import slugSchema from './slug.schema.js';
+const { z } = require('zod');
+const entitySchema = require('./entity.schema');
+const timestampsSchema = require('./timestamps.schema');
+const slugSchema = require('./slug.schema');
 
 const limitValues = [10, 25, 50, 100];
 const offsetValues = [0, 10, 25, 50, 100];
@@ -51,7 +51,7 @@ const productSchema = productCreateSchema
 /** @typedef { z.infer<typeof productSchema>} Product */
 /** @typedef { z.infer<typeof productQuerySchema>} ProductQuery */
 
-export {
+module.exports = {
   productQuerySchema,
   productCreateSchema,
   productUpdateSchema,

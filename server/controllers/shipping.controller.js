@@ -1,32 +1,27 @@
-import { ZodError } from 'zod';
-import ShippingMongo from '../models/mongo/shipping.js';
-import {shippingCreateSchema} from '../schemas/shipping.schema.js';
-import formatZodError from '../utils/format-zod-error.js';
-import ShippingSequelize from '../models/sql/shipping.sql.js';
-import { ValidationError } from 'sequelize';
-import { sequelize } from '../sequelize.js';
+const { ZodError } = require('zod');
+const ShippingMongo = require('../models/mongo/shipping');
+const { shippingCreateSchema } = require('../schemas/shipping.schema');
+const formatZodError = require('../utils/format-zod-error');
+const { ValidationError } = require('sequelize');
+const sequelize = require('../models/sql');
 
+const Shipping = sequelize.model('shippings');
 
 /**
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function createShipping(req, res) {
+async function createShipping(req, res, next) {
   try {
     const result = await sequelize.transaction(async (t) => {
-      const shippingCreateBody = await shippingCreateSchema.parseAsync(req.body);
+      const shippingCreateBody = await shippingCreateSchema.parseAsync(
+        req.body,
+      );
 
-      const newData = await ShippingSequelize.create(shippingCreateBody, {
+      const newData = await Shipping.create(shippingCreateBody, {
         transaction: t,
       });
-
-      // const newData = await ShippingSequelize.scope('toMongo').findByPk(
-      //   data.id,
-      //   {
-      //     transaction: t,
-      //   },
-      // );
 
       const shipping = {
         id: newData.id,
@@ -35,7 +30,7 @@ export async function createShipping(req, res) {
         emailCustomer: newData.emailCustomer,
         street: newData.street,
         zipCode: newData.zipCode,
-        phone: newData.phone
+        phone: newData.phone,
       };
 
       const shippingDoc = await ShippingMongo.create(shipping);
@@ -62,7 +57,7 @@ export async function createShipping(req, res) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getShipping(req, res) {
+async function getShipping(req, res) {
   try {
     const shipping = req.params.shipping;
     const shippingDoc = await ShippingMongo.findOne({
@@ -81,7 +76,8 @@ export async function getShipping(req, res) {
     res.status(500).json({ message: error.message });
   }
 }
-export async function getAllShipping(req,res) {
+
+async function getAllShipping(req, res, next) {
   try {
     const shipping = await ShippingMongo.findAll({
       where: req.query,
@@ -101,26 +97,22 @@ export async function getAllShipping(req,res) {
     }
     return res.status(404).json({ message: error.message });
   }
-
 }
-
-
 
 /**
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
-export async function getProduct(req, res) {
+async function getProduct(req, res, next) {
   try {
-
     const product = await ShippingMongo.findOne();
     if (!product) {
       return res.status(404).json({ message: 'Livraison introuvable' });
     }
     return res.json(product);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
@@ -150,3 +142,10 @@ export async function getProduct(req, res) {
 //     res.status(500).json({ message: error.message });
 //   }
 // }
+
+module.exports = {
+  createShipping,
+  getShipping,
+  getAllShipping,
+  getProduct,
+};

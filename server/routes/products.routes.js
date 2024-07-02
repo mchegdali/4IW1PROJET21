@@ -1,21 +1,21 @@
-import { Router } from 'express';
-import {
+const { Router } = require('express');
+const {
   createProduct,
   getProduct,
   getProducts,
   updateProduct,
   deleteProduct,
   getRelatedProducts,
-} from '../controllers/products.controller.js';
+} = require('../controllers/products.controller');
 
 const productsRouter = Router({ mergeParams: true });
 
-productsRouter.get('/:product/related', getRelatedProducts);
+productsRouter.get('/products/:product/related', getRelatedProducts);
 productsRouter
-  .route('/:product')
+  .route('/products/:product')
   .get(getProduct)
   .patch(updateProduct)
   .delete(deleteProduct);
-productsRouter.route('/').get(getProducts).post(createProduct);
+productsRouter.route('/products').get(getProducts).post(createProduct);
 
-export default productsRouter;
+module.exports = productsRouter;

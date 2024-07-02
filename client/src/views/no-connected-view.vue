@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CreateAccount from '@/components/no-connected-view.vue';
+import CreateAccount from '@/components/no-connected.vue';
 </script>
 
 <template>

@@ -1,6 +1,8 @@
 // import { DataTypes, Model } from 'sequelize';
 // import { sequelize } from '../../sequelize.js';
 
+const PaymentSequelize = (sequelize) => {
+  class Payment extends Model {}
 
 // class PaymentSequelize extends Model {}
 

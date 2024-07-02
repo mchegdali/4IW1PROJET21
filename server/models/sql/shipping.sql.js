@@ -2,35 +2,34 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../sequelize.js';
 // import PaymentSequelize from '../mongo/payment.js';
 
-class ShippingSequelize extends Model {}
-
-ShippingSequelize.init({
-    id: {
+  Shipping.init(
+    {
+      id: {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
-    },
-    emailCustomer: {
+      },
+      emailCustomer: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    fullname: {
+      },
+      fullname: {
         type: DataTypes.STRING,
         allowNull: false,
     },
     street: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    zipCode: {
+      },
+      zipCode: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    city: {
+      },
+      city: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    phone: {
+      },
+      phone: {
         type: DataTypes.STRING,
         allowNull: false,
     },

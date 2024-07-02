@@ -1,5 +1,5 @@
 //@ts-check
-import { z } from 'zod';
+const { z } = require('zod');
 
 const timestampsSchema = z.object({
   createdAt: z.coerce.date(),
@@ -8,4 +8,4 @@ const timestampsSchema = z.object({
 
 /** @typedef { z.output<typeof timestampsSchema>} Timestamps */
 
-export default timestampsSchema;
+module.exports = timestampsSchema;
