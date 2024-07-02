@@ -17,7 +17,7 @@ services:
       - HOST=${HOST}
       - MONGODB_URL=${MONGODB_URL}
       - MONGODB_DBNAME=${MONGODB_DBNAME}
-      - POSTGRES_URL=${POSTGRES_URL}
+      - POSTGRES_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
       - CONFIRM_TOKEN_SECRET=${CONFIRM_TOKEN_SECRET}
@@ -37,18 +37,16 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
     volumes:
       - data-mongo:/data/db
-    ports:
-      - 27017:27017
 
   postgres:
     image: postgres
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
     volumes:
       - data-postgres:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
 
 volumes:
   data-mongo:
