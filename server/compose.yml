@@ -12,12 +12,22 @@ services:
     depends_on:
       - mongo
       - postgres
-    env_file:
-      - ./server/.env
+    environment:
+      - APP_URL=${APP_URL}
+      - HOST=${HOST}
+      - MONGODB_URL=${MONGODB_URL}
+      - MONGODB_DBNAME=${MONGODB_DBNAME}
+      - POSTGRES_URL=${POSTGRES_URL}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+      - CONFIRM_TOKEN_SECRET=${CONFIRM_TOKEN_SECRET}
+      - FORGOT_PASSWORD_TOKEN_SECRET=${FORGOT_PASSWORD_TOKEN_SECRET}
+      - PASSWORD_SECRET=${PASSWORD_SECRET}
+      - BREVO_API_KEY=${BREVO_API_KEY}
     ports:
       - 3000:3000
     volumes:
-      - ./server:/home/node/server
+      - ./:/home/node/server
 
   mongo:
     image: mongo
