@@ -1,4 +1,4 @@
-console.log(process.env.POSTGRES_HOST);
+console.log(process.env);
 const express = require('express');
 const cors = require('cors');
 
