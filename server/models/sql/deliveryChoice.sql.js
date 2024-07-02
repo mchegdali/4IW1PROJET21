@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../sequelize.js';
+import ShippingSequelize from './shipping.sql.js';
 
 
 class DeliveryChoiceSequelize extends Model {}
@@ -17,7 +18,8 @@ DeliveryChoiceSequelize.init({
 }, {
     sequelize,
     modelName: 'DeliveryChoice',
-    tableName: 'deliveryChoice'
+    tableName: 'deliveryChoices'
 });
+
 
 export default DeliveryChoiceSequelize;

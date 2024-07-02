@@ -1,7 +1,4 @@
 import mongoose from 'mongoose';
-
-
-
 const shippingSchema = new mongoose.Schema ({
     id: {
         type: mongoose.Schema.Types.UUID,
@@ -34,9 +31,18 @@ const shippingSchema = new mongoose.Schema ({
         required: true,
     },
     deliveryChoiceShipping: {
-        type: String,
-        required: true,
-    },
+        type:  {
+            id: {
+                type: mongoose.Schema.Types.UUID,
+                required: true,
+            },
+            name: {
+                type : String,
+                required: true,
+            },
+        default: null,
+        }
+    }
 },
 {
     toObject: {
@@ -53,13 +59,16 @@ shippingSchema.index(
         description: 'text'
     },
     {
-      name: 'shipping_search_index',
+      name: 'shipping_deliveryChoice_search_index',
       weights: {
         title: 10,
         description: 5
       },
     },
 )
-
+shippingSchema.index(
+    {'deliveryChoice.id': 1 },
+    {name : 'deliveryChoiceShipping_index'}
+);
 const shipping = mongoose.model('shipping', shippingSchema);
 export default shipping;

@@ -26,7 +26,7 @@ deliveryChoiceSchema.index(
         description: 'text'
     },
     {
-      name: 'delivery_choice_index',
+      name: 'shipping_deliveryChoice_index',
       weights: {
         title: 10,
         description: 5

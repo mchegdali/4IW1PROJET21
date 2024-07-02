@@ -46,10 +46,10 @@ export async function createShipping(req, res) {
     return res.status(201).json(result);
   } catch (error) {
     if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
+      return res.status(422).json({ errors: error.errors });
     }
     if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
+      return res.status(422).json({ errors: formatZodError(error) });
     }
 
     console.error(error);
@@ -65,13 +65,16 @@ export async function createShipping(req, res) {
 export async function getShipping(req, res) {
   try {
     const shipping = req.params.shipping;
-    console.log(shipping);
+    const shippingDoc = await ShippingMongo.findOne({
+       shipping
+    });
+    return  shippingDoc;
   }catch(error) {
     if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
+      return res.status(422).json({ errors: error.errors });
     }
     if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
+      return res.status(422).json({ errors: formatZodError(error) });
     }
 
     console.error(error);
@@ -80,7 +83,9 @@ export async function getShipping(req, res) {
 }
 export async function getAllShipping(req,res) {
   try {
-    const shipping = await ShippingMongo.find({});
+    const shipping = await ShippingMongo.findAll({
+      where: req.query,
+    });
     
     if (!shipping) {
       return res.status(404).json({ message: 'No shipping data found' });
@@ -92,9 +97,9 @@ export async function getAllShipping(req,res) {
     });
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
+      return res.status(422).json({ errors: formatZodError(error) });
     }
-    return res.status(400).json({ message: error.message });
+    return res.status(404).json({ message: error.message });
   }
 
 }

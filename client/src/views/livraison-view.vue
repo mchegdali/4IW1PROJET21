@@ -55,7 +55,9 @@ const livraisonData = {
   street: '',
   zipCode: '',
   phone: '',
-  city: ''
+  city: '',
+  deliveryChoice: '',
+
 };
 
 const { formData, formErrors, formSubmitting, submitForm } = useForm(shippingSchema,livraisonData);
@@ -122,12 +124,12 @@ const handleSubmit = () => {
           <fieldset>
             <label> Livraison Domicile </label>
             <div class="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
-              <Input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+              <Input id="bordered-radio-1" type="radio" value="Livraison collissimo" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
               <label for="bordered-radio-1" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Livraison Colissimo</label>
             </div>
             <label> Livraison Point relais </label>
             <div class="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
-              <Input checked id="bordered-radio-2" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+              <Input checked id="bordered-radio-2" type="radio" value="livraison en point retrait" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
               <label for="bordered-radio-2" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Livraison en point de retrait Mondial Relay (choix du point relais après paiement)</label>
             </div>
           </fieldset>

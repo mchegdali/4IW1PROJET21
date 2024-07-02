@@ -8,13 +8,13 @@ import ShippingMongo from '../models/mongo/shipping.js';
  * @property { string } [path]
  * @property { Object } context
  * @property { import('sequelize').Sequelize } context.sequelize
- */
+*/
 
 /**
  *
  * @param {MigrationParams} params
  *
- */
+*/
 
 export const up = async ({ context: { sequelize } }) => {
  const queryInterface = sequelize.getQueryInterface();
@@ -48,6 +48,19 @@ export const up = async ({ context: { sequelize } }) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    deliveryChoiceShipping: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+      references: {
+        model: {
+          tableName: 'deliveryChoiceShipping',
+          
+        },
+        key: 'id',
+      },
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -58,7 +71,6 @@ export const up = async ({ context: { sequelize } }) => {
       allowNull: false,
       defaultValue: sequelize.fn('NOW'),
     },
-    
   });
 };
 
@@ -71,4 +83,3 @@ export const down = async ({ context: { sequelize } }) => {
   await sequelize.getQueryInterface().dropTable('shippings', { force: true });
   await ShippingMongo.db.dropCollection(ShippingMongo.collection.name);
 };
- 

@@ -8,7 +8,7 @@ services:
     stdin_open: true
     working_dir: /home/node
     entrypoint: sh -c
-    command: '"npm install && npm run dev"'
+    command: '"npm install && npm run dev:legacy:"'
     depends_on:
       - mongo
       - postgres

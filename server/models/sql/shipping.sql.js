@@ -1,7 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../sequelize.js';
-import DeliveryChoiceSequelize from './deliveryChoice.sql.js';
-
+// import PaymentSequelize from '../mongo/payment.js';
 
 class ShippingSequelize extends Model {}
 
@@ -36,21 +35,12 @@ ShippingSequelize.init({
         allowNull: false,
     },
     
-},{
-    sequelize,
-    modelName: 'Shipping',
-    tableName: 'shippings',
-});
-// 1:M relationship between Products and ProductsCategories
-ShippingSequelize.belongsTo(DeliveryChoiceSequelize, {
-  as: 'deliveryChoice',
-  targetKey: 'id',
-  foreignKey: {
-    field: 'deliveryChoiceId',
-    name: 'deliveryChoiceId',
-  },
-  onDelete: 'SET NULL',
-  onUpdate: 'CASCADE',
-});
 
+}, {
+     
+    sequelize,
+    modelName: 'Products',
+    tableName: 'products',
+
+})
 export default ShippingSequelize;
