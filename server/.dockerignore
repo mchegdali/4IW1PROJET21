@@ -1,0 +1,9 @@
+.npm
+node_modules
+.env
+Dockerfile
+compose.yml
+.git
+.gitignore
+README.md
+LICENSE
