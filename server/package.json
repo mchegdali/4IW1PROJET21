@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev:legacy:": "nodemon -L index.js",
+    "start": "node --env-file .env.local index.js",
+    "dev:legacy": "nodemon -L index.js",
     "lint": "eslint . --ext .js",
     "dev": "node --watch index.js",
     "db:migrate": "node bin/migrate.js",
