@@ -13,8 +13,8 @@ const loginSchema = z.object({
 });
 
 const initialLoginData = reactive({
-  email: 'eokfiejf@fefrf.com',
-  name: 'toto'
+  email: '',
+  name: ''
 });
 
 const { formData, formErrors, formSubmitting, submitForm } = useForm(loginSchema, initialLoginData);
@@ -25,9 +25,7 @@ const handleSubmit = () => {
   });
 };
 
-const isFormModified = computed(() => {
-  return formData.email !== initialLoginData.email || formData.name !== initialLoginData.name;
-});
+
 </script>
 
 <template>
@@ -54,7 +52,7 @@ const isFormModified = computed(() => {
         />
         <small class="text-destructive" v-if="formErrors.email">{{ formErrors.email }}</small>
       </div>
-      <Button type="submit" class="w-full" :disabled="formSubmitting || !isFormModified">Valider les modifications</Button>
+      <Button type="submit" class="w-full">Valider les modifications</Button>
     </form>
   </div>
 </template>

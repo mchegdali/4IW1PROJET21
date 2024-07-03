@@ -145,6 +145,16 @@ const router = createRouter({
           name: 'cookie-policy',
           path: '/cookie-policy',
           component: () => import('../views/cookie-policy-view.vue')
+        },
+        {
+          name: 'my-informations',
+          path: '/my-informations',
+          component: () => import('../views/my-informations-view.vue')
+        },
+        {
+          name: 'adresses',
+          path: '/adresses',
+          component: () => import('../views/adresse-view.vue')
         }
       ]
     }
