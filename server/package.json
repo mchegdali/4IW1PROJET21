@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node --env-file .env.local index.js",
     "dev:legacy": "nodemon -L index.js",
     "lint": "eslint . --ext .js",
     "dev": "node --watch index.js",
