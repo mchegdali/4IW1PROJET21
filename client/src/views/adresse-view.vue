@@ -12,9 +12,8 @@ import { MoveLeft } from 'lucide-vue-next';
   </div>
 
   <div class="mt-10 flex flex-col gap-10">
-    <Button type="submit" class="w-full bg-tea-600 rounded-lg text-white p-2"
-      >Ajouter une nouvelle adresse</Button
-    >
+    <RouterLink :to="{ name: 'add-adresse' }" class="w-full bg-tea-600 rounded-lg text-white p-2 text-center">Ajouter une nouvelle adresse</RouterLink>
+  
 
     <div class="rounded shadow-md p-2 flex justify-between">
       <div>
@@ -27,7 +26,8 @@ import { MoveLeft } from 'lucide-vue-next';
         <p>07 45 62 41 23</p>
       </div>
 
-      <div>Modifier</div>
+      <RouterLink :to="{ name: 'edit-adresse' }" class="">Modifier</RouterLink>
+  
     </div>
   </div>
 </template>
