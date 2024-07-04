@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
+const { mongoose} = require ('mongoose');
 
 const deliveryChoiceSchema = new mongoose.Schema(
   {
-    id: {
+    _id: {
       type: mongoose.Schema.Types.UUID,
       required: true,
     },
@@ -22,9 +22,6 @@ const deliveryChoiceSchema = new mongoose.Schema(
   },
 );
 
-deliveryChoiceSchema.index(
-  { name: 'text', description: 'text', 'deliveryCoice.name': 'text' },
-);
 
 const deliveryChoiceMongo = mongoose.model('DeliveryChoice', deliveryChoiceSchema);
 

@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
+const { mongoose} = require( 'mongoose');
 
 
 
 const shippingSchema = new mongoose.Schema(
   {
-    id: {
+    _id : {
       type: mongoose.Schema.Types.UUID,
       required: true,
     },
@@ -44,19 +44,6 @@ const shippingSchema = new mongoose.Schema(
     },
     toJSON: {
       getters: true,
-    },
-  },
-);
-shippingSchema.index(
-  {
-    title: 'text',
-    description: 'text',
-  },
-  {
-    name: 'shipping_search_index',
-    weights: {
-      title: 10,
-      description: 5,
     },
   },
 );
