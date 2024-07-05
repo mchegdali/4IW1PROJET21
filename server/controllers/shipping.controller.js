@@ -31,6 +31,7 @@ async function createShipping(req, res, next) {
         street: newData.street,
         zipCode: newData.zipCode,
         phone: newData.phone,
+        deliveryChoice: newData.deliveryChoice,  
       };
 
       const shippingDoc = await ShippingMongo.create(shipping);

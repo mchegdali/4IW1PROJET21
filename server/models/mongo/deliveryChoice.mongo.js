@@ -23,6 +23,6 @@ const deliveryChoiceSchema = new mongoose.Schema(
 );
 
 
-const deliveryChoiceMongo = mongoose.model('DeliveryChoice', deliveryChoiceSchema);
+const deliveryChoiceMongo = mongoose.model('deliveryChoice', deliveryChoiceSchema);
 
 export default deliveryChoiceMongo;

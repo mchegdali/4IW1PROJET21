@@ -64,8 +64,7 @@ const ShippingSequelize = (sequelize) => {
      
     sequelize,
     modelName: 'shippings',
-    tableName: 'shippings',
-
+   
 })
 return Shippings;
 };

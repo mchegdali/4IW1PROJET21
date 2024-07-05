@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Input from '../components/ui/input/Input.vue';
 import Button from '../components/ui/button/Button.vue';
-import { useForm } from '@/composables/form';
+import { useForm } from '../composables/form';
 import {z} from 'zod';
-import {z} from 'zod';
+
 import {ref} from 'vue';
 
 
@@ -47,7 +47,9 @@ const shippingSchema = z.object({
   city: z.string()
     .min(2, { message: "2 caractères minimum" })
     .max(25, { message: "25 caractères maximum" })
-    .regex(/^[a-zA-Z]+$/, { message: "Ville invalide" })
+    .regex(/^[a-zA-Z]+$/, { message: "Ville invalide" }),
+  deliveryChoice:  z.string()
+    
 });
 
 const livraisonData = {
@@ -58,7 +60,6 @@ const livraisonData = {
   phone: '',
   city: '',
   deliveryChoice: '',
-
 };
 
 const { formData, formErrors, formSubmitting, submitForm } = useForm(shippingSchema,livraisonData);
@@ -86,8 +87,6 @@ const handleSubmit = () => {
 <h1 class="text-3xl bold mb-5"> livraison </h1>
   <div class="flex flex-col items-center space-y-20">
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-4 ">
-      <section id="shipping">
-      
         <div class="flex flex-col">
           <label> Nom et Prénom </label>
           <Input v-model="formData.fullname"  :class="{ 'border-destructive': formErrors.fullname }" required autofocus />
@@ -120,17 +119,17 @@ const handleSubmit = () => {
           <fieldset>
             <label> Livraison Domicile </label>
             <div class="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
-              <Input id="bordered-radio-1" type="radio" value="Livraison collissimo" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+              <Input id="bordered-radio-1" type="radio" v-model="formData.deliveryChoice" value="Livraison collissimo" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
               <label for="bordered-radio-1" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Livraison Colissimo</label>
             </div>
             <label> Livraison Point relais </label>
             <div class="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
-              <Input checked id="bordered-radio-2" type="radio" value="livraison en point retrait" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+              <Input checked id="bordered-radio-2" type="radio" v-model="formData.deliveryChoice" value="livraison en point retrait" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
               <label for="bordered-radio-2" class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Livraison en point de retrait Mondial Relay (choix du point relais après paiement)</label>
             </div>
           </fieldset>
         </div>
-      </div>
+      
       <br>
       <div id="Payment">
           <div class="flex flex-col gap-5">
@@ -175,6 +174,7 @@ const handleSubmit = () => {
          <Button type="submit" class="w-1/2" :disabled="formSubmitting">Payer Maintenant</Button>
         </div>
       </div>
+     
     </form>
   </div>
 </template>

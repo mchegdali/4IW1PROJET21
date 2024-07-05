@@ -53,22 +53,7 @@ const shippingSchema = new mongoose.Schema ({
     },
    },
 );
-shippingSchema.index(
-    {
-        title: 'text',
-        description: 'text'
-    },
-    {
-      name: 'shipping_deliveryChoice_search_index',
-      weights: {
-        title: 10,
-        description: 5
-      },
-    },
-)
-shippingSchema.index(
-    {'deliveryChoice.id': 1 },
-    {name : 'deliveryChoiceShipping_index'}
-);
+
+
 const shipping = mongoose.model('shipping', shippingSchema);
 export default shipping;
