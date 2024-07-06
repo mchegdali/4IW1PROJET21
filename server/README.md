@@ -29,19 +29,7 @@ docker compose down
 Apply migrations:
 
 ```bash
-docker compose exec npm run db:migrate:up
-```
-
-Revert one step of migration:
-
-```bash
-docker compose exec npm run db:migrate:down
-```
-
-Revert all migrations:
-
-```bash
-docker compose exec npm run db:migrate:down-all
+docker compose exec node npm run db:migrate
 ```
 
 ### Fixtures
@@ -49,11 +37,11 @@ docker compose exec npm run db:migrate:down-all
 Seed the database:
 
 ```bash
-docker compose exec npm run db:seed:up
+docker compose exec node npm run db:seed:up
 ```
 
 Revert all seed data:
 
 ```bash
-docker compose exec npm run db:seed:down-all
+docker compose exec node npm run db:seed:down-all
 ```
