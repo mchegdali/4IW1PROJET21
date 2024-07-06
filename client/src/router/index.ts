@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 import HomeView from '../views/home-view.vue';
 import Layout from '../layouts/layout.vue';
 
@@ -32,12 +33,17 @@ const router = createRouter({
         {
           name: 'account',
           path: '/account',
-          component: () => import('../views/account-view.vue')
-        }, {
+          component: () => import('../views/account-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
           name: 'livraison',
           path: '/livraison',
           component: () => import('../views/livraison-view.vue')
-        }, {
+        },
+        {
           name: 'livraison',
           path: '/livraison',
           component: () => import('../views/livraison-view.vue')
@@ -53,28 +59,41 @@ const router = createRouter({
           component: () => import('../views/register-view.vue')
         },
         {
-          name: 'no-connected',
-          path: '/no-connected',
-          component: () => import('../views/no-connected-view.vue')
-        },
-        {
           name: 'orders',
           path: '/orders',
           component: () => import('../views/order-view.vue')
         },
         {
           name: 'order',
-          path: '/order/:id',
+          path: '/orders/:id',
           component: () => import('../views/order-details-view.vue')
         },
         {
           name: 'tracking',
           path: '/tracking/:id',
           component: () => import('../views/order-tracking-view.vue')
-        },
+        }
       ]
-    },
+    }
   ]
+});
+
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore();
+  if (!to.meta?.requiresAuth) {
+    return next();
+  }
+
+  if (!userStore.isAuthenticated) {
+    const isSuccess = await userStore.getRefreshToken();
+    if (isSuccess) {
+      next();
+    } else {
+      next('/login');
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;

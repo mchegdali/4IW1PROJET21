@@ -7,6 +7,10 @@ const loginSchema = z.object({
   password: z.string(),
 });
 
+const refreshTokenSchema = z.object({
+  refreshToken: z.string(),
+});
+
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
 });
@@ -25,4 +29,5 @@ module.exports = {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  refreshTokenSchema,
 };

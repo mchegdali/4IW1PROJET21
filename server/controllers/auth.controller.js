@@ -3,15 +3,16 @@ const dayjs = require('dayjs');
 const jose = require('jose');
 const authConfig = require('../config/auth.config');
 const { sendForgotPasswordEmail } = require('../config/email.config');
-const UserMongo = require('../models/mongo/user.mongo');
 const sequelize = require('../models/sql');
 const {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  refreshTokenSchema,
 } = require('../schemas/auth.schema');
 
 const Users = sequelize.model('users');
+
 /**
  *
  * @type {import("express").RequestHandler}
@@ -20,7 +21,11 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
 
-    const user = await UserMongo.findOne({ email });
+    const user = await Users.findOne({
+      where: {
+        email,
+      },
+    });
 
     if (!user) {
       return res.sendStatus(401);
@@ -67,9 +72,60 @@ const login = async (req, res, next) => {
     );
 
     return res.json({
+      user: {
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role,
+      },
       accessToken,
       refreshToken,
     });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @type {import("express").RequestHandler}
+ */
+const refreshToken = async (req, res, next) => {
+  try {
+    const { data: token, success } = refreshTokenSchema.safeParse(req.body);
+
+    if (!success) {
+      return res.sendStatus(401);
+    }
+
+    const decodedToken = await jose.jwtVerify(
+      token,
+      authConfig.refreshTokenSecret,
+    );
+    const user = await Users.findByPk(decodedToken.payload.sub);
+
+    if (!user) {
+      return res.sendStatus(401);
+    }
+
+    const now = dayjs();
+    const issuedAt = now.unix();
+    const accessTokenExpiredAt = now.add(60, 'minute').unix();
+
+    const accessTokenSign = new jose.SignJWT({
+      email: user.email,
+    })
+      .setSubject(user.id)
+      .setIssuedAt(issuedAt)
+      .setExpirationTime(accessTokenExpiredAt)
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setNotBefore(issuedAt);
+
+    const accessToken = await accessTokenSign.sign(
+      authConfig.accessTokenSecret,
+    );
+
+    return res.send(accessToken);
   } catch (error) {
     return next(error);
   }
@@ -121,7 +177,11 @@ const forgotPassword = async (req, res, next) => {
   try {
     const { email } = forgotPasswordSchema.parse(req.body);
 
-    const user = await UserMongo.findOne({ email });
+    const user = await Users.findOne({
+      where: {
+        email,
+      },
+    });
 
     if (!user) {
       return res.sendStatus(204);
@@ -183,4 +243,10 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-module.exports = { confirm, login, forgotPassword, resetPassword };
+module.exports = {
+  confirm,
+  login,
+  forgotPassword,
+  resetPassword,
+  refreshToken,
+};

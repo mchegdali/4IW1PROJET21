@@ -1,6 +1,7 @@
 const { ValidationError, UniqueConstraintError } = require('sequelize');
 const { ZodError } = require('zod');
 const createHttpError = require('http-errors');
+const jose = require('jose');
 
 /**
  *
@@ -36,7 +37,9 @@ const errorMiddleware = (error, req, res, _next) => {
 
     return res.status(422).json(flattenedErrors);
   }
-
+  if (error instanceof jose.errors.JOSEError) {
+    return res.sendStatus(401);
+  }
   if (createHttpError.isHttpError(error)) {
     return res.sendStatus(error.statusCode);
   }

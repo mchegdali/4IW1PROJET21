@@ -56,7 +56,6 @@ export const useBasketStore = defineStore('basket', {
       }
     },
     removeProduct(product: Product) {
-      //@ts-ignore
       const lastIndex = this.products.findLastIndex((p) => p._id === product._id);
 
       if (lastIndex !== -1) {

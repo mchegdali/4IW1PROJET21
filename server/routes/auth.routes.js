@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const {
   login,
+  refreshToken,
   confirm,
   forgotPassword,
   resetPassword,
@@ -11,7 +12,7 @@ const authConfig = require('../config/auth.config');
 const authRouter = Router();
 
 authRouter.post('/auth/login', login);
-// authRouter.post('/register', register);
+authRouter.get('/refresh-token', refreshToken);
 authRouter.post(
   '/auth/confirm',
   checkAuth(authConfig.accessTokenSecret, false),
