@@ -29,7 +29,7 @@ const DeliveryChoiceSequelize = (sequelize) => {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'il faut sélectionner une livraison',
+            msg: 'veuillez entre un nom de type de livraison',
           },
         },
       },
