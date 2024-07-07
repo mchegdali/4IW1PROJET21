@@ -59,6 +59,49 @@ const router = createRouter({
           component: () => import('../views/register-view.vue')
         },
         {
+          name: 'forgot-password',
+          path: '/forgot-password',
+          component: () => import('../views/forgot-password-view.vue')
+        },
+        {
+          name: 'reset-password',
+          path: '/reset-password',
+          component: () => import('../views/reset-password-view.vue'),
+          beforeEnter: (to, from, next) => {
+            if (!to.query.token) {
+              return next({ name: 'home', replace: true });
+            }
+            return next();
+          }
+        },
+        {
+          name: 'account-verified',
+          path: '/confirm',
+          component: () => import('../views/account-verified-view.vue'),
+          beforeEnter: (to, from, next) => {
+            if (!to.query.token) {
+              return next({ name: 'home', replace: true });
+            }
+            fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/confirm`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                token: to.query.token
+              })
+            }).then((response) => {
+              if (response.status === 401) {
+                return next({ name: 'login' });
+              }
+
+              if (response.status === 204) {
+                return next();
+              }
+            });
+          }
+        },
+        {
           name: 'orders',
           path: '/orders',
           component: () => import('../views/order-view.vue')

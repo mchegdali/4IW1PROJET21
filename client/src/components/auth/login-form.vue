@@ -6,6 +6,9 @@ import { useForm } from '@/composables/form';
 import { useFetch } from '@vueuse/core';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
+import { useToast } from '../ui/toast';
+
+const { toast } = useToast();
 
 type LoginResponse = {
   accessToken: string;
@@ -37,6 +40,10 @@ const { data, execute, error, statusCode } = useFetch(`${import.meta.env.VITE_AP
   immediate: false,
 }).post(formData).json<LoginResponse>();
 
+const { data: emailResent, execute: resendConfirmationEmail } = useFetch(`${import.meta.env.VITE_API_BASE_URL}/auth/resend-confirmation-email`, {
+  immediate: false,
+}).post(formData).text();
+
 const handleSubmit = () => {
   submitForm(async () => {
     try {
@@ -51,70 +58,59 @@ const handleSubmit = () => {
     }
   });
 };
+
+const handleResendConfirmationEmail = async () => {
+  await resendConfirmationEmail(true);
+  if (emailResent?.value) {
+    toast({ title: 'Email de confirmation envoyé', description: 'Vérifiez votre boîte mail', type: 'foreground', duration: 2500 });
+  }
+};
 </script>
 
 <template>
-  <div class="border p-5 rounded-lg shadow-lg">
-    <h1 class="text-3xl bold mb-5">S'identifier</h1>
-    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-      <div>
-        <label>Adresse e-mail
-          <Input id="email" v-model="formData.email"
-            :class="{ 'border-destructive': formErrors.email || statusCode === 401 }" autofocus />
-        </label>
-        <small class="text-destructive" v-if="formErrors.email">
-          {{ formErrors.email }}
-        </small>
-        <small class="text-destructive" v-else-if="statusCode === 401">
-          Email ou mot de passe incorrect
-        </small>
-      </div>
-      <div>
-        <label>Mot de passe
-          <Input id="password" type="password" v-model="formData.password"
-            :class="{ 'border-destructive': formErrors.password || statusCode === 401 }" />
-        </label>
-        <small class="text-destructive" v-if="formErrors.password">
-          {{ formErrors.password }}
-        </small>
-        <small class="text-destructive" v-else-if="statusCode === 401">
-          Email ou mot de passe incorrect
-        </small>
-      </div>
-      <div class="flex gap-4">
+  <form @submit.prevent="handleSubmit" class="space-y-4">
+    <div>
+      <label>Adresse e-mail
+        <Input id="email" v-model="formData.email"
+          :class="{ 'border-destructive': formErrors.email || statusCode === 401 }" autofocus />
+      </label>
+      <small class="text-destructive" v-if="formErrors.email">
+        {{ formErrors.email }}
+      </small>
+      <small class="text-destructive" v-else-if="statusCode === 401">
+        Email ou mot de passe incorrect
+      </small>
+    </div>
+    <div>
+      <label>Mot de passe
+        <Input id="password" type="password" v-model="formData.password"
+          :class="{ 'border-destructive': formErrors.password || statusCode === 401 }" />
+      </label>
+      <small class="text-destructive" v-if="formErrors.password">
+        {{ formErrors.password }}
+      </small>
+      <small class="text-destructive" v-else-if="statusCode === 401">
+        Email ou mot de passe incorrect
+      </small>
+    </div>
+
+    <div class="flex gap-4">
+      <Button variant="outline" as-child type="button">
         <RouterLink :to="{ name: 'register' }" class="w-1/2">
-          <Button class="w-full bg-white text-tea-600 border hover:bg-gray-100" type="button">Créer un compte</Button>
+          Créer un compte
         </RouterLink>
-        <Button type="submit" class="w-1/2" :disabled="formSubmitting">Connexion</Button>
-      </div>
-    </form>
-    <div class="mt-5">
-      <p>
-        En continuant, vous acceptez les
-        <a href="/" class="text-tea-600">conditions d'utilisation et de vente</a> de Fanthésie.
-        Consultez notre <a href="/" class="text-tea-600">déclaration de confidentialité</a>, notre
-        <a href="/" class="text-tea-600">politique relative aux cookies</a>.
-      </p>
+      </Button>
+
+
+      <Button type="submit" class="w-1/2" :disabled="formSubmitting">Connexion</Button>
     </div>
-    <div class="text-center mt-5">
-      <div class="flex items-center justify-center">
-        <div class="flex-grow border-t border-current text-gray-300"></div>
-        <a href="/" class="text-center font-bold text-tea-600 mx-4">Mot de passe oublié ?</a>
-        <div class="flex-grow border-t border-current text-gray-300"></div>
-      </div>
+    <div v-if="statusCode === 403" class="flex gap-4">
+      <small class="text-destructive">
+        Votre compte n'est pas activé. Veuillez vérifier votre e-mail.
+      </small>
+      <Button type="button" variant="link" @click="handleResendConfirmationEmail">
+        Demander un nouvel email de confirmation
+      </Button>
     </div>
-  </div>
+  </form>
 </template>
-
-<!-- <style scoped>
-.error {
-  color: red;
-  display: block;
-  padding-left: 20px;
-}
-
-.error-border {
-  border: 1px solid red;
-  padding: 5px;
-}
-</style> -->

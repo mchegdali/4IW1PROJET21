@@ -2,14 +2,19 @@ const { verify } = require('@node-rs/argon2');
 const dayjs = require('dayjs');
 const jose = require('jose');
 const authConfig = require('../config/auth.config');
-const { sendForgotPasswordEmail } = require('../config/email.config');
+const {
+  sendForgotPasswordEmail,
+  sendConfirmationEmail,
+} = require('../config/email.config');
 const sequelize = require('../models/sql');
 const {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
   refreshTokenSchema,
+  resendConfirmationEmailSchema,
 } = require('../schemas/auth.schema');
+const UserMongo = require('../models/mongo/user.mongo');
 
 const Users = sequelize.model('users');
 
@@ -21,10 +26,8 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
 
-    const user = await Users.findOne({
-      where: {
-        email,
-      },
+    const user = await UserMongo.findOne({
+      email,
     });
 
     if (!user) {
@@ -137,7 +140,11 @@ const refreshToken = async (req, res, next) => {
  */
 const confirm = async (req, res, next) => {
   try {
-    const token = res.locals.token;
+    const token = req.body.token;
+
+    if (!token || typeof token !== 'string') {
+      return res.sendStatus(401);
+    }
 
     const decoded = await jose.jwtVerify(
       token,
@@ -148,18 +155,21 @@ const confirm = async (req, res, next) => {
       },
     );
 
-    const nbUpdated = await Users.update(
-      {
-        isVerified: true,
-      },
-      {
-        where: {
-          id: decoded.payload.sub,
+    const [nbUpdated, updateResult] = await Promise.all([
+      Users.update(
+        {
+          isVerified: true,
         },
-      },
-    );
+        {
+          where: {
+            id: decoded.payload.sub,
+          },
+        },
+      ),
+      UserMongo.updateOne({ _id: decoded.payload.sub }, { isVerified: true }),
+    ]);
 
-    if (nbUpdated === 0) {
+    if (nbUpdated === 0 || updateResult.modifiedCount === 0) {
       return res.sendStatus(401);
     }
 
@@ -243,10 +253,54 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+/**
+ *
+ * @type {import("express").RequestHandler}
+ */
+const resendConfirmationEmail = async (req, res, next) => {
+  try {
+    const { email } = resendConfirmationEmailSchema.parse(req.body);
+
+    const user = await UserMongo.findOne({
+      email,
+    });
+
+    if (!user) {
+      return res.sendStatus(204);
+    }
+
+    const now = dayjs();
+    const issuedAt = now.unix();
+
+    const confirmationTokenSign = new jose.SignJWT({
+      email: user.email,
+    })
+      .setSubject(user.id)
+      .setIssuedAt(issuedAt)
+      .setExpirationTime('15 minutes')
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setNotBefore(issuedAt);
+
+    const confirmationToken = await confirmationTokenSign.sign(
+      authConfig.confirmationTokenSecret,
+    );
+
+    await sendConfirmationEmail(
+      { email: user.email, fullname: user.fullname },
+      confirmationToken,
+    );
+
+    return res.sendStatus(204);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   confirm,
   login,
   forgotPassword,
   resetPassword,
   refreshToken,
+  resendConfirmationEmail,
 };

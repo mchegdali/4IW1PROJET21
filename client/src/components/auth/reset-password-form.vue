@@ -10,15 +10,9 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
 
-const registerSchema = z
+const resetPasswordSchema = z
   .object({
-    email: z
-      .string()
-      .email({ message: "L'e-mail doit être sous cette forme : exemple@example.com" }),
-    fullname: z.string().regex(/^[a-zA-ZÀ-ÿ' -]+ [a-zA-ZÀ-ÿ' -]+$/, {
-      message: 'Ne peut contenir que des lettres, des apostrophes, des tirets et des accents.'
-    }),
-    password: z.string().regex(passwordRegex, {
+    password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères.").regex(passwordRegex, {
       message: 'Le mot de passe ne répond pas aux critères requis.'
     }),
     confirmPassword: z.string()
@@ -28,14 +22,12 @@ const registerSchema = z
     path: ['confirmPassword']
   });
 
-const initialRegisterData = {
-  email: '',
-  fullname: '',
+const initialData = {
   password: '',
   confirmPassword: ''
 };
 
-const { formData, formErrors, formSubmitting, submitForm } = useForm(registerSchema, initialRegisterData);
+const { formData, formErrors, formSubmitting, submitForm } = useForm(resetPasswordSchema, initialData);
 
 const { data, error, statusCode, execute } = useFetch(`${import.meta.env.VITE_API_BASE_URL}/users`, {
   immediate: false, onFetchError: ({ data }) => {

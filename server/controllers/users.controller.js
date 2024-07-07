@@ -24,7 +24,7 @@ async function createUser(req, res, next) {
     const userCreationData = userCreateSchema.parse(req.body);
     if (!req.user || req.user.role !== 'admin') {
       userCreationData.role = 'user';
-      userCreationData.isVerified = true;
+      userCreationData.isVerified = false;
     }
 
     const newUser = await sequelize.transaction(async (t) => {
@@ -33,7 +33,7 @@ async function createUser(req, res, next) {
         include: ['addresses'],
       });
 
-      const userMongo = await data.toMongo();
+      const userMongo = data.toMongo();
 
       const userDoc = await UserMongo.create(userMongo);
 
@@ -45,7 +45,7 @@ async function createUser(req, res, next) {
       };
     });
 
-    if (req.user.role !== 'admin') {
+    if (req?.user?.role !== 'admin') {
       const now = dayjs();
       const issuedAt = now.unix();
 
@@ -72,8 +72,6 @@ async function createUser(req, res, next) {
 
     return res.status(201).json(newUser);
   } catch (error) {
-    console.error(error.name);
-
     return next(error);
   }
 }

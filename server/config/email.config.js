@@ -64,7 +64,7 @@ async function sendConfirmationEmail(user, confirmationToken) {
  * @param {string} forgotPasswordToken
  */
 async function sendForgotPasswordEmail(user, forgotPasswordToken) {
-  const url = new URL('/forgot-password', process.env.APP_URL);
+  const url = new URL('/reset-password', process.env.APP_URL);
   url.searchParams.append('token', forgotPasswordToken);
   await sendEmail(user, templateIds.forgotPassword, {
     TOKEN_URL: url.toString(),

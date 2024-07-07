@@ -3,7 +3,7 @@ const { z } = require('zod');
 const passwordSchema = require('./password.schema');
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email({ message: 'Adresse e-mail invalide' }),
   password: z.string(),
 });
 
@@ -12,7 +12,11 @@ const refreshTokenSchema = z.object({
 });
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email({ message: 'Adresse e-mail invalide' }),
+});
+
+const resendConfirmationEmailSchema = z.object({
+  email: z.string().email({ message: 'Adresse e-mail invalide' }),
 });
 
 const resetPasswordSchema = z
@@ -30,4 +34,5 @@ module.exports = {
   forgotPasswordSchema,
   resetPasswordSchema,
   refreshTokenSchema,
+  resendConfirmationEmailSchema,
 };
