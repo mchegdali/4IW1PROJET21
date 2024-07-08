@@ -14,7 +14,7 @@
 
     <div class="flex flex-col text-center mt-10">
       <p>Bonjour,</p>
-      <p class="font-bold text-2xl">{{ userStore.user.fullname }}</p>
+      <p class="font-bold text-2xl">{{ userStore.user?.fullname }}</p>
     </div>
 
     <div class="mt-10">
