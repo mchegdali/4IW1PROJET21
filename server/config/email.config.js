@@ -5,6 +5,7 @@ let apiKey = apiInstance.authentications['apiKey'];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 
 console.log(process.env.BREVO_API_KEY);
+console.log(apiKey.apiKey);
 const templateIds = {
   confirmation: 1,
   forgotPassword: 2,
@@ -20,8 +21,7 @@ const templateIds = {
  */
 async function sendEmail(user, templateId, params) {
   const sendSmtpEmail = new brevo.SendSmtpEmail();
-
-  sendSmtpEmail.to = [
+  sendSmtpEmail.headers.sendSmtpEmail.to = [
     {
       email: user.email,
       name: user.fullname,
