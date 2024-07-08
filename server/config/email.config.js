@@ -4,8 +4,6 @@ const apiInstance = new brevo.TransactionalEmailsApi();
 let apiKey = apiInstance.authentications['apiKey'];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 
-console.log(process.env.BREVO_API_KEY);
-console.log(apiKey.apiKey);
 const templateIds = {
   confirmation: 1,
   forgotPassword: 2,
