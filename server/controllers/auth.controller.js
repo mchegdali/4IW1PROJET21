@@ -259,7 +259,9 @@ const resetPassword = async (req, res, next) => {
  */
 const resendConfirmationEmail = async (req, res, next) => {
   try {
+    console.log(req.body);
     const { email } = resendConfirmationEmailSchema.parse(req.body);
+    console.log(email);
 
     const user = await UserMongo.findOne({
       email,
@@ -268,6 +270,7 @@ const resendConfirmationEmail = async (req, res, next) => {
     if (!user) {
       return res.sendStatus(204);
     }
+    console.log(user);
 
     const now = dayjs();
     const issuedAt = now.unix();
@@ -284,6 +287,7 @@ const resendConfirmationEmail = async (req, res, next) => {
     const confirmationToken = await confirmationTokenSign.sign(
       authConfig.confirmationTokenSecret,
     );
+    console.log(confirmationToken);
 
     await sendConfirmationEmail(
       { email: user.email, fullname: user.fullname },
