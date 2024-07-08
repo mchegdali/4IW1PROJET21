@@ -31,10 +31,10 @@ async function sendEmail(user, templateId, params) {
   try {
     await apiInstance.sendTransacEmail(sendSmtpEmail);
   } catch (error) {
-    if (error instanceof brevo.HttpError) {
-      console.log('HttpError statusCode', error.statusCode);
-      console.log('HttpError body', error.body);
-    }
+    // if (error instanceof brevo.HttpError) {
+    //   console.log('HttpError statusCode', error.statusCode);
+    //   console.log('HttpError body', error.body);
+    // }
 
     console.log(error);
     throw error;
