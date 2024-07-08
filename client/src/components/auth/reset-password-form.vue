@@ -61,38 +61,6 @@ const handleSubmit = () => {
   <form class="space-y-4" @submit.prevent="handleSubmit">
     <div>
       <label>
-        Adresse e-mail
-        <Input
-          id="email"
-          v-model="formData.email"
-          autofocus
-          :class="{ 'border-destructive': formErrors.email, 'bg-destructive/25': formErrors.email }"
-        />
-      </label>
-      <small class="text-destructive" v-if="formErrors.email">
-        {{ formErrors.email }}
-      </small>
-      <small class="text-destructive" v-else-if="error?.email">
-        {{ error?.email }}
-      </small>
-    </div>
-    <div>
-      <label>
-        Nom et Prénom
-        <Input
-          id="fullname"
-          name="fullname"
-          type="text"
-          v-model="formData.fullname"
-          :class="{ 'border-destructive': formErrors.fullname }"
-        />
-      </label>
-      <small class="text-destructive" v-if="formErrors.name">
-        {{ formErrors.name }}
-      </small>
-    </div>
-    <div>
-      <label>
         Mot de passe
         <Input
           id="password"

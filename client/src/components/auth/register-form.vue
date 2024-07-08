@@ -40,17 +40,14 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
   initialRegisterData
 );
 
-const { data, error, statusCode, execute } = useFetch(
-  `${import.meta.env.VITE_API_BASE_URL}/users`,
-  {
-    immediate: false,
-    onFetchError: ({ data }) => {
-      return {
-        error: data
-      };
-    }
+const { error, statusCode, execute } = useFetch(`${import.meta.env.VITE_API_BASE_URL}/users`, {
+  immediate: false,
+  onFetchError: ({ data }) => {
+    return {
+      error: data
+    };
   }
-)
+})
   .post(formData)
   .json();
 
