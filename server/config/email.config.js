@@ -49,6 +49,8 @@ async function sendEmail(user, templateId, params) {
 async function sendConfirmationEmail(user, confirmationToken) {
   const url = new URL('/confirm', process.env.APP_URL);
   url.searchParams.append('token', confirmationToken);
+
+  console.log(url.toString());
   await sendEmail(user, templateIds.confirmation, {
     TOKEN_URL: url.toString(),
     FULLNAME: user.fullname,
