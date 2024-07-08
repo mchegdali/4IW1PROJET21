@@ -29,40 +29,58 @@ const loginSchema = z.object({
   password: z.string().min(8, { message: 'Le mot de passe est obligatoire' })
 });
 
-const initialLoginData = {
+const initialData = {
   email: '',
   password: ''
 };
 
-const { formData, formErrors, formSubmitting, submitForm } = useForm(loginSchema, initialLoginData);
+const { formData, formErrors, formSubmitting, submitForm } = useForm(loginSchema, initialData);
 
-const { data, execute, error, statusCode } = useFetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
-  immediate: false,
-}).post(formData).json<LoginResponse>();
+const { data, execute, error, statusCode } = useFetch(
+  `${import.meta.env.VITE_API_BASE_URL}/auth/login`,
+  {
+    immediate: false
+  }
+)
+  .post(formData)
+  .json<LoginResponse>();
 
-const { data: emailResent, execute: resendConfirmationEmail } = useFetch(`${import.meta.env.VITE_API_BASE_URL}/auth/resend-confirmation-email`, {
-  immediate: false,
-}).post(formData).text();
+const { execute: resendConfirmationEmail } = useFetch(
+  `${import.meta.env.VITE_API_BASE_URL}/auth/resend-confirmation-email`,
+  {
+    immediate: false
+  }
+)
+  .post(formData)
+  .text();
 
 const handleSubmit = () => {
   submitForm(async () => {
     try {
       await execute(true);
       if (data?.value) {
-
-        userStore.$patch({ accessToken: data.value.accessToken, refreshToken: data.value.refreshToken, user: data.value.user });
+        userStore.$patch({
+          accessToken: data.value.accessToken,
+          refreshToken: data.value.refreshToken,
+          user: data.value.user
+        });
         router.push({ name: 'home' });
       }
     } catch {
-      console.log("handleSubmit error", error.value);
+      console.log('handleSubmit error', error.value);
     }
   });
 };
 
 const handleResendConfirmationEmail = async () => {
-  await resendConfirmationEmail(true);
-  if (emailResent?.value) {
-    toast({ title: 'Email de confirmation envoyé', description: 'Vérifiez votre boîte mail', type: 'foreground', duration: 2500 });
+  const response = await resendConfirmationEmail();
+  if (response) {
+    toast({
+      title: 'Email de confirmation envoyé',
+      description: 'Vérifiez votre boîte mail',
+      type: 'foreground',
+      duration: 2500
+    });
   }
 };
 </script>
@@ -70,9 +88,14 @@ const handleResendConfirmationEmail = async () => {
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-4">
     <div>
-      <label>Adresse e-mail
-        <Input id="email" v-model="formData.email"
-          :class="{ 'border-destructive': formErrors.email || statusCode === 401 }" autofocus />
+      <label
+        >Adresse e-mail
+        <Input
+          id="email"
+          v-model="formData.email"
+          :class="{ 'border-destructive': formErrors.email || statusCode === 401 }"
+          autofocus
+        />
       </label>
       <small class="text-destructive" v-if="formErrors.email">
         {{ formErrors.email }}
@@ -82,9 +105,14 @@ const handleResendConfirmationEmail = async () => {
       </small>
     </div>
     <div>
-      <label>Mot de passe
-        <Input id="password" type="password" v-model="formData.password"
-          :class="{ 'border-destructive': formErrors.password || statusCode === 401 }" />
+      <label
+        >Mot de passe
+        <Input
+          id="password"
+          type="password"
+          v-model="formData.password"
+          :class="{ 'border-destructive': formErrors.password || statusCode === 401 }"
+        />
       </label>
       <small class="text-destructive" v-if="formErrors.password">
         {{ formErrors.password }}
@@ -96,11 +124,8 @@ const handleResendConfirmationEmail = async () => {
 
     <div class="flex gap-4">
       <Button variant="outline" as-child type="button">
-        <RouterLink :to="{ name: 'register' }" class="w-1/2">
-          Créer un compte
-        </RouterLink>
+        <RouterLink :to="{ name: 'register' }" class="w-1/2"> Créer un compte </RouterLink>
       </Button>
-
 
       <Button type="submit" class="w-1/2" :disabled="formSubmitting">Connexion</Button>
     </div>

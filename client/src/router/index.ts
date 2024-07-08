@@ -59,6 +59,11 @@ const router = createRouter({
           component: () => import('../views/register-view.vue')
         },
         {
+          name: 'register-confirmation',
+          path: '/register-confirmation',
+          component: () => import('../views/register-confirmation-view.vue')
+        },
+        {
           name: 'forgot-password',
           path: '/forgot-password',
           component: () => import('../views/forgot-password-view.vue')

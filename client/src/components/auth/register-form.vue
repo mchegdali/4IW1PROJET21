@@ -35,21 +35,31 @@ const initialRegisterData = {
   confirmPassword: ''
 };
 
-const { formData, formErrors, formSubmitting, submitForm } = useForm(registerSchema, initialRegisterData);
+const { formData, formErrors, formSubmitting, submitForm } = useForm(
+  registerSchema,
+  initialRegisterData
+);
 
-const { data, error, statusCode, execute } = useFetch(`${import.meta.env.VITE_API_BASE_URL}/users`, {
-  immediate: false, onFetchError: ({ data }) => {
-    return {
-      error: data
+const { data, error, statusCode, execute } = useFetch(
+  `${import.meta.env.VITE_API_BASE_URL}/users`,
+  {
+    immediate: false,
+    onFetchError: ({ data }) => {
+      return {
+        error: data
+      };
     }
-
   }
-}).post(formData).json();
+)
+  .post(formData)
+  .json();
 
 const handleSubmit = () => {
   submitForm(async () => {
     await execute();
-
+    if (statusCode.value === 201) {
+      router.push({ name: 'register-confirmation' });
+    }
   });
 };
 </script>
@@ -59,8 +69,12 @@ const handleSubmit = () => {
     <div>
       <label>
         Adresse e-mail
-        <Input id="email" v-model="formData.email" autofocus
-          :class="{ 'border-destructive': formErrors.email, 'bg-destructive/25': formErrors.email }" />
+        <Input
+          id="email"
+          v-model="formData.email"
+          autofocus
+          :class="{ 'border-destructive': formErrors.email, 'bg-destructive/25': formErrors.email }"
+        />
       </label>
       <small class="text-destructive" v-if="formErrors.email">
         {{ formErrors.email }}
@@ -72,8 +86,13 @@ const handleSubmit = () => {
     <div>
       <label>
         Nom et Prénom
-        <Input id="fullname" name="fullname" type="text" v-model="formData.fullname"
-          :class="{ 'border-destructive': formErrors.fullname }" />
+        <Input
+          id="fullname"
+          name="fullname"
+          type="text"
+          v-model="formData.fullname"
+          :class="{ 'border-destructive': formErrors.fullname }"
+        />
       </label>
       <small class="text-destructive" v-if="formErrors.name">
         {{ formErrors.name }}
@@ -82,8 +101,12 @@ const handleSubmit = () => {
     <div>
       <label>
         Mot de passe
-        <Input id="password" type="password" v-model="formData.password"
-          :class="{ 'border-destructive': formErrors.password }" />
+        <Input
+          id="password"
+          type="password"
+          v-model="formData.password"
+          :class="{ 'border-destructive': formErrors.password }"
+        />
       </label>
       <div class="rounded-lg my-2 flex gap-2">
         <Info />
@@ -99,8 +122,12 @@ const handleSubmit = () => {
     <div>
       <label>
         Confirmation du mot de passe
-        <Input id="confirmPassword" type="password" v-model="formData.confirmPassword"
-          :class="{ 'border-destructive': formErrors.confirmPassword }" />
+        <Input
+          id="confirmPassword"
+          type="password"
+          v-model="formData.confirmPassword"
+          :class="{ 'border-destructive': formErrors.confirmPassword }"
+        />
       </label>
       <small class="text-destructive" v-if="formErrors.confirmPassword">
         {{ formErrors.confirmPassword }}
@@ -108,6 +135,4 @@ const handleSubmit = () => {
     </div>
     <Button type="submit" class="w-full" :disabled="formSubmitting">Confirmer</Button>
   </form>
-
-
 </template>

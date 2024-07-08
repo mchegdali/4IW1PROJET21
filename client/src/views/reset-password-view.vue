@@ -1,16 +1,12 @@
 <script setup lang="ts">
-import RegisterForm from '@/components/auth/register-form.vue';
-import Button from '@/components/ui/button/Button.vue';
+import ResetPasswordForm from '@/components/auth/reset-password-form.vue';
 </script>
 
 <template>
   <div class="flex justify-center items-center p-16">
-
     <div class="border p-5 rounded-lg shadow-lg max-w-screen-md">
       <h1 class="text-3xl font-bold mb-5">Réinitialiser mon mot de passe</h1>
-      <RegisterForm />
-
+      <ResetPasswordForm />
     </div>
-
   </div>
 </template>
