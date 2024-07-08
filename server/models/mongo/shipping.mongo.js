@@ -1,13 +1,8 @@
 const {mongoose} = require ('mongoose');
 const shippingSchema = new mongoose.Schema ({
-    id: {
+    _id: {
         type: mongoose.Schema.Types.UUID,
         required : true,
-    },
-    emailCustomer: {
-        type: String,
-        required: true,
-
     },
     fullname: {
         type:  String,
@@ -30,9 +25,9 @@ const shippingSchema = new mongoose.Schema ({
         type: String,
         required: true,
     },
-    deliveryChoiceShipping: {
+    deliveryChoiceId: {
         type:  {
-            id: {
+            _id: {
                 type: mongoose.Schema.Types.UUID,
                 required: true,
             },
@@ -40,7 +35,6 @@ const shippingSchema = new mongoose.Schema ({
                 type : String,
                 required: true,
             },
-        default: null,
         }
     }
 },
@@ -55,5 +49,5 @@ const shippingSchema = new mongoose.Schema ({
 );
 
 
-const shipping = mongoose.model('shipping', shippingSchema);
-export default shipping;
+const shipping = mongoose.model('shippings', shippingSchema);
+module.exports =  shipping;

@@ -1,11 +1,18 @@
+const httpErrors = require('http-errors');
+const validator = require('validator');
+const sequelize = require('../models/sql');
+const {
+  shippingQuerySchema,
+  shippingCreateSchema,
+  shippingUpdateSchema,
+} = require('../schemas/shipping.schema');
+const { NotFound } = httpErrors;
+const Shippings = sequelize.model('shippings');
 const { ZodError } = require('zod');
 const ShippingMongo = require('../models/mongo/shipping');
-const { shippingCreateSchema } = require('../schemas/shipping.schema');
 const formatZodError = require('../utils/format-zod-error');
 const { ValidationError } = require('sequelize');
-const sequelize = require('../models/sql');
-
-const Shipping = sequelize.model('shippings');
+const deliveryChoiceMongo = require('../models/mongo/deliveryChoice.mongo');
 
 /**
  *
@@ -14,45 +21,36 @@ const Shipping = sequelize.model('shippings');
  */
 async function createShipping(req, res, next) {
   try {
+    const shippingCreateBody = await shippingCreateSchema.parseAsync(req.body);
+    console.log(shippingCreateBody,"deliveryChoice : " +  shippingCreateBody.deliveryChoiceId)
     const result = await sequelize.transaction(async (t) => {
-      const shippingCreateBody = await shippingCreateSchema.parseAsync(
-        req.body,
+      if (shippingCreateBody.deliveryChoiceId) {
+        const deliveryChoice = await deliveryChoiceMongo.findById(
+          shippingCreateBody.deliveryChoiceId,
+    
       );
-
-      const newData = await Shipping.create(shippingCreateBody, {
+      if (!deliveryChoice) {
+          throw new NotFound('livraison introuvable');
+        }
+      }
+      const data = await Shippings.create(shippingCreateBody, {
         transaction: t,
+        include: ['deliveryChoice'],
       });
+      console.log(data)
+           const shippingMongo = await data.toMongo();
 
-      const shipping = {
-        id: newData.id,
-        fullname: newData.fullname,
-        city: newData.city,
-        emailCustomer: newData.emailCustomer,
-        street: newData.street,
-        zipCode: newData.zipCode,
-        phone: newData.phone,
-        deliveryChoice: newData.deliveryChoice,  
-      };
-
-      const shippingDoc = await ShippingMongo.create(shipping);
-
+      const shippingDoc = await ShippingMongo.create(shippingMongo);
+        
       return shippingDoc;
     });
-
+    
     return res.status(201).json(result);
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return res.status(422).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(422).json({ errors: formatZodError(error) });
-    }
-
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    console.log(error)
+    return next(error);
   }
 }
-
 /**
  *
  * @type {import('express').RequestHandler}
@@ -62,58 +60,18 @@ async function getShipping(req, res) {
   try {
     const shipping = req.params.shipping;
     const shippingDoc = await ShippingMongo.findOne({
-       shipping
+      shipping,
     });
-    return  shippingDoc;
-  }catch(error) {
+    return shippingDoc;
+  } catch (error) {
     if (error instanceof ValidationError) {
       return res.status(422).json({ errors: error.errors });
     }
     if (error instanceof ZodError) {
       return res.status(422).json({ errors: formatZodError(error) });
     }
-
     console.error(error);
     res.status(500).json({ message: error.message });
-  }
-}
-
-async function getAllShipping(req, res, next) {
-  try {
-    const shipping = await ShippingMongo.findAll({
-      where: req.query,
-    });
-    
-    if (!shipping) {
-      return res.status(404).json({ message: 'No shipping data found' });
-    }
-
-    return res.json({
-      metadata: shipping.metadata ? shipping.metadata[0] : null,
-      data: shipping.data || null,
-    });
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(422).json({ errors: formatZodError(error) });
-    }
-    return res.status(404).json({ message: error.message });
-  }
-}
-
-/**
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getProduct(req, res, next) {
-  try {
-    const product = await ShippingMongo.findOne();
-    if (!product) {
-      return res.status(404).json({ message: 'Livraison introuvable' });
-    }
-    return res.json(product);
-  } catch (error) {
-    return next(error);
   }
 }
 
@@ -147,6 +105,4 @@ async function getProduct(req, res, next) {
 module.exports = {
   createShipping,
   getShipping,
-  getAllShipping,
-  getProduct,
 };

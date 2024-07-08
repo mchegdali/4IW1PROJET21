@@ -13,10 +13,10 @@ const deliveryChoiceRouter = Router();
 
 
 
-deliveryChoiceRouter.get('/deliveryChoices/:deliveryChocie/shipping', getShipping);
+deliveryChoiceRouter.get('/deliveryChoices/:id/shipping', getShipping);
 
 deliveryChoiceRouter
-  .route('/deliveryChoices/:deliveryChocie')
+  .route('/deliveryChoices/:id')
   .get(getDeliveryChoice)
   .patch(updateDeliveryChoice)
   .delete(deleteDeliveryChoice);

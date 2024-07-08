@@ -27,9 +27,13 @@ const DeliveryChoiceSequelize = (sequelize) => {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: {
+          name: 'idx_unique_shipping_deliveryChoice_name',
+          msg: 'Ce nom est déjà utilisé.',
+        },
         validate: {
           notNull: {
-            msg: 'veuillez entre un nom de type de livraison',
+            msg: 'Le nom est obligatoire.',
           },
         },
       },

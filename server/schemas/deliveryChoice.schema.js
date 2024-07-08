@@ -15,7 +15,9 @@ const deliveryChoiceCreateSchema = z
     name: data.name,
   }));
 
-const deliveryChoiceUpdateSchema = deliveryChoiceCreateSchema.innerType().partial();
+const deliveryChoiceUpdateSchema = deliveryChoiceCreateSchema.innerType().partial().refine((a)=> {
+  return Object.keys(a).length > 0;
+},'Vous devez remplir au moins un champ');
 
 const deliveryChoiceSchema = deliveryChoiceCreateSchema
   .innerType()

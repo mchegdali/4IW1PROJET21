@@ -8,10 +8,6 @@ const shippingSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.UUID,
       required: true,
     },
-    emailCustomer: {
-      type: String,
-      required: true,
-    },
     fullname: {
       type: String,
       required: true,
@@ -33,7 +29,7 @@ const shippingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    deliveryChoiceShipping: {
+    deliveryChoiceId: {
         type: String,
         required: true,
     },

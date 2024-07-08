@@ -71,10 +71,10 @@ async function getDeliveryChoices(req, res, next) {
     /**
      * @type {boolean}
      */
-    const isUUID = req.params.deliveryChoice;
+    const isUUID = req.params.id;
 
     const filter = {
-      [isUUID]: req.params.deliveryChoice,
+      isUUID,
     };
 
     const deliveryChoice = await DeliveryChoiceMongo.findOne(filter).lean();
@@ -90,18 +90,17 @@ async function getDeliveryChoices(req, res, next) {
 }
 
 /**
- *
  * @type {import('express').RequestHandler}
- * @returns
  */
 async function updateDeliveryChoice(req, res, next) {
+  console.log(req.params.id);
   try {
-    const isUUID = req.params.deliveryChoice
+    const id = req.params.id;
     const sqlWhere = {
-      [isUUID]: req.params.deliveryChoice,
+      id ,
     };
     const mongoWhere = {
-      [isUUID]: req.params.deliveryChoice,
+      id,
     };
 
     const deliveryChoiceUpdateBody = deliveryChoiceUpdateSchema.parse(req.body);
@@ -172,7 +171,7 @@ async function updateDeliveryChoice(req, res, next) {
  */
 async function deleteDeliveryChoice(req, res, next) {
   try {
-    const isUUID = req.params.deliveryChoice;
+    const isUUID = req.params.id;
 
     const sqlWhere = {
       isUUID,
