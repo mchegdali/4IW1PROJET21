@@ -26,6 +26,10 @@ const AddressesSequelize = (sequelize) => {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
       },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       street: {
         type: DataTypes.STRING,
         allowNull: false,

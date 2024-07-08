@@ -29,6 +29,7 @@ const up = async ({ context: { sequelize } }) => {
     isVerified: true,
     addresses: [
       {
+        name: faker.lorem.word(),
         street: faker.location.streetAddress(true),
         city: faker.location.city(),
         zipCode: faker.location.zipCode(),
@@ -52,6 +53,7 @@ const up = async ({ context: { sequelize } }) => {
         addresses: [
           {
             id: crypto.randomUUID(),
+            name: faker.lorem.word(),
             street: faker.location.streetAddress(true),
             city: faker.location.city(),
             zipCode: faker.location.zipCode(),
@@ -69,7 +71,7 @@ const up = async ({ context: { sequelize } }) => {
           {
             model: Addresses,
             as: 'addresses',
-            attributes: ['id', 'street', 'city', 'zipCode'],
+            attributes: ['id', 'name', 'street', 'city', 'zipCode'],
           },
         ],
         transaction: t,
@@ -87,6 +89,7 @@ const up = async ({ context: { sequelize } }) => {
         addresses: [
           {
             id: crypto.randomUUID(),
+            name: faker.lorem.word(),
             street: faker.location.streetAddress(true),
             city: faker.location.city(),
             zipCode: faker.location.zipCode(),
@@ -104,7 +107,7 @@ const up = async ({ context: { sequelize } }) => {
           {
             model: Addresses,
             as: 'addresses',
-            attributes: ['id', 'street', 'city', 'zipCode'],
+            attributes: ['id', 'name', 'street', 'city', 'zipCode'],
           },
         ],
         transaction: t,
@@ -120,6 +123,7 @@ const up = async ({ context: { sequelize } }) => {
         isVerified: true,
         addresses: [
           {
+            name: faker.lorem.word(),
             street: faker.location.streetAddress(true),
             city: faker.location.city(),
             zipCode: faker.location.zipCode(),
@@ -137,7 +141,7 @@ const up = async ({ context: { sequelize } }) => {
           {
             model: Addresses,
             as: 'addresses',
-            attributes: ['id', 'street', 'city', 'zipCode'],
+            attributes: ['id', 'name', 'street', 'city', 'zipCode'],
           },
         ],
         transaction: t,
