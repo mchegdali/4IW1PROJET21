@@ -35,6 +35,8 @@ async function sendEmail(user, templateId, params) {
       console.log('HttpError statusCode', error.statusCode);
       console.log('HttpError body', error.body);
     }
+
+    console.log(error);
     throw error;
   }
 }
