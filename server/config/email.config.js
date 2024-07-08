@@ -28,17 +28,7 @@ async function sendEmail(user, templateId, params) {
   sendSmtpEmail.templateId = templateId;
   sendSmtpEmail.params = params;
 
-  try {
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
-  } catch (error) {
-    // if (error instanceof brevo.HttpError) {
-    //   console.log('HttpError statusCode', error.statusCode);
-    //   console.log('HttpError body', error.body);
-    // }
-
-    console.log(error);
-    throw error;
-  }
+  await apiInstance.sendTransacEmail(sendSmtpEmail);
 }
 
 /**
