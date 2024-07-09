@@ -2,12 +2,17 @@ const _slugify = require('slugify');
 
 /**
  *
- * @param {string} str
- * @returns
+ * @param {string | number} value
+ * @returns {string | null}
  */
-function slugify(str) {
-  if (typeof str !== 'string') return str;
-  return _slugify(str, {
+function slugify(value) {
+  if (typeof value !== 'string' && typeof value !== 'number') {
+    return null;
+  }
+
+  const slug = typeof value === 'string' ? value : value.toString();
+
+  return _slugify(slug, {
     replacement: '-',
     lower: true,
     strict: true,
