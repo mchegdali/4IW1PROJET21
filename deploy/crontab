@@ -1,0 +1,2 @@
+# Renew SSL certificates every month
+0 2 1 * * /usr/bin/certbot renew --quiet
