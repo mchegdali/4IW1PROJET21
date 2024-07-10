@@ -52,7 +52,7 @@ async function createDeliveryChoice(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-async function getDeliveryChoice(req, res, next) {
+async function getDeliveryChoices(req, res, next) {
   try {
     const deliveryChoice = await DeliveryChoiceMongo.find({}).lean({});
     return res.json(deliveryChoice);
@@ -66,15 +66,15 @@ async function getDeliveryChoice(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-async function getDeliveryChoices(req, res, next) {
+async function getDeliveryChoice(req, res, next) {
   try {
     /**
      * @type {boolean}
      */
-    const isUUID = req.params.id;
+    const id = req.params.id;
 
     const filter = {
-      isUUID,
+      _id: id,
     };
 
     const deliveryChoice = await DeliveryChoiceMongo.findOne(filter).lean();
@@ -85,6 +85,7 @@ async function getDeliveryChoices(req, res, next) {
 
     return res.json(deliveryChoice);
   } catch (error) {
+    console.log(error)
     return next(error);
   }
 }
@@ -100,7 +101,7 @@ async function updateDeliveryChoice(req, res, next) {
       id ,
     };
     const mongoWhere = {
-      id,
+      _id : id,
     };
 
     const deliveryChoiceUpdateBody = deliveryChoiceUpdateSchema.parse(req.body);
@@ -139,7 +140,7 @@ async function updateDeliveryChoice(req, res, next) {
           new: true,
         },
       );
-
+      console.log(deliveryChoiceDoc)
       if (!deliveryChoiceDoc) {
         throw new NotFound();
       }
@@ -171,13 +172,13 @@ async function updateDeliveryChoice(req, res, next) {
  */
 async function deleteDeliveryChoice(req, res, next) {
   try {
-    const isUUID = req.params.id;
+    const id = req.params.id;
 
     const sqlWhere = {
-      isUUID,
+      id,
     };
     const mongoWhere = {
-      isUUID,
+      _id : id,
     };
 
     const [deletedCountSql, deletedCountMongo] = await Promise.all([

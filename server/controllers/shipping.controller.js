@@ -9,7 +9,7 @@ const {
 const { NotFound } = httpErrors;
 const Shippings = sequelize.model('shippings');
 const { ZodError } = require('zod');
-const ShippingMongo = require('../models/mongo/shipping');
+const ShippingMongo = require('../models/mongo/shipping.mongo');
 const formatZodError = require('../utils/format-zod-error');
 const { ValidationError } = require('sequelize');
 const deliveryChoiceMongo = require('../models/mongo/deliveryChoice.mongo');
@@ -22,11 +22,11 @@ const deliveryChoiceMongo = require('../models/mongo/deliveryChoice.mongo');
 async function createShipping(req, res, next) {
   try {
     const shippingCreateBody = await shippingCreateSchema.parseAsync(req.body);
-    console.log(shippingCreateBody,"deliveryChoice : " +  shippingCreateBody.deliveryChoiceId)
+    console.log(shippingCreateBody,"deliveryChoice : " +  shippingCreateBody.deliveryChoice)
     const result = await sequelize.transaction(async (t) => {
-      if (shippingCreateBody.deliveryChoiceId) {
+      if (shippingCreateBody.deliveryChoice) {
         const deliveryChoice = await deliveryChoiceMongo.findById(
-          shippingCreateBody.deliveryChoiceId,
+          shippingCreateBody.deliveryChoice,
     
       );
       if (!deliveryChoice) {
@@ -56,53 +56,93 @@ async function createShipping(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-async function getShipping(req, res) {
+async function getShipping(req, res, next) {
   try {
-    const shipping = req.params.shipping;
-    const shippingDoc = await ShippingMongo.findOne({
-      shipping,
-    });
-    return shippingDoc;
+    const id = req.params.id;
+
+    const filter = {
+      _id: id,
+    };
+
+    const shipping = await ShippingMongo.findOne(filter);
+    if (!shippingQuerySchema) {
+      return res.sendStatus(404);
+    }
+    return res.json(shipping);
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return res.status(422).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(422).json({ errors: formatZodError(error) });
-    }
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 }
 
-// async function updateProduct(req, res) {
-//   try {
-//     const product = await Product.findById(req.params.id);
-//     if (!product) {
-//       return res.status(404).json({ message: 'Product not found' });
-//     }
-//     Object.assign(product, req.body);
-//     await product.save();
-//     res.json(product);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// }
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function updateShipping(req, res, next) {
+  try {
+    const id = req.params.id;
+    const sqlWhere = {
+      id,
+    };
+    const mongoWhere = {
+      _id: id,
+    };
 
-// async function deleteProduct(req, res) {
-//   try {
-//     const product = await Product.findById(req.params.id);
-//     if (!product) {
-//       return res.status(404).json({ message: 'Product not found' });
-//     }
-//     await product.remove();
-//     res.json({ message: 'Product deleted' });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// }
+    const shippingUpdateBody = await shippingUpdateSchema.parseAsync(req.body);
+    const updatedKeys = Object.keys(shippingUpdateBody);
 
+    const result = await sequelize.transaction(async (t) => {
+      const [affectedRowsCount, affectedRows] = await Shippings.update(
+        shippingUpdateBody,
+        {
+          where: sqlWhere,
+          limit: 1,
+          transaction: t,
+          returning: true,
+        },
+      );
+
+      if (affectedRowsCount === 0) {
+        throw new NotFound('livraison introuvable');
+      }
+
+      const shipping = await Shippings.scope('toMongo').findByPk(
+        affectedRows[0].getDataValue('id'),
+        {
+          transaction: t,
+        },
+      );
+
+      const shippingMongo = {};
+
+      for (const key of updatedKeys) {
+        shippingMongo[key] = shipping.getDataValue(key);
+      }
+
+      const replaceResult = await ShippingMongo.findOneAndUpdate(
+        mongoWhere,
+        shippingMongo,
+        {
+          new: true,
+        },
+      );
+
+      if (!replaceResult) {
+        throw new NotFound('livraison introuvable');
+      }
+
+      return replaceResult;
+    });
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.log(error)
+    return next(error);
+  }
+}
 module.exports = {
   createShipping,
   getShipping,
+  updateShipping,
 };

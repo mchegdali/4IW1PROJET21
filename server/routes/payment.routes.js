@@ -3,7 +3,7 @@ const { createPayment, executePayment } = require('../controllers/payment.contro
 
 const paymentRouter = Router();
 
-paymentRouter.post('/pay', createPayment);
+paymentRouter.post('/payment', createPayment);
 paymentRouter.get('/success', executePayment);
 paymentRouter.get('/cancel', (req, res) => res.send('Cancelled'));
 
