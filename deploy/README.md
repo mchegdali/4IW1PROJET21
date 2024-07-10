@@ -14,3 +14,31 @@
 - Certbot is installed with `apt install certbot python3-certbot-nginx`
 - Certbot is configured with `certbot --nginx`
 - Automatic renewal is configured with `crontab -e`
+
+## Fail2ban
+
+### Configuration
+
+- Fail2ban configuration is in fail2ban/jail.local
+- Fail2ban configuration is in fail2ban/nginx-403.conf
+- Fail2ban configuration is in fail2ban/nginx-404.conf
+- Fail2ban configuration is in fail2ban/nginx-422.conf
+- To verify the configuration, run fail2ban-client status
+- To reload the configuration, run fail2ban-client reload
+
+## Samba
+
+### Configuration
+
+Samba configuration is in smb.conf
+To verify the configuration, run testparm
+
+- Create a folder mkdir -p /srv/samba/lucas
+
+Add rights to the folder to a user: 
+- chown lucas:lucas /srv/samba/lucas
+- Create samba user with password: sudo smbpasswd -a lucas
+
+To reload the configuration, run :
+- systemctl reload smbd ## needs to be run as root
+- systemctl reload nmbd ## needs to be run as root
