@@ -18,7 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@getbrevo/brevo": "^2.1.1",
+    "@getbrevo/brevo": "^2.2.0",
     "@node-rs/argon2": "^1.8.3",
     "cors": "^2.8.5",
     "dayjs": "^1.11.11",
