@@ -11,31 +11,6 @@ async function umzug() {
 
   const connection = _mongoose.connection.db;
 
-  // const migrator = new Umzug({
-  //   create: {
-  //     folder: 'migrations',
-  //     template: (filepath) => [
-  //       [
-  //         filepath,
-  //         fs
-  //           .readFileSync(path.join(__dirname, 'templates/migration'))
-  //           .toString(),
-  //       ],
-  //     ],
-  //   },
-  //   migrations: {
-  //     glob: ['migrations/*', { cwd: __dirname }],
-  //   },
-  //   context: {
-  //     sequelize: db,
-  //   },
-  //   storage: new MongoDBStorage({
-  //     connection,
-  //     collectionName: 'migrations',
-  //   }),
-  //   logger: console,
-  // });
-
   const seeder = new Umzug({
     create: {
       folder: 'seeders',

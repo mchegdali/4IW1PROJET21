@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 import HomeView from '../views/home-view.vue';
 import Layout from '../layouts/layout.vue';
 
@@ -32,12 +33,17 @@ const router = createRouter({
         {
           name: 'account',
           path: '/account',
-          component: () => import('../views/account-view.vue')
-        }, {
+          component: () => import('../views/account-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
           name: 'livraison',
           path: '/livraison',
           component: () => import('../views/livraison-view.vue')
-        }, {
+        },
+        {
           name: 'livraison',
           path: '/livraison',
           component: () => import('../views/livraison-view.vue')
@@ -53,9 +59,52 @@ const router = createRouter({
           component: () => import('../views/register-view.vue')
         },
         {
-          name: 'no-connected',
-          path: '/no-connected',
-          component: () => import('../views/no-connected-view.vue')
+          name: 'register-confirmation',
+          path: '/register-confirmation',
+          component: () => import('../views/register-confirmation-view.vue')
+        },
+        {
+          name: 'forgot-password',
+          path: '/forgot-password',
+          component: () => import('../views/forgot-password-view.vue')
+        },
+        {
+          name: 'reset-password',
+          path: '/reset-password',
+          component: () => import('../views/reset-password-view.vue'),
+          beforeEnter: (to, from, next) => {
+            if (!to.query.token) {
+              return next({ name: 'home', replace: true });
+            }
+            return next();
+          }
+        },
+        {
+          name: 'account-verified',
+          path: '/confirm',
+          component: () => import('../views/account-verified-view.vue'),
+          beforeEnter: (to, from, next) => {
+            if (!to.query.token) {
+              return next({ name: 'home', replace: true });
+            }
+            fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/confirm`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                token: to.query.token
+              })
+            }).then((response) => {
+              if (response.status === 401) {
+                return next({ name: 'login' });
+              }
+
+              if (response.status === 204) {
+                return next();
+              }
+            });
+          }
         },
         {
           name: 'orders',
@@ -64,12 +113,35 @@ const router = createRouter({
         },
         {
           name: 'order',
-          path: '/order/:id',
+          path: '/orders/:id',
           component: () => import('../views/order-details-view.vue')
+        },
+        {
+          name: 'tracking',
+          path: '/tracking/:id',
+          component: () => import('../views/order-tracking-view.vue')
         }
       ]
-    },
+    }
   ]
+});
+
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore();
+  if (!to.meta?.requiresAuth) {
+    return next();
+  }
+
+  if (!userStore.isAuthenticated) {
+    const isSuccess = await userStore.getRefreshToken();
+    if (isSuccess) {
+      next();
+    } else {
+      next('/login');
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;

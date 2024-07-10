@@ -1,5 +1,7 @@
 const jose = require('jose');
 const sequelize = require('../models/sql');
+const { refreshTokenSchema } = require('../schemas/auth.schema');
+const authConfig = require('../config/auth.config');
 const Users = sequelize.model('users');
 
 /**
@@ -44,9 +46,7 @@ const checkAuth =
 
       return next();
     } catch (error) {
-      if (error instanceof jose.errors.JOSEError) {
-        return res.sendStatus(401);
-      }
+      return next(error);
     }
   };
 

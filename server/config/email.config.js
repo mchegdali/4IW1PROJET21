@@ -19,7 +19,6 @@ const templateIds = {
  */
 async function sendEmail(user, templateId, params) {
   const sendSmtpEmail = new brevo.SendSmtpEmail();
-
   sendSmtpEmail.to = [
     {
       email: user.email,
@@ -29,15 +28,7 @@ async function sendEmail(user, templateId, params) {
   sendSmtpEmail.templateId = templateId;
   sendSmtpEmail.params = params;
 
-  try {
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
-  } catch (error) {
-    if (error instanceof brevo.HttpError) {
-      console.log('HttpError statusCode', error.statusCode);
-      console.log('HttpError body', error.body);
-    }
-    throw error;
-  }
+  await apiInstance.sendTransacEmail(sendSmtpEmail);
 }
 
 /**
@@ -50,6 +41,7 @@ async function sendEmail(user, templateId, params) {
 async function sendConfirmationEmail(user, confirmationToken) {
   const url = new URL('/confirm', process.env.APP_URL);
   url.searchParams.append('token', confirmationToken);
+
   await sendEmail(user, templateIds.confirmation, {
     TOKEN_URL: url.toString(),
     FULLNAME: user.fullname,
@@ -64,7 +56,7 @@ async function sendConfirmationEmail(user, confirmationToken) {
  * @param {string} forgotPasswordToken
  */
 async function sendForgotPasswordEmail(user, forgotPasswordToken) {
-  const url = new URL('/forgot-password', process.env.APP_URL);
+  const url = new URL('/reset-password', process.env.APP_URL);
   url.searchParams.append('token', forgotPasswordToken);
   await sendEmail(user, templateIds.forgotPassword, {
     TOKEN_URL: url.toString(),

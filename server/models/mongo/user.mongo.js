@@ -1,4 +1,5 @@
-const mongoose = require('./db');
+const mongoose = require('mongoose');
+const connection = require('./db');
 
 const UserSchema = new mongoose.Schema(
   {
@@ -87,6 +88,6 @@ UserSchema.index(
   },
 );
 
-const UserMongo = mongoose.model('User', UserSchema);
+const UserMongo = connection.model('User', UserSchema);
 
 module.exports = UserMongo;

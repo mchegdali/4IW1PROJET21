@@ -57,7 +57,7 @@ console.log(order);
 
           <h1 class="text-xs font-bold text-gray-700 mt-2 sm:text-sm">VOS COORDONNÉES</h1>
           <div class="text-sm p-2 sm:text-sm">
-            <p>{{order.contactDetails.name}}</p>
+            <p>{{ order.contactDetails.name }}</p>
             <p>{{ order.contactDetails.phoneNumber }}</p>
           </div>
         </div>
@@ -81,16 +81,11 @@ console.log(order);
               }}
             </p>
 
-            <div
-              v-if="order.deliveryStatus === false"
-              class="bg-white py-2 text-sm flex items-center gap-2"
-            >
+            <div v-if="order.deliveryStatus === false" class="bg-white py-2 text-sm flex items-center gap-2">
               <Truck />
-              <RouterLink
-                :to="{ name: 'order', params: { id: order.orderId } }"
-                class="text-tea-600 sm:text-lg"
-                >Suivre le colis</RouterLink
-              >
+              <RouterLink :to="{ name: 'tracking', params: { id: order.orderId } }" class="text-tea-600 sm:text-lg">
+                Suivre le colis
+              </RouterLink>
             </div>
           </div>
 
@@ -130,14 +125,10 @@ console.log(order);
 
         <!-- quatrieme infos -->
         <div class="flex flex-col w-full gap-2 px-2 sm:px-4 pb-2">
-          <div
-            v-for="(item, index) in order.items"
-            :key="item.id"
-            :class="[
-              'h-28 flex w-full gap-8 pb-2',
-              index !== order.items.length - 1 ? 'border-b border-gray-300' : ''
-            ]"
-          >
+          <div v-for="(item, index) in order.items" :key="item.id" :class="[
+            'h-28 flex w-full gap-8 pb-2',
+            index !== order.items.length - 1 ? 'border-b border-gray-300' : ''
+          ]">
             <img class="min-w-24 h-full bg-slate-400" :src="item.image" alt="" />
             <div class="flex flex-col text-sm gap-2">
               <p class="font-bold">{{ item.title }}</p>
@@ -150,29 +141,24 @@ console.log(order);
         </div>
       </div>
 
-      <div>
+      <div class="md:border md:flex md:flex-col md:rounded md:h-fit">
         <!-- cinquieme infos -->
         <h6 class="font-bold text-sm p-2 sm:text-lg sm:p-4 text-gray-700">
           INFORMATION DE PAIEMENT
         </h6>
         <div class="flex gap-4 items-center p-2 sm:p-4 text-xs">
           <span v-if="order.typePayement == 'pp'" class="flex gap-4 items-center">
-            <img
-              class="w-9 px-2 py-1"
-              src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png"
-              alt=""
-            />
-            <h1 class="px-2 text-sm sm:text-lg">Paypal</h1></span
-          >
+            <img class="w-9 px-2 py-1" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png"
+              alt="" />
+            <h1 class="px-2 text-sm sm:text-lg">Paypal</h1>
+          </span>
 
           <span v-if="order.typePayement == 'cb'" class="flex gap-4 items-center">
-            <img
-              class="w-9 px-2 py-1 sm:w-12"
+            <img class="w-9 px-2 py-1 sm:w-12"
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/300px-MasterCard_Logo.svg.png"
-              alt=""
-            />
-            <h1 class="px-2 text-sm sm:text-lg">Carte bancaire</h1></span
-          >
+              alt="" />
+            <h1 class="px-2 text-sm sm:text-lg">Carte bancaire</h1>
+          </span>
         </div>
 
         <!-- sixieme infos -->
