@@ -51,7 +51,9 @@ const { execute: resendConfirmationEmail } = useFetch(
     immediate: false
   }
 )
-  .post(formData)
+  .post({
+    email: formData.value.email
+  })
   .text();
 
 const handleSubmit = () => {

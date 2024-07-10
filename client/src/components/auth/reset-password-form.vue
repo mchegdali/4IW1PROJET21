@@ -5,9 +5,11 @@ import { z } from 'zod';
 import { Info } from 'lucide-vue-next';
 import { useForm } from '@/composables/form';
 import { useFetch } from '@vueuse/core';
-import { useRouter } from 'vue-router';
+import { useRouter, type LocationQueryValue } from 'vue-router';
 
 const router = useRouter();
+
+const token = router.currentRoute.value.query.token as LocationQueryValue;
 
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
 
@@ -40,6 +42,18 @@ const { data, error, statusCode, execute } = useFetch(
   `${import.meta.env.VITE_API_BASE_URL}/auth/reset-password`,
   {
     immediate: false,
+    beforeFetch({ url, options, cancel }) {
+      if (!token) cancel();
+
+      options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${token}`
+      };
+
+      return {
+        options
+      };
+    },
     onFetchError: ({ data }) => {
       return {
         error: data
