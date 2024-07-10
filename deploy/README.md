@@ -19,10 +19,10 @@
 
 ### Configuration
 
-- Fail2ban configuration is in fail2ban/jail.local
-- Fail2ban configuration is in fail2ban/nginx-403.conf
-- Fail2ban configuration is in fail2ban/nginx-404.conf
-- Fail2ban configuration is in fail2ban/nginx-422.conf
+- Fail2ban configuration is in /etc/fail2ban/jail.local
+- Fail2ban configuration is in /etc/fail2ban/filter.d/nginx-403.conf
+- Fail2ban configuration is in /etc/fail2ban/filter.d/nginx-404.conf
+- Fail2ban configuration is in /etc/fail2ban/filter.d/nginx-422.conf
 - To verify the configuration, run fail2ban-client status
 - To reload the configuration, run fail2ban-client reload
 
@@ -30,7 +30,7 @@
 
 ### Configuration
 
-Samba configuration is in smb.conf
+Samba configuration is in /etc/samba/smb.conf
 To verify the configuration, run testparm
 
 - Create a folder mkdir -p /srv/samba/lucas
