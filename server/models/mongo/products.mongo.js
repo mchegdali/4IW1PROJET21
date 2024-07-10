@@ -1,4 +1,5 @@
-const mongoose = require('./db');
+const mongoose = require('mongoose');
+const connection = require('./db');
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -79,6 +80,6 @@ ProductSchema.index(
   },
 );
 
-const ProductMongo = mongoose.model('Product', ProductSchema);
+const ProductMongo = connection.model('Product', ProductSchema);
 
 module.exports = ProductMongo;

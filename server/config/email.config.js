@@ -19,7 +19,7 @@ const templateIds = {
  */
 async function sendEmail(user, templateId, params) {
   const sendSmtpEmail = new brevo.SendSmtpEmail();
-  sendSmtpEmail.headers.sendSmtpEmail.to = [
+  sendSmtpEmail.to = [
     {
       email: user.email,
       name: user.fullname,

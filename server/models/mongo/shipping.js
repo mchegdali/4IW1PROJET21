@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const connection = require('./db');
 
 const shippingSchema = new mongoose.Schema(
   {
@@ -64,5 +65,5 @@ shippingSchema.index(
   },
 );
 
-const shipping = mongoose.model('shipping', shippingSchema);
+const shipping = connection.model('shipping', shippingSchema);
 module.exports = shipping;

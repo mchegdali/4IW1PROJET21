@@ -37,7 +37,7 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
 );
 
 const { data, error, statusCode, execute } = useFetch(
-  `${import.meta.env.VITE_API_BASE_URL}/users`,
+  `${import.meta.env.VITE_API_BASE_URL}/auth/reset-password`,
   {
     immediate: false,
     onFetchError: ({ data }) => {
