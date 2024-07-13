@@ -15,8 +15,8 @@ const addressesRouter = Router({ mergeParams: true });
 
 addressesRouter.post(
   '/',
-  checkAuth(authConfig.accessTokenSecret, true),
-  isOwnAccount,
+  // checkAuth(authConfig.accessTokenSecret, true),
+  // isOwnAccount,
   createAddress,
 );
 
@@ -40,14 +40,14 @@ addressesRouter.delete(
     console.log(req.params);
     next();
   },
-  checkAuth(authConfig.accessTokenSecret, true),
+  // checkAuth(authConfig.accessTokenSecret, true),
   deleteAddress,
 );
 
 addressesRouter.get(
   '/',
-  checkAuth(authConfig.accessTokenSecret, true),
-  isOwnAccount,
+  // checkAuth(authConfig.accessTokenSecret, true),
+  // isOwnAccount,
   getAddresses,
 );
 addressesRouter.get(

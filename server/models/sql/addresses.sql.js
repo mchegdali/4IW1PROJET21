@@ -12,6 +12,7 @@ const AddressesSequelize = (sequelize) => {
     toMongo() {
       return {
         _id: this.id,
+        name: this.name,
         street: this.street,
         city: this.city,
         zipCode: this.zipCode,

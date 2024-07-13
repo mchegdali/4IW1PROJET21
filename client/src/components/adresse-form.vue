@@ -1,57 +1,56 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
 import Input from './ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { z } from 'zod';
 import { useForm } from '@/composables/form';
 
+const router = useRouter();
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+const userId = user.id;
+
 const handleSubmit = () => {
   submitForm(async (data) => {
-    console.log("Données d'adresse envoyées :", data);
+    try {
+      const response = await fetch(`http://localhost:3000/users/${userId}/addresses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de l'ajout de l'adresse");
+      }
+
+      router.push({ name: 'adresses', params: { userId } });
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de l'adresse:", error);
+    }
   });
 };
 
 const addressSchema = z.object({
-  fullName: z
+  name: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
+    message: 'Le nom contient des caractères invalides'
+  }),
+  street: z.string().regex(/^[a-zA-Z0-9àâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ .,'-]+$/, {
+    message: 'La rue contient des caractères invalides'
+  }),
+  city: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
+    message: 'La ville contient des caractères invalides'
+  }),
+  zipCode: z
     .string()
-    .regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
-      message: 'Le nom complet contient des caractères invalides'
-    }),
-  street: z
-    .string()
-    .regex(/^[a-zA-Z0-9àâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ .,'-]+$/, {
-      message: 'La rue contient des caractères invalides'
-    }),
-  city: z
-    .string()
-    .regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
-      message: 'La ville contient des caractères invalides'
-    }),
-  region: z
-    .string()
-    .regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
-      message: 'La région contient des caractères invalides'
-    }),
-  postalCode: z
-    .string()
-    .regex(/^\d{5}$/, { message: 'Le code postal doit être composé de 5 chiffres' }),
-  country: z
-    .string()
-    .regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
-      message: 'Le pays contient des caractères invalides'
-    }),
-  phone: z
-    .string()
-    .regex(/^(\+33|0)[1-9](\d{2}){4}$/, { message: 'Le numéro de téléphone est invalide' })
+    .regex(/^\d{5}$/, { message: 'Le code postal doit être composé de 5 chiffres' })
 });
 
 const initialAddressData = {
-  fullName: 'Jean Dupont',
-  street: '52 rue Antoine',
-  city: 'Paris',
-  region: 'Ile de France',
-  postalCode: '77016',
-  country: 'France',
-  phone: '07 45 62 41 23'
+  name: '',
+  street: '',
+  city: '',
+  zipCode: ''
 };
 
 const { formData, formErrors, formSubmitting, submitForm } = useForm(
@@ -65,16 +64,16 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
       <div>
         <label
-          >Nom et prénom
+          >Nom
           <Input
-            id="fullName"
-            v-model="formData.fullName"
-            :class="{ 'border-destructive': formErrors.fullName }"
+            id="name"
+            v-model="formData.name"
+            :class="{ 'border-destructive': formErrors.name }"
             autofocus
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.fullName">
-          {{ formErrors.fullName }}
+        <small class="text-destructive" v-if="formErrors.name">
+          {{ formErrors.name }}
         </small>
       </div>
       <div>
@@ -105,54 +104,15 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
       </div>
       <div>
         <label
-          >Région
-          <Input
-            id="region"
-            v-model="formData.region"
-            :class="{ 'border-destructive': formErrors.region }"
-          />
-        </label>
-        <small class="text-destructive" v-if="formErrors.region">
-          {{ formErrors.region }}
-        </small>
-      </div>
-      <div>
-        <label
           >Code postal
           <Input
-            id="postalCode"
-            v-model="formData.postalCode"
-            :class="{ 'border-destructive': formErrors.postalCode }"
+            id="zipCode"
+            v-model="formData.zipCode"
+            :class="{ 'border-destructive': formErrors.zipCode }"
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.postalCode">
-          {{ formErrors.postalCode }}
-        </small>
-      </div>
-      <div>
-        <label
-          >Pays
-          <Input
-            id="country"
-            v-model="formData.country"
-            :class="{ 'border-destructive': formErrors.country }"
-          />
-        </label>
-        <small class="text-destructive" v-if="formErrors.country">
-          {{ formErrors.country }}
-        </small>
-      </div>
-      <div>
-        <label
-          >Téléphone
-          <Input
-            id="phone"
-            v-model="formData.phone"
-            :class="{ 'border-destructive': formErrors.phone }"
-          />
-        </label>
-        <small class="text-destructive" v-if="formErrors.phone">
-          {{ formErrors.phone }}
+        <small class="text-destructive" v-if="formErrors.zipCode">
+          {{ formErrors.zipCode }}
         </small>
       </div>
       <Button type="submit" class="w-full" :disabled="formSubmitting">Soumettre</Button>
