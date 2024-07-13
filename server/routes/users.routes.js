@@ -6,7 +6,6 @@ const {
   deleteUser,
   updateUser,
   getUser,
-  getUserAddresses,
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');

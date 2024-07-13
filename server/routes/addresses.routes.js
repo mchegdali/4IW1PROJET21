@@ -11,25 +11,26 @@ const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
 const { isOwnAccount } = require('../middlewares/user.middleware');
 
-const addressesRouter = Router({mergeParams: true});
+const addressesRouter = Router({ mergeParams: true });
 
 addressesRouter.post(
   '/',
   checkAuth(authConfig.accessTokenSecret, true),
+  isOwnAccount,
   createAddress,
 );
 
 addressesRouter.patch(
   '/:id',
-  // checkAuth(authConfig.accessTokenSecret, true),
-  // isOwnAccount,
+  checkAuth(authConfig.accessTokenSecret, true),
+  isOwnAccount,
   updateAddress,
 );
 
 addressesRouter.put(
   '/:id',
-  // checkAuth(authConfig.accessTokenSecret, true),
-  // isOwnAccount,
+  checkAuth(authConfig.accessTokenSecret, true),
+  isOwnAccount,
   replaceAddress,
 );
 
@@ -37,14 +38,23 @@ addressesRouter.delete(
   '/:id',
   (req, res, next) => {
     console.log(req.params);
-    next()
+    next();
   },
   checkAuth(authConfig.accessTokenSecret, true),
-  checkRole(['admin']),
   deleteAddress,
 );
 
-addressesRouter.get('/', getAddresses);
-addressesRouter.get('/:id', getAddress);
+addressesRouter.get(
+  '/',
+  checkAuth(authConfig.accessTokenSecret, true),
+  isOwnAccount,
+  getAddresses,
+);
+addressesRouter.get(
+  '/:id',
+  checkAuth(authConfig.accessTokenSecret, true),
+  isOwnAccount,
+  getAddress,
+);
 
 module.exports = addressesRouter;
