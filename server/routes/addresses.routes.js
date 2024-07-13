@@ -7,7 +7,7 @@ const {
   getAddress,
   replaceAddress,
 } = require('../controllers/addresses.controller');
-const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
+const { checkAuth } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
 const { isOwnAccount } = require('../middlewares/user.middleware');
 
