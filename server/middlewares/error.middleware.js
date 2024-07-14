@@ -1,6 +1,8 @@
 const { ValidationError, UniqueConstraintError } = require('sequelize');
 const { ZodError } = require('zod');
 const createHttpError = require('http-errors');
+const jose = require('jose');
+const brevo = require('@getbrevo/brevo');
 
 /**
  *
@@ -36,8 +38,16 @@ const errorMiddleware = (error, req, res, _next) => {
 
     return res.status(422).json(flattenedErrors);
   }
-
+  if (error instanceof jose.errors.JOSEError) {
+    return res.sendStatus(401);
+  }
   if (createHttpError.isHttpError(error)) {
+    return res.sendStatus(error.statusCode);
+  }
+
+  if (error instanceof brevo.HttpError) {
+    console.error('HttpError statusCode', error.statusCode);
+    console.error('HttpError body', error.body);
     return res.sendStatus(error.statusCode);
   }
 

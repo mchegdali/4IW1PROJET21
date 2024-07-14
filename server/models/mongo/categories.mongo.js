@@ -1,4 +1,5 @@
-const mongoose = require('./db');
+const mongoose = require('mongoose');
+const connection = require('./db');
 
 const CategoriesSchema = new mongoose.Schema(
   {
@@ -39,6 +40,6 @@ CategoriesSchema.index(
   },
 );
 
-const CategoriesMongo = mongoose.model('Categories', CategoriesSchema);
+const CategoriesMongo = connection.model('Categories', CategoriesSchema);
 
 module.exports = CategoriesMongo;

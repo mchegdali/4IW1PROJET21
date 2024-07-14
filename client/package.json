@@ -17,8 +17,10 @@
     "@vueuse/core": "^10.9.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "date-fns": "^3.6.0",
     "embla-carousel": "^8.0.2",
     "embla-carousel-vue": "^8.0.2",
+    "jwt-decode": "^4.0.0",
     "lucide-vue-next": "^0.372.0",
     "pinia": "^2.1.7",
     "radix-vue": "^1.7.1",
@@ -26,6 +28,7 @@
     "tailwindcss-animate": "^1.0.7",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",
+    "vue-timeline": "^0.1.0",
     "zod": "^3.23.7"
   },
   "devDependencies": {

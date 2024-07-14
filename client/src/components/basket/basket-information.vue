@@ -6,6 +6,9 @@ import { useBasketStore } from '@/stores/basket';
 const basketStore = useBasketStore();
 
 const products = reactive(basketStore.products);
+
+console.log(products);
+
 </script>
 
 <template>

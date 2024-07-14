@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const connection = require('./db');
 
-const paymentSchema = new mongoose.schema(
+const paymentSchema = new mongoose.Schema(
   {
     _id: {
       type: mongoose.Schema.Types.UUID,
@@ -39,5 +40,5 @@ paymentSchema.index(
   },
 );
 
-const Payment = mongoose.model('shipping', paymentSchema);
+const Payment = connection.model('shipping', paymentSchema);
 module.exports = Payment;
