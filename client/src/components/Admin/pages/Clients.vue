@@ -12,7 +12,7 @@
                         <StatisticsBlock :stats="statisticsData" />
                     </div>
                     <div class="bg-white rounded-xl p-2 flex-grow">
-                        <LineChart v-if="lineChartOptions && lineChartSeries" :options="lineChartOptions" :series="lineChartSeries" />
+                        <LineChart />
                     </div>
                 </div>
 
@@ -33,6 +33,7 @@ import { defineComponent } from 'vue';
 import StatisticsBlock from '../StatisticsBlock.vue';
 import LineChart from '../LineChart.vue';
 import AreaChart from '../AreaChart.vue';
+import AreaChart from '../AreaChart.vue';
 import StatCard from '../StatCard.vue';
 import BarChart from '../BarChart.vue';
 
@@ -49,90 +50,31 @@ interface Stat {
 }
 
 export default defineComponent({
-    name: 'Utilisateurs',
-    components: {
-        StatisticsBlock,
-        LineChart,
-        AreaChart,
-        StatCard,
-        BarChart,
-    },
-    data() {
-        return {
-            statisticsData: [
-                { value: '10', text: 'Ventes', color: 'text-blue-600' },
-                { value: '20', text: 'Clients', color: 'text-green-600' },
-                { value: '30', text: 'Produits', color: 'text-red-600' }
-            ] as Statistic[],
-            stats: [
-                { id: 1, label: 'Utilisateurs totaux', value: '' },
-                { id: 2, label: 'Utilisateurs actifs', value: '567' },
-                { id: 3, label: 'Nouvelles inscriptions', value: '89' },
-                { id: 4, label: 'Visiteurs quotidiens', value: '1234' },
-                { id: 5, label: 'Visiteurs mensuels', value: '12345' },
-                { id: 6, label: 'Taux de rebond', value: '45%' },
-            ] as Stat[],
-            lineChartOptions: {
-                chart: {
-                    id: 'vuechart-line-users'
-                },
-                xaxis: {
-                    categories: []
-                }
-            },
-            lineChartSeries: [
-                {
-                    name: 'Utilisateurs',
-                    data: []
-                }
-            ],
-        };
-    },
-    methods: {
-        async fetchUserCount() {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/count`);
-                const data = await response.json();
-                this.stats[0].value = data.count.toString();
-            } catch (error) {
-                console.error('Error fetching user count:', error);
-                this.stats[0].value = "-"; 
-            }
-        },
-        async fetchUserRegistrations() {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/registrations`);
-                const data = await response.json();
-
-                const dates = data.map(entry => entry.date);
-                const counts = data.map(entry => entry.count);
-
-                this.lineChartOptions = {
-                    chart: {
-                        id: 'vuechart-line-example'
-                    },
-                    xaxis: {
-                        categories: dates
-                    },
-                    title: {
-                        text: 'Inscriptions par jour',
-                        align: 'left',
-                    }
-                };
-
-                this.lineChartSeries = [{
-                    name: 'Inscriptions',
-                    data: counts
-                }];
-            } catch (error) {
-                console.error('Error fetching user registrations:', error);
-            }
-        }
-    },
-    mounted() {
-        this.fetchUserCount();
-        this.fetchUserRegistrations();
-    },
+name: 'Utilisateurs',
+components: {
+    StatisticsBlock,
+    LineChart,
+    AreaChart,
+    StatCard,
+    BarChart,
+},
+data() {
+    return {
+    statisticsData: [
+        { value: '10', text: 'Ventes', color: 'text-blue-600' },
+        { value: '20', text: 'Clients', color: 'text-green-600' },
+        { value: '30', text: 'Produits', color: 'text-red-600' }
+    ] as Statistic[],
+    stats: [
+        { id: 1, label: 'Utilisateurs totaux', value: '1234' },
+        { id: 2, label: 'Utilisateurs actifs', value: '567' },
+        { id: 3, label: 'Nouvelles inscriptions', value: '89' },
+        { id: 4, label: 'Visiteurs quotidiens', value: '1234' },
+        { id: 5, label: 'Visiteurs mensuels', value: '12345' },
+        { id: 6, label: 'Taux de rebond', value: '45%' },
+    ] as Stat[],
+    };
+}
 });
 </script>
   
