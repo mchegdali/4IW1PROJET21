@@ -12,10 +12,13 @@ const AddressesSequelize = (sequelize) => {
     toMongo() {
       return {
         _id: this.id,
-        name: this.name,
+        firstName: this.firstName,
+        lastName: this.lastName,
         street: this.street,
         city: this.city,
+        region: this.region,
         zipCode: this.zipCode,
+        country: this.country,
         phone: this.phone,
       };
     }
@@ -28,9 +31,13 @@ const AddressesSequelize = (sequelize) => {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
       },
-      name: {
+      firstName: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
+      },
+      lastName: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       street: {
         type: DataTypes.STRING,
@@ -40,9 +47,17 @@ const AddressesSequelize = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      region: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       zipCode: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      country: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       phone: {
         type: DataTypes.STRING,

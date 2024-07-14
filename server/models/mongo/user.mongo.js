@@ -42,7 +42,12 @@ const UserSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.UUID,
             required: true,
           },
-          name: {
+          firstName: {
+            type: String,
+            required: true,
+            trim: true,
+          },
+          lastName: {
             type: String,
             required: true,
             trim: true,
@@ -57,7 +62,17 @@ const UserSchema = new mongoose.Schema(
             required: true,
             trim: true,
           },
+          region: {
+            type: String,
+            required: true,
+            trim: true,
+          },
           zipCode: {
+            type: String,
+            required: true,
+            trim: true,
+          },
+          country: {
             type: String,
             required: true,
             trim: true,

@@ -29,10 +29,13 @@ const up = async ({ context: { sequelize } }) => {
     isVerified: true,
     addresses: [
       {
-        name: faker.lorem.word(),
+        firstName: faker.lorem.word(),
+        lastName: faker.lorem.word(),
         street: faker.location.streetAddress(true),
         city: faker.location.city(),
+        region: faker.lorem.word(),
         zipCode: faker.location.zipCode(),
+        country: faker.location.country(),
         phone: faker.phone.number(),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -54,10 +57,13 @@ const up = async ({ context: { sequelize } }) => {
         addresses: [
           {
             id: crypto.randomUUID(),
-            name: faker.lorem.word(),
+            firstName: faker.lorem.word(),
+            lastName: faker.lorem.word(),
             street: faker.location.streetAddress(true),
             city: faker.location.city(),
+            region: faker.lorem.word(),
             zipCode: faker.location.zipCode(),
+            country: faker.location.country(),
             phone: faker.phone.number(),
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -73,7 +79,7 @@ const up = async ({ context: { sequelize } }) => {
           {
             model: Addresses,
             as: 'addresses',
-            attributes: ['id', 'name', 'street', 'city', 'zipCode', 'phone'],
+            attributes: ['id', 'firstName', 'lastName', 'street', 'city', 'region', 'zipCode', 'country', 'phone'],
           },
         ],
         transaction: t,
@@ -91,10 +97,13 @@ const up = async ({ context: { sequelize } }) => {
         addresses: [
           {
             id: crypto.randomUUID(),
-            name: faker.lorem.word(),
+            firstName: faker.lorem.word(),
+            lastName: faker.lorem.word(),
             street: faker.location.streetAddress(true),
             city: faker.location.city(),
+            region: faker.lorem.word(),
             zipCode: faker.location.zipCode(),
+            country: faker.location.country(),
             phone: faker.phone.number(),
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -110,7 +119,7 @@ const up = async ({ context: { sequelize } }) => {
           {
             model: Addresses,
             as: 'addresses',
-            attributes: ['id', 'name', 'street', 'city', 'zipCode', 'phone'],
+            attributes: ['id', 'firstName', 'lastName', 'street', 'city', 'region', 'zipCode', 'country', 'phone'],
           },
         ],
         transaction: t,
@@ -126,10 +135,13 @@ const up = async ({ context: { sequelize } }) => {
         isVerified: true,
         addresses: [
           {
-            name: faker.lorem.word(),
+            firstName: faker.lorem.word(),
+            lastName: faker.lorem.word(),
             street: faker.location.streetAddress(true),
             city: faker.location.city(),
+            region: faker.lorem.word(),
             zipCode: faker.location.zipCode(),
+            country: faker.location.country(),
             phone: faker.phone.number(),
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -145,7 +157,7 @@ const up = async ({ context: { sequelize } }) => {
           {
             model: Addresses,
             as: 'addresses',
-            attributes: ['id', 'name', 'street', 'city', 'zipCode', 'phone'],
+            attributes: ['id', 'firstName', 'lastName', 'street', 'city', 'region', 'zipCode', 'country', 'phone'],
           },
         ],
         transaction: t,

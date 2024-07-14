@@ -32,7 +32,10 @@ const handleSubmit = () => {
 };
 
 const addressSchema = z.object({
-  name: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
+  firstName: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
+    message: 'Le prénom contient des caractères invalides'
+  }),
+  lastName: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
     message: 'Le nom contient des caractères invalides'
   }),
   street: z.string().regex(/^[a-zA-Z0-9àâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ .,'-]+$/, {
@@ -41,17 +44,28 @@ const addressSchema = z.object({
   city: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
     message: 'La ville contient des caractères invalides'
   }),
-  phone: z.string({message: 'La ville contient des caractères invalides'}),
+  region: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
+    message: 'La région contient des caractères invalides'
+  }),
+  country: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
+    message: 'Le pays contient des caractères invalides'
+  }),
   zipCode: z
     .string()
-    .regex(/^\d{5}$/, { message: 'Le code postal doit être composé de 5 chiffres' })
+    .regex(/^\d{5}$/, { message: 'Le code postal doit être composé de 5 chiffres' }),
+  phone: z.string().regex(/^\+?\d{10,15}$/, {
+    message: 'Le numéro de téléphone est invalide'
+  })
 });
 
 const initialAddressData = {
-  name: '',
+  firstName: '',
+  lastName: '',
   street: '',
   city: '',
+  region: '',
   zipCode: '',
+  country: '',
   phone: ''
 };
 
@@ -65,22 +79,32 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
   <div class="mt-10">
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
       <div>
-        <label
-          >Nom
+        <label>Prénom
           <Input
-            id="name"
-            v-model="formData.name"
-            :class="{ 'border-destructive': formErrors.name }"
+            id="firstName"
+            v-model="formData.firstName"
+            :class="{ 'border-destructive': formErrors.firstName }"
             autofocus
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.name">
-          {{ formErrors.name }}
+        <small class="text-destructive" v-if="formErrors.firstName">
+          {{ formErrors.firstName }}
         </small>
       </div>
       <div>
-        <label
-          >Rue
+        <label>Nom
+          <Input
+            id="lastName"
+            v-model="formData.lastName"
+            :class="{ 'border-destructive': formErrors.lastName }"
+          />
+        </label>
+        <small class="text-destructive" v-if="formErrors.lastName">
+          {{ formErrors.lastName }}
+        </small>
+      </div>
+      <div>
+        <label>Rue
           <Input
             id="street"
             v-model="formData.street"
@@ -92,8 +116,7 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label
-          >Ville
+        <label>Ville
           <Input
             id="city"
             v-model="formData.city"
@@ -105,8 +128,19 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label
-          >Code postal
+        <label>Région
+          <Input
+            id="region"
+            v-model="formData.region"
+            :class="{ 'border-destructive': formErrors.region }"
+          />
+        </label>
+        <small class="text-destructive" v-if="formErrors.region">
+          {{ formErrors.region }}
+        </small>
+      </div>
+      <div>
+        <label>Code postal
           <Input
             id="zipCode"
             v-model="formData.zipCode"
@@ -118,15 +152,26 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label
-          >Numero de telephone
+        <label>Pays
           <Input
-            id="zipCode"
-            v-model="formData.phone"
-            :class="{ 'border-destructive': formErrors.zipCode }"
+            id="country"
+            v-model="formData.country"
+            :class="{ 'border-destructive': formErrors.country }"
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.zipCode">
+        <small class="text-destructive" v-if="formErrors.country">
+          {{ formErrors.country }}
+        </small>
+      </div>
+      <div>
+        <label>Numéro de téléphone
+          <Input
+            id="phone"
+            v-model="formData.phone"
+            :class="{ 'border-destructive': formErrors.phone }"
+          />
+        </label>
+        <small class="text-destructive" v-if="formErrors.phone">
           {{ formErrors.phone }}
         </small>
       </div>
@@ -134,3 +179,12 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
     </form>
   </div>
 </template>
+
+<style scoped>
+.border-destructive {
+  border-color: #f00;
+}
+.text-destructive {
+  color: #f00;
+}
+</style>

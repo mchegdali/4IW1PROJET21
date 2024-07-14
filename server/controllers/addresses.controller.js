@@ -50,16 +50,13 @@ async function createAddress(req, res, next) {
 
 async function getAddresses(req, res, next) {
   try {
-    const users = await UserMongo.find({}).lean({});
+    const user = await UserMongo.findById(req.params.userId).lean({});
 
-    const addresses = users.reduce((acc, user) => {
-      if (user.addresses && user.addresses.length > 0) {
-        acc.push(...user.addresses);
-      }
-      return acc;
-    }, []);
+    if (user === null) {
+      return res.sendStatus(404);
+    }
 
-    return res.json(addresses);
+    return res.json(user.addresses);
   } catch (error) {
     return next(error);
   }

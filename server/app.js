@@ -17,7 +17,7 @@ app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(cors());
-app.use(logger());
+// app.use(logger());
 app.use(helmet());
 
 app.use(authRouter);
