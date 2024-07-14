@@ -24,7 +24,7 @@ userStore.$subscribe((mutation, state) => {
     localStorage.setItem('refreshToken', state.refreshToken);
   }
   if (state.user) {
-    localStorage.setItem('user', JSON.stringify(state.user));
+      localStorage.setItem("user", JSON.stringify(state.user));
   }
 });
 

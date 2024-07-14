@@ -81,9 +81,9 @@
   
 <script lang="ts">
 import { defineComponent, ref, computed, PropType } from 'vue';
-import DoubleArrow from '../components/svg/DoubleArrow.vue';
-import Csv from '../components/svg/Csv.vue';
-import DialogUtilisateur from '../components/dialog/DialogUtilisateur.vue';
+import DoubleArrow from '../Admin/svg/DoubleArrow.vue';
+import Csv from '../Admin/svg/Csv.vue';
+import DialogUtilisateur from '../Admin/DialogUtilisateur.vue';
 
 interface Client {
     id: number;

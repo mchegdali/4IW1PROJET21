@@ -79,4 +79,3 @@ data() {
   
 <style lang="scss" scoped>
 </style>
-  
