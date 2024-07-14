@@ -41,6 +41,7 @@ const addressSchema = z.object({
   city: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
     message: 'La ville contient des caractères invalides'
   }),
+  phone: z.string({message: 'La ville contient des caractères invalides'}),
   zipCode: z
     .string()
     .regex(/^\d{5}$/, { message: 'Le code postal doit être composé de 5 chiffres' })
@@ -50,7 +51,8 @@ const initialAddressData = {
   name: '',
   street: '',
   city: '',
-  zipCode: ''
+  zipCode: '',
+  phone: ''
 };
 
 const { formData, formErrors, formSubmitting, submitForm } = useForm(
@@ -113,6 +115,19 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </label>
         <small class="text-destructive" v-if="formErrors.zipCode">
           {{ formErrors.zipCode }}
+        </small>
+      </div>
+      <div>
+        <label
+          >Numero de telephone
+          <Input
+            id="zipCode"
+            v-model="formData.phone"
+            :class="{ 'border-destructive': formErrors.zipCode }"
+          />
+        </label>
+        <small class="text-destructive" v-if="formErrors.zipCode">
+          {{ formErrors.phone }}
         </small>
       </div>
       <Button type="submit" class="w-full" :disabled="formSubmitting">Soumettre</Button>

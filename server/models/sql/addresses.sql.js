@@ -16,6 +16,7 @@ const AddressesSequelize = (sequelize) => {
         street: this.street,
         city: this.city,
         zipCode: this.zipCode,
+        phone: this.phone,
       };
     }
   }
@@ -42,6 +43,10 @@ const AddressesSequelize = (sequelize) => {
       zipCode: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      phone: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
     },
     {

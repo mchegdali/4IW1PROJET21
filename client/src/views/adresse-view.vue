@@ -66,6 +66,7 @@ onMounted(() => {
         <p>{{ address.street }}</p>
         <p>{{ address.city }}</p>
         <p>{{ address.zipCode }}</p>
+        <p>{{ address.phone }}</p>
       </div>
 
       <div class="flex gap-2">
