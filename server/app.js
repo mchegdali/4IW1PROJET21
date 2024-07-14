@@ -11,6 +11,8 @@ const shippingRouter = require('./routes/shipping.routes');
 const errorMiddleware = require('./middlewares/error.middleware');
 const deliveryChoiceRouter = require('./routes/deliveryChoice.routes');
 const paymentRouter = require('./routes/payment.routes');
+const basketRouter = require('./routes/basket.routes');
+const orderRouter = require('./routes/order.routes');
 const app = express();
 
 app.set('trust proxy', 1);
@@ -28,4 +30,6 @@ app.use(shippingRouter);
 app.use(errorMiddleware);
 app.use(deliveryChoiceRouter);
 app.use(paymentRouter);
+app.use(basketRouter);
+app.use(orderRouter);
 module.exports = app;

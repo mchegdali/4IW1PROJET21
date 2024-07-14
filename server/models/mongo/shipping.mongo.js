@@ -25,6 +25,10 @@ const shippingSchema = new mongoose.Schema ({
         type: String,
         required: true,
     },
+    statusOrder: {
+        type:String,
+        required:false,
+    },
     deliveryChoiceId: {
         type:  {
             _id: {

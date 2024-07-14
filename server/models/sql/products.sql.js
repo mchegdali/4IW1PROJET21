@@ -8,6 +8,10 @@ const ProductsSequelize = (sequelize) => {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
+      Products.hasMany(models.baskets, {
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+      });
     }
 
     /**
@@ -20,6 +24,9 @@ const ProductsSequelize = (sequelize) => {
       const category = await this.sequelize.models.categories.findByPk(
         this.categoryId,
       );
+      const basket = await this.sequelize.models.baskets.findByPk(
+        this.categoryId,
+      );
 
       return {
         _id: this.id,
@@ -29,6 +36,7 @@ const ProductsSequelize = (sequelize) => {
         category: category.toMongo(),
         image: this.image,
         price: this.price,
+        basket : basket.toMongo(),
       };
     }
   }

@@ -52,6 +52,10 @@ const ShippingSequelize = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      statusOrder: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      }
 
 }, {
      
