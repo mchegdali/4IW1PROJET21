@@ -7,6 +7,7 @@
         <div class="flex items-center justify-between mb-12 p-5">
             <h1 class="text-2xl font-bold text-green-900">Dashboard Fanthésie</h1>
             <img src="../../../../public/images/fanthesie2.png" alt="Image" class="rounded-md">
+            <img src="../../../../public/images/fanthesie2.png" alt="Image" class="rounded-md">
         </div>
 
         <!-- Stats globales -->

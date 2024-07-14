@@ -12,7 +12,7 @@
                         <StatisticsBlock :stats="statisticsData" />
                     </div>
                     <div class="bg-white rounded-xl p-2 flex-grow">
-                        <LineChart v-if="lineChartOptions && lineChartSeries" :options="lineChartOptions" :series="lineChartSeries" />
+                        <LineChart />
                     </div>
                 </div>
 
@@ -32,6 +32,7 @@
 import { defineComponent } from 'vue';
 import StatisticsBlock from '../StatisticsBlock.vue';
 import LineChart from '../LineChart.vue';
+import AreaChart from '../AreaChart.vue';
 import StatCard from '../StatCard.vue';
 import BarChart from '../BarChart.vue';
 
