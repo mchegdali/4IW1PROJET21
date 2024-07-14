@@ -3,6 +3,7 @@ const cors = require('cors');
 const logger = require('pino-http');
 const helmet = require('helmet');
 
+const trackingRouter = require('./routes/tracking.routes'); // Importez votre route de suivi de colis
 const authRouter = require('./routes/auth.routes');
 const productsRouter = require('./routes/products.routes');
 const categoriesRouter = require('./routes/categories.routes');
@@ -19,9 +20,12 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(express.json());
-app.use(cors());
+app.use(cors()); // Middleware CORS global pour toutes les routes
 // app.use(logger());
 app.use(helmet());
+
+// Routes principales
+app.use('/v1/tracking', trackingRouter); // Utilisation de la route de suivi de colis
 
 app.use(authRouter);
 app.use(usersRouter);

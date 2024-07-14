@@ -3,93 +3,71 @@ import { ref } from 'vue';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRoute } from 'vue-router';
-import ordersData from '@/api/order.json';
 
 const route = useRoute();
-const trakingId = route.params.id;
+const trackingId = route.params.id;
 
-const order = ref(ordersData.orders.find((o) => o.orderId === trakingId));
+const orderData = ref({
+  event: [],
+  timeline: []
+});
 
 const formatDate = (dateString: string) => {
   return format(new Date(dateString), 'PPPpp', { locale: fr });
 };
 
-const orderData = ref({
-  idShip: '1B34567890123',
-  timeline: [
-    {
-      id: 1,
-      shortLabel: 'En cours de traitement',
-      longLabel: 'Votre colis est en train de voyager dans un train.',
-      status: true,
-      type: -1,
-      date: '2020-12-07T00:00:00+01:00',
-      country: 'DE'
-    },
-    {
-      id: 2,
-      shortLabel: 'Pris en charge par le transporteur',
-      longLabel: 'Votre colis a été pris en charge par le transporteur.',
-      status: true,
-      type: 0,
-      date: '2020-12-06T10:00:00+01:00',
-      country: 'DE'
-    },
-    {
-      id: 3,
-      shortLabel: 'Arrivé au centre de tri',
-      longLabel: 'Votre colis est arrivé au centre de tri.',
-      status: true,
-      type: 1,
-      date: '2020-12-05T12:30:00+01:00',
-      country: 'DE'
-    },
-    {
-      id: 4,
-      shortLabel: 'En cours de livraison',
-      longLabel: 'Votre colis est en cours de livraison.',
-      status: true,
-      type: 2,
-      date: '2020-12-04T08:00:00+01:00',
-      country: 'DE'
-    },
-    {
-      id: 5,
-      shortLabel: 'Livré',
-      longLabel: 'Votre colis a été livré.',
-      status: true,
-      type: 3,
-      date: '2020-12-03T15:32:00+01:00',
-      country: 'DE'
+onMounted(async () => {
+  try {
+    const response = await fetch(`http://localhost:3000/v1/tracking?tracking_number=${trackingId}`);
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
     }
-  ],
-  event: [
-    {
-      date: '2020-12-07T00:00:00+01:00',
-      label: 'Votre colis est en cours de distribution',
-      code: 'ET2'
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('La réponse n\'est pas au format JSON');
     }
-  ],
-  product: 'Lettre Recommandée',
-  entryDate: '2017-12-01T09:14:00+02:00',
-  estimDate: '2017-12-02T09:11:00+02:00',
-  deliveryDate: '2020-12-03T15:32:00+02:00'
+
+    const data = await response.json();
+    orderData.value = {
+      idShip: data.tracking_number,
+      timeline: data.events.map(event => ({
+        id: event.event_code,
+        shortLabel: event.description,
+        longLabel: `Votre colis est arrivé à ${event.city_locality}, ${event.state_province}, ${event.country_code}.`,
+        status: true,
+        type: -1,
+        date: event.occurred_at,
+        country: event.country_code
+      })),
+      event: [{
+        date: data.events[0].occurred_at,
+        label: data.status_description,
+        code: data.status_code
+      }],
+      product: data.carrier_code,
+      entryDate: data.events[0].occurred_at,
+      estimDate: data.events[0].occurred_at,
+      deliveryDate: data.events[data.events.length - 1].occurred_at
+    };
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données de suivi:', error.message);
+  }
 });
 </script>
-
 <template>
   <div class="flex flex-col gap-6 p-6">
     <!-- Section Informations de commande -->
     <div class="flex gap-4 text-lg items-center sm:text-lg">
-      N° de commande: <span class="font-bold">{{ order?.orderNumber }}</span>
+      N° de suivi: <span class="font-bold">{{ orderData.idShip }}</span>
     </div>
 
     <!-- Section Evénements de livraison -->
     <div v-for="event in orderData.event" :key="event.date" class="">
       <h3 class="text-xl font-semibold">Evénements de livraison</h3>
-      <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{
-        formatDate(event.date)
-      }}</time>
+      <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
+        {{ formatDate(event.date) }}
+      </time>
       <p class="text-base font-normal text-gray-500 dark:text-gray-400">{{ event.label }}</p>
     </div>
 
@@ -117,18 +95,15 @@ const orderData = ref({
           <div
             class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
           >
-            <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{
-              formatDate(item.date)
-            }}</time>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              {{ item.shortLabel }}
-            </h3>
-            <p class="mb-2 text-base font-normal text-gray-500 dark:text-gray-400">
-              {{ item.longLabel }}
-            </p>
+            <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
+              {{ formatDate(item.date) }}
+            </time>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.shortLabel }}</h3>
+            <p class="mb-2 text-base font-normal text-gray-500 dark:text-gray-400">{{ item.longLabel }}</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
