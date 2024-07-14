@@ -81,8 +81,7 @@
 
   
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
-import type { PropType } from 'vue';
+import { defineComponent, ref, computed, PropType } from 'vue';
 import DoubleArrow from '../Admin/svg/DoubleArrow.vue';
 import Csv from '../Admin/svg/Csv.vue';
 import DialogUtilisateur from '../Admin/DialogUtilisateur.vue';
