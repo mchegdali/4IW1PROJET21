@@ -2,10 +2,22 @@
 import { ref, onMounted } from 'vue';
 import { FilePenLine, MoveLeft, Trash } from 'lucide-vue-next';
 
+interface Address {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  street: string;
+  city: string;
+  region: string;
+  zipCode: string;
+  country: string;
+  phone: string;
+}
+
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 const userId = user.id;
 
-const addresses = ref([]);
+const addresses = ref<Address[]>([]);
 
 const getAddresses = async () => {
   try {
@@ -20,7 +32,7 @@ const getAddresses = async () => {
   }
 };
 
-const deleteAddress = async (addressId) => {
+const deleteAddress = async (addressId: string) => {
   try {
     const response = await fetch(`http://localhost:3000/users/${userId}/addresses/${addressId}`, {
       method: 'DELETE'
@@ -58,7 +70,7 @@ onMounted(() => {
   </div>
   <div
     v-for="address in addresses"
-    :key="address.id"
+    :key="address._id"
     class="bg-white rounded-lg shadow-md p-4 mb-4 flex justify-between items-center mt-5"
   >
     <div>
@@ -73,7 +85,7 @@ onMounted(() => {
 
     <div class="flex space-x-4">
       <RouterLink
-        :to="{ name: 'edit-adresse', params: { id: address.id } }"
+        :to="{ name: 'edit-adresse', params: { id: address._id } }"
         class="text-blue-500 hover:text-blue-700"
       >
         <FilePenLine class="w-5 h-5" />
