@@ -1,13 +1,12 @@
 <template>
     <section class="flex-1 ml-80">
         <!-- <div class="w-100 bg-white h-12 flex items-center justify-start border-b-2 border-gray-100 mb-5 p-5">
-        <!-- <div class="w-100 bg-white h-12 flex items-center justify-start border-b-2 border-gray-100 mb-5 p-5">
             <p class="font-bold">Prénom, nom</p>
-        </div> -->
         </div> -->
         
         <div class="flex items-center justify-between mb-12 p-5">
             <h1 class="text-2xl font-bold text-green-900">Dashboard Fanthésie</h1>
+            <img src="../../../../public/images/fanthesie2.png" alt="Image" class="rounded-md">
             <img src="../../../../public/images/fanthesie2.png" alt="Image" class="rounded-md">
         </div>
 
@@ -101,13 +100,11 @@ export default defineComponent({
                 title: 'Ventes',
                 text: 'Explorez les dernières tendances de vente et optimisez votre stratégie commerciale en temps réel. Cliquez ici pour consulter les statistiques de ventes !',
                 page: 'AdminVentes',
-                page: 'AdminVentes',
             },
             {
                 image: 'https://picsum.photos/500/500',
                 title: 'Utilisateurs',
                 text: 'Découvrez les nouvelles inscriptions et analysez le comportement de vos utilisateurs. Cliquez ici pour accéder aux statistiques des utilisateurs !',
-                page: 'AdminUtilisateurs',
                 page: 'AdminUtilisateurs',
             },
             {
@@ -115,13 +112,11 @@ export default defineComponent({
                 title: 'Produits',
                 text: 'Suivez la performance de vos produits et identifiez les best-sellers. Cliquez ici pour consulter les statistiques détaillées de vos produits !',
                 page: 'AdminProduits',
-                page: 'AdminProduits',
             },
             {
                 image: 'https://picsum.photos/500/500',
                 title: 'Finances',
                 text: 'Obtenez un aperçu complet de vos finances et suivez vos revenus et dépenses. Cliquez ici pour consulter les statistiques financières détaillées !',
-                page: 'AdminFinances',
                 page: 'AdminFinances',
             },
             {
@@ -129,13 +124,11 @@ export default defineComponent({
                 title: 'Clients',
                 text: 'Analysez les données de vos clients et améliorez votre relation client. Cliquez ici pour accéder aux statistiques détaillées de vos clients !',
                 page: 'AdminClients',
-                page: 'AdminClients',
             },
             {
                 image: 'https://picsum.photos/500/500',
                 title: 'Tendances et Prévisions',
                 text: 'Utilisez des prévisions basées sur des données pour planifier votre stratégie future. Cliquez ici pour explorer les tendances et les prévisions détaillées !',
-                page: 'AdminTendances',
                 page: 'AdminTendances',
             },
         ] as Card[],
