@@ -9,7 +9,6 @@
                 </div>
                 <div class="w-2/5 bg-white rounded-xl">
                     <DonutChart />
-                    <DonutChart />
                 </div>
             </div> 
         </div>
@@ -22,7 +21,6 @@
                         <StatisticsBlock :stats="statisticsData" />
                     </div>
                     <div class="bg-white rounded-xl p-2 flex-grow">
-                        <DonutChart />
                         <DonutChart />
                     </div>
                 </div>
