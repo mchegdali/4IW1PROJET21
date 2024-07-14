@@ -13,7 +13,7 @@
                 <Csv @click="exportSelectedCsv" class="h-9 cursor-pointer" />
             </div>
         </div>
-
+  
         <table class="min-w-full bg-white border border-gray-300">
             <thead class="bg-gray-100">
                 <tr>
@@ -63,7 +63,7 @@
                 </tr>
             </tbody>
         </table>
-
+  
         <div class="mt-4 flex items-center justify-center">
             <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 bg-gray-200 rounded-l disabled:opacity-50">
                 Précédent
@@ -75,13 +75,12 @@
         </div>
 
         <!-- La modal pour visualiser ou éditer l'utilisateur -->
-        <DialogUtilisateur :client="selectedClient || defaultClient" v-model="isDialogOpen" :isEditMode="isEditMode" @save="saveClient" />
+        <DialogUtilisateur :client="selectedClient" v-model="isDialogOpen" :isEditMode="isEditMode" @save="saveClient" />
     </div>
 </template>
-
+  
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
-import type { PropType } from 'vue';
+import { defineComponent, ref, computed, PropType } from 'vue';
 import DoubleArrow from '../Admin/svg/DoubleArrow.vue';
 import Csv from '../Admin/svg/Csv.vue';
 import DialogUtilisateur from '../Admin/DialogUtilisateur.vue';
@@ -101,7 +100,7 @@ export default defineComponent({
         Csv,
         DialogUtilisateur
     },
-    emits: ['delete-clients', 'update-client'],
+    emits: ['delete-clients'],
     props: {
         clients: {
             type: Array as PropType<Client[]>,
@@ -110,7 +109,7 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const searchQuery = ref('');
-        const sortedColumn = ref<keyof Client>('id');
+        const sortedColumn = ref('');
         const sortOrder = ref<'asc' | 'desc'>('asc');
         const currentPage = ref(1);
         const perPage = ref(10);
@@ -118,14 +117,6 @@ export default defineComponent({
         const selectedClient = ref<Client | null>(null);
         const isDialogOpen = ref(false);
         const isEditMode = ref(false);
-
-        const defaultClient: Client = {
-            id: 0,
-            nom: '',
-            prenom: '',
-            email: '',
-            ville: ''
-        };
 
         const filteredClients = computed(() => {
             if (!searchQuery.value) {
@@ -204,44 +195,40 @@ export default defineComponent({
         };
 
         const exportSelectedCsv = async () => {
-            const selected = props.clients.filter(client => selectedClients.value.includes(client.id));
-            if (selected.length === 0) {
-                alert('Aucun client sélectionné');
-                return;
-            }
+        const selected = props.clients.filter(client => selectedClients.value.includes(client.id));
+        if (selected.length === 0) {
+            alert('Aucun client sélectionné');
+            return;
+        }
 
-            const headers = ['ID', 'Nom', 'Prénom', 'Email', 'Ville'];
-            const rows = selected.map(client => [client.id, client.nom, client.prenom, client.email, client.ville]);
+        const headers = ['ID', 'Nom', 'Prénom', 'Email', 'Ville'];
+        const rows = selected.map(client => [client.id, client.nom, client.prenom, client.email, client.ville]);
 
-            let csvContent = '';
-            csvContent += headers.join(',') + '\r\n';
-            rows.forEach(rowArray => {
-                const row = rowArray.join(',');
-                csvContent += row + '\r\n';
+        let csvContent = '';
+        csvContent += headers.join(',') + '\r\n';
+        rows.forEach(rowArray => {
+            const row = rowArray.join(',');
+            csvContent += row + '\r\n';
+        });
+
+        try {
+            // Utilisation de l'API Web File System pour créer et écrire dans le fichier
+            const handle = await window.showSaveFilePicker({
+                suggestedName: 'clients_selectionnes.csv',
+                types: [{
+                    description: 'CSV file',
+                    accept: {'text/csv': ['.csv']},
+                }],
             });
 
-            try {
-                if ('showSaveFilePicker' in window) {
-                    // Utilisation de l'API Web File System pour créer et écrire dans le fichier
-                    const handle = await (window as any).showSaveFilePicker({
-                        suggestedName: 'clients_selectionnes.csv',
-                        types: [{
-                            description: 'CSV file',
-                            accept: {'text/csv': ['.csv']},
-                        }],
-                    });
-
-                    const writableStream = await handle.createWritable();
-                    await writableStream.write(new Blob([csvContent], {type: 'text/csv'}));
-                    await writableStream.close();
-                    alert('Fichier CSV exporté avec succès.');
-                } else {
-                    alert('showSaveFilePicker API non supportée dans ce navigateur.');
-                }
-            } catch (err) {
-                console.error('Erreur lors de l\'exportation du fichier CSV :', err);
-            }
-        };
+            const writableStream = await handle.createWritable();
+            await writableStream.write(new Blob([csvContent], {type: 'text/csv'}));
+            await writableStream.close();
+            alert('Fichier CSV exporté avec succès.');
+        } catch (err) {
+            console.error('Erreur lors de l\'exportation du fichier CSV :', err);
+        }
+    };
 
         const viewClient = (client: Client) => {
             selectedClient.value = client;
@@ -269,7 +256,10 @@ export default defineComponent({
         };
 
         const saveClient = (client: Client) => {
-            emit('update-client', client);
+            const index = props.clients.findIndex(c => c.id === client.id);
+            if (index !== -1) {
+                props.clients.splice(index, 1, client);
+            }
         };
 
         return {
@@ -297,12 +287,11 @@ export default defineComponent({
             selectedClient,
             saveClient,
             isEditMode,
-            defaultClient,
         };
     },
 });
 </script>
-
+  
 <style scoped>
 .container {
     max-width: 1200px;
@@ -311,3 +300,4 @@ export default defineComponent({
     cursor: pointer;
 }
 </style>
+  

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import HomeView from '../views/home-view.vue';
 import Layout from '../layouts/layout.vue';
-import adminRoutes from './admin';
+import adminRoutes from './admin'; 
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -168,6 +168,8 @@ const router = createRouter({
           component: () => import('../views/address/edit-address-view.vue')
         }
       ]
+    },
+    ...adminRoutes // Ajout des routes admin
     },
     ...adminRoutes // Ajout des routes admin
   ]

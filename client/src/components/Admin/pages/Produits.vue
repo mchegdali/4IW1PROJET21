@@ -32,7 +32,7 @@
         </div>
     </section>
 </template>
-
+  
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AreaChart from '../AreaChart.vue';
@@ -44,27 +44,6 @@ interface Statistic {
     value: string;
     text: string;
     color: string;
-}
-
-interface DistributionData {
-    count: number;
-    _id: string;
-}
-
-interface PriceDistributionData {
-    count: number;
-    range: string;
-}
-
-interface ChartOptions {
-    chart: {
-        id: string;
-    };
-    labels: string[];
-    title: {
-        text: string;
-        align: string;
-    };
 }
 
 export default defineComponent({
@@ -100,5 +79,7 @@ export default defineComponent({
     },
 });
 </script>
-
-<style lang="scss" scoped></style>
+  
+<style lang="scss" scoped>
+</style>
+  

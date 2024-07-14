@@ -1,32 +1,32 @@
 <template>
     <section class="flex-1 ml-80">
-      <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Clients</h1>
-  
-      <p>todo: rajouter le radialbar/circular gauge pour afficher le % d'utilisateurs qui ont passés commandes</p>
-  
-      <div class="p-5">
-        <div class="flex flex-row space-x-4">
-          <!-- Colonne de gauche -->
-          <div class="w-1/3 flex flex-col">
-            <div class="mb-4">
-              <StatisticsBlock :stats="statisticsData" />
+        <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Clients</h1>
+
+        <p>todo: rajouter le radialbar/circular gauge pour afficher le % d'utilisateurs qui ont passés commandes</p>
+
+        <div class="p-5">
+            <div class="flex flex-row space-x-4">
+                <!-- Colonne de gauche -->
+                <div class="w-1/3 flex flex-col">
+                    <div class="mb-4">
+                        <StatisticsBlock :stats="statisticsData" />
+                    </div>
+                    <div class="bg-white rounded-xl p-2 flex-grow">
+                        <LineChart />
+                    </div>
+                </div>
+
+                <!-- Colonne de droite -->
+                <div class="w-full md:w-2/3 bg-white rounded-xl p-2 md:h-auto overflow-auto">
+                    <BarChart />
+                </div>
             </div>
-            <div class="bg-white rounded-xl p-2 flex-grow">
-              <LineChart v-if="lineChartOptions && lineChartSeries" :options="lineChartOptions" :series="lineChartSeries" />
+            <div class="grid grid-cols-3 gap-4 mt-9 p-5">
+                <StatCard v-for="stat in stats" :key="stat.id" :label="stat.label" :value="stat.value" />
             </div>
-          </div>
-  
-          <!-- Colonne de droite -->
-          <div class="w-full md:w-2/3 bg-white rounded-xl p-2 md:h-auto overflow-auto">
-            <BarChart />
-          </div>
         </div>
-        <div class="grid grid-cols-3 gap-4 mt-9 p-5">
-          <StatCard v-for="stat in stats" :key="stat.id" :label="stat.label" :value="stat.value" />
-        </div>
-      </div>
     </section>
-  </template>
+</template>
   
 <script lang="ts">
 import { defineComponent } from 'vue';
@@ -40,9 +40,9 @@ interface Statistic {
     value: string;
     text: string;
     color: string;
-  }
-  
-  interface Stat {
+}
+
+interface Stat {
     id: number;
     label: string;
     value: string;
@@ -156,5 +156,5 @@ interface Statistic {
   });
   </script>
   
-  <style lang="scss" scoped></style>
-  
+<style lang="scss" scoped>
+</style>
