@@ -1,8 +1,7 @@
 <template>
     <section class="flex-1 ml-80">
       <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Clients</h1>
-  
-<<<<<<< HEAD
+
 <script lang="ts">
 import { defineComponent } from 'vue';
 import StatisticsBlock from '../StatisticsBlock.vue';
