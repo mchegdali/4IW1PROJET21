@@ -8,7 +8,7 @@
                     <AreaChart />
                 </div>
                 <div class="w-2/5 bg-white rounded-xl">
-                    <DonutChart v-if="donutChartOptions && donutChartSeries" :options="donutChartOptions" :series="donutChartSeries" />
+                    <DonutChart />
                 </div>
             </div> 
         </div>
@@ -21,7 +21,7 @@
                         <StatisticsBlock :stats="statisticsData" />
                     </div>
                     <div class="bg-white rounded-xl p-2 flex-grow">
-                        <DonutChart v-if="priceChartOptions && priceChartSeries" :options="priceChartOptions" :series="priceChartSeries" />
+                        <DonutChart />
                     </div>
                 </div>
                 <!-- Colonne de droite -->
@@ -56,72 +56,13 @@ export default defineComponent({
     },
     data() {
         return {
-            statisticsData: [
-                { value: '10', text: 'Ventes', color: 'text-blue-600' },
-                { value: '20', text: 'Clients', color: 'text-green-600' },
-                { value: '', text: 'Produits', color: 'text-red-600' }
-            ] as Statistic[],
-            donutChartOptions: null,
-            donutChartSeries: null,
-            priceChartOptions: null,
-            priceChartSeries: null,
+        statisticsData: [
+            { value: '10', text: 'Ventes', color: 'text-blue-600' },
+            { value: '20', text: 'Clients', color: 'text-green-600' },
+            { value: '30', text: 'Produits', color: 'text-red-600' }
+        ] as Statistic[],
         };
-    },
-    methods: {
-        async fetchProductCount() {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/count`);
-                const data = await response.json();
-                this.statisticsData[2].value = data.count.toString();
-            } catch (error) {
-                console.error('Error fetching product count:', error);
-                this.statisticsData[2].value = "-"; 
-            }
-        },
-        async fetchProductDistribution() {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/distribution-by-category`);
-                const data = await response.json();
-                this.donutChartSeries = data.map(item => item.count);
-                this.donutChartOptions = {
-                    chart: {
-                        id: 'vuechart-example-donut'
-                    },
-                    labels: data.map(item => item._id),
-                    title: {
-                        text: 'Répartition des produits par catégorie',
-                        align: 'left'
-                    }
-                };
-            } catch (error) {
-                console.error('Error fetching product distribution:', error);
-            }
-        },
-        async fetchPriceDistribution() {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/price-distribution`);
-                const data = await response.json();
-                this.priceChartSeries = data.map(item => item.count);
-                this.priceChartOptions = {
-                    chart: {
-                        id: 'price-distribution-donut'
-                    },
-                    labels: data.map(item => item.range),
-                    title: {
-                        text: 'Répartition des produits par tranches de prix',
-                        align: 'left'
-                    }
-                };
-            } catch (error) {
-                console.error('Error fetching price distribution:', error);
-            }
-        }
-    },
-    mounted() {
-        this.fetchProductCount();
-        this.fetchProductDistribution();
-        this.fetchPriceDistribution();
-    },
+    }
 });
 </script>
   
