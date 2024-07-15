@@ -18,12 +18,12 @@ const BasketsSequelize = (sequelize) => {
      */
     async toMongo() {
       
-      const itemsProduct =  await this.sequelize.models.products.findByPk(
+      const items =  await this.sequelize.models.products.findByPk(
         this.productId,
       );
       return {
         _id: this.id,
-        itemsProduct: itemsProduct.toMongo(),
+        items: items.toMongo(),
           
       };
     }

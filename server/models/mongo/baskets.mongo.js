@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 const connection = require('./db');
-
 const OrderSchema = new mongoose.Schema(
   {
     _id: {
       type: mongoose.Schema.Types.UUID,
       required: true,
     },
-    itemsProduct: [{
+    items: [{
       type:  {
         _id: {
           type: mongoose.Schema.Types.UUID,

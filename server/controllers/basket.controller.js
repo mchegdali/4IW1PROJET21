@@ -24,8 +24,8 @@ async function createBasket(req, res, next) {
   try {
     const userId = req.params.id; // User ID from the route parameter
     const basketCreateBody = await basketCreateSchema.parseAsync(req.body);
-    const { itemsProduct: itemsProductIds } = basketCreateBody;
-
+    const { items: itemsProductIds } = basketCreateBody;
+    console.log(itemsProductIds)
     if (!Array.isArray(itemsProductIds)) {
       throw new Error('itemsProduct should be an array');
     }
@@ -38,15 +38,15 @@ async function createBasket(req, res, next) {
       }
 
       // Fetch products from MongoDB
-      const itemsProducts = await ProductsMongo.find({
+      const items = await ProductsMongo.find({
         _id: { $in: itemsProductIds }
       }).exec();
-      if (!itemsProducts.length) {
+      if (!items.length) {
         throw new NotFound('Produits introuvables');
       }
 
       // Ensure that the required fields are present
-      itemsProducts.forEach(product => {
+      items.forEach(product => {
         if (!product.price || !product.image || !product.name || !product._id) {
           throw new Error('One or more products are missing required fields');
         }
@@ -58,7 +58,7 @@ async function createBasket(req, res, next) {
       }, { transaction: t });
 
       // Associate products with the basket
-      const productIds = itemsProducts.map(product => product._id);
+      const productIds = items.map(product => product._id);
       for (const productId of productIds) {
         await basket.addProduct(productId, { transaction: t });
       }
@@ -66,7 +66,7 @@ async function createBasket(req, res, next) {
       // Convert SQL basket to MongoDB-like object and save it to MongoDB
       const basketMongo = {
         _id: basket.id,
-        itemsProduct: itemsProducts,
+        items: items,
       };
       const basketDoc = await BasketsMongo.create(basketMongo);
 

@@ -11,7 +11,7 @@ const basketQuerySchema = z.object({
 });
 
 const basketCreateSchema = z.object({
-  itemsProduct: z.array(z.string().uuid()).optional(),
+  items: z.array(z.string().uuid()).optional(),
 });
 
 const basketUpdateSchema = basketCreateSchema.partial().refine((a) => {
