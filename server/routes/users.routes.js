@@ -6,7 +6,6 @@ const {
   deleteUser,
   updateUser,
   getUserCount,
-  getUserRegistrations
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -48,8 +47,13 @@ usersRouter.get(
   getUserRegistrations,
 );
 
-usersRouter.use('/users/:userId/addresses', addressesRouter);
-usersRouter.get('/users/:userId', getUser);
+// Route pour obtenir le nombre total d'utilisateurs
+usersRouter.get(
+  '/users/count',
+  // checkAuth(authConfig.accessTokenSecret, false),
+  // checkRole(['admin']),
+  getUserCount,
+);
 
 usersRouter.put(
   '/users/:userId',
