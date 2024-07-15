@@ -5,7 +5,7 @@ const {
   replaceUser,
   deleteUser,
   updateUser,
-  getUser,
+  getUserCount,
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -14,12 +14,14 @@ const addressesRouter = require('./addresses.routes');
 
 const usersRouter = Router();
 
+// Route pour créer un utilisateur
 usersRouter.post(
   '/users',
   checkAuth(authConfig.accessTokenSecret, true),
   createUser,
 );
 
+// Route pour obtenir tous les utilisateurs
 usersRouter.get(
   '/users',
   checkAuth(authConfig.accessTokenSecret, false),
@@ -27,8 +29,13 @@ usersRouter.get(
   getUsers,
 );
 
-usersRouter.use('/users/:userId/addresses', addressesRouter);
-usersRouter.get('/users/:id', getUser);
+// Route pour obtenir le nombre total d'utilisateurs
+usersRouter.get(
+  '/users/count',
+  // checkAuth(authConfig.accessTokenSecret, false),
+  // checkRole(['admin']),
+  getUserCount,
+);
 
 usersRouter.put(
   '/users/:id',
@@ -44,6 +51,7 @@ usersRouter.patch(
   updateUser,
 );
 
+// Route pour supprimer un utilisateur
 usersRouter.delete(
   '/users/:id',
   checkAuth(authConfig.accessTokenSecret, true),

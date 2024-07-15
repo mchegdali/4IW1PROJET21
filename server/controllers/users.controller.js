@@ -268,46 +268,22 @@ async function deleteUser(req, res, next) {
 }
 
 /**
+ * Récupère le nombre total d'utilisateurs dans Mongo
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
-async function getUser(req, res, next) {
+async function getUserCount(req, res, next) {
   try {
-    const user = await UserMongo.findById(req.params.id);
-
-    if (user === null) {
-      console.log('no user found');
-      return res.sendStatus(404);
-    }
-
-    return res.json(user);
-  } catch (error) {
-    return next(error);
-  }
-}
-
-/**
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getUserAddresses(req, res, next) {
-  try {
-    const user = await UserMongo.findById(req.params.id);
-
-    if (user === null) {
-      console.log('no user found');
-      return res.sendStatus(404);
-    }
-
-    return res.json(user.addresses);
+    const count = await UserMongo.countDocuments();
+    return res.status(200).json({ count });
   } catch (error) {
     return next(error);
   }
 }
 
 module.exports = {
+  getUserCount,
   createUser,
   getUsers,
   getUser,

@@ -307,6 +307,22 @@ async function deleteProduct(req, res, next) {
   }
 }
 
+/**
+ * Récupère le nombre total de produits dans Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getProductCount(req, res, next) {
+  try {
+    console.log('getProductCount called'); // Log pour vérifier si la route est atteinte
+    const count = await ProductMongo.countDocuments();
+    return res.status(200).json({ count });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createProduct,
   getProducts,
@@ -314,4 +330,5 @@ module.exports = {
   getRelatedProducts,
   updateProduct,
   deleteProduct,
+  getProductCount
 };

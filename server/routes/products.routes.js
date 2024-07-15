@@ -6,9 +6,16 @@ const {
   updateProduct,
   deleteProduct,
   getRelatedProducts,
+  getProductCount,
 } = require('../controllers/products.controller');
 
 const productsRouter = Router({ mergeParams: true });
+
+productsRouter.get(
+  '/products/count',
+  getProductCount,
+);
+
 
 productsRouter.get('/products/:product/related', getRelatedProducts);
 productsRouter
