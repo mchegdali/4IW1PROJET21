@@ -92,6 +92,7 @@ usersRouter.post(
   createUser,
 );
 
+// Route pour obtenir tous les utilisateurs
 usersRouter.get(
   '/users',
   checkAuth(authConfig.accessTokenSecret, false),
