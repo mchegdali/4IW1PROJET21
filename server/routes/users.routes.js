@@ -7,13 +7,13 @@ const {
   updateUser,
   getUser,
   getUserCount,
-<<<<<<< HEAD
+
   getUserRegistrations
   getUserRegistrations
-=======
+
   getUserRegistrations,
   getUserRegistrationsLast12Months
->>>>>>> 472b0f9 (modif front panier debut liaison a stripe et gestion conglit)
+
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -76,6 +76,7 @@ usersRouter.post(
   createUser,
 );
 
+// Route pour obtenir tous les utilisateurs
 usersRouter.get(
   '/users',
   checkAuth(authConfig.accessTokenSecret, false),

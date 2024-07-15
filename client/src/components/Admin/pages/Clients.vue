@@ -11,7 +11,7 @@ import StatCard from '../StatCard.vue';
 import BarChart from '../BarChart.vue';
 
 interface Statistic {
-=======
+
       <p>todo: rajouter le radialbar/circular gauge pour afficher le % d'utilisateurs qui ont passés commandes</p>
   
       <div class="p-5">
@@ -46,7 +46,7 @@ interface Statistic {
   import BarChart from '../BarChart.vue';
   
   interface Statistic {
->>>>>>> 472b0f9 (modif front panier debut liaison a stripe et gestion conglit)
+
     value: string;
     text: string;
     color: string;

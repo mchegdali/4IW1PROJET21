@@ -311,8 +311,8 @@ module.exports = {
   deleteProduct,
   getProductCount,
   getProductDistributionByCategory,
-<<<<<<< HEAD
-=======
+
+
   getPriceDistribution,
->>>>>>> 472b0f9 (modif front panier debut liaison a stripe et gestion conglit)
+
 };

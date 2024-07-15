@@ -348,7 +348,7 @@ async function getUserAddresses(req, res, next) {
     return res.json(user.addresses);
   } catch (error) {
     return next(error);
-<<<<<<< HEAD
+
 =======
   }
 }
@@ -396,7 +396,7 @@ module.exports = {
   getUserRegistrations,
 <<<<<<< HEAD
   getUserRegistrations,
-=======
+
   getUserRegistrationsLast12Months
->>>>>>> 472b0f9 (modif front panier debut liaison a stripe et gestion conglit)
+
 };
