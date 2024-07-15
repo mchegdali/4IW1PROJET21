@@ -24,7 +24,7 @@ const BasketsSequelize = (sequelize) => {
       return {
         _id: this.id,
         items: items.toMongo(),
-          
+        totalPrice: this.totalPrice,
       };
     }
   }
@@ -39,8 +39,11 @@ const BasketsSequelize = (sequelize) => {
       user: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
-      }
-      
+      },
+      totalPrice: {
+        type: DataTypes.DECIMAL.UNSIGNED,
+        allowNull: false,
+      },
       
     },
     {

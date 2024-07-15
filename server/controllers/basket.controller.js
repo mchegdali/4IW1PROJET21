@@ -24,8 +24,9 @@ async function createBasket(req, res, next) {
   try {
     const userId = req.params.id; // User ID from the route parameter
     const basketCreateBody = await basketCreateSchema.parseAsync(req.body);
+    console.log("FIRST LOG " , basketCreateBody)
     const { items: itemsProductIds } = basketCreateBody;
-    console.log(itemsProductIds)
+    console.log("TWO LOG " , itemsProductIds)
     if (!Array.isArray(itemsProductIds)) {
       throw new Error('itemsProduct should be an array');
     }
@@ -37,12 +38,14 @@ async function createBasket(req, res, next) {
         throw new NotFound('Utilisateur introuvable');
       }
 
-      // Fetch products from MongoDB
-      const items = await ProductsMongo.find({
-        _id: { $in: itemsProductIds }
-      }).exec();
-      if (!items.length) {
-        throw new NotFound('Produits introuvables');
+      // Fetch products from MongoDB for each item individually
+      const items = [];
+      for (const itemId of itemsProductIds) {
+        const item = await ProductsMongo.findById(itemId).exec();
+        if (!item) {
+          throw new NotFound(`Produit introuvable avec l'ID: ${itemId}`);
+        }
+        items.push(item);
       }
 
       // Ensure that the required fields are present
@@ -52,9 +55,16 @@ async function createBasket(req, res, next) {
         }
       });
 
+      // Calculate total price of the basket
+      const totalPrice = items.reduce((acc, product) => {
+        acc += parseFloat(product.price); // Assuming product.price is a string or number
+        return acc;
+      }, 0);
+
       // Create the basket in SQL
       const basket = await Baskets.create({
         user: user._id,
+        totalPrice: totalPrice,
       }, { transaction: t });
 
       // Associate products with the basket
@@ -67,6 +77,7 @@ async function createBasket(req, res, next) {
       const basketMongo = {
         _id: basket.id,
         items: items,
+        totalPrice: totalPrice,
       };
       const basketDoc = await BasketsMongo.create(basketMongo);
 

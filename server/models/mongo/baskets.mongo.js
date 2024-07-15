@@ -6,6 +6,10 @@ const OrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.UUID,
       required: true,
     },
+    totalPrice : {
+      type: mongoose.Schema.Types.Decimal128,
+      required: true,
+    },
     items: [{
       type:  {
         _id: {
