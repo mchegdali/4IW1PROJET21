@@ -256,7 +256,23 @@ async function deleteUser(req, res, next) {
   }
 }
 
+/**
+ * Récupère le nombre total d'utilisateurs dans Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserCount(req, res, next) {
+  try {
+    const count = await UserMongo.countDocuments();
+    return res.status(200).json({ count });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
+  getUserCount,
   createUser,
   getUsers,
   replaceUser,
