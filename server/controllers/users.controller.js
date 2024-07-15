@@ -269,34 +269,6 @@ async function deleteUser(req, res, next) {
 }
 
 /**
- * Récupérer le nombre d'inscriptions d'utilisateurs par jour sur Mongo
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getUserRegistrations(req, res, next) {
-  try {
-    const registrations = await UserMongo.aggregate([
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-    ]);
-    return res.status(200).json(
-      registrations.map((entry) => ({
-        date: entry._id,
-        count: entry.count,
-      })),
-    );
-  } catch (error) {
-    return next(error);
-  }
-}
-
-/**
  * Récupère le nombre total d'utilisateurs dans Mongo
  *
  * @type {import('express').RequestHandler}
@@ -308,46 +280,6 @@ async function getUserCount(req, res, next) {
     return res.status(200).json({ count });
   } catch (error) {
     return next(error);
-  }
-}
-
-/**
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getUser(req, res, next) {
-  try {
-    const user = await UserMongo.findById(req.params.userId, {
-      password: 0,
-    });
-
-    if (user === null) {
-      return res.sendStatus(404);
-    }
-
-    return res.json(user);
-  } catch (error) {
-    return next(error);
-  }
-}
-
-/**
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getUserAddresses(req, res, next) {
-  try {
-    const user = await UserMongo.findById(req.params.userId);
-
-    if (user === null) {
-      return res.sendStatus(404);
-    }
-
-    return res.json(user.addresses);
-  } catch (error) {
-      return next(error);
   }
 }
 
@@ -382,6 +314,7 @@ async function getUserRegistrationsLast12Months(req, res, next) {
 }
 
 module.exports = {
+  getUserCount,
   getUserCount,
   createUser,
   getUsers,
