@@ -1,4 +1,5 @@
-const mongoose = require('./db');
+const mongoose = require('mongoose');
+const connection = require('./db');
 
 const OrderSchema = new mongoose.Schema(
   {
@@ -78,6 +79,6 @@ const OrderSchema = new mongoose.Schema(
   },
 );
 
-const BasketMongo = mongoose.model('Basket', OrderSchema);
+const BasketMongo = connection.model('Basket', OrderSchema);
 
 module.exports = BasketMongo;

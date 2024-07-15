@@ -26,6 +26,10 @@ async function createBasket(req, res, next) {
     const basketCreateBody = await basketCreateSchema.parseAsync(req.body);
     const { itemsProduct: itemsProductIds } = basketCreateBody;
 
+    if (!Array.isArray(itemsProductIds)) {
+      throw new Error('itemsProduct should be an array');
+    }
+
     const result = await sequelize.transaction(async (t) => {
       // Fetch user from MongoDB
       const user = await UsersMongo.findById(userId).exec();
@@ -41,18 +45,29 @@ async function createBasket(req, res, next) {
         throw new NotFound('Produits introuvables');
       }
 
+      // Ensure that the required fields are present
+      itemsProducts.forEach(product => {
+        if (!product.price || !product.image || !product.name || !product._id) {
+          throw new Error('One or more products are missing required fields');
+        }
+      });
+
       // Create the basket in SQL
       const basket = await Baskets.create({
         user: user._id,
       }, { transaction: t });
 
       // Associate products with the basket
-      for (const product of itemsProducts) {
-        await basket.addProduct(product._id, { transaction: t });
+      const productIds = itemsProducts.map(product => product._id);
+      for (const productId of productIds) {
+        await basket.addProduct(productId, { transaction: t });
       }
 
       // Convert SQL basket to MongoDB-like object and save it to MongoDB
-      const basketMongo = await basket.toMongo();
+      const basketMongo = {
+        _id: basket.id,
+        itemsProduct: itemsProducts,
+      };
       const basketDoc = await BasketsMongo.create(basketMongo);
 
       return basketDoc;
