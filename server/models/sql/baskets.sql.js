@@ -44,10 +44,6 @@ const BasketsSequelize = (sequelize) => {
         type: DataTypes.DECIMAL.UNSIGNED,
         allowNull: true,
       },
-      quantity: {
-        type: DataTypes.JSON,
-        allowNull: true,
-      },
       
     },
     {

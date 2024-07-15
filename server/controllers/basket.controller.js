@@ -69,16 +69,13 @@ async function createBasket(req, res, next) {
         return acc;
       }, 0);
 
-      // Convert quantityMap to array format for SQL
-      const quantityArray = Object.entries(quantityMap).map(([uuid, nbOccurence]) => ({ uuid, nbOccurence }));
-
       // Create the basket in SQL
       const basket = await Baskets.create({
         user: user._id,
         totalPrice: totalPrice,
-        quantity: quantityArray,
       }, { transaction: t });
-      console.log("four log ", basket)
+      console.log("FOURTH LOG", basket);
+
       // Associate products with the basket
       for (const productId in quantityMap) {
         await basket.addProduct(productId, { transaction: t });
@@ -87,19 +84,22 @@ async function createBasket(req, res, next) {
       // Convert SQL basket to MongoDB-like object and save it to MongoDB
       const basketMongo = {
         _id: basket.id,
-        items: items,
-        totalPrice: totalPrice,
-        quantity: Object.entries(quantityMap).map(([uuidProd, nbOccurence]) => ({
-          uuidProd,
-          nbOccurence: nbOccurence.toString(),
+        items: items.map(product => ({
+          _id: product._id,
+          name: product.name,
+          category: product.category,
+          image: product.image,
+          price: product.price,
+          quantity: quantityMap[product._id.toString()],
         })),
+        totalPrice: totalPrice,
         user: {
           _id: user._id,
           fullname: user.fullname,
           email: user.email,
         },
       };
-      console.log(basketMongo)
+      console.log("FIFTH LOG", basketMongo);
 
       const basketDoc = await BasketsMongo.create(basketMongo);
 

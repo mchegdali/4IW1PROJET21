@@ -7,27 +7,17 @@ const OrderSchema = new mongoose.Schema(
       required: true,
     },
     totalPrice : {
-      type: mongoose.Schema.Types.Decimal128,
+      type: mongoose.Schema.Types.Number,
       required: true,
-    },
-    quantity: [{
-      type:  {
-        uuidProd: {
-          type: mongoose.Schema.Types.UUID,
-          required: true,
-        },
-        nbOccurence: {
-          type: String,
-          required: true,
-        },
-    },}],
-
-
-    
+    },    
     items: [{
       type:  {
         _id: {
           type: mongoose.Schema.Types.UUID,
+          required: true,
+        },
+        quantity: {
+          type: mongoose.Schema.Types.Number,
           required: true,
         },
         name: {
