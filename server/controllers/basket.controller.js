@@ -24,9 +24,10 @@ async function createBasket(req, res, next) {
   try {
     const userId = req.params.id; // User ID from the route parameter
     const basketCreateBody = await basketCreateSchema.parseAsync(req.body);
-    console.log("FIRST LOG " , basketCreateBody)
+    console.log("FIRST LOG", basketCreateBody);
     const { items: itemsProductIds } = basketCreateBody;
-    console.log("TWO LOG " , itemsProductIds)
+    console.log("SECOND LOG", itemsProductIds);
+
     if (!Array.isArray(itemsProductIds)) {
       throw new Error('itemsProduct should be an array');
     }
@@ -38,14 +39,20 @@ async function createBasket(req, res, next) {
         throw new NotFound('Utilisateur introuvable');
       }
 
-      // Fetch products from MongoDB for each item individually
-      const items = [];
-      for (const itemId of itemsProductIds) {
-        const item = await ProductsMongo.findById(itemId).exec();
-        if (!item) {
-          throw new NotFound(`Produit introuvable avec l'ID: ${itemId}`);
-        }
-        items.push(item);
+      // Create quantity map
+      const quantityMap = {};
+      itemsProductIds.forEach(productId => {
+        quantityMap[productId] = (quantityMap[productId] || 0) + 1;
+      });
+      console.log("THIRD LOG", quantityMap);
+
+      // Fetch products from MongoDB
+      const items = await ProductsMongo.find({
+        _id: { $in: Object.keys(quantityMap) }
+      }).exec();
+
+      if (!items.length) {
+        throw new NotFound('Produits introuvables');
       }
 
       // Ensure that the required fields are present
@@ -57,19 +64,23 @@ async function createBasket(req, res, next) {
 
       // Calculate total price of the basket
       const totalPrice = items.reduce((acc, product) => {
-        acc += parseFloat(product.price); // Assuming product.price is a string or number
+        const quantity = quantityMap[product._id.toString()] || 0;
+        acc += parseFloat(product.price) * quantity;
         return acc;
       }, 0);
+
+      // Convert quantityMap to array format for SQL
+      const quantityArray = Object.entries(quantityMap).map(([uuid, nbOccurence]) => ({ uuid, nbOccurence }));
 
       // Create the basket in SQL
       const basket = await Baskets.create({
         user: user._id,
         totalPrice: totalPrice,
+        quantity: quantityArray,
       }, { transaction: t });
-
+      console.log("four log ", basket)
       // Associate products with the basket
-      const productIds = items.map(product => product._id);
-      for (const productId of productIds) {
+      for (const productId in quantityMap) {
         await basket.addProduct(productId, { transaction: t });
       }
 
@@ -78,7 +89,18 @@ async function createBasket(req, res, next) {
         _id: basket.id,
         items: items,
         totalPrice: totalPrice,
+        quantity: Object.entries(quantityMap).map(([uuidProd, nbOccurence]) => ({
+          uuidProd,
+          nbOccurence: nbOccurence.toString(),
+        })),
+        user: {
+          _id: user._id,
+          fullname: user.fullname,
+          email: user.email,
+        },
       };
+      console.log(basketMongo)
+
       const basketDoc = await BasketsMongo.create(basketMongo);
 
       return basketDoc;
@@ -90,6 +112,7 @@ async function createBasket(req, res, next) {
     return next(error);
   }
 }
+
 /**
  *
  * @type {import('express').RequestHandler}

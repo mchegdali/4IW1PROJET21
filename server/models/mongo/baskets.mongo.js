@@ -10,6 +10,20 @@ const OrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Decimal128,
       required: true,
     },
+    quantity: [{
+      type:  {
+        uuidProd: {
+          type: mongoose.Schema.Types.UUID,
+          required: true,
+        },
+        nbOccurence: {
+          type: String,
+          required: true,
+        },
+    },}],
+
+
+    
     items: [{
       type:  {
         _id: {

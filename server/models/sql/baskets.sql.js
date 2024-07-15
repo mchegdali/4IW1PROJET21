@@ -42,7 +42,11 @@ const BasketsSequelize = (sequelize) => {
       },
       totalPrice: {
         type: DataTypes.DECIMAL.UNSIGNED,
-        allowNull: false,
+        allowNull: true,
+      },
+      quantity: {
+        type: DataTypes.JSON,
+        allowNull: true,
       },
       
     },
