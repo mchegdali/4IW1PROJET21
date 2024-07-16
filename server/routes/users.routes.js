@@ -9,9 +9,6 @@ const {
   getUserCount,
 
   getUserRegistrations
-  getUserRegistrations
-
-  getUserRegistrations,
   getUserRegistrationsLast12Months
 
 } = require('../controllers/users.controller');
