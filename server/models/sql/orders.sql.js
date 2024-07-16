@@ -8,6 +8,7 @@ const OrdersSequelize = (sequelize) => {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
+      
   }
   async toMongo() {
     const user = await this.sequelize.models.users.findByPk(
@@ -44,9 +45,9 @@ const OrdersSequelize = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      itemsProduct: {
+      items: {
         type: DataTypes.JSON,
-        allowNull: false,
+        allowNull: true,
       },
       
 

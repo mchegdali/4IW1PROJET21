@@ -36,7 +36,7 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    itemsProduct: [{
+    items: [{
       type:  {
         _id: {
           type: mongoose.Schema.Types.UUID,
@@ -62,10 +62,6 @@ const OrderSchema = new mongoose.Schema(
             },
           },
           default: null,
-        },
-        image: {
-          type: String,
-          required: true,
         },
         price: {
           type: mongoose.Schema.Types.Decimal128,

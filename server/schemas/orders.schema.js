@@ -11,10 +11,6 @@ const orderQuerySchema = z.object({
 
 
 const orderCreateSchema = z.object({
-  paymentStatus: z.string().min(2),
-  deliveryStatus: z.string().min(0.01),
-  orderStatus: z.string().min(2),
-  itemsProduct: z.string().uuid().or(z.null()).default(null),
   user: z.string().uuid().or(z.null()).default(null),
 });
 
