@@ -15,6 +15,7 @@ const Users = sequelize.model('users');
 
 /**
  * Créer un utilisateur
+ * Créer un utilisateur
  *
  * @type {import('express').RequestHandler}
  * @returns
@@ -283,6 +284,32 @@ async function getUserCount(req, res, next) {
   }
 }
 
+/**
+ * Récupérer le nombre d'inscriptions d'utilisateurs par jour sur Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserRegistrations(req, res, next) {
+  try {
+      const registrations = await UserMongo.aggregate([
+          {
+              $group: {
+                  _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                  count: { $sum: 1 }
+              }
+          },
+          { $sort: { _id: 1 } }
+      ]);
+      return res.status(200).json(registrations.map(entry => ({
+          date: entry._id,
+          count: entry.count
+      })));
+  } catch (error) {
+      return next(error);
+  }
+}
+
 module.exports = {
   getUserCount,
   getUserCount,
@@ -292,6 +319,5 @@ module.exports = {
   replaceUser,
   deleteUser,
   updateUser,
-  getUserRegistrations,
   getUserRegistrations,
 };
