@@ -65,7 +65,7 @@ export default defineComponent({
             { value: '30', text: 'Produits', color: 'text-red-600' }
         ] as Statistic[],
         stats: [
-            { id: 1, label: 'Utilisateurs totaux', value: '-' },
+            { id: 1, label: 'Utilisateurs totaux', value: '' },
             { id: 2, label: 'Utilisateurs actifs', value: '567' },
             { id: 3, label: 'Nouvelles inscriptions', value: '89' },
             { id: 4, label: 'Visiteurs quotidiens', value: '1234' },
@@ -82,6 +82,7 @@ export default defineComponent({
                 this.stats[0].value = data.count.toString();
             } catch (error) {
                 console.error('Error fetching user count:', error);
+                this.stats[0].value = "-"; 
             }
         },
     },
