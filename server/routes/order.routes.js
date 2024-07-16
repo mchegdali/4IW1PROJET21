@@ -1,9 +1,9 @@
 const { Router } = require('express');
 const {
-  createOrders,
+  createOrder,
   deleteOrder,
   getOrder,
-  // getOrders,
+  getOrders,
   updateOrder,
 } = require('../controllers/order.controller');
 
@@ -21,6 +21,6 @@ orderRouter
   .patch(updateOrder)
   .delete(deleteOrder);
 
-orderRouter.route('/orders').post(createOrders);
+orderRouter.route('/orders').get(getOrders).post(createOrder);
 
 module.exports = orderRouter;

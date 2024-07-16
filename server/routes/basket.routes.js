@@ -12,7 +12,7 @@ const basketRouter = Router();
 
 
 // basketRouter.get('/deliveryChoices/:id/shipping', getShipping);
-basketRouter.post('/user/:id/basket',createBasket);
+basketRouter.post('/users/:id/basket',createBasket);
 basketRouter
   .route('/basket/:id')
   .get(getBasket)

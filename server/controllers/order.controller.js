@@ -17,13 +17,12 @@ const BasketsMongo = require ("../models/mongo/baskets.mongo")
 /**
  * @type {import('express').RequestHandler}
  */
-async function createOrders(req, res, next) {
+async function createOrder(req, res, next) {
   try {
     // Valider les données d'entrée
     const orderCreateBody = await orderCreateSchema.parseAsync(req.body);
     
 
-    console.log(typeof(orderCreateBody.user),typeof(user))
     const result = await sequelize.transaction(async (t) => {
       if (orderCreateBody.user) {
         const user = await UsersMongo.findById(
@@ -35,7 +34,6 @@ async function createOrders(req, res, next) {
       }
       const user = await UsersMongo.findById(
         orderCreateBody.user,);
-        console.log("test : " ,typeof(user))
       // Vérifier le panier de l'utilisateur dans MongoDB
       // Find basket in MongoDB
       
@@ -45,13 +43,11 @@ async function createOrders(req, res, next) {
       .sort({ createdAt: -1 })  // Sort by createdAt in descending order (latest first)
       .exec();
       
-      console.log('basket',basket)
       if (!basket) {
         throw new NotFound('Panier introuvable');
       }
       // Extraire les items et le total price du panier
       const { items, totalPrice } = basket;
-      console.log("items ",items,"totalPrice",totalPrice)
       // Créer la commande dans SQL
       const order = await Orders.create({
         user: user._id,
@@ -61,7 +57,6 @@ async function createOrders(req, res, next) {
         items: JSON.stringify(items), 
         totalPrice: totalPrice,
       }, { transaction: t });
-      console.log("cree commande sql ",order)
       // Convertir la commande SQL en un objet compatible avec MongoDB
       const orderMongo = {
         _id: order.id,
@@ -101,78 +96,6 @@ async function createOrders(req, res, next) {
   }
 }
 
-async function createOrder(req, res, next) {
-  try {
-    const userId = req.params.id; // User ID from the route parameter
-
-    // Find user in MongoDB
-    const user = await UsersMongo.findById(userId).exec();
-    if (!user) {
-      throw new NotFound('Utilisateur introuvable');
-    }
-
-    
-    if (!basket) {
-      throw new NotFound('Panier introuvable');
-    }
-
-    // Extract items and total price from the basket
-    const { items, totalPrice } = basket;
-
-    // Create the order in SQL and save in MongoDB within a transaction
-    const result = await sequelize.transaction(async (t) => {
-      // Create the order in SQL
-      const newOrder = await Orders.create({
-        userId: userId,
-        paymentStatus: 'Pending',
-        deliveryStatus: 'Pending',
-        orderStatus: 'Pending',
-        items: items,
-        totalPrice: totalPrice,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }, { transaction: t });
-
-      // Convert SQL order to MongoDB-like object
-      const orderMongo = {
-        _id: newOrder.id.toString(), // Ensure _id is a string
-        paymentStatus: newOrder.paymentStatus,
-        deliveryStatus: newOrder.deliveryStatus,
-        orderStatus: newOrder.orderStatus,
-        items: items.map(item => ({
-          _id: item._id.toString(), // Ensure item _id is a string
-          name: item.name,
-          category: item.category,
-          image: item.image,
-          price: item.price,
-          quantity: item.quantity // Assuming item.quantity is available
-        })),
-        totalPrice: totalPrice.toString(), // Ensure totalPrice is a string
-        user: {
-          _id: user._id.toString(), // Ensure user _id is a string
-          fullname: user.fullname,
-          email: user.email,
-        },
-      };
-
-      // Save orderMongo to MongoDB
-      const orderDoc = await OrdersMongo.create(orderMongo);
-
-      return orderDoc;
-    });
-
-    return res.status(201).json(result);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(400).json(formatZodError(error));
-    }
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ message: error.message });
-    }
-    console.error('Error creating order:', error);
-    return next(error);
-  }
-}
 
 /**
  *
@@ -187,11 +110,11 @@ async function getOrder(req, res, next) {
       _id: id,
     };
 
-    const shipping = await OrdersMongo.findOne(filter);
+    const order = await OrdersMongo.findOne(filter);
     if (!orderQuerySchema) {
       return res.sendStatus(404);
     }
-    return res.json(shipping);
+    return res.json(order);
   } catch (error) {
     return next(error);
   }
@@ -209,6 +132,7 @@ async function getOrders(req, res, next) {
     return next(error);
   }
 }
+
 /**
  *
  * @type {import('express').RequestHandler}
@@ -217,54 +141,41 @@ async function getOrders(req, res, next) {
 async function updateOrder(req, res, next) {
   try {
     const id = req.params.id;
-    const sqlWhere = {
-      id,
-    };
-    const mongoWhere = {
-      _id: id,
-    };
+    const sqlWhere = { id };
+    const mongoWhere = { _id: id };
 
-    const shippingUpdateBody = await orderUpdateSchema.parseAsync(req.body);
-    const updatedKeys = Object.keys(shippingUpdateBody);
+    const orderUpdateBody = await orderUpdateSchema.parseAsync(req.body);
+    const updatedKeys = Object.keys(orderUpdateBody);
 
     const result = await sequelize.transaction(async (t) => {
-      const [affectedRowsCount, affectedRows] = await Shippings.update(
-        shippingUpdateBody,
-        {
-          where: sqlWhere,
-          limit: 1,
-          transaction: t,
-          returning: true,
-        },
-      );
+      const [affectedRowsCount, affectedRows] = await Orders.update(orderUpdateBody, {
+        where: sqlWhere,
+        limit: 1,
+        transaction: t,
+        returning: true,
+      });
 
       if (affectedRowsCount === 0) {
-        throw new NotFound('livraison introuvable');
+        throw new Error('Commande introuvable');
       }
 
-      const shipping = await Shippings.scope('toMongo').findByPk(
-        affectedRows[0].getDataValue('id'),
-        {
-          transaction: t,
-        },
-      );
+      const order = await Orders.findByPk(affectedRows[0].getDataValue('id'), {
+        transaction: t,
+      });
 
-      const shippingMongo = {};
+      const orderMongo = {};
 
       for (const key of updatedKeys) {
-        shippingMongo[key] = shipping.getDataValue(key);
+        orderMongo[key] = order.getDataValue(key);
       }
 
-      const replaceResult = await OrdersMongo.findOneAndUpdate(
-        mongoWhere,
-        shippingMongo,
-        {
-          new: true,
-        },
-      );
+      const replaceResult = await OrdersMongo.findOneAndUpdate(mongoWhere, orderMongo, {
+        new: true,
+        runValidators: true,
+      });
 
       if (!replaceResult) {
-        throw new NotFound('livraison introuvable');
+        throw new Error('Commande introuvable dans MongoDB');
       }
 
       return replaceResult;
@@ -272,37 +183,50 @@ async function updateOrder(req, res, next) {
 
     return res.status(200).json(result);
   } catch (error) {
-    console.log(error)
+    console.error('Error updating order:', error);
+    if (error.message.includes('Commande introuvable')) {
+      return res.status(404).json({ message: error.message });
+    }
     return next(error);
   }
 }
-async function deleteOrder(req,res,next) {
+
+async function deleteOrder(req, res, next) {
   try {
-     const id = req.params.id;
-     const sqlWhere = {
-      id,
-    };
-    const mongoWhere = {
-      '_id' : id,
-    };
+    const id = req.params.id;
+    const sqlWhere = { id };
+    const mongoWhere = { _id: id };
 
-    const [deletedCountSql, deletedCountMongo] = await Promise.all([
-      Baskets.destroy({ where: sqlWhere }),
-      OrdersMongo.deleteOne(mongoWhere),
-    ]);
+    const result = await sequelize.transaction(async (t) => {
+      const deletedOrderMongo = await OrdersMongo.findByIdAndDelete(id);
+      if (!deletedOrderMongo) {
+        throw new Error('Commande introuvable dans MongoDB');
+      }
 
-    if (deletedCountSql === 0 && deletedCountMongo.deletedCount === 0) {
-      return res.sendStatus(404);
+      const deletedCountSQL = await Orders.destroy({
+        where: sqlWhere,
+        transaction: t,
+      });
+
+      if (deletedCountSQL === 0) {
+        throw new Error('Commande introuvable dans SQL');
+      }
+
+      return deletedOrderMongo; // retourne la commande supprimée de MongoDB
+    });
+
+    return res.status(200).json({ message: 'Commande supprimée avec succès', order: result });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    if (error.message.includes('Commande introuvable')) {
+      return res.status(404).json({ message: error.message });
     }
-
-  } catch(error) {
-    console.log(error);
-    return next (error);
+    return next(error);
   }
 }
 module.exports = {
-  createOrder,  
-  createOrders,
+
+  createOrder,
   getOrder,
   getOrders,
   updateOrder,
