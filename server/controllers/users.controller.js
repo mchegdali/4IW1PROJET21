@@ -359,6 +359,6 @@ module.exports = {
   replaceUser,
   deleteUser,
   updateUser,
-  getUserAddresses,
+  getUserRegistrations,
   getUserRegistrations,
 };

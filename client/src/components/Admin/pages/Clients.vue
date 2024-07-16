@@ -12,7 +12,7 @@
                         <StatisticsBlock :stats="statisticsData" />
                     </div>
                     <div class="bg-white rounded-xl p-2 flex-grow">
-                        <LineChart />
+                        <LineChart v-if="lineChartOptions && lineChartSeries" :options="lineChartOptions" :series="lineChartSeries" />
                     </div>
                 </div>
 
