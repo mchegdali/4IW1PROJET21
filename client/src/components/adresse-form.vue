@@ -31,31 +31,21 @@ const handleSubmit = () => {
   });
 };
 
+const nameRegex = /^[a-zA-ZÀ-ÿ '-]{2,}$/;
+const streetRegex = /^[a-zA-Z0-9À-ÿ '-]{2,}$/;
+const cityRegionCountryRegex = /^[a-zA-ZÀ-ÿ '-]{2,}$/;
+const zipCodeRegex = /^[0-9]{5}$/;
+const phoneRegex = /^[0-9]{10}$/;
+
 const addressSchema = z.object({
-  firstName: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
-    message: 'Le prénom contient des caractères invalides'
-  }),
-  lastName: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
-    message: 'Le nom contient des caractères invalides'
-  }),
-  street: z.string().regex(/^[a-zA-Z0-9àâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ .,'-]+$/, {
-    message: 'La rue contient des caractères invalides'
-  }),
-  city: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
-    message: 'La ville contient des caractères invalides'
-  }),
-  region: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
-    message: 'La région contient des caractères invalides'
-  }),
-  country: z.string().regex(/^[a-zA-ZàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒ \-']+$/, {
-    message: 'Le pays contient des caractères invalides'
-  }),
-  zipCode: z
-    .string()
-    .regex(/^\d{5}$/, { message: 'Le code postal doit être composé de 5 chiffres' }),
-  phone: z.string().regex(/^\+?\d{10,15}$/, {
-    message: 'Le numéro de téléphone est invalide'
-  })
+  firstName: z.string().regex(nameRegex, 'Prénom invalide'),
+  lastName: z.string().regex(nameRegex, 'Nom de famille invalide'),
+  street: z.string().regex(streetRegex, 'Adresse invalide'),
+  city: z.string().regex(cityRegionCountryRegex, 'Ville invalide'),
+  region: z.string().regex(cityRegionCountryRegex, 'Région invalide'),
+  zipCode: z.string().regex(zipCodeRegex, 'Code postal invalide'),
+  country: z.string().regex(cityRegionCountryRegex, 'Pays invalide'),
+  phone: z.string().regex(phoneRegex, 'Numéro de téléphone invalide')
 });
 
 const initialAddressData = {
@@ -79,7 +69,8 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
   <div class="mt-10">
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
       <div>
-        <label>Prénom
+        <label
+          >Prénom
           <Input
             id="firstName"
             v-model="formData.firstName"
@@ -92,7 +83,8 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label>Nom
+        <label
+          >Nom
           <Input
             id="lastName"
             v-model="formData.lastName"
@@ -104,7 +96,8 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label>Rue
+        <label
+          >Rue
           <Input
             id="street"
             v-model="formData.street"
@@ -116,7 +109,8 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label>Ville
+        <label
+          >Ville
           <Input
             id="city"
             v-model="formData.city"
@@ -128,7 +122,8 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label>Région
+        <label
+          >Région
           <Input
             id="region"
             v-model="formData.region"
@@ -140,7 +135,8 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label>Code postal
+        <label
+          >Code postal
           <Input
             id="zipCode"
             v-model="formData.zipCode"
@@ -152,7 +148,8 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label>Pays
+        <label
+          >Pays
           <Input
             id="country"
             v-model="formData.country"
@@ -164,7 +161,8 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
         </small>
       </div>
       <div>
-        <label>Numéro de téléphone
+        <label
+          >Numéro de téléphone
           <Input
             id="phone"
             v-model="formData.phone"
