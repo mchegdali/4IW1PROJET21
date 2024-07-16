@@ -8,7 +8,7 @@
                     <AreaChart />
                 </div>
                 <div class="w-2/5 bg-white rounded-xl">
-                    <DonutChart />
+                    <DonutChart v-if="donutChartOptions && donutChartSeries" :options="donutChartOptions" :series="donutChartSeries" />
                 </div>
             </div> 
         </div>
