@@ -59,7 +59,7 @@ export default defineComponent({
         statisticsData: [
             { value: '10', text: 'Ventes', color: 'text-blue-600' },
             { value: '20', text: 'Clients', color: 'text-green-600' },
-            { value: '-', text: 'Produits', color: 'text-red-600' }
+            { value: '', text: 'Produits', color: 'text-red-600' }
         ] as Statistic[],
         };
     },
@@ -71,6 +71,7 @@ export default defineComponent({
                 this.statisticsData[2].value = data.count.toString();
             } catch (error) {
                 console.error('Error fetching product count:', error);
+                this.statisticsData[2].value = "-"; 
             }
         },
     },
