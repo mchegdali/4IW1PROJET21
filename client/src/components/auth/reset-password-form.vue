@@ -4,8 +4,8 @@ import Button from '@/components/ui/button/Button.vue';
 import { z } from 'zod';
 import { Info } from 'lucide-vue-next';
 import { useForm } from '@/composables/form';
-import { useFetch } from '@vueuse/core';
 import { useRouter, type LocationQueryValue } from 'vue-router';
+import config from '@/config';
 
 const router = useRouter();
 
@@ -15,12 +15,9 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
 
 const resetPasswordSchema = z
   .object({
-    password: z
-      .string()
-      .min(8, 'Le mot de passe doit contenir au moins 8 caractères.')
-      .regex(passwordRegex, {
-        message: 'Le mot de passe ne répond pas aux critères requis.'
-      }),
+    password: z.string().regex(passwordRegex, {
+      message: 'Le mot de passe ne répond pas aux critères requis.'
+    }),
     confirmPassword: z.string()
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -28,59 +25,51 @@ const resetPasswordSchema = z
     path: ['confirmPassword']
   });
 
-const initialData = {
+const defaultValues = {
+  email: '',
+  fullname: '',
   password: '',
   confirmPassword: ''
 };
 
-const { formData, formErrors, formSubmitting, submitForm } = useForm(
-  resetPasswordSchema,
-  initialData
-);
+const { defineField, handleSubmit, errors, isSubmitting } = useForm({
+  validationSchema: resetPasswordSchema,
+  defaultValues
+});
 
-const { data, error, statusCode, execute } = useFetch(
-  `${import.meta.env.VITE_API_BASE_URL}/auth/reset-password`,
-  {
-    immediate: false,
-    beforeFetch({ url, options, cancel }) {
-      if (!token) cancel();
+const [password, passwordField] = defineField('password');
+const [confirmPassword, confirmPasswordField] = defineField('confirmPassword');
 
-      options.headers = {
-        ...options.headers,
-        Authorization: `Bearer ${token}`
-      };
-
-      return {
-        options
-      };
+const submitHandler = handleSubmit(async (data, signal) => {
+  const response = await fetch(`${config.apiBaseUrl}/auth/reset-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
     },
-    onFetchError: ({ data }) => {
-      return {
-        error: data
-      };
-    }
-  }
-)
-  .post(formData)
-  .json();
-
-const handleSubmit = () => {
-  submitForm(async () => {
-    await execute();
+    body: JSON.stringify(data),
+    signal
   });
-};
+
+  if (!response.ok) {
+    throw response;
+  }
+
+  router.push({ name: 'reset-password-confirmation' });
+});
 </script>
 
 <template>
-  <form class="space-y-4" @submit.prevent="handleSubmit">
+  <form class="space-y-4" @submit.prevent="submitHandler">
     <div>
       <label>
         Mot de passe
         <Input
           id="password"
           type="password"
-          v-model="formData.password"
-          :class="{ 'border-destructive': formErrors.password }"
+          v-model="password"
+          @input="passwordField.onInput"
+          :class="{ 'border-destructive': errors.password }"
         />
       </label>
       <div class="rounded-lg my-2 flex gap-2">
@@ -90,8 +79,8 @@ const handleSubmit = () => {
           chiffre et un symbole, et doit avoir au moins 8 caractères.
         </p>
       </div>
-      <small class="text-destructive" v-if="formErrors.password">
-        {{ formErrors.password }}
+      <small class="text-destructive" v-if="errors.password">
+        {{ errors.password }}
       </small>
     </div>
     <div>
@@ -100,14 +89,15 @@ const handleSubmit = () => {
         <Input
           id="confirmPassword"
           type="password"
-          v-model="formData.confirmPassword"
-          :class="{ 'border-destructive': formErrors.confirmPassword }"
+          v-model="confirmPassword"
+          @input="confirmPasswordField.onInput"
+          :class="{ 'border-destructive': errors.confirmPassword }"
         />
       </label>
-      <small class="text-destructive" v-if="formErrors.confirmPassword">
-        {{ formErrors.confirmPassword }}
+      <small class="text-destructive" v-if="errors.confirmPassword">
+        {{ errors.confirmPassword }}
       </small>
     </div>
-    <Button type="submit" class="w-full" :disabled="formSubmitting">Confirmer</Button>
+    <Button type="submit" class="w-full" :disabled="isSubmitting">Confirmer</Button>
   </form>
 </template>

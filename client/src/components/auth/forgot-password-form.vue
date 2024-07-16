@@ -3,55 +3,66 @@ import Input from '@/components/ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { z } from 'zod';
 import { useForm } from '@/composables/form';
-import { useFetch } from '@vueuse/core';
 import { useToast } from '../ui/toast';
+import { onBeforeUnmount } from 'vue';
+import config from '@/config';
+import { useRouter } from 'vue-router';
 
 const { toast } = useToast();
+const router = useRouter();
+
 const forgotPasswordSchema = z.object({
-  email: z.string().email({ message: 'Adresse e-mail invalide' }),
+  email: z.string().email({ message: 'Adresse e-mail invalide' })
 });
 
-const initialData = {
-  email: '',
+const defaultValues = {
+  email: ''
 };
 
-const { formData, formErrors, submitForm, formSubmitting } = useForm(forgotPasswordSchema, initialData);
+const { handleSubmit, defineField, cancel, isSubmitting, status, isError } = useForm({
+  validationSchema: forgotPasswordSchema,
+  defaultValues
+});
 
-const { data, execute, error, statusCode } = useFetch(`${import.meta.env.VITE_API_BASE_URL}/auth/forgot-password`, {
-  immediate: false,
-}).post(formData).text();
+const [email, emailField] = defineField('email');
 
-const handleSubmit = () => {
-  submitForm(async () => {
-    try {
-      const response = await execute(true);
-      console.log(response);
-
-      if (response) {
-
-        toast({ title: 'Email de réinitialisation envoyé', description: 'Vérifiez votre boîte mail', type: 'foreground', duration: 2500 });
-      }
-    } catch {
-      console.log("handleSubmit error", error.value);
-    }
+const submitHandler = handleSubmit(async (data, signal) => {
+  const response = await fetch(`${config.apiBaseUrl}/auth/forgot-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data),
+    signal
   });
-};
+
+  if (!response.ok) {
+    throw response;
+  }
+
+  router.push({ name: 'forgot-password-confirmation' });
+});
+
+onBeforeUnmount(() => {
+  cancel();
+});
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+  <form @submit.prevent="submitHandler" class="flex flex-col gap-4">
     <div>
-      <label>Adresse e-mail
-        <Input id="email" v-model="formData.email"
-          :class="{ 'border-destructive': formErrors.email || statusCode === 401 }" autofocus />
+      <label
+        >Adresse e-mail
+        <Input
+          id="email"
+          v-model="email"
+          @input="emailField.onInput"
+          :class="{ 'border-destructive': isError }"
+          autofocus
+        />
       </label>
-      <small class="text-destructive" v-if="formErrors.email">
-        {{ formErrors.email }}
-      </small>
-      <small class="text-destructive" v-else-if="statusCode === 401">
-        Email ou mot de passe incorrect
-      </small>
+      <small class="text-destructive" v-if="isError"> Email ou mot de passe incorrect </small>
     </div>
-    <Button type="submit" :disabled="formSubmitting">Réinitialiser mon mot de passe</Button>
+    <Button type="submit" :disabled="isSubmitting">Réinitialiser mon mot de passe</Button>
   </form>
 </template>

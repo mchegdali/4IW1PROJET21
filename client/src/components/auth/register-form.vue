@@ -6,6 +6,7 @@ import { Info } from 'lucide-vue-next';
 import { useForm } from '@/composables/form';
 import { useFetch } from '@vueuse/core';
 import { useRouter } from 'vue-router';
+import config from '@/config';
 
 const router = useRouter();
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
@@ -28,108 +29,103 @@ const registerSchema = z
     path: ['confirmPassword']
   });
 
-const initialRegisterData = {
+const defaultValues = {
   email: '',
   fullname: '',
   password: '',
   confirmPassword: ''
 };
 
-const { formData, formErrors, formSubmitting, submitForm } = useForm(
-  registerSchema,
-  initialRegisterData
-);
+const { defineField, handleSubmit, errors, isError, isSubmitting } = useForm({
+  validationSchema: registerSchema,
+  defaultValues
+});
 
-const { error, statusCode, execute } = useFetch(`${import.meta.env.VITE_API_BASE_URL}/users`, {
-  immediate: false,
-  onFetchError: ({ data }) => {
-    return {
-      error: data
-    };
-  }
-})
-  .post(formData)
-  .json();
+const [email, emailField] = defineField('email');
+const [fullname, fullnameField] = defineField('fullname');
+const [password, passwordField] = defineField('password');
+const [confirmPassword, confirmPasswordField] = defineField('confirmPassword');
 
-const handleSubmit = () => {
-  submitForm(async () => {
-    await execute();
-    if (statusCode.value === 201) {
-      router.push({ name: 'register-confirmation' });
-    }
+const submitHandler = handleSubmit(async (data, signal) => {
+  const response = await fetch(`${config.apiBaseUrl}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data),
+    signal
   });
-};
+
+  if (!response.ok) {
+    throw response;
+  }
+
+  router.push({ name: 'register-confirmation' });
+});
 </script>
 
 <template>
-  <form class="space-y-4" @submit.prevent="handleSubmit">
+  <form class="space-y-4" @submit.prevent="submitHandler">
     <div>
-      <label>
-        Adresse e-mail
-        <Input
-          id="email"
-          v-model="formData.email"
-          autofocus
-          :class="{ 'border-destructive': formErrors.email, 'bg-destructive/25': formErrors.email }"
-        />
-      </label>
-      <small class="text-destructive" v-if="formErrors.email">
-        {{ formErrors.email }}
-      </small>
-      <small class="text-destructive" v-else-if="error?.email">
-        {{ error?.email }}
+      <Label for="email" :class="{ 'text-destructive': errors.email }">Adresse e-mail</Label>
+      <Input
+        id="email"
+        v-model="email"
+        @input="emailField.onInput"
+        :class="{ 'border-destructive': errors.email }"
+        autofocus
+      />
+      <small class="text-destructive" v-if="errors.email">
+        {{ errors.email }}
       </small>
     </div>
     <div>
-      <label>
-        Nom et Prénom
-        <Input
-          id="fullname"
-          name="fullname"
-          type="text"
-          v-model="formData.fullname"
-          :class="{ 'border-destructive': formErrors.fullname }"
-        />
-      </label>
-      <small class="text-destructive" v-if="formErrors.name">
-        {{ formErrors.name }}
+      <Label for="fullname" :class="{ 'text-destructive': errors.password }">Nom complet</Label>
+      <Input
+        id="fullname"
+        type="text"
+        v-model="fullname"
+        @input="fullnameField.onInput"
+        :class="{ 'border-destructive': errors.fullname }"
+        autofocus
+      />
+      <small class="text-destructive" v-if="errors.fullname">
+        {{ errors.fullname }}
       </small>
     </div>
     <div>
-      <label>
-        Mot de passe
-        <Input
-          id="password"
-          type="password"
-          v-model="formData.password"
-          :class="{ 'border-destructive': formErrors.password }"
-        />
-      </label>
-      <div class="rounded-lg my-2 flex gap-2">
-        <Info />
-        <p class="text-xs">
-          Le mot de passe doit contenir au moins une lettre minuscule, une lettre majuscule, un
-          chiffre et un symbole, et doit avoir au moins 8 caractères.
-        </p>
-      </div>
-      <small class="text-destructive" v-if="formErrors.password">
-        {{ formErrors.password }}
+      <Label for="password" :class="{ 'text-destructive': errors.password }">Mot de passe</Label>
+      <Input
+        id="password"
+        type="password"
+        v-model="password"
+        @input="passwordField.onInput"
+        :class="{ 'border-destructive': errors.password || errors.confirmPassword }"
+        autofocus
+      />
+      <small class="text-destructive" v-if="errors.password">
+        {{ errors.password }}
+      </small>
+      <small class="text-destructive" v-if="errors.confirmPassword">
+        {{ errors.confirmPassword }}
       </small>
     </div>
     <div>
-      <label>
-        Confirmation du mot de passe
-        <Input
-          id="confirmPassword"
-          type="password"
-          v-model="formData.confirmPassword"
-          :class="{ 'border-destructive': formErrors.confirmPassword }"
-        />
-      </label>
-      <small class="text-destructive" v-if="formErrors.confirmPassword">
-        {{ formErrors.confirmPassword }}
+      <Label for="confirmPassword" :class="{ 'text-destructive': errors.password }"
+        >Confirmation du mot de passe</Label
+      >
+      <Input
+        id="confirmPassword"
+        type="password"
+        v-model="confirmPassword"
+        @input="confirmPasswordField.onInput"
+        :class="{ 'border-destructive': errors.confirmPassword }"
+        autofocus
+      />
+      <small class="text-destructive" v-if="errors.confirmPassword">
+        {{ errors.confirmPassword }}
       </small>
     </div>
-    <Button type="submit" class="w-full" :disabled="formSubmitting">Confirmer</Button>
+    <Button type="submit" class="w-full" :disabled="isSubmitting">Confirmer</Button>
   </form>
 </template>
