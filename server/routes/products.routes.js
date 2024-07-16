@@ -8,6 +8,7 @@ const {
   getRelatedProducts,
   getProductCount,
   getProductDistributionByCategory,
+  getPriceDistribution,
 } = require('../controllers/products.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -26,6 +27,13 @@ productsRouter.get(
   // checkAuth(authConfig.accessTokenSecret, false),
   // checkRole(['admin']),
   getProductDistributionByCategory
+);
+
+productsRouter.get(
+  '/products/price-distribution', 
+  // checkAuth(authConfig.accessTokenSecret, false),
+  // checkRole(['admin']),
+  getPriceDistribution
 );
 
 
