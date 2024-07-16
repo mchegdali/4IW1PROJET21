@@ -302,6 +302,50 @@ async function getProductDistributionByCategory(req, res, next) {
   }
 }
 
+/**
+ * Récupère la distribution des produits par tranche de prix depuis MongoDB
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getPriceDistribution(req, res, next) {
+  try {
+      const products = await ProductMongo.find().exec();
+      const priceDistribution = [
+          { range: 'Moins de 100 €', count: 0 },
+          { range: '100 € - 300 €', count: 0 },
+          { range: '300 € - 500 €', count: 0 },
+          { range: '500 € - 700 €', count: 0 },
+          { range: 'Plus de 700 €', count: 0 },
+      ];
+
+      products.forEach(product => {
+          const price = parseFloat(product.price);
+          if (!isNaN(price)) {
+              if (price < 100) {
+                  priceDistribution[0].count += 1;
+              } else if (price >= 100 && price < 300) {
+                  priceDistribution[1].count += 1;
+              } else if (price >= 300 && price < 500) {
+                  priceDistribution[2].count += 1;
+              } else if (price >= 500 && price < 700) {
+                  priceDistribution[3].count += 1;
+              } else if (price >= 700) {
+                  priceDistribution[4].count += 1;
+              }
+          } else {
+              console.warn(`Invalid price for product: ${product.name}, price: ${product.price}`);
+          }
+      });
+
+      res.status(200).json(priceDistribution);
+  } catch (error) {
+      console.error("Error in getPriceDistribution:", error);
+      res.status(500).send("Internal Server Error");
+  }
+}
+
+
 module.exports = {
   createProduct,
   getProducts,
