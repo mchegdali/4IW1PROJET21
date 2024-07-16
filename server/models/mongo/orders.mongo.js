@@ -7,7 +7,38 @@ const OrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.UUID,
       required: true,
     },
-  
+    shipping: {
+      type: {
+        _id: {
+          type: mongoose.Schema.Types.UUID,
+          required: true,
+      },
+      fullname: {
+          type : String,
+          required: true,
+      },
+      street:  {
+        type : String,
+        required: true,
+      },
+      zipCode: {
+        type : String,
+        required: true,
+      },
+      city: {
+        type : String,
+        required: true,
+      },
+      phone: {
+        type : String,
+        required: true,
+      },
+      deliveryChoiceId :  {
+        type: String,
+        required: true,
+      },
+      }
+    },
     user: {
       type:  {
           _id: {

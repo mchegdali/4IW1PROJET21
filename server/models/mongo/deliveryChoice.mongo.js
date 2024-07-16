@@ -1,4 +1,5 @@
-const { mongoose} = require ('mongoose');
+const mongoose = require('mongoose');
+const connection = require('./db');
 
 const deliveryChoiceSchema = new mongoose.Schema(
   {
@@ -23,6 +24,6 @@ const deliveryChoiceSchema = new mongoose.Schema(
 );
 
 
-const deliveryChoiceMongo = mongoose.model('deliveryChoices', deliveryChoiceSchema);
+const deliveryChoiceMongo =  connection.model('deliveryChoices', deliveryChoiceSchema);
 
 module.exports = deliveryChoiceMongo;

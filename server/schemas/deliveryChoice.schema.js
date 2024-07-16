@@ -11,16 +11,14 @@ const deliveryChoiceCreateSchema = z
   .object({
     name: z.string().min(2),
   })
-  .transform((data) => ({
-    name: data.name,
-  }));
+  
 
-const deliveryChoiceUpdateSchema = deliveryChoiceCreateSchema.innerType().partial().refine((a)=> {
+const deliveryChoiceUpdateSchema = deliveryChoiceCreateSchema.partial().refine((a)=> {
   return Object.keys(a).length > 0;
 },'Vous devez remplir au moins un champ');
 
 const deliveryChoiceSchema = deliveryChoiceCreateSchema
-  .innerType()
+
   .merge(entitySchema)
   .merge(timestampsSchema);
 

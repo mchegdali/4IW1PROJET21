@@ -1,5 +1,6 @@
 const paypal = require('paypal-rest-sdk');
-
+const httpErrors = require('http-errors');
+const { NotFound } = httpErrors;
 paypal.configure({
   mode: 'sandbox', // Sandbox or live
   client_id: process.env.PAYPAL_CLIENT_ID,
@@ -36,7 +37,7 @@ const createPayment = (req, res) => {
 
   paypal.payment.create(create_payment_json, function (error, payment) {
     if (error) {
-      throw error;
+      throw new NotFound();
     } else {
       for (let i = 0; i < payment.links.length; i++) {
         if (payment.links[i].rel === 'approval_url') {
@@ -63,8 +64,7 @@ const executePayment = (req, res) => {
 
   paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
     if (error) {
-      console.log(error.response);
-      throw error;
+      throw new NotFound();
     } else {
       res.json({ message: 'Payment successful', payment });
     }

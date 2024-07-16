@@ -1,5 +1,4 @@
 const httpErrors = require('http-errors');
-const validator = require('validator');
 const sequelize = require('../models/sql');
 const {
   orderQuerySchema,
@@ -8,53 +7,54 @@ const {
 } = require('../schemas/orders.schema');
 const { NotFound } = httpErrors;
 const Orders = sequelize.model('orders');
-const { ZodError } = require('zod');
+const Shippings = sequelize.model('shippings')
 const OrdersMongo = require('../models/mongo/orders.mongo');
-const formatZodError = require('../utils/format-zod-error');
-const { ValidationError } = require('sequelize');
+
 const UsersMongo = require ("../models/mongo/user.mongo");
 const BasketsMongo = require ("../models/mongo/baskets.mongo")
+const ShippingsMongo = require ("../models/mongo/shipping.mongo")
+
 /**
  * @type {import('express').RequestHandler}
  */
 async function createOrder(req, res, next) {
   try {
-
     const orderCreateBody = await orderCreateSchema.parseAsync(req.body);
-    
+    const user = await UsersMongo.findById(orderCreateBody.user);
 
     const result = await sequelize.transaction(async (t) => {
-      if (orderCreateBody.user) {
-        const user = await UsersMongo.findById(
-          orderCreateBody.user,);
-          if (!user) {
-            throw new NotFound('Utilisateur introuvable');
-          }
-        
+      const userId = await UsersMongo.findById(orderCreateBody.user);
+      if (!userId) {
+        throw new NotFound();
       }
-      const user = await UsersMongo.findById(
-        orderCreateBody.user,);
 
-      const basket = await BasketsMongo.findOne({
-        user : user
-      })
-      .sort({ createdAt: -1 }) 
-      .exec();
-      
+      const shipping = await ShippingsMongo.findById(orderCreateBody.shipping);
+      if (!shipping) {
+        throw new NotFound();
+      }
+
+      const basket = await BasketsMongo.findOne({ user: user })
+        .sort({ createdAt: -1 })
+        .exec();
+
       if (!basket) {
-        throw new NotFound('Panier introuvable');
+        throw new NotFound();
       }
-
       const { items, totalPrice } = basket;
 
       const order = await Orders.create({
-        user: user._id,
+        userId: user._id,
         paymentStatus: 'Pending',
         deliveryStatus: 'Pending',
         orderStatus: 'Pending',
-        items: JSON.stringify(items), 
+        items: JSON.stringify(items),
         totalPrice: totalPrice,
       }, { transaction: t });
+
+      await Shippings.update(
+        { order: order.id },
+        { where: { id: shipping.id }, transaction: t }
+      );
 
       const orderMongo = {
         _id: order.id,
@@ -62,18 +62,27 @@ async function createOrder(req, res, next) {
         deliveryStatus: order.deliveryStatus,
         orderStatus: order.orderStatus,
         items: items.map(item => ({
-          _id: item._id.toString(), 
+          _id: item._id.toString(),
           name: item.name,
           category: item.category,
           image: item.image,
           price: item.price,
           quantity: item.quantity
         })),
-        totalPrice: totalPrice.toString(), 
+        totalPrice: totalPrice.toString(),
         user: {
-          _id: user._id, 
+          _id: user._id,
           fullname: user.fullname,
           email: user.email,
+        },
+        shipping: {
+          _id: shipping.id,
+          fullname: shipping.fullname,
+          street: shipping.street,
+          zipCode: shipping.zipCode,
+          city: shipping.city,
+          phone: shipping.phone,
+          deliveryChoiceId: shipping.deliveryChoiceId,
         },
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -85,10 +94,6 @@ async function createOrder(req, res, next) {
 
     return res.status(201).json(result);
   } catch (error) {
-    console.log('Error creating order:', error);
-    if (error instanceof NotFound) {
-      return res.sendStatus(404);
-    }
     return next(error);
   }
 }
@@ -153,7 +158,7 @@ async function updateOrder(req, res, next) {
       });
 
       if (affectedRowsCount === 0) {
-        throw new Error('Commande introuvable');
+        throw new NotFound();
       }
 
       const order = await Orders.findByPk(affectedRows[0].getDataValue('id'), {
@@ -172,18 +177,16 @@ async function updateOrder(req, res, next) {
       });
 
       if (!replaceResult) {
-        throw new Error('Commande introuvable dans MongoDB');
+        throw new NotFound();
       }
 
       return replaceResult;
     });
 
-    return res.status(200).json(result);
+    return res.status(204).json(result);
   } catch (error) {
-    console.error('Error updating order:', error);
-    if (error.message.includes('Commande introuvable')) {
-      return res.sendStatus(404);
-    }
+
+   
     return next(error);
   }
 }
@@ -197,7 +200,7 @@ async function deleteOrder(req, res, next) {
     const result = await sequelize.transaction(async (t) => {
       const deletedOrderMongo = await OrdersMongo.findByIdAndDelete(id);
       if (!deletedOrderMongo) {
-        throw new Error('Commande introuvable dans MongoDB');
+        throw new NotFound();
       }
 
       const deletedCountSQL = await Orders.destroy({
@@ -206,18 +209,15 @@ async function deleteOrder(req, res, next) {
       });
 
       if (deletedCountSQL === 0) {
-        throw new Error('Commande introuvable dans SQL');
+        throw new NotFound();
       }
 
       return deletedOrderMongo;
     });
 
-    return res.status(200).json({ message: 'Commande supprimée avec succès', order: result });
+    return res.status(204);
   } catch (error) {
-    console.error('Error deleting order:', error);
-    if (error.message.includes('Commande introuvable')) {
-      return res.sendStatus(404);
-    }
+
     return next(error);
   }
 }

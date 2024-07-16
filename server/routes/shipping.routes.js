@@ -3,15 +3,17 @@ const {
   createShipping,
   getShipping,
   updateShipping,
+  deleteShipping,
+  getShippings,
 } = require('../controllers/shipping.controller');
 
 const shippingRouter = Router();
 shippingRouter
-  .route('/shipping/:id')
+  .route('/shippings/:id')
   .get(getShipping)
-  .patch(updateShipping);
-  // .delete(deleteShipping);
-shippingRouter.post('/shipping', createShipping);
+  .patch(updateShipping)
+  .delete(deleteShipping);
+shippingRouter.route('/shippings').get(getShippings).post(createShipping);
 
 
 module.exports = shippingRouter;

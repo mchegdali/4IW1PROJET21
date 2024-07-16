@@ -8,13 +8,19 @@ const OrdersSequelize = (sequelize) => {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
+      Orders.hasOne(models.shippings, {
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+      });
       
   }
   async toMongo() {
     const user = await this.sequelize.models.users.findByPk(
       this.userId,
     );
-
+    const shipping = await this.sequelize.models.users.findByPk(
+          this.shippingId,
+        );
     return {
       _id: this.id,
       paymentStatus: this.paymentStatus,
@@ -22,6 +28,7 @@ const OrdersSequelize = (sequelize) => {
       orderStatus: this.orderStatus,
       items: this.items,
       user: user.toMongo(),
+      shpping: shipping.toMongo
     };
   }
 }

@@ -1,12 +1,14 @@
 const DeliveryChoiceMongo = require('../models/mongo/deliveryChoice.mongo');
-const sequelize = require('../models/sql/db');
-const { NotFound } = require('http-errors');
-const ShippingMongo = require('../models/mongo/shipping.mongo');
-const DeliveryChoiceSequelize = sequelize.model('deliveryChoices');
+const sequelize = require('../models/sql');
+const DeliveryChoice = sequelize.model('deliveryChoices');
 
+const httpErrors = require('http-errors');
+
+const { NotFound } = httpErrors;
 const {
   deliveryChoiceCreateSchema,
   deliveryChoiceUpdateSchema,
+  deliveryChoiceQuerySchema,
 } = require('../schemas/deliveryChoice.schema');
 
 
@@ -17,36 +19,65 @@ const {
  */
 async function createDeliveryChoice(req, res, next) {
   try {
-    // Valider le corps de la requête
     const deliveryChoiceCreateBody = await deliveryChoiceCreateSchema.parseAsync(req.body);
-    console.log(deliveryChoiceCreateBody);
-    if (!deliveryChoiceCreateBody.name) {
-      throw new Error('Le champ "name" est requis');
-    }
-    // Démarrer une transaction avec Sequelize
+
     const result = await sequelize.transaction(async (t) => {
-      // Créer un enregistrement dans la base de données SQL avec la transaction
-      const shipping = await DeliveryChoiceSequelize.create(deliveryChoiceCreateBody, {
-        transaction: t,
-      });
 
-      // Créer un document dans MongoDB en utilisant l'ID de l'enregistrement SQL comme _id
-      const deliveryChoiceDoc = await DeliveryChoiceMongo.create({
-        _id: shipping.id.toString(), // Assurez-vous que l'ID est compatible avec MongoDB ObjectID si nécessaire
-        name: shipping.name,
-      });
+      const createdDeliveryChoice = await DeliveryChoice.create(
+        {
+          name: deliveryChoiceCreateBody.name,
+   
+        },
+        { transaction: t }
+      );
 
-      return deliveryChoiceDoc;
+      const deliveryChoiceMongo = {
+        _id: createdDeliveryChoice.id, 
+        name: deliveryChoiceCreateBody.name,
+
+      };
+
+      
+      const createdDeliveryChoiceDoc = await DeliveryChoiceMongo.create(deliveryChoiceMongo);
+      console.log(createdDeliveryChoiceDoc)
+      return createdDeliveryChoiceDoc;
     });
 
-    // Retourner le document créé avec un statut 201 (Created)
-    return res.status(201).json(result);
+    return res.status(201);
+
   } catch (error) {
-    // Passer l'erreur au middleware de gestion des erreurs
     return next(error);
   }
 }
 
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getDeliveryChoice(req, res, next) {
+  try {
+    const id = req.params.id;
+
+    const filter = {
+      _id: id,
+    };
+
+    const deliveryChoice = await DeliveryChoiceMongo.findOne(filter);
+    if (!deliveryChoiceQuerySchema) {
+      return res.sendStatus(404);
+    }
+    return res.json(deliveryChoice);
+  } catch (error) {
+    return next(error);
+  }
+}
 /**
  *
  * @type {import('express').RequestHandler}
@@ -61,152 +92,76 @@ async function getDeliveryChoices(req, res, next) {
   }
 }
 
-/**
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getDeliveryChoice(req, res, next) {
-  try {
-    /**
-     * @type {boolean}
-     */
-    const id = req.params.id;
-
-    const filter = {
-      _id: id,
-    };
-
-    const deliveryChoice = await DeliveryChoiceMongo.findOne(filter).lean();
-
-    if (!deliveryChoice) {
-      return res.sendStatus(404);
-    }
-
-    return res.json(deliveryChoice);
-  } catch (error) {
-    console.log(error)
-    return next(error);
-  }
-}
-
-/**
- * @type {import('express').RequestHandler}
- */
 async function updateDeliveryChoice(req, res, next) {
-  console.log(req.params.id);
   try {
-    const id = req.params.id;
-    const sqlWhere = {
-      id ,
-    };
-    const mongoWhere = {
-      _id : id,
-    };
+    const updateData = await deliveryChoiceUpdateSchema.parseAsync(req.body);
 
-    const deliveryChoiceUpdateBody = deliveryChoiceUpdateSchema.parse(req.body);
-    const updatedKeys = Object.keys(deliveryChoiceUpdateBody);
+    const id= req.params.id;
 
+    // Commencer une transaction SQL
     const result = await sequelize.transaction(async (t) => {
-      const [affectedRowsCount, affectedRows] =
-        await DeliveryChoiceSequelize.update(deliveryChoiceUpdateBody, {
-          where: sqlWhere,
-          limit: 1,
-          transaction: t,
-          returning: true,
-        });
+      // Mise à jour de la commande dans MongoDB
+      const updatedDeliveryChoiceMongo = await DeliveryChoiceMongo.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true,
+      });
 
-      if (affectedRowsCount === 0) {
+      if (!updatedDeliveryChoiceMongo) {
         throw new NotFound();
       }
 
-      const deliveryChoice = await DeliveryChoiceSequelize.scope('toMongo').findByPk(
-        affectedRows[0].getDataValue('id'),
-        {
-          transaction: t,
-        },
-      );
+      // Mise à jour de la commande dans SQL
+      const updatedDeliveryChoiceSQL = await DeliveryChoice.update(updateData, {
+        where: { id},
+        transaction: t,
+        returning: true,
+      });
 
-      const deliveryChoiceMongo = {};
-
-      for (const key of updatedKeys) {
-        deliveryChoiceMongo[key] = deliveryChoice.getDataValue(key);
-      }
-
-      const deliveryChoiceDoc = await DeliveryChoiceMongo.findOneAndUpdate(
-        mongoWhere,
-        deliveryChoiceMongo,
-        {
-          new: true,
-        },
-      );
-      console.log(deliveryChoiceDoc)
-      if (!deliveryChoiceDoc) {
+      if (updatedDeliveryChoiceSQL[0] === 0) {
         throw new NotFound();
       }
 
-      await ShippingMongo.updateMany(
-        {
-          'deliveryChoice._id': deliveryChoiceDoc._id,
-        },
-        {
-          $set: {
-            deliveryChoice: deliveryChoiceDoc,
-          },
-        },
-      );
-
-      return deliveryChoiceDoc;
+      return updatedDeliveryChoiceSQL[1][0]; // retourne la commande mise à jour
     });
 
-    return res.status(200).json(result);
+    return res.status(204);
   } catch (error) {
     return next(error);
   }
 }
 
-/**
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
 async function deleteDeliveryChoice(req, res, next) {
   try {
     const id = req.params.id;
 
-    const sqlWhere = {
-      id,
-    };
-    const mongoWhere = {
-      _id : id,
-    };
+    // Commencer une transaction SQL
+    const result = await sequelize.transaction(async (t) => {
+      // Suppression de la commande dans MongoDB
+      const deletedDeliveryChoiceMongo = await DeliveryChoiceMongo.findByIdAndDelete(id);
 
-    const [deletedCountSql, deletedCountMongo] = await Promise.all([
-      DeliveryChoiceSequelize.destroy({ where: sqlWhere }),
-      DeliveryChoiceMongo.deleteOne(mongoWhere),
-    ]);
+      if (!deletedDeliveryChoiceMongo) {
+        throw new NotFound();
+      }
 
-    if (deletedCountSql === 0 && deletedCountMongo.deletedCount === 0) {
-      return res.sendStatus(404);
-    }
+      // Suppression de la commande dans SQL
+      const deletedDeliveryChoiceSQL = await DeliveryChoice.destroy({
+        where: { id },
+        transaction: t,
+      });
 
-    await ShippingMongo.updateMany(
-      {
-        deliveryChoice: mongoWhere,
-      },
-      {
-        $set: {
-          deliveryChoice: null,
-        },
-      },
-    );
+      if (deletedDeliveryChoiceSQL === 0) {
+        throw new NotFound();
+      }
 
-    return res.sendStatus(204);
+      return deletedDeliveryChoiceMongo; 
+    });
+
+    return res.status(204);
   } catch (error) {
+    
     return next(error);
   }
 }
-
 module.exports = {
   createDeliveryChoice,
   getDeliveryChoices,

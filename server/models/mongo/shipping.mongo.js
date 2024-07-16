@@ -1,4 +1,5 @@
-const {mongoose} = require ('mongoose');
+const mongoose = require('mongoose');
+const connection = require('./db');
 const shippingSchema = new mongoose.Schema ({
     _id: {
         type: mongoose.Schema.Types.UUID,
@@ -25,10 +26,6 @@ const shippingSchema = new mongoose.Schema ({
         type: String,
         required: true,
     },
-    statusOrder: {
-        type:String,
-        required:false,
-    },
     deliveryChoiceId: {
         type:  {
             _id: {
@@ -53,5 +50,5 @@ const shippingSchema = new mongoose.Schema ({
 );
 
 
-const shipping = mongoose.model('shippings', shippingSchema);
+const shipping =  connection.model('shippings', shippingSchema);
 module.exports =  shipping;

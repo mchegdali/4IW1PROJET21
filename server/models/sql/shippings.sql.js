@@ -7,12 +7,17 @@ const ShippingSequelize = (sequelize) => {
         onDelete: 'SET NULL',
         onUpdated: 'CASCADE',
       });
-      // payment
-      //definit
+      Shippings.hasOne(models.orders, {
+        onDelete: 'SET NULL',
+        onUpdated: 'CASCADE',
+      });
       }
       async toMongo() {
         const deliveryChoiceId = await this.sequelize.models.deliveryChoices.findByPk(
           this.deliveryChoiceId,
+        );
+        const orders = await this.sequelize.models.orders.findByPk(
+          this.orders
         );
         return {
           _id: this.id,
@@ -22,7 +27,7 @@ const ShippingSequelize = (sequelize) => {
           city: this.city,
           phone: this.phone,
           deliveryChoiceId: deliveryChoiceId.toMongo(),
-          //payment var
+          orders: orders(),
         };
       }
   }
@@ -52,10 +57,7 @@ const ShippingSequelize = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      statusOrder: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      }
+      
 
 }, {
      

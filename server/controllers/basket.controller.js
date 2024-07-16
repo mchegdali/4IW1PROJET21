@@ -22,24 +22,23 @@ const UsersMongo = require ("../models/mongo/user.mongo");
  */
 async function createBasket(req, res, next) {
   try {
-    const userId = req.params.id; // User ID from the route parameter
+    const userId = req.params.id; 
     const basketCreateBody = await basketCreateSchema.parseAsync(req.body);
 
     const { items: itemsProductIds } = basketCreateBody;
 
 
     if (!Array.isArray(itemsProductIds)) {
-      throw new Error('items doit être un array');
+      throw new NotFound();
     }
 
     const result = await sequelize.transaction(async (t) => {
-      // Fetch user from MongoDB
+
       const user = await UsersMongo.findById(userId).exec();
       if (!user) {
-        throw new NotFound('Utilisateur introuvable');
+        throw new NotFound();
       }
 
-      // Create quantity map
       const quantityMap = {};
       itemsProductIds.forEach(productId => {
         quantityMap[productId] = (quantityMap[productId] || 0) + 1;
@@ -52,35 +51,32 @@ async function createBasket(req, res, next) {
       }).exec();
 
       if (!items.length) {
-        throw new NotFound('Produits introuvables');
+        throw new NotFound();
       }
 
       // Ensure that the required fields are present
       items.forEach(product => {
         if (!product.price || !product.image || !product.name || !product._id) {
-          throw new Error('un ou plusieurs champs sont manquants');
+          throw new NotFound();
         }
       });
 
-      // Calculate total price of the basket
       const totalPrice = items.reduce((acc, product) => {
         const quantity = quantityMap[product._id.toString()] || 0;
         acc += parseFloat(product.price) * quantity;
         return acc;
       }, 0);
 
-      // Create the basket in SQL
       const basket = await Baskets.create({
         user: user._id,
         totalPrice: totalPrice,
       }, { transaction: t });
 
-      // Associate products with the basket
+
       for (const productId in quantityMap) {
         await basket.addProduct(productId, { transaction: t });
       }
 
-      // Convert SQL basket to MongoDB-like object and save it to MongoDB
       const basketMongo = {
         _id: basket.id,
         items: items.map(product => ({
@@ -189,7 +185,7 @@ async function updateBasket(req, res, next) {
     if (basketUpdateBody.totalPrice !== undefined) {
 
       if (calculatedTotalPrice !== null && calculatedTotalPrice !== basketUpdateBody.totalPrice) {
-        return res.status(400).json({ message: 'Incohérence totalPrice avec les items fournis' });
+        return res.sendStatus(404);
       }
     } else if (calculatedTotalPrice !== null) {
 
@@ -206,7 +202,7 @@ async function updateBasket(req, res, next) {
       });
 
       if (affectedRowsCount === 0) {
-        throw new Error('Panier introuvable');
+        throw new NotFound();
       }
 
       const basket = await Baskets.findByPk(affectedRows[0].getDataValue('id'), {
@@ -229,19 +225,16 @@ async function updateBasket(req, res, next) {
 
 
       if (!replaceResult) {
-        throw new Error('Panier introuvable dans MongoDB');
+        throw new NotFound();
       }
 
       return replaceResult;
     });
 
-    return res.status(200).json(result);
+    return res.status(204);
   } catch (error) {
 
-    console.error('Erreur lors de la mise à jour du panier:', error);
-    if (error.message.includes('Panier introuvable')) {
-      return res.sendStatus(404);
-    }
+   
     return next(error);
   }
 }
@@ -253,7 +246,7 @@ async function deleteBasket(req,res,next) {
     const result = await sequelize.transaction(async (t) => {
       const deletedBasketMongo = await BasketsMongo.findByIdAndDelete(id);
       if (!deletedBasketMongo) {
-        throw new Error('Panier introuvable dans MongoDB');
+        throw new NotFound();
       }
 
       const deletedCountSQL = await Baskets.destroy({
@@ -262,18 +255,15 @@ async function deleteBasket(req,res,next) {
       });
 
       if (deletedCountSQL === 0) {
-        throw new Error('Panier introuvable dans SQL');
+        throw new NotFound();
       }
 
       return deletedBasketMongo; 
     });
 
-    return res.status(200).json({ message: 'Panier supprimée avec succès', order: result });
+    return res.status(204);
   } catch (error) {
-    console.error('Error deleting order:', error);
-    if (error.message.includes('Panier introuvable')) {
-      return res.sendStatus(404);
-    }
+    
     return next(error);
   }
 }
