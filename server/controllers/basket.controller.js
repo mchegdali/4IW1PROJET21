@@ -24,12 +24,12 @@ async function createBasket(req, res, next) {
   try {
     const userId = req.params.id; // User ID from the route parameter
     const basketCreateBody = await basketCreateSchema.parseAsync(req.body);
-    console.log("FIRST LOG", basketCreateBody);
+
     const { items: itemsProductIds } = basketCreateBody;
-    console.log("SECOND LOG", itemsProductIds);
+
 
     if (!Array.isArray(itemsProductIds)) {
-      throw new Error('itemsProduct should be an array');
+      throw new Error('items doit être un array');
     }
 
     const result = await sequelize.transaction(async (t) => {
@@ -44,7 +44,7 @@ async function createBasket(req, res, next) {
       itemsProductIds.forEach(productId => {
         quantityMap[productId] = (quantityMap[productId] || 0) + 1;
       });
-      console.log("THIRD LOG", quantityMap);
+
 
       // Fetch products from MongoDB
       const items = await ProductsMongo.find({
@@ -58,7 +58,7 @@ async function createBasket(req, res, next) {
       // Ensure that the required fields are present
       items.forEach(product => {
         if (!product.price || !product.image || !product.name || !product._id) {
-          throw new Error('One or more products are missing required fields');
+          throw new Error('un ou plusieurs champs sont manquants');
         }
       });
 
@@ -74,7 +74,6 @@ async function createBasket(req, res, next) {
         user: user._id,
         totalPrice: totalPrice,
       }, { transaction: t });
-      console.log("FOURTH LOG", basket);
 
       // Associate products with the basket
       for (const productId in quantityMap) {
@@ -99,7 +98,6 @@ async function createBasket(req, res, next) {
           email: user.email,
         },
       };
-      console.log("FIFTH LOG", basketMongo);
 
       const basketDoc = await BasketsMongo.create(basketMongo);
 
@@ -108,7 +106,7 @@ async function createBasket(req, res, next) {
 
     return res.status(201).json(result);
   } catch (error) {
-    console.error('Error creating basket:', error);
+    console.error('creation de panier :', error);
     return next(error);
   }
 }
@@ -156,54 +154,82 @@ async function getBaskets(req, res, next) {
 async function updateBasket(req, res, next) {
   try {
     const id = req.params.id;
-    const sqlWhere = {
-      id,
-    };
-    const mongoWhere = {
-      _id: id,
-    };
+    const sqlWhere = { id };
+    const mongoWhere = { _id: id };
 
-    const shippingUpdateBody = await basketUpdateSchema.parseAsync(req.body);
-    const updatedKeys = Object.keys(shippingUpdateBody);
+
+    const basketUpdateBody = await basketUpdateSchema.parseAsync(req.body);
+    const updatedKeys = Object.keys(basketUpdateBody);
+
+
+    let calculatedTotalPrice = null;
+
+    if (basketUpdateBody.items) {
+
+      const products = await Products.findAll({
+        where: {
+          id: basketUpdateBody.items,
+        },
+      });
+
+      calculatedTotalPrice = products.reduce((total, product) => {
+        return total + parseFloat(product.price);
+      }, 0);
+
+      basketUpdateBody.items.forEach((itemId) => {
+        const product = products.find((p) => p.id === itemId);
+        if (product) {
+          const quantity = basketUpdateBody.items.filter((item) => item === itemId).length;
+          product.quantity = quantity;
+        }
+      });
+    }
+
+
+    if (basketUpdateBody.totalPrice !== undefined) {
+
+      if (calculatedTotalPrice !== null && calculatedTotalPrice !== basketUpdateBody.totalPrice) {
+        return res.status(400).json({ message: 'Incohérence totalPrice avec les items fournis' });
+      }
+    } else if (calculatedTotalPrice !== null) {
+
+      basketUpdateBody.totalPrice = calculatedTotalPrice;
+    }
 
     const result = await sequelize.transaction(async (t) => {
-      const [affectedRowsCount, affectedRows] = await Shippings.update(
-        shippingUpdateBody,
-        {
-          where: sqlWhere,
-          limit: 1,
-          transaction: t,
-          returning: true,
-        },
-      );
+
+      const [affectedRowsCount, affectedRows] = await Baskets.update(basketUpdateBody, {
+        where: sqlWhere,
+        limit: 1,
+        transaction: t,
+        returning: true,
+      });
 
       if (affectedRowsCount === 0) {
-        throw new NotFound('livraison introuvable');
+        throw new Error('Panier introuvable');
       }
 
-      const shipping = await Shippings.scope('toMongo').findByPk(
-        affectedRows[0].getDataValue('id'),
-        {
-          transaction: t,
-        },
-      );
+      const basket = await Baskets.findByPk(affectedRows[0].getDataValue('id'), {
+        transaction: t,
+      });
 
-      const shippingMongo = {};
+
+      const basketMongo = {};
+
 
       for (const key of updatedKeys) {
-        shippingMongo[key] = shipping.getDataValue(key);
+        basketMongo[key] = basket.getDataValue(key);
       }
 
-      const replaceResult = await BasketsMongo.findOneAndUpdate(
-        mongoWhere,
-        shippingMongo,
-        {
-          new: true,
-        },
-      );
+
+      const replaceResult = await BasketsMongo.findOneAndUpdate(mongoWhere, basketMongo, {
+        new: true,
+        runValidators: true,
+      });
+
 
       if (!replaceResult) {
-        throw new NotFound('livraison introuvable');
+        throw new Error('Panier introuvable dans MongoDB');
       }
 
       return replaceResult;
@@ -211,32 +237,44 @@ async function updateBasket(req, res, next) {
 
     return res.status(200).json(result);
   } catch (error) {
-    console.log(error)
+
+    console.error('Erreur lors de la mise à jour du panier:', error);
+    if (error.message.includes('Panier introuvable')) {
+      return res.sendStatus(404);
+    }
     return next(error);
   }
 }
 async function deleteBasket(req,res,next) {
-  try {
-     const id = req.params.id;
-     const sqlWhere = {
-      id,
-    };
-    const mongoWhere = {
-      '_id' : id,
-    };
+   try {
+    const id = req.params.id;
 
-    const [deletedCountSql, deletedCountMongo] = await Promise.all([
-      Baskets.destroy({ where: sqlWhere }),
-      BasketsMongo.deleteOne(mongoWhere),
-    ]);
 
-    if (deletedCountSql === 0 && deletedCountMongo.deletedCount === 0) {
+    const result = await sequelize.transaction(async (t) => {
+      const deletedBasketMongo = await BasketsMongo.findByIdAndDelete(id);
+      if (!deletedBasketMongo) {
+        throw new Error('Panier introuvable dans MongoDB');
+      }
+
+      const deletedCountSQL = await Baskets.destroy({
+        where: id,
+        transaction: t,
+      });
+
+      if (deletedCountSQL === 0) {
+        throw new Error('Panier introuvable dans SQL');
+      }
+
+      return deletedBasketMongo; 
+    });
+
+    return res.status(200).json({ message: 'Panier supprimée avec succès', order: result });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    if (error.message.includes('Panier introuvable')) {
       return res.sendStatus(404);
     }
-
-  } catch(error) {
-    console.log(error);
-    return next (error);
+    return next(error);
   }
 }
 module.exports = {

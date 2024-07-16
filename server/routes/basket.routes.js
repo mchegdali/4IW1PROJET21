@@ -16,10 +16,9 @@ basketRouter.post('/users/:id/basket',createBasket);
 basketRouter
   .route('/basket/:id')
   .get(getBasket)
-  .get(getBaskets)
   .patch(updateBasket)
   .delete(deleteBasket);
 
-// basketRouter.route('/basket').get(getBaskets).post(createBasket);
+basketRouter.route('/basket').get(getBaskets)
 
 module.exports = basketRouter;

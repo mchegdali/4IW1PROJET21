@@ -12,6 +12,8 @@ const basketQuerySchema = z.object({
 
 const basketCreateSchema = z.object({
   items: z.array(z.string().uuid()).optional(),
+  user: z.string().uuid().optional(),
+  totalPrice: z.number().optional(),
 });
 
 const basketUpdateSchema = basketCreateSchema.partial().refine((a) => {
