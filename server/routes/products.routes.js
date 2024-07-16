@@ -7,13 +7,25 @@ const {
   deleteProduct,
   getRelatedProducts,
   getProductCount,
+  getProductDistributionByCategory,
 } = require('../controllers/products.controller');
+const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
+const authConfig = require('../config/auth.config');
 
 const productsRouter = Router({ mergeParams: true });
 
 productsRouter.get(
   '/products/count',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
   getProductCount,
+);
+
+productsRouter.get(
+  '/products/distribution-by-category',
+  // checkAuth(authConfig.accessTokenSecret, false),
+  // checkRole(['admin']),
+  getProductDistributionByCategory
 );
 
 

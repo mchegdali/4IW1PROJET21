@@ -323,6 +323,28 @@ async function getProductCount(req, res, next) {
   }
 }
 
+/**
+ * Récupère la répartition des produits par catégorie
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getProductDistributionByCategory(req, res, next) {
+  try {
+    const distribution = await ProductMongo.aggregate([
+      {
+        $group: {
+          _id: '$category.name',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    return res.status(200).json(distribution);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createProduct,
   getProducts,
@@ -330,5 +352,6 @@ module.exports = {
   getRelatedProducts,
   updateProduct,
   deleteProduct,
-  getProductCount
+  getProductCount,
+  getProductDistributionByCategory,
 };
