@@ -3,9 +3,7 @@
  * @type {import("express").RequestHandler}
  */
 const isOwnAccount = (req, res, next) => {
-  const isAuthorized =
-    req.user._id.toString() === req.params.userId || req.user.role === 'admin';
-  if (!isAuthorized) {
+  if (req.user.id !== req.params.userId || req.user.role !== 'admin') {
     return res.sendStatus(403);
   }
 
