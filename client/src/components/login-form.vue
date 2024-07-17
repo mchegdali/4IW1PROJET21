@@ -67,9 +67,16 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(loginSchema
     <div class="mt-5">
       <p>
         En continuant, vous acceptez les
-        <RouterLink :to="{ name: 'conditions' }" class="text-tea-600">conditions d'utilisation et de vente</RouterLink> de Fanthésie.
-        Consultez notre  <RouterLink :to="{ name: 'confidentiality-declaration' }" class="text-tea-600">déclaration de confidentialité</RouterLink>, notre
-          <RouterLink :to="{ name: 'cookie-policy' }" class="text-tea-600">politique relative aux cookies</RouterLink>.
+        <RouterLink :to="{ name: 'conditions' }" class="text-tea-600"
+          >conditions d'utilisation et de vente</RouterLink
+        >
+        de Fanthésie. Consultez notre
+        <RouterLink :to="{ name: 'confidentiality-declaration' }" class="text-tea-600"
+          >déclaration de confidentialité</RouterLink
+        >, notre
+        <RouterLink :to="{ name: 'cookie-policy' }" class="text-tea-600"
+          >politique relative aux cookies</RouterLink
+        >.
       </p>
     </div>
     <div class="text-center mt-5">

@@ -24,8 +24,6 @@ const handleSubmit = () => {
     console.log('Données de connexion envoyées :', data);
   });
 };
-
-
 </script>
 
 <template>

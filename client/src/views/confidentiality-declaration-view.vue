@@ -1,13 +1,13 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold m-2">Déclaration de confidentialité</h1>
-    <div class="text-justify mt-6 space-y-8 sm:p-8">
+  <main class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold">Déclaration de confidentialité</h1>
+    <div class="text-justify space-y-4 sm:p-8">
       <section>
         <p>
-          Bienvenue sur Fanthésie. Nous prenons très au sérieux la confidentialité de
-          vos informations personnelles. Cette déclaration de confidentialité explique quelles
+          Bienvenue sur Fanthésie. Nous prenons très au sérieux la confidentialité de vos
+          informations personnelles. Cette déclaration de confidentialité explique quelles
           informations nous collectons, comment nous les utilisons et les protégeons, ainsi que vos
           droits concernant vos informations personnelles.
         </p>
@@ -30,7 +30,7 @@
         <h2 class="text-xl font-semibold mt-4">Utilisation des informations</h2>
         <p>Nous utilisons les informations que nous collectons pour :</p>
         <ul class="list-disc ml-8">
-          <li>Traiter et exécuter vos commandes de thé.</li>
+          <li>Traiter et exécuter vos commandes.</li>
           <li>Vous fournir un service client.</li>
           <li>
             Vous envoyer des mises à jour sur vos commandes et des informations sur nos produits.
@@ -104,5 +104,5 @@
         </p>
       </section>
     </div>
-  </div>
+  </main>
 </template>
