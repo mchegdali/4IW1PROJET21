@@ -15,5 +15,4 @@ shippingRouter
   .delete(deleteShipping);
 shippingRouter.route('/shippings').get(getShippings).post(createShipping);
 
-
 module.exports = shippingRouter;

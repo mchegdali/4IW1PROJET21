@@ -103,7 +103,7 @@ async function updateShipping(req, res, next) {
     const shippingUpdateBody = await shippingUpdateSchema.parseAsync(req.body);
     const updatedKeys = Object.keys(shippingUpdateBody);
 
-    const result = await sequelize.transaction(async (t) => {
+    await sequelize.transaction(async (t) => {
       const [affectedRowsCount, affectedRows] = await Shippings.update(
         shippingUpdateBody,
         {
@@ -147,7 +147,7 @@ async function updateShipping(req, res, next) {
       return replaceResult;
     });
 
-    return res.status(204);
+    return res.sendStatus(204);
   } catch (error) {
     return next(error);
   }
@@ -157,7 +157,7 @@ async function deleteShipping(req, res, next) {
   try {
     const id = req.params.id;
 
-    const result = await sequelize.transaction(async (t) => {
+    await sequelize.transaction(async (t) => {
       const deletedShippingMongo = await ShippingMongo.findByIdAndDelete(id);
       if (!deletedShippingMongo) {
         throw new NotFound();
@@ -175,7 +175,7 @@ async function deleteShipping(req, res, next) {
       return deletedShippingMongo;
     });
 
-    return res.status(204);
+    return res.sendStatus(204);
   } catch (error) {
     return next(error);
   }

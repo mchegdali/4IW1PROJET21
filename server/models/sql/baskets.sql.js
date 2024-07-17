@@ -1,6 +1,5 @@
 const { DataTypes, Model } = require('sequelize');
 
-
 const BasketsSequelize = (sequelize) => {
   class Baskets extends Model {
     static associate(models) {
@@ -17,8 +16,7 @@ const BasketsSequelize = (sequelize) => {
      * @returns
      */
     async toMongo() {
-      
-      const items =  await this.sequelize.models.products.findByPk(
+      const items = await this.sequelize.models.products.findByPk(
         this.productId,
       );
       return {
@@ -44,7 +42,6 @@ const BasketsSequelize = (sequelize) => {
         type: DataTypes.DECIMAL.UNSIGNED,
         allowNull: true,
       },
-      
     },
     {
       sequelize,

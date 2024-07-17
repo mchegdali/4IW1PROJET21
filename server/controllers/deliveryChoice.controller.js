@@ -21,7 +21,7 @@ async function createDeliveryChoice(req, res, next) {
     const deliveryChoiceCreateBody =
       await deliveryChoiceCreateSchema.parseAsync(req.body);
 
-    const result = await sequelize.transaction(async (t) => {
+    await sequelize.transaction(async (t) => {
       const createdDeliveryChoice = await DeliveryChoice.create(
         {
           name: deliveryChoiceCreateBody.name,
@@ -132,7 +132,7 @@ async function deleteDeliveryChoice(req, res, next) {
     const id = req.params.id;
 
     // Commencer une transaction SQL
-    const result = await sequelize.transaction(async (t) => {
+    await sequelize.transaction(async (t) => {
       // Suppression de la commande dans MongoDB
       const deletedDeliveryChoiceMongo =
         await DeliveryChoiceMongo.findByIdAndDelete(id);

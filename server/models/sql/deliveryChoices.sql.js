@@ -1,10 +1,9 @@
 const { DataTypes, Model } = require('sequelize');
 
 const DeliveryChoiceSequelize = (sequelize) => {
-
   class DeliveryChoices extends Model {
     static associate(models) {
-     DeliveryChoices.hasOne(models.shippings, {
+      DeliveryChoices.hasOne(models.shippings, {
         as: 'shippings',
       });
     }

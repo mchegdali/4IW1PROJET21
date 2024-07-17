@@ -13,19 +13,16 @@ const UsersSequelize = (sequelize) => {
       });
       Users.belongsTo(models.orders, {
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       });
       Users.hasOne(models.baskets, {
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       });
-  
     }
-    
-    async toMongo() { 
-      const order = await this.sequelize.models.orders.findByPk(
-        this.orderId,
-      );
+
+    async toMongo() {
+      const order = await this.sequelize.models.orders.findByPk(this.orderId);
       return {
         _id: this.getDataValue('id'),
 
@@ -38,7 +35,7 @@ const UsersSequelize = (sequelize) => {
         addresses:
           this.getDataValue('addresses')?.map((address) => address.toMongo()) ??
           [],
-          order : order.toMongo(),
+        order: order.toMongo(),
       };
     }
   }

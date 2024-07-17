@@ -23,7 +23,9 @@ const deliveryChoiceSchema = new mongoose.Schema(
   },
 );
 
-
-const deliveryChoiceMongo =  connection.model('deliveryChoices', deliveryChoiceSchema);
+const deliveryChoiceMongo = connection.model(
+  'deliveryChoices',
+  deliveryChoiceSchema,
+);
 
 module.exports = deliveryChoiceMongo;

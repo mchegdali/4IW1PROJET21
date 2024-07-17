@@ -3,8 +3,6 @@ const { z } = require('zod');
 const entitySchema = require('./entity.schema');
 const timestampsSchema = require('./timestamps.schema');
 
-
-
 const basketQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   text: z.string().min(2).optional(),

@@ -1,6 +1,5 @@
 const { DataTypes, Model } = require('sequelize');
 
-
 const OrdersSequelize = (sequelize) => {
   class Orders extends Model {
     static associate(models) {
@@ -12,26 +11,23 @@ const OrdersSequelize = (sequelize) => {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
-      
+    }
+    async toMongo() {
+      const user = await this.sequelize.models.users.findByPk(this.userId);
+      const shipping = await this.sequelize.models.users.findByPk(
+        this.shippingId,
+      );
+      return {
+        _id: this.id,
+        paymentStatus: this.paymentStatus,
+        deliveryStatus: this.deliveryStatus,
+        orderStatus: this.orderStatus,
+        items: this.items,
+        user: user.toMongo(),
+        shpping: shipping.toMongo,
+      };
+    }
   }
-  async toMongo() {
-    const user = await this.sequelize.models.users.findByPk(
-      this.userId,
-    );
-    const shipping = await this.sequelize.models.users.findByPk(
-          this.shippingId,
-        );
-    return {
-      _id: this.id,
-      paymentStatus: this.paymentStatus,
-      deliveryStatus: this.deliveryStatus,
-      orderStatus: this.orderStatus,
-      items: this.items,
-      user: user.toMongo(),
-      shpping: shipping.toMongo
-    };
-  }
-}
 
   Orders.init(
     {
@@ -56,8 +52,6 @@ const OrdersSequelize = (sequelize) => {
         type: DataTypes.JSON,
         allowNull: true,
       },
-      
-
     },
     {
       sequelize,

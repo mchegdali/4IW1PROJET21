@@ -12,48 +12,48 @@ const OrderSchema = new mongoose.Schema(
         _id: {
           type: mongoose.Schema.Types.UUID,
           required: true,
-      },
-      fullname: {
-          type : String,
+        },
+        fullname: {
+          type: String,
           required: true,
+        },
+        street: {
+          type: String,
+          required: true,
+        },
+        zipCode: {
+          type: String,
+          required: true,
+        },
+        city: {
+          type: String,
+          required: true,
+        },
+        phone: {
+          type: String,
+          required: true,
+        },
+        deliveryChoiceId: {
+          type: String,
+          required: true,
+        },
       },
-      street:  {
-        type : String,
-        required: true,
-      },
-      zipCode: {
-        type : String,
-        required: true,
-      },
-      city: {
-        type : String,
-        required: true,
-      },
-      phone: {
-        type : String,
-        required: true,
-      },
-      deliveryChoiceId :  {
-        type: String,
-        required: true,
-      },
-      }
     },
     user: {
-      type:  {
-          _id: {
-              type: mongoose.Schema.Types.UUID,
-              required: true,
-          },
-          fullname: {
-              type : String,
-              required: true,
-          },
-          email: {
-              type: String,
-              required: true,
-          },
-      }
+      type: {
+        _id: {
+          type: mongoose.Schema.Types.UUID,
+          required: true,
+        },
+        fullname: {
+          type: String,
+          required: true,
+        },
+        email: {
+          type: String,
+          required: true,
+        },
+      },
     },
     orderStatus: {
       type: String,
@@ -67,46 +67,48 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    items: [{
-      type:  {
-        _id: {
-          type: mongoose.Schema.Types.UUID,
-          required: true,
-        },
-        name: {
-          type: String,
-          required: true,
-        },
-        category: {
-          type: {
-            _id: {
-              type: mongoose.Schema.Types.UUID,
-              required: true,
+    items: [
+      {
+        type: {
+          _id: {
+            type: mongoose.Schema.Types.UUID,
+            required: true,
+          },
+          name: {
+            type: String,
+            required: true,
+          },
+          category: {
+            type: {
+              _id: {
+                type: mongoose.Schema.Types.UUID,
+                required: true,
+              },
+              name: {
+                type: String,
+                required: true,
+              },
+              slug: {
+                type: String,
+                required: true,
+              },
             },
-            name: {
-              type: String,
-              required: true,
-            },
-            slug: {
-              type: String,
-              required: true,
+            default: null,
+          },
+          price: {
+            type: mongoose.Schema.Types.Decimal128,
+            required: true,
+            /**
+             *
+             * @param {import('mongoose').Types.Decimal128} v
+             */
+            get(v) {
+              return v.toString();
             },
           },
-          default: null,
         },
-        price: {
-          type: mongoose.Schema.Types.Decimal128,
-          required: true,
-          /**
-           *
-           * @param {import('mongoose').Types.Decimal128} v
-           */
-          get(v) {
-            return v.toString();
-          },
-        },
-      }
-    }],
+      },
+    ],
   },
   {
     toObject: {

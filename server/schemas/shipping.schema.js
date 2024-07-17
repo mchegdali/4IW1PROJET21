@@ -3,8 +3,6 @@ const { z } = require('zod');
 const entitySchema = require('./entity.schema');
 const timestampsSchema = require('./timestamps.schema');
 
-
-
 const shippingQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   text: z.string().min(2).optional(),
@@ -17,7 +15,6 @@ const shippingCreateSchema = z.object({
   city: z.string().min(2),
   phone: z.string().min(2),
   deliveryChoiceId: z.string().uuid().or(z.null()).default(null),
-  
 });
 
 const shippingUpdateSchema = shippingCreateSchema.partial().refine((a) => {

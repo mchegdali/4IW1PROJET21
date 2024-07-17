@@ -1,5 +1,4 @@
 const httpErrors = require('http-errors');
-const validator = require('validator');
 const sequelize = require('../models/sql');
 const {
   basketQuerySchema,
@@ -9,45 +8,38 @@ const {
 const { NotFound } = httpErrors;
 const Baskets = sequelize.model('baskets');
 const Products = sequelize.model('products');
-const Users = sequelize.model('users');
 
-const { ZodError } = require('zod');
 const BasketsMongo = require('../models/mongo/baskets.mongo');
-const formatZodError = require('../utils/format-zod-error');
-const { ValidationError } = require('sequelize');
-const ProductsMongo = require ("../models/mongo/products.mongo");
-const UsersMongo = require ("../models/mongo/user.mongo");
+const ProductsMongo = require('../models/mongo/products.mongo');
+const UsersMongo = require('../models/mongo/user.mongo');
 /**
  * @type {import('express').RequestHandler}
  */
 async function createBasket(req, res, next) {
   try {
-    const userId = req.params.id; 
+    const userId = req.params.id;
     const basketCreateBody = await basketCreateSchema.parseAsync(req.body);
 
     const { items: itemsProductIds } = basketCreateBody;
-
 
     if (!Array.isArray(itemsProductIds)) {
       throw new NotFound();
     }
 
     const result = await sequelize.transaction(async (t) => {
-
       const user = await UsersMongo.findById(userId).exec();
       if (!user) {
         throw new NotFound();
       }
 
       const quantityMap = {};
-      itemsProductIds.forEach(productId => {
+      itemsProductIds.forEach((productId) => {
         quantityMap[productId] = (quantityMap[productId] || 0) + 1;
       });
 
-
       // Fetch products from MongoDB
       const items = await ProductsMongo.find({
-        _id: { $in: Object.keys(quantityMap) }
+        _id: { $in: Object.keys(quantityMap) },
       }).exec();
 
       if (!items.length) {
@@ -55,7 +47,7 @@ async function createBasket(req, res, next) {
       }
 
       // Ensure that the required fields are present
-      items.forEach(product => {
+      items.forEach((product) => {
         if (!product.price || !product.image || !product.name || !product._id) {
           throw new NotFound();
         }
@@ -67,11 +59,13 @@ async function createBasket(req, res, next) {
         return acc;
       }, 0);
 
-      const basket = await Baskets.create({
-        user: user._id,
-        totalPrice: totalPrice,
-      }, { transaction: t });
-
+      const basket = await Baskets.create(
+        {
+          user: user._id,
+          totalPrice: totalPrice,
+        },
+        { transaction: t },
+      );
 
       for (const productId in quantityMap) {
         await basket.addProduct(productId, { transaction: t });
@@ -79,7 +73,7 @@ async function createBasket(req, res, next) {
 
       const basketMongo = {
         _id: basket.id,
-        items: items.map(product => ({
+        items: items.map((product) => ({
           _id: product._id,
           name: product.name,
           category: product.category,
@@ -153,15 +147,12 @@ async function updateBasket(req, res, next) {
     const sqlWhere = { id };
     const mongoWhere = { _id: id };
 
-
     const basketUpdateBody = await basketUpdateSchema.parseAsync(req.body);
     const updatedKeys = Object.keys(basketUpdateBody);
-
 
     let calculatedTotalPrice = null;
 
     if (basketUpdateBody.items) {
-
       const products = await Products.findAll({
         where: {
           id: basketUpdateBody.items,
@@ -175,54 +166,61 @@ async function updateBasket(req, res, next) {
       basketUpdateBody.items.forEach((itemId) => {
         const product = products.find((p) => p.id === itemId);
         if (product) {
-          const quantity = basketUpdateBody.items.filter((item) => item === itemId).length;
+          const quantity = basketUpdateBody.items.filter(
+            (item) => item === itemId,
+          ).length;
           product.quantity = quantity;
         }
       });
     }
 
-
     if (basketUpdateBody.totalPrice !== undefined) {
-
-      if (calculatedTotalPrice !== null && calculatedTotalPrice !== basketUpdateBody.totalPrice) {
+      if (
+        calculatedTotalPrice !== null &&
+        calculatedTotalPrice !== basketUpdateBody.totalPrice
+      ) {
         return res.sendStatus(404);
       }
     } else if (calculatedTotalPrice !== null) {
-
       basketUpdateBody.totalPrice = calculatedTotalPrice;
     }
 
-    const result = await sequelize.transaction(async (t) => {
-
-      const [affectedRowsCount, affectedRows] = await Baskets.update(basketUpdateBody, {
-        where: sqlWhere,
-        limit: 1,
-        transaction: t,
-        returning: true,
-      });
+    await sequelize.transaction(async (t) => {
+      const [affectedRowsCount, affectedRows] = await Baskets.update(
+        basketUpdateBody,
+        {
+          where: sqlWhere,
+          limit: 1,
+          transaction: t,
+          returning: true,
+        },
+      );
 
       if (affectedRowsCount === 0) {
         throw new NotFound();
       }
 
-      const basket = await Baskets.findByPk(affectedRows[0].getDataValue('id'), {
-        transaction: t,
-      });
-
+      const basket = await Baskets.findByPk(
+        affectedRows[0].getDataValue('id'),
+        {
+          transaction: t,
+        },
+      );
 
       const basketMongo = {};
-
 
       for (const key of updatedKeys) {
         basketMongo[key] = basket.getDataValue(key);
       }
 
-
-      const replaceResult = await BasketsMongo.findOneAndUpdate(mongoWhere, basketMongo, {
-        new: true,
-        runValidators: true,
-      });
-
+      const replaceResult = await BasketsMongo.findOneAndUpdate(
+        mongoWhere,
+        basketMongo,
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
 
       if (!replaceResult) {
         throw new NotFound();
@@ -231,19 +229,16 @@ async function updateBasket(req, res, next) {
       return replaceResult;
     });
 
-    return res.status(204);
+    return res.sendStatus(204);
   } catch (error) {
-
-   
     return next(error);
   }
 }
-async function deleteBasket(req,res,next) {
-   try {
+async function deleteBasket(req, res, next) {
+  try {
     const id = req.params.id;
 
-
-    const result = await sequelize.transaction(async (t) => {
+    await sequelize.transaction(async (t) => {
       const deletedBasketMongo = await BasketsMongo.findByIdAndDelete(id);
       if (!deletedBasketMongo) {
         throw new NotFound();
@@ -258,19 +253,19 @@ async function deleteBasket(req,res,next) {
         throw new NotFound();
       }
 
-      return deletedBasketMongo; 
+      return deletedBasketMongo;
     });
 
-    return res.status(204);
+    return res.sendStatus(204);
   } catch (error) {
-    
     return next(error);
   }
 }
+
 module.exports = {
   createBasket,
   getBasket,
   getBaskets,
   updateBasket,
-  deleteBasket
+  deleteBasket,
 };

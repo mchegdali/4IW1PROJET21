@@ -7,12 +7,12 @@ const {
 } = require('../schemas/orders.schema');
 const { NotFound } = httpErrors;
 const Orders = sequelize.model('orders');
-const Shippings = sequelize.model('shippings')
+const Shippings = sequelize.model('shippings');
 const OrdersMongo = require('../models/mongo/orders.mongo');
 
-const UsersMongo = require ("../models/mongo/user.mongo");
-const BasketsMongo = require ("../models/mongo/baskets.mongo")
-const ShippingsMongo = require ("../models/mongo/shipping.mongo")
+const UsersMongo = require('../models/mongo/user.mongo');
+const BasketsMongo = require('../models/mongo/baskets.mongo');
+const ShippingsMongo = require('../models/mongo/shipping.mongo');
 
 /**
  * @type {import('express').RequestHandler}
@@ -42,18 +42,21 @@ async function createOrder(req, res, next) {
       }
       const { items, totalPrice } = basket;
 
-      const order = await Orders.create({
-        userId: user._id,
-        paymentStatus: 'Pending',
-        deliveryStatus: 'Pending',
-        orderStatus: 'Pending',
-        items: JSON.stringify(items),
-        totalPrice: totalPrice,
-      }, { transaction: t });
+      const order = await Orders.create(
+        {
+          userId: user._id,
+          paymentStatus: 'Pending',
+          deliveryStatus: 'Pending',
+          orderStatus: 'Pending',
+          items: JSON.stringify(items),
+          totalPrice: totalPrice,
+        },
+        { transaction: t },
+      );
 
       await Shippings.update(
         { order: order.id },
-        { where: { id: shipping.id }, transaction: t }
+        { where: { id: shipping.id }, transaction: t },
       );
 
       const orderMongo = {
@@ -61,13 +64,13 @@ async function createOrder(req, res, next) {
         paymentStatus: order.paymentStatus,
         deliveryStatus: order.deliveryStatus,
         orderStatus: order.orderStatus,
-        items: items.map(item => ({
+        items: items.map((item) => ({
           _id: item._id.toString(),
           name: item.name,
           category: item.category,
           image: item.image,
           price: item.price,
-          quantity: item.quantity
+          quantity: item.quantity,
         })),
         totalPrice: totalPrice.toString(),
         user: {
@@ -97,7 +100,6 @@ async function createOrder(req, res, next) {
     return next(error);
   }
 }
-
 
 /**
  *
@@ -150,12 +152,15 @@ async function updateOrder(req, res, next) {
     const updatedKeys = Object.keys(orderUpdateBody);
 
     const result = await sequelize.transaction(async (t) => {
-      const [affectedRowsCount, affectedRows] = await Orders.update(orderUpdateBody, {
-        where: sqlWhere,
-        limit: 1,
-        transaction: t,
-        returning: true,
-      });
+      const [affectedRowsCount, affectedRows] = await Orders.update(
+        orderUpdateBody,
+        {
+          where: sqlWhere,
+          limit: 1,
+          transaction: t,
+          returning: true,
+        },
+      );
 
       if (affectedRowsCount === 0) {
         throw new NotFound();
@@ -171,10 +176,14 @@ async function updateOrder(req, res, next) {
         orderMongo[key] = order.getDataValue(key);
       }
 
-      const replaceResult = await OrdersMongo.findOneAndUpdate(mongoWhere, orderMongo, {
-        new: true,
-        runValidators: true,
-      });
+      const replaceResult = await OrdersMongo.findOneAndUpdate(
+        mongoWhere,
+        orderMongo,
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
 
       if (!replaceResult) {
         throw new NotFound();
@@ -185,8 +194,6 @@ async function updateOrder(req, res, next) {
 
     return res.status(204).json(result);
   } catch (error) {
-
-   
     return next(error);
   }
 }
@@ -195,9 +202,7 @@ async function deleteOrder(req, res, next) {
   try {
     const id = req.params.id;
 
-
-
-    const result = await sequelize.transaction(async (t) => {
+    await sequelize.transaction(async (t) => {
       const deletedOrderMongo = await OrdersMongo.findByIdAndDelete(id);
       if (!deletedOrderMongo) {
         throw new NotFound();
@@ -215,17 +220,15 @@ async function deleteOrder(req, res, next) {
       return deletedOrderMongo;
     });
 
-    return res.status(204);
+    return res.sendStatus(204);
   } catch (error) {
-
     return next(error);
   }
 }
 module.exports = {
-
   createOrder,
   getOrder,
   getOrders,
   updateOrder,
-  deleteOrder
+  deleteOrder,
 };

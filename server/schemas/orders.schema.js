@@ -14,19 +14,23 @@ const orderCreateSchema = z.object({
   orderStatus: z.string().optional(),
   deliveryStatus: z.string().optional(),
   paymentStatus: z.string().optional(),
-  items: z.array(z.object({
-    _id: z.string().uuid(),
-    name: z.string(),
-    category: z.object({
-      _id: z.string().uuid(),
-      name: z.string(),
-      slug: z.string()
-    }),
-    price: z.number(),
-    quantity: z.number().optional(),
-    image: z.string().url().optional()
-  })).optional(),
-  totalPrice: z.number().optional()
+  items: z
+    .array(
+      z.object({
+        _id: z.string().uuid(),
+        name: z.string(),
+        category: z.object({
+          _id: z.string().uuid(),
+          name: z.string(),
+          slug: z.string(),
+        }),
+        price: z.number(),
+        quantity: z.number().optional(),
+        image: z.string().url().optional(),
+      }),
+    )
+    .optional(),
+  totalPrice: z.number().optional(),
 });
 
 // Créez un schéma de mise à jour partiel basé sur le schéma de création
@@ -42,7 +46,6 @@ const orderSchema = orderCreateSchema
 /** @typedef { z.infer<typeof orderUpdateSchema>} OrderUpdateBody */
 /** @typedef { z.infer<typeof orderSchema>} Order */
 /** @typedef { z.infer<typeof orderQuerySchema>} OrderQuery */
-
 
 module.exports = {
   orderQuerySchema,
