@@ -1,40 +1,58 @@
-const { ZodError } = require('zod');
-const ShippingMongo = require('../models/mongo/shipping');
-const { shippingCreateSchema } = require('../schemas/shipping.schema');
-const formatZodError = require('../utils/format-zod-error');
-const { ValidationError } = require('sequelize');
+const httpErrors = require('http-errors');
 const sequelize = require('../models/sql');
+const {
+  shippingQuerySchema,
+  shippingCreateSchema,
+  shippingUpdateSchema,
+} = require('../schemas/shipping.schema');
+const { NotFound } = httpErrors;
+const Shippings = sequelize.model('shippings');
 
-const Shipping = sequelize.model('shippings');
+const ShippingMongo = require('../models/mongo/shipping.mongo');
+
+const DeliveryChoiceMongo = require('../models/mongo/deliveryChoice.mongo');
+
 
 /**
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
+
 async function createShipping(req, res, next) {
+  
   try {
+
+    const shippingCreateBody = await shippingCreateSchema.parseAsync(req.body);
+    
+    
     const result = await sequelize.transaction(async (t) => {
-      const shippingCreateBody = await shippingCreateSchema.parseAsync(
-        req.body,
-      );
+      
+      const deliveryChoiceId = await DeliveryChoiceMongo.findById(
+        shippingCreateBody.deliveryChoiceId,);
 
-      const newData = await Shipping.create(shippingCreateBody, {
-        transaction: t,
-      });
 
-      const shipping = {
-        id: newData.id,
-        fullname: newData.fullname,
-        city: newData.city,
-        emailCustomer: newData.emailCustomer,
-        street: newData.street,
-        zipCode: newData.zipCode,
-        phone: newData.phone,
+
+      const shipping = await Shippings.create({
+        fullname: shippingCreateBody.fullname,
+        street: shippingCreateBody.street,
+        zipCode: shippingCreateBody.zipCode,
+        city: shippingCreateBody.city,
+        phone: shippingCreateBody.phone, 
+        deliveryChoiceId: deliveryChoiceId._id,
+      }, { transaction: t });
+
+      const shippingMongo = {
+        _id: shipping.id,
+        fullname: shipping.fullname,
+        street: shipping.street,
+        zipCode: shipping.zipCode,
+        city: shipping.city,
+        phone: shipping.phone, 
+        deliveryChoiceId: deliveryChoiceId._id,
       };
 
-      const shippingDoc = await ShippingMongo.create(shipping);
-
+      const shippingDoc = await ShippingMongo.create(shippingMongo);
       return shippingDoc;
     });
 
@@ -43,93 +61,125 @@ async function createShipping(req, res, next) {
     return next(error);
   }
 }
-
 /**
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
-async function getShipping(req, res) {
+async function getShipping(req, res, next) {
   try {
-    const shipping = req.params.shipping;
-    console.log(shipping);
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
+    const id = req.params.id;
 
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    const filter = {
+      _id: id,
+    };
+
+    const shipping = await ShippingMongo.findOne(filter);
+    if (!shippingQuerySchema) {
+      return new NotFound();
+    }
+    return res.json(shipping);
+  } catch (error) {
+    return next(error);
   }
 }
-
-async function getAllShipping(req, res, next) {
+async function getShippings(req, res,next) {
   try {
-    const shipping = await ShippingMongo.find({});
+    const shipping = await ShippingMongo.find({}).lean({});
+    return res.json(shipping);
+  } catch (error) {
+    return next(error);
+  }
+}
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
 
-    if (!shipping) {
-      return res.status(404).json({ message: 'No shipping data found' });
-    }
+async function updateShipping(req, res, next) {
+  try {
+    const id = req.params.id;
+    const sqlWhere = { id };
+    const mongoWhere = { _id: id };
 
-    return res.json({
-      metadata: shipping.metadata ? shipping.metadata[0] : null,
-      data: shipping.data || null,
+    const shippingUpdateBody = await shippingUpdateSchema.parseAsync(req.body);
+    const updatedKeys = Object.keys(shippingUpdateBody);
+
+    const result = await sequelize.transaction(async (t) => {
+      const [affectedRowsCount, affectedRows] = await Shippings.update(shippingUpdateBody, {
+        where: sqlWhere,
+        limit: 1,
+        transaction: t,
+        returning: true,
+      });
+
+      if (affectedRowsCount === 0) {
+        throw NotFound();
+      }
+
+      const order = await Shippings.findByPk(affectedRows[0].getDataValue('id'), {
+        transaction: t,
+      });
+
+      const shippingMongo = {};
+
+      for (const key of updatedKeys) {
+        shippingMongo[key] = order.getDataValue(key);
+      }
+
+      const replaceResult = await ShippingMongo.findOneAndUpdate(mongoWhere, shippingMongo, {
+        new: true,
+        runValidators: true,
+      });
+
+      if (!replaceResult) {
+        throw new NotFound();
+      }
+
+      return replaceResult;
     });
+
+    return res.status(204);
   } catch (error) {
     return next(error);
   }
 }
 
-/**
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getProduct(req, res, next) {
+async function deleteShipping(req, res, next) {
   try {
-    const product = await ShippingMongo.findOne();
-    if (!product) {
-      return res.status(404).json({ message: 'Livraison introuvable' });
-    }
-    return res.json(product);
+    const id = req.params.id;
+
+
+
+    const result = await sequelize.transaction(async (t) => {
+      const deletedShippingMongo = await ShippingMongo.findByIdAndDelete(id);
+      if (!deletedShippingMongo) {
+        throw new NotFound();
+      }
+
+      const deletedCountSQL = await Shippings.destroy({
+        where: id,
+        transaction: t,
+      });
+
+      if (deletedCountSQL === 0) {
+        throw new NotFound();
+      }
+
+      return deletedShippingMongo;
+    });
+
+    return res.status(204);
   } catch (error) {
     return next(error);
   }
 }
-
-// async function updateProduct(req, res) {
-//   try {
-//     const product = await Product.findById(req.params.id);
-//     if (!product) {
-//       return res.status(404).json({ message: 'Product not found' });
-//     }
-//     Object.assign(product, req.body);
-//     await product.save();
-//     res.json(product);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// }
-
-// async function deleteProduct(req, res) {
-//   try {
-//     const product = await Product.findById(req.params.id);
-//     if (!product) {
-//       return res.status(404).json({ message: 'Product not found' });
-//     }
-//     await product.remove();
-//     res.json({ message: 'Product deleted' });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// }
 
 module.exports = {
   createShipping,
   getShipping,
-  getAllShipping,
-  getProduct,
+  updateShipping,
+  deleteShipping,
+  getShippings,
 };
