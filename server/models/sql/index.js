@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const sequelize = require('./db');
+const sequelize = require('./db.js');
 
 const files = fs.readdirSync(__dirname);
 

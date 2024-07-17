@@ -8,6 +8,10 @@ const ProductsSequelize = (sequelize) => {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
+      Products.hasMany(models.baskets, {
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+      });
     }
 
     /**
@@ -17,6 +21,7 @@ const ProductsSequelize = (sequelize) => {
      * @returns
      */
     async toMongo() {
+      console.log('Product toMongo 1');
       const category = await this.sequelize.models.categories.findByPk(
         this.categoryId,
       );
