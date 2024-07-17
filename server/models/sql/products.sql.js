@@ -21,10 +21,8 @@ const ProductsSequelize = (sequelize) => {
      * @returns
      */
     async toMongo() {
+      console.log('Product toMongo 1');
       const category = await this.sequelize.models.categories.findByPk(
-        this.categoryId,
-      );
-      const basket = await this.sequelize.models.baskets.findByPk(
         this.categoryId,
       );
 
@@ -36,7 +34,6 @@ const ProductsSequelize = (sequelize) => {
         category: category.toMongo(),
         image: this.image,
         price: this.price,
-        basket : basket.toMongo(),
       };
     }
   }

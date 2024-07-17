@@ -21,18 +21,25 @@ app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(cors());
-app.use(logger());
+// app.use(logger());
 app.use(helmet());
 
+app.use((req, res, next) => {
+  console.log(req.url);
+  next();
+});
 app.use(authRouter);
 app.use(usersRouter);
 app.use(productsRouter);
 app.use(categoriesRouter);
 app.use(shippingRouter);
 app.use(addressesRouter);
-app.use(errorMiddleware);
-app.use(deliveryChoiceRouter);
+app.use((req, res, next) => {
+  console.log('Delivery Choice');
+  next();
+}, deliveryChoiceRouter);
 app.use(paymentRouter);
 app.use(basketRouter);
 app.use(orderRouter);
+app.use(errorMiddleware);
 module.exports = app;

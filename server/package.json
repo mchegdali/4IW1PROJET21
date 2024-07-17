@@ -29,6 +29,7 @@
     "http-errors": "^2.0.0",
     "jose": "^5.4.0",
     "mongoose": "^8.4.1",
+    "paypal-rest-sdk": "^1.8.1",
     "pg": "^8.11.5",
     "pg-hstore": "^2.3.4",
     "pino-http": "^10.2.0",

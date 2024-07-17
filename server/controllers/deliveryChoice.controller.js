@@ -11,7 +11,6 @@ const {
   deliveryChoiceQuerySchema,
 } = require('../schemas/deliveryChoice.schema');
 
-
 /**
  *
  * @type {import('express').RequestHandler}
@@ -19,32 +18,29 @@ const {
  */
 async function createDeliveryChoice(req, res, next) {
   try {
-    const deliveryChoiceCreateBody = await deliveryChoiceCreateSchema.parseAsync(req.body);
+    const deliveryChoiceCreateBody =
+      await deliveryChoiceCreateSchema.parseAsync(req.body);
 
     const result = await sequelize.transaction(async (t) => {
-
       const createdDeliveryChoice = await DeliveryChoice.create(
         {
           name: deliveryChoiceCreateBody.name,
-   
         },
-        { transaction: t }
+        { transaction: t },
       );
 
       const deliveryChoiceMongo = {
-        _id: createdDeliveryChoice.id, 
+        _id: createdDeliveryChoice.id,
         name: deliveryChoiceCreateBody.name,
-
       };
 
-      
-      const createdDeliveryChoiceDoc = await DeliveryChoiceMongo.create(deliveryChoiceMongo);
-      console.log(createdDeliveryChoiceDoc)
+      const createdDeliveryChoiceDoc =
+        await DeliveryChoiceMongo.create(deliveryChoiceMongo);
+      console.log(createdDeliveryChoiceDoc);
       return createdDeliveryChoiceDoc;
     });
 
-    return res.status(201);
-
+    return res.sendStatus(201);
   } catch (error) {
     return next(error);
   }
@@ -96,15 +92,16 @@ async function updateDeliveryChoice(req, res, next) {
   try {
     const updateData = await deliveryChoiceUpdateSchema.parseAsync(req.body);
 
-    const id= req.params.id;
+    const id = req.params.id;
 
     // Commencer une transaction SQL
     const result = await sequelize.transaction(async (t) => {
       // Mise à jour de la commande dans MongoDB
-      const updatedDeliveryChoiceMongo = await DeliveryChoiceMongo.findByIdAndUpdate(id, updateData, {
-        new: true,
-        runValidators: true,
-      });
+      const updatedDeliveryChoiceMongo =
+        await DeliveryChoiceMongo.findByIdAndUpdate(id, updateData, {
+          new: true,
+          runValidators: true,
+        });
 
       if (!updatedDeliveryChoiceMongo) {
         throw new NotFound();
@@ -112,7 +109,7 @@ async function updateDeliveryChoice(req, res, next) {
 
       // Mise à jour de la commande dans SQL
       const updatedDeliveryChoiceSQL = await DeliveryChoice.update(updateData, {
-        where: { id},
+        where: { id },
         transaction: t,
         returning: true,
       });
@@ -137,7 +134,8 @@ async function deleteDeliveryChoice(req, res, next) {
     // Commencer une transaction SQL
     const result = await sequelize.transaction(async (t) => {
       // Suppression de la commande dans MongoDB
-      const deletedDeliveryChoiceMongo = await DeliveryChoiceMongo.findByIdAndDelete(id);
+      const deletedDeliveryChoiceMongo =
+        await DeliveryChoiceMongo.findByIdAndDelete(id);
 
       if (!deletedDeliveryChoiceMongo) {
         throw new NotFound();
@@ -153,12 +151,11 @@ async function deleteDeliveryChoice(req, res, next) {
         throw new NotFound();
       }
 
-      return deletedDeliveryChoiceMongo; 
+      return deletedDeliveryChoiceMongo;
     });
 
     return res.status(204);
   } catch (error) {
-    
     return next(error);
   }
 }
