@@ -9,6 +9,7 @@ const categoriesRouter = require('./routes/categories.routes');
 const usersRouter = require('./routes/users.routes');
 const shippingRouter = require('./routes/shipping.routes');
 const errorMiddleware = require('./middlewares/error.middleware');
+const addressesRouter = require('./routes/addresses.routes');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(usersRouter);
 app.use(productsRouter);
 app.use(categoriesRouter);
 app.use(shippingRouter);
+app.use(addressesRouter);
 app.use(errorMiddleware);
 
 module.exports = app;

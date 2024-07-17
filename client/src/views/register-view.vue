@@ -11,9 +11,16 @@ import Button from '@/components/ui/button/Button.vue';
       <div class="mt-5">
         <p>
           En continuant, vous acceptez les
-          <a href="/" class="text-tea-600">conditions d'utilisation et de vente</a> de Fanthésie.
-          Consultez notre <a href="/" class="text-tea-600">déclaration de confidentialité</a>, notre
-          <a href="/" class="text-tea-600">politique relative aux cookies</a>.
+          <RouterLink :to="{ name: 'conditions' }" class="text-tea-600"
+            >conditions d'utilisation et de vente</RouterLink
+          >
+          de Fanthésie. Consultez notre
+          <RouterLink :to="{ name: 'confidentiality-declaration' }" class="text-tea-600"
+            >déclaration de confidentialité</RouterLink
+          >, notre
+          <RouterLink :to="{ name: 'cookie-policy' }" class="text-tea-600"
+            >politique relative aux cookies</RouterLink
+          >.
         </p>
       </div>
       <div class="flex items-center gap-4">

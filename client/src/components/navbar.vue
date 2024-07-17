@@ -7,6 +7,7 @@ import logo from '@/assets/images/fanthesie.png';
 import { useUserStore } from '@/stores/user';
 import Badge from './ui/badge/Badge.vue';
 import { useBasketStore } from '@/stores/basket';
+import { ref } from 'vue';
 
 const userStore = useUserStore();
 const basketStore = useBasketStore();

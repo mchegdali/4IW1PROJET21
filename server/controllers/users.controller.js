@@ -267,10 +267,52 @@ async function deleteUser(req, res, next) {
   }
 }
 
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUser(req, res, next) {
+  try {
+    const user = await UserMongo.findById(req.params.id);
+
+    if (user === null) {
+      console.log('no user found');
+      return res.sendStatus(404);
+    }
+
+    return res.json(user);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserAddresses(req, res, next) {
+  try {
+    const user = await UserMongo.findById(req.params.id);
+
+    if (user === null) {
+      console.log('no user found');
+      return res.sendStatus(404);
+    }
+
+    return res.json(user.addresses);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createUser,
   getUsers,
+  getUser,
   replaceUser,
   deleteUser,
   updateUser,
+  getUserAddresses,
 };
