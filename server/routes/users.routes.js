@@ -28,24 +28,24 @@ usersRouter.get(
 );
 
 usersRouter.use('/users/:userId/addresses', addressesRouter);
-usersRouter.get('/users/:id', getUser);
+usersRouter.get('/users/:userId', getUser);
 
 usersRouter.put(
-  '/users/:id',
+  '/users/:userId',
   checkAuth(authConfig.accessTokenSecret, true),
   isOwnAccount,
   replaceUser,
 );
 
 usersRouter.patch(
-  '/users/:id',
+  '/users/:userId',
   checkAuth(authConfig.accessTokenSecret, true),
   isOwnAccount,
   updateUser,
 );
 
 usersRouter.delete(
-  '/users/:id',
+  '/users/:userId',
   checkAuth(authConfig.accessTokenSecret, true),
   checkRole(['admin']),
   deleteUser,
