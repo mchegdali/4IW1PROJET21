@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { ref, onBeforeUnmount } from 'vue';
+import { useForm } from '../composables/form';
+import { z } from 'zod';
 import Input from '../components/ui/input/Input.vue';
 import Button from '../components/ui/button/Button.vue';
-import { useForm } from '@/composables/form';
-import { z } from 'zod';
-import { onBeforeUnmount, ref } from 'vue';
 import config from '@/config';
 
 // gestion mode de paiement
@@ -21,6 +21,7 @@ const displayPayPalForm = () => {
   displayPaypalBtn.value = true;
 };
 
+// Définition du schéma de validation du formulaire
 const shippingSchema = z.object({
   fullname: z
     .string()
@@ -52,13 +53,15 @@ const shippingSchema = z.object({
     .regex(/^[a-zA-Z]+$/, { message: 'Ville invalide' })
 });
 
+// Données initiales du formulaire
 const livraisonData = {
   fullname: '',
   emailCustomer: '',
   street: '',
   zipCode: '',
   phone: '',
-  city: ''
+  city: '',
+  deliveryChoiceId: ''
 };
 
 const {
@@ -100,6 +103,7 @@ onBeforeUnmount(() => {
   cancel();
 });
 </script>
+
 <template>
   <main class="grow">
     <h1 class="text-3xl font-bold m-2">Livraison</h1>

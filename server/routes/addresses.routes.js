@@ -36,10 +36,6 @@ addressesRouter.put(
 
 addressesRouter.delete(
   '/:id',
-  (req, res, next) => {
-    console.log(req.params);
-    next();
-  },
   checkAuth(authConfig.accessTokenSecret, true),
   deleteAddress,
 );
