@@ -121,7 +121,7 @@ async function updateDeliveryChoice(req, res, next) {
       return updatedDeliveryChoiceSQL[1][0]; // retourne la commande mise à jour
     });
 
-    return res.status(204);
+    return res.status(200).json(result);
   } catch (error) {
     return next(error);
   }
@@ -154,7 +154,7 @@ async function deleteDeliveryChoice(req, res, next) {
       return deletedDeliveryChoiceMongo;
     });
 
-    return res.status(204);
+    return res.sendStatus(204);
   } catch (error) {
     return next(error);
   }

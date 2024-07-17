@@ -13,7 +13,6 @@ const deliveryChoiceRouter = require('./routes/deliveryChoice.routes');
 const paymentRouter = require('./routes/payment.routes');
 const basketRouter = require('./routes/basket.routes');
 const orderRouter = require('./routes/order.routes');
-const addressesRouter = require('./routes/addresses.routes');
 
 const app = express();
 
@@ -24,20 +23,12 @@ app.use(cors());
 // app.use(logger());
 app.use(helmet());
 
-app.use((req, res, next) => {
-  console.log(req.url);
-  next();
-});
 app.use(authRouter);
 app.use(usersRouter);
 app.use(productsRouter);
 app.use(categoriesRouter);
 app.use(shippingRouter);
-app.use(addressesRouter);
-app.use((req, res, next) => {
-  console.log('Delivery Choice');
-  next();
-}, deliveryChoiceRouter);
+app.use(deliveryChoiceRouter);
 app.use(paymentRouter);
 app.use(basketRouter);
 app.use(orderRouter);

@@ -9,14 +9,8 @@ const {
 
 const orderRouter = Router();
 
-
-
-// basketRouter.get('/deliveryChoices/:id/shipping', getShipping);
-orderRouter.route('/order/test').get(getOrder, (req, res) => {
-  res.send('Basket resulat ')
-})
 orderRouter
-  .route('/order/:id')
+  .route('/orders/:id')
   .get(getOrder)
   .patch(updateOrder)
   .delete(deleteOrder);
