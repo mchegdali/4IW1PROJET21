@@ -5,7 +5,6 @@ import ProductsSearchForm from '@/components/products/products-search-form.vue';
 
 import logo from '@/assets/images/fanthesie.png';
 import { useUserStore } from '@/stores/user';
-import { computed, ref } from 'vue';
 import Badge from './ui/badge/Badge.vue';
 import { useBasketStore } from '@/stores/basket';
 

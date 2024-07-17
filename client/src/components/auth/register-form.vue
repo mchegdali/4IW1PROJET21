@@ -2,9 +2,7 @@
 import Input from '@/components/ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { z } from 'zod';
-import { Info } from 'lucide-vue-next';
 import { useForm } from '@/composables/form';
-import { useFetch } from '@vueuse/core';
 import { useRouter } from 'vue-router';
 import config from '@/config';
 
@@ -36,7 +34,7 @@ const defaultValues = {
   confirmPassword: ''
 };
 
-const { defineField, handleSubmit, errors, isError, isSubmitting } = useForm({
+const { defineField, handleSubmit, errors, isSubmitting } = useForm({
   validationSchema: registerSchema,
   defaultValues
 });

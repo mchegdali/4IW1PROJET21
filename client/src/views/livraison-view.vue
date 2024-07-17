@@ -110,9 +110,9 @@ onBeforeUnmount(() => {
             <label> email </label>
             <Input
               v-model="emailCustomer"
+              v-bind="emailCustomerField"
               :class="{ 'border-destructive': formErrors.emailCustomer }"
               required
-              autofocus
             />
             <small v-if="formErrors.emailCustomer">{{ formErrors.emailCustomer }}</small>
           </div>
@@ -120,9 +120,9 @@ onBeforeUnmount(() => {
             <label> Nom et Prénom </label>
             <Input
               v-model="fullname"
+              v-bind="fullnameField"
               :class="{ 'border-destructive': formErrors.fullname }"
               required
-              autofocus
             />
             <small v-if="formErrors.fullname">{{ formErrors.fullname }}</small>
           </div>
@@ -131,6 +131,7 @@ onBeforeUnmount(() => {
             <Input
               id="street"
               v-model="street"
+              v-bind="streetField"
               :class="{ 'border-destructive': formErrors.street }"
               type="text"
             />
@@ -138,16 +139,20 @@ onBeforeUnmount(() => {
           </div>
           <div class="flex flex-col">
             <label> Code postale </label>
-            <Input v-model="zipCode" :class="{ 'border-destructive': formErrors.zipCode }" />
+            <Input
+              v-model="zipCode"
+              v-bind="zipCodeField"
+              :class="{ 'border-destructive': formErrors.zipCode }"
+            />
             <small v-if="formErrors.zipCode">{{ formErrors.zipCode }}</small>
           </div>
           <div class="flex flex-col">
             <label> Ville </label>
             <Input
               v-model="city"
+              v-bind="cityField"
               :class="{ 'border-destructive': formErrors.city }"
               required
-              autofocus
             />
             <small v-if="formErrors.city">{{ formErrors.city }}</small>
           </div>
@@ -156,10 +161,10 @@ onBeforeUnmount(() => {
             <Input
               id="phone"
               v-model="phone"
+              v-bind="phoneField"
               :class="{ 'border-destructive': formErrors.phone }"
               type="text"
               required
-              autofocus
             />
             <small v-if="formErrors.phone">{{ formErrors.phone }}</small>
           </div>

@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import ordersData from '@/api/order.json';
-import { Calendar, MoveLeft, Package2, Truck } from 'lucide-vue-next';
+import { Calendar, Package2, Truck } from 'lucide-vue-next';
 
 const route = useRoute();
 const orderId = route.params.id;

@@ -3,12 +3,10 @@ import Input from '@/components/ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { z } from 'zod';
 import { useForm } from '@/composables/form';
-import { useToast } from '../ui/toast';
 import { onBeforeUnmount } from 'vue';
 import config from '@/config';
 import { useRouter } from 'vue-router';
 
-const { toast } = useToast();
 const router = useRouter();
 
 const forgotPasswordSchema = z.object({
@@ -19,7 +17,7 @@ const defaultValues = {
   email: ''
 };
 
-const { handleSubmit, defineField, cancel, isSubmitting, status, isError } = useForm({
+const { handleSubmit, defineField, cancel, isSubmitting, isError } = useForm({
   validationSchema: forgotPasswordSchema,
   defaultValues
 });
