@@ -27,6 +27,9 @@ export const useBasketStore = defineStore('basket', {
       }
 
       return products;
+    },
+    nbItems(state) {
+      return state.products.length;
     }
   },
   actions: {

@@ -8,6 +8,7 @@ const {
   productQuerySchema,
   productUpdateSchema,
 } = require('../schemas/products.schema');
+
 const { NotFound } = httpErrors;
 const Products = sequelize.model('products');
 
@@ -57,99 +58,98 @@ async function createProduct(req, res, next) {
 async function getProducts(req, res, next) {
   try {
     const category = req.params.category;
-    const categoryIsUUID = res.locals.category?.isUUID;
 
-    const { page, text, limit } = await productQuerySchema.parseAsync(
-      req.query,
-    );
-
-    if (category) {
-      const categoryDoc = await CategoriesMongo.findOne({
-        [categoryIsUUID ? '_id' : 'slug']: category,
-      });
-
-      if (!categoryDoc) {
-        return res.sendStatus(404);
-      }
-    }
+    const { page, text, pageSize, minPrice, maxPrice } =
+      await productQuerySchema.parseAsync(req.query);
 
     /**
      * @type {import('mongoose').PipelineStage[]  }
      */
     const pipelineStages = [];
-    /**
-     * @type {import('mongoose').PipelineStage  }
-     */
-    let textMatchStage;
 
     /**
-     * @type {import('mongoose').PipelineStage  }
+     * @type {import('mongoose').FilterQuery[]  }
      */
-    let categoryMatchStage;
+    const matchAndStage = [];
 
-    /**
-     * @type {import('mongoose').PipelineStage  }
-     */
-    let sortStage;
+    if (text) {
+      matchAndStage.push({
+        $text: {
+          $search: text,
+          $diacriticSensitive: false,
+          $caseSensitive: false,
+        },
+      });
+    }
 
     if (category) {
-      categoryMatchStage = {
-        $match: {
-          [categoryIsUUID ? 'category._id' : 'category.slug']: category,
-        },
-      };
+      matchAndStage.push({
+        $or: [{ 'category._id': category }, { 'category.slug': category }],
+      });
     }
 
-    // if (true) {
-    if (text) {
-      textMatchStage = {
-        $match: {
-          $text: {
-            $search: text,
-            $diacriticSensitive: false,
-            $caseSensitive: false,
-          },
-        },
-      };
-      sortStage = {
-        $sort: { score: { $meta: 'textScore' } },
-      };
+    if (minPrice || maxPrice) {
+      let priceMatch = {};
+
+      if (minPrice) {
+        priceMatch['$gte'] = Number(minPrice);
+      }
+
+      if (maxPrice) {
+        priceMatch['$lte'] = Number(maxPrice);
+      }
+
+      matchAndStage.push({
+        price: priceMatch,
+      });
     }
 
-    if (categoryMatchStage) {
-      pipelineStages.push(categoryMatchStage);
-    }
-    if (textMatchStage) {
-      pipelineStages.push(textMatchStage);
+    if (matchAndStage.length > 0) {
+      pipelineStages.push({
+        $match: {
+          $and: matchAndStage,
+        },
+      });
     }
 
     pipelineStages.push(
-      { $skip: (page - 1) * limit },
       { $project: { score: 0 } },
       {
         $facet: {
           metadata: [
             { $count: 'total' },
             {
-              $addFields: {
+              $set: {
                 page,
-                totalPages: { $ceil: { $divide: ['$total', limit] } },
+                totalPages: { $ceil: { $divide: ['$total', pageSize] } },
+                pageSize,
               },
             },
           ],
-          data: [{ $set: { price: { $toString: '$price' } } }],
+          data: [
+            { $skip: (page - 1) * pageSize },
+            { $limit: pageSize },
+            { $set: { price: { $toString: '$price' } } },
+          ],
         },
       },
     );
 
-    if (sortStage) {
-      pipelineStages.push(sortStage);
+    if (text) {
+      pipelineStages.push({
+        $sort: { score: { $meta: 'textScore' } },
+      });
     }
 
     const products = await ProductMongo.aggregate(pipelineStages).exec();
 
     return res.json({
-      metadata: products[0].metadata[0],
+      metadata: products[0].metadata[0] ?? {
+        total: 0,
+        page: 1,
+        totalPages: 0,
+        pageSize,
+      },
       data: products[0].data,
     });
   } catch (error) {

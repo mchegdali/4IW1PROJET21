@@ -6,13 +6,9 @@ module.exports = {
   extends: ['eslint:recommended'],
   overrides: [
     {
-      env: {
-        node: true,
-      },
-      files: ['.eslintrc.{js,cjs}'],
-      parserOptions: {
-        sourceType: 'script',
-      },
+      files: ['tests/**'],
+      plugins: ['jest'],
+      extends: ['plugin:jest/recommended'],
     },
   ],
   parserOptions: {

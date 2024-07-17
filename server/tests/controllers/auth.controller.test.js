@@ -4,9 +4,9 @@ const request = require('supertest');
 const connection = require('../../models/mongo/db');
 const sequelize = require('../../models/sql');
 
-const UserMongo = require('../../models/mongo/user.mongo');
 const Users = sequelize.model('users');
 const { fakerFR: faker } = require('@faker-js/faker');
+const UserMongo = require('../../models/mongo/user.mongo');
 
 const firstname = faker.person.firstName();
 const lastname = faker.person.lastName();
@@ -28,53 +28,37 @@ const data = {
 };
 
 describe('auth.controller', () => {
-  describe('POST /auth/login', () => {
-    let user;
-
+  describe('POST /auth/login', function () {
     beforeAll(async () => {
       const userSql = await Users.create(data);
       const userMongo = userSql.toMongo();
-
-      const userDoc = await UserMongo.create(userMongo);
-
-      user = userDoc;
+      await UserMongo.create(userMongo);
     });
 
-    test('should return 200 and a token', (done) => {
-      request(app)
+    test('should return 200 and a token', async () => {
+      const response = await request(app)
         .post('/auth/login')
         .send({
           email: data.email,
           password: data.password,
         })
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body).toHaveProperty('accessToken');
-          expect(typeof res.body.accessToken === 'string').toBe(true);
-          expect(res.body).toHaveProperty('refreshToken');
-          expect(res.body).toHaveProperty('user');
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          done();
-        });
+        .set('Accept', 'application/json');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('accessToken');
+      expect(typeof response.body.accessToken === 'string').toBe(true);
+      expect(response.body).toHaveProperty('refreshToken');
+      expect(response.body).toHaveProperty('user');
     });
   });
 });
 
 afterAll(async () => {
-  await Users.destroy({
-    where: {
-      email: data.email,
-    },
-  });
-  await UserMongo.deleteOne({
-    email: data.email,
-  });
+  // await Users.destroy({
+  //   where: {
+  //     id: data.id,
+  //   },
+  // });
 
   await connection.close();
 });

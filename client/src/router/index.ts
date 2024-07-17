@@ -64,6 +64,11 @@ const router = createRouter({
           component: () => import('../views/register-confirmation-view.vue')
         },
         {
+          name: 'forgot-password-confirmation',
+          path: '/forgot-password-confirmation',
+          component: () => import('../views/forgot-password-confirmation-view.vue')
+        },
+        {
           name: 'forgot-password',
           path: '/forgot-password',
           component: () => import('../views/forgot-password-view.vue')
@@ -78,6 +83,11 @@ const router = createRouter({
             }
             return next();
           }
+        },
+        {
+          name: 'reset-password-confirmation',
+          path: '/reset-password-confirmation',
+          component: () => import('../views/reset-password-confirmation-view.vue')
         },
         {
           name: 'account-verified',

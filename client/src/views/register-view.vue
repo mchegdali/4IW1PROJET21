@@ -4,8 +4,7 @@ import Button from '@/components/ui/button/Button.vue';
 </script>
 
 <template>
-  <div class="flex justify-center items-center p-16">
-
+  <main class="grow flex justify-center items-center p-16">
     <div class="border p-5 rounded-lg shadow-lg max-w-screen-md">
       <h1 class="text-3xl font-bold mb-5">Créer un compte</h1>
       <RegisterForm />
@@ -20,12 +19,9 @@ import Button from '@/components/ui/button/Button.vue';
       <div class="flex items-center gap-4">
         <h4>Déja un compte chez Fanthésie ?</h4>
         <Button variant="link" as-child type="button">
-          <RouterLink :to="{ name: 'login' }">
-            S'identifier
-          </RouterLink>
+          <RouterLink :to="{ name: 'login' }"> S'identifier </RouterLink>
         </Button>
       </div>
     </div>
-
-  </div>
+  </main>
 </template>
