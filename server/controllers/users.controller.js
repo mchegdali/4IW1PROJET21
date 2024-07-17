@@ -277,7 +277,7 @@ async function getUser(req, res, next) {
     const user = await UserMongo.findById(req.params.id);
 
     if (user === null) {
-      console.log("no user found");
+      console.log('no user found');
       return res.sendStatus(404);
     }
 
@@ -297,7 +297,7 @@ async function getUserAddresses(req, res, next) {
     const user = await UserMongo.findById(req.params.id);
 
     if (user === null) {
-      console.log("no user found");
+      console.log('no user found');
       return res.sendStatus(404);
     }
 
@@ -314,5 +314,5 @@ module.exports = {
   replaceUser,
   deleteUser,
   updateUser,
-  getUserAddresses
+  getUserAddresses,
 };

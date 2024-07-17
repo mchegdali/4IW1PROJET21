@@ -17,7 +17,7 @@ app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(cors());
-// app.use(logger());
+app.use(logger());
 app.use(helmet());
 
 app.use(authRouter);
@@ -25,7 +25,7 @@ app.use(usersRouter);
 app.use(productsRouter);
 app.use(categoriesRouter);
 app.use(shippingRouter);
-app.use(addressesRouter)
+app.use(addressesRouter);
 app.use(errorMiddleware);
 
 module.exports = app;

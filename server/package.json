@@ -7,6 +7,7 @@
     "start": "node index.js",
     "dev:legacy": "nodemon -L index.js",
     "lint": "eslint . --ext .js",
+    "format": "prettier --write .",
     "test": "jest --collectCoverage",
     "dev": "node --watch index.js",
     "db:migrate": "node bin/migrate.js",

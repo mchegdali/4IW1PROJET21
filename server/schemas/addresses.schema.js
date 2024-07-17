@@ -23,7 +23,7 @@ const addressCreateSchema = z.object({
   region: z.string().regex(cityRegionCountryRegex, 'Région invalide'),
   zipCode: z.string().regex(zipCodeRegex, 'Code postal invalide'),
   country: z.string().regex(cityRegionCountryRegex, 'Pays invalide'),
-  phone: z.string().regex(phoneRegex, 'Numéro de téléphone invalide')
+  phone: z.string().regex(phoneRegex, 'Numéro de téléphone invalide'),
 });
 
 const addressUpdateSchema = addressCreateSchema.partial().refine((a) => {
