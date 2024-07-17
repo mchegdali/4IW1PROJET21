@@ -104,9 +104,6 @@ export function useForm<TSchema extends ZodTypeAny>(options: {
             try {
               const body = await error.json();
               for (const [key, value] of Object.entries(body)) {
-                console.log('key', key);
-                console.log('value', value);
-
                 if (Array.isArray(value)) {
                   formErrors.set(key, value[0]);
                 } else if (typeof value === 'string') {

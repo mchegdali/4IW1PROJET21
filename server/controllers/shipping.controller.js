@@ -1,8 +1,5 @@
-const { ZodError } = require('zod');
 const ShippingMongo = require('../models/mongo/shipping');
 const { shippingCreateSchema } = require('../schemas/shipping.schema');
-const formatZodError = require('../utils/format-zod-error');
-const { ValidationError } = require('sequelize');
 const sequelize = require('../models/sql');
 
 const Shipping = sequelize.model('shippings');
@@ -49,20 +46,13 @@ async function createShipping(req, res, next) {
  * @type {import('express').RequestHandler}
  * @returns
  */
-async function getShipping(req, res) {
+async function getShipping(req, res, next) {
   try {
     const shipping = req.params.shipping;
-    console.log(shipping);
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    if (error instanceof ZodError) {
-      return res.status(400).json({ errors: formatZodError(error) });
-    }
 
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    return res.json(shipping);
+  } catch (error) {
+    return next(error);
   }
 }
 
