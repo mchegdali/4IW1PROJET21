@@ -13,6 +13,8 @@ const deliveryChoiceRouter = require('./routes/deliveryChoice.routes');
 const paymentRouter = require('./routes/payment.routes');
 const basketRouter = require('./routes/basket.routes');
 const orderRouter = require('./routes/order.routes');
+const addressesRouter = require('./routes/addresses.routes');
+
 const app = express();
 
 app.set('trust proxy', 1);
@@ -27,6 +29,7 @@ app.use(usersRouter);
 app.use(productsRouter);
 app.use(categoriesRouter);
 app.use(shippingRouter);
+app.use(addressesRouter);
 app.use(errorMiddleware);
 app.use(deliveryChoiceRouter);
 app.use(paymentRouter);

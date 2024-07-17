@@ -3,7 +3,7 @@ import Button from '@/components/ui/button/Button.vue';
 </script>
 
 <template>
-  <div class="flex justify-center items-center p-16">
+  <main class="grow flex justify-center items-center p-16">
     <div class="border border-tea-200 p-5 rounded-lg shadow-lg shadow-tea-50 max-w-screen-md">
       <div class="flex flex-col items-center justify-center w-full">
         <div class="flex flex-col items-center justify-center w-full">
@@ -18,5 +18,5 @@ import Button from '@/components/ui/button/Button.vue';
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </template>

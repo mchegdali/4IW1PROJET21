@@ -15,6 +15,8 @@ const {
   resendConfirmationEmailSchema,
 } = require('../schemas/auth.schema');
 const UserMongo = require('../models/mongo/user.mongo');
+const generateAccessToken = require('../utils/generate-access-token');
+const generateRefreshToken = require('../utils/generate-refresh-token');
 
 const Users = sequelize.model('users');
 
@@ -44,35 +46,9 @@ const login = async (req, res, next) => {
       return res.sendStatus(401);
     }
 
-    const now = dayjs();
-    const issuedAt = now.unix();
-    const accessTokenExpiredAt = now.add(60, 'minute').unix();
+    const { issuedAt, accessToken } = await generateAccessToken(user);
 
-    const accessTokenSign = new jose.SignJWT({
-      email: user.email,
-    })
-      .setSubject(user.id)
-      .setIssuedAt(issuedAt)
-      .setExpirationTime(accessTokenExpiredAt)
-      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-      .setNotBefore(issuedAt);
-
-    const accessToken = await accessTokenSign.sign(
-      authConfig.accessTokenSecret,
-    );
-
-    const refreshTokenExpiredAt = now.add(30, 'day').unix();
-
-    const refreshTokenSign = new jose.SignJWT()
-      .setSubject(user.id)
-      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-      .setIssuedAt(issuedAt)
-      .setExpirationTime(refreshTokenExpiredAt)
-      .setNotBefore(issuedAt);
-
-    const refreshToken = await refreshTokenSign.sign(
-      authConfig.refreshTokenSecret,
-    );
+    const refreshToken = await generateRefreshToken(user, issuedAt);
 
     return res.json({
       user: {
@@ -95,14 +71,15 @@ const login = async (req, res, next) => {
  */
 const refreshToken = async (req, res, next) => {
   try {
-    const { data: token, success } = refreshTokenSchema.safeParse(req.body);
+    const { data, success } = refreshTokenSchema.safeParse(req.body);
+    const { refreshToken } = data;
 
     if (!success) {
       return res.sendStatus(401);
     }
 
     const decodedToken = await jose.jwtVerify(
-      token,
+      refreshToken,
       authConfig.refreshTokenSecret,
     );
     const user = await Users.findByPk(decodedToken.payload.sub);
@@ -259,9 +236,7 @@ const resetPassword = async (req, res, next) => {
  */
 const resendConfirmationEmail = async (req, res, next) => {
   try {
-    console.log(req.body);
     const { email } = resendConfirmationEmailSchema.parse(req.body);
-    console.log(email);
 
     const user = await UserMongo.findOne({
       email,
@@ -270,7 +245,6 @@ const resendConfirmationEmail = async (req, res, next) => {
     if (!user) {
       return res.sendStatus(204);
     }
-    console.log(user);
 
     const now = dayjs();
     const issuedAt = now.unix();
@@ -287,7 +261,6 @@ const resendConfirmationEmail = async (req, res, next) => {
     const confirmationToken = await confirmationTokenSign.sign(
       authConfig.confirmationTokenSecret,
     );
-    console.log(confirmationToken);
 
     await sendConfirmationEmail(
       { email: user.email, fullname: user.fullname },

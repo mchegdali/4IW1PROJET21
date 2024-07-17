@@ -9,21 +9,27 @@ import {
 } from '@/components/ui/carousel';
 import ProductCard from '@/components/products/product-card.vue';
 
-const { products, title } = defineProps<{
+const { products, title, description } = defineProps<{
   products?: Product[] | null;
   title?: string;
+  description?: string;
 }>();
 </script>
 
 <template>
-  <section class="flex flex-col gap-4 w-full max-w-screen-xs mb-2">
-    <slot name="header">
-      <h2 class="text-3xl font-semibold">{{ title }}</h2>
-    </slot>
+  <section class="space-y-4 w-full mb-2">
+    <header class="py-2 px-4">
+      <slot name="header">
+        <h2 class="text-3xl font-semibold">{{ title }}</h2>
+      </slot>
+      <slot name="description" v-if="description">
+        <p class="text-base text-gray-500">
+          {{ description }}
+        </p>
+      </slot>
+    </header>
     <slot>
-      <Carousel
-        class="relative w-full max-w-xs md:max-w-screen-sm lg:max-w-screen-lg xl:max-w-screen-xl overflow-hidden"
-      >
+      <Carousel class="relative w-full overflow-hidden">
         <CarouselContent class="gap-2">
           <CarouselItem v-for="product in products" :key="product._id">
             <ProductCard v-if="product" :product="product" />

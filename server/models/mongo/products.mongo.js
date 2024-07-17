@@ -65,18 +65,11 @@ const ProductSchema = new mongoose.Schema(
 );
 
 ProductSchema.index(
-  { name: 'text', description: 'text', 'category.name': 'text' },
+  { name: 'text', description: 'text' },
+  // { name: 'text', description: 'text', 'category.name': 'text' },
   {
     name: 'products_search_index',
-    weights: { name: 100, description: 25, 'category.name': 50 },
-    default_language: 'french',
-  },
-);
-
-ProductSchema.index(
-  { 'category._id': 1, 'category.slug': 1 },
-  {
-    name: 'products_category_index',
+    weights: { name: 100, description: 25 },
   },
 );
 

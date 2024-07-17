@@ -9,7 +9,6 @@ const dayjs = require('dayjs');
 const jose = require('jose');
 const authConfig = require('../config/auth.config');
 const { sendConfirmationEmail } = require('../config/email.config');
-const { getPaginationLinks } = require('../utils/get-pagination-links');
 const { NotFound } = require('http-errors');
 
 const Users = sequelize.model('users');
@@ -109,17 +108,29 @@ async function getUsers(req, res, next) {
 
     pipelineStages.push({
       $facet: {
-        metadata: [{ $count: 'total' }],
+        metadata: [
+          { $count: 'total' },
+          {
+            $set: {
+              page,
+              totalPages: { $ceil: { $divide: ['$total', pageSize] } },
+              pageSize,
+            },
+          },
+        ],
         items: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
       },
     });
 
     const [{ items, metadata }] = await UserMongo.aggregate(pipelineStages);
 
-    const _links = getPaginationLinks(req.url, page, text, pageSize, metadata);
-
     return res.json({
-      _links,
+      metadata: metadata[0] ?? {
+        total: 0,
+        page: 1,
+        totalPages: 0,
+        pageSize,
+      },
       items: items ?? [],
     });
   } catch (error) {
@@ -256,10 +267,52 @@ async function deleteUser(req, res, next) {
   }
 }
 
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUser(req, res, next) {
+  try {
+    const user = await UserMongo.findById(req.params.id);
+
+    if (user === null) {
+      console.log('no user found');
+      return res.sendStatus(404);
+    }
+
+    return res.json(user);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserAddresses(req, res, next) {
+  try {
+    const user = await UserMongo.findById(req.params.id);
+
+    if (user === null) {
+      console.log('no user found');
+      return res.sendStatus(404);
+    }
+
+    return res.json(user.addresses);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createUser,
   getUsers,
+  getUser,
   replaceUser,
   deleteUser,
   updateUser,
+  getUserAddresses,
 };

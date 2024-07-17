@@ -12,7 +12,6 @@ const ShippingMongo = require('../models/mongo/shipping.mongo');
 
 const DeliveryChoiceMongo = require('../models/mongo/deliveryChoice.mongo');
 
-
 /**
  *
  * @type {import('express').RequestHandler}
@@ -20,27 +19,25 @@ const DeliveryChoiceMongo = require('../models/mongo/deliveryChoice.mongo');
  */
 
 async function createShipping(req, res, next) {
-  
   try {
-
     const shippingCreateBody = await shippingCreateSchema.parseAsync(req.body);
-    
-    
+
     const result = await sequelize.transaction(async (t) => {
-      
       const deliveryChoiceId = await DeliveryChoiceMongo.findById(
-        shippingCreateBody.deliveryChoiceId,);
+        shippingCreateBody.deliveryChoiceId,
+      );
 
-
-
-      const shipping = await Shippings.create({
-        fullname: shippingCreateBody.fullname,
-        street: shippingCreateBody.street,
-        zipCode: shippingCreateBody.zipCode,
-        city: shippingCreateBody.city,
-        phone: shippingCreateBody.phone, 
-        deliveryChoiceId: deliveryChoiceId._id,
-      }, { transaction: t });
+      const shipping = await Shippings.create(
+        {
+          fullname: shippingCreateBody.fullname,
+          street: shippingCreateBody.street,
+          zipCode: shippingCreateBody.zipCode,
+          city: shippingCreateBody.city,
+          phone: shippingCreateBody.phone,
+          deliveryChoiceId: deliveryChoiceId._id,
+        },
+        { transaction: t },
+      );
 
       const shippingMongo = {
         _id: shipping.id,
@@ -48,7 +45,7 @@ async function createShipping(req, res, next) {
         street: shipping.street,
         zipCode: shipping.zipCode,
         city: shipping.city,
-        phone: shipping.phone, 
+        phone: shipping.phone,
         deliveryChoiceId: deliveryChoiceId._id,
       };
 
@@ -83,7 +80,7 @@ async function getShipping(req, res, next) {
     return next(error);
   }
 }
-async function getShippings(req, res,next) {
+async function getShippings(req, res, next) {
   try {
     const shipping = await ShippingMongo.find({}).lean({});
     return res.json(shipping);
@@ -107,20 +104,26 @@ async function updateShipping(req, res, next) {
     const updatedKeys = Object.keys(shippingUpdateBody);
 
     const result = await sequelize.transaction(async (t) => {
-      const [affectedRowsCount, affectedRows] = await Shippings.update(shippingUpdateBody, {
-        where: sqlWhere,
-        limit: 1,
-        transaction: t,
-        returning: true,
-      });
+      const [affectedRowsCount, affectedRows] = await Shippings.update(
+        shippingUpdateBody,
+        {
+          where: sqlWhere,
+          limit: 1,
+          transaction: t,
+          returning: true,
+        },
+      );
 
       if (affectedRowsCount === 0) {
         throw NotFound();
       }
 
-      const order = await Shippings.findByPk(affectedRows[0].getDataValue('id'), {
-        transaction: t,
-      });
+      const order = await Shippings.findByPk(
+        affectedRows[0].getDataValue('id'),
+        {
+          transaction: t,
+        },
+      );
 
       const shippingMongo = {};
 
@@ -128,10 +131,14 @@ async function updateShipping(req, res, next) {
         shippingMongo[key] = order.getDataValue(key);
       }
 
-      const replaceResult = await ShippingMongo.findOneAndUpdate(mongoWhere, shippingMongo, {
-        new: true,
-        runValidators: true,
-      });
+      const replaceResult = await ShippingMongo.findOneAndUpdate(
+        mongoWhere,
+        shippingMongo,
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
 
       if (!replaceResult) {
         throw new NotFound();
@@ -149,8 +156,6 @@ async function updateShipping(req, res, next) {
 async function deleteShipping(req, res, next) {
   try {
     const id = req.params.id;
-
-
 
     const result = await sequelize.transaction(async (t) => {
       const deletedShippingMongo = await ShippingMongo.findByIdAndDelete(id);

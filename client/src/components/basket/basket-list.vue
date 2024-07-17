@@ -11,7 +11,11 @@ const products = computed(() => {
 </script>
 
 <template>
-  <div v-for="product in products" :key="product._id" class="w-full bg-white p-4 border-b border-gray-200">
+  <div
+    v-for="product in products"
+    :key="product._id"
+    class="w-full bg-white p-4 border-b border-gray-200"
+  >
     <BasketListItem :product="product" />
   </div>
 </template>
