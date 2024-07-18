@@ -11,7 +11,6 @@ const shippingRouter = require('./routes/shipping.routes');
 const errorMiddleware = require('./middlewares/error.middleware');
 const deliveryChoiceRouter = require('./routes/deliveryChoice.routes');
 const paymentRouter = require('./routes/payment.routes');
-const basketRouter = require('./routes/basket.routes');
 const orderRouter = require('./routes/order.routes');
 const statusRouter = require('./routes/status.routes');  // Importez le routeur de status
 

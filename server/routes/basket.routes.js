@@ -13,4 +13,4 @@ userBasketRouter
   .post(addItemToBasket)
   .delete(removeItemFromBasket);
 
-module.exports = userBasketRouter;
+module.exports = { userBasketRouter, basketsRouter };
