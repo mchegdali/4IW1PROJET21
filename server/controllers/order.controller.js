@@ -43,9 +43,15 @@ async function createOrder(req, res, next) {
         throw new NotFound('Status not found');
       }
 
+      const status = await StatusMongo.findOne({ label: 'Pending' });
+      if (!status) {
+        throw new NotFound('Status not found');
+      }
+
       const order = await Orders.create(
         {
           userId: user._id,
+          statusId: status._id,
           statusId: status._id,
           items: JSON.stringify(items),
           totalPrice: totalPrice,
@@ -60,6 +66,10 @@ async function createOrder(req, res, next) {
 
       const orderMongo = {
         _id: order.id,
+        status: {
+          _id: status._id,
+          label: status.label,
+        },
         status: {
           _id: status._id,
           label: status.label,
@@ -116,6 +126,7 @@ async function getOrder(req, res, next) {
 
     const order = await OrdersMongo.findOne(filter);
     if (!order) {
+    if (!order) {
       return res.sendStatus(404);
     }
     return res.json(order);
@@ -123,6 +134,7 @@ async function getOrder(req, res, next) {
     return next(error);
   }
 }
+
 
 /**
  *
@@ -211,6 +223,7 @@ async function deleteOrder(req, res, next) {
 
       const deletedCountSQL = await Orders.destroy({
         where: { id },
+        where: { id },
         transaction: t,
       });
 
@@ -226,133 +239,6 @@ async function deleteOrder(req, res, next) {
     return next(error);
   }
 }
-
-/**
- * Récupérer le nombre total de commandes dans MongoDB
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getOrderCount(req, res, next) {
-  try {
-    const count = await OrdersMongo.countDocuments();
-    return res.status(200).json({ count });
-  } catch (error) {
-    return next(error);
-  }
-}
-
-/**
- * Récupérer le chiffre d'affaires total dans MongoDB
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getTotalRevenue(req, res, next) {
-  try {
-    const totalRevenueData = await OrdersMongo.aggregate([
-      { $unwind: '$items' },
-      {
-        $group: {
-          _id: null,
-          totalRevenue: {
-            $sum: {
-              $multiply: [
-                {
-                  $convert: {
-                    input: '$items.price',
-                    to: 'double',
-                    onError: 0,
-                    onNull: 0,
-                  },
-                },
-                { $ifNull: ['$items.quantity', 1] },
-              ],
-            },
-          },
-        },
-      },
-      { $project: { _id: 0, totalRevenue: 1 } },
-    ]);
-
-    console.log('Total Revenue Data:', totalRevenueData);
-
-    const totalRevenue = totalRevenueData[0]?.totalRevenue || 0;
-
-    return res.status(200).json({ totalRevenue });
-  } catch (error) {
-    console.error('Error calculating total revenue:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-}
-
-/**
- * Récupère la répartition des commandes par status dans MongoDB
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getOrderStatusDistribution(req, res, next) {
-  try {
-    const distribution = await OrdersMongo.aggregate([
-      {
-        $group: {
-          _id: '$status.label',
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          label: '$_id',
-          count: 1,
-          _id: 0,
-        },
-      },
-    ]);
-
-    return res.status(200).json(distribution);
-  } catch (error) {
-    return next(error);
-  }
-}
-
-/**
- * Récupére le nombre total de ventes basé sur les produits dans les commandes
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getTotalSales(req, res, next) {
-  try {
-    const orders = await OrdersMongo.aggregate([
-      { $unwind: "$items" },
-      { $group: { _id: null, totalSales: { $sum: 1 } } }
-    ]);
-
-    const totalSales = orders.length ? orders[0].totalSales : 0;
-    return res.status(200).json({ totalSales });
-  } catch (error) {
-    return next(error);
-  }
-}
-
-const getUserOrders = async (req, res, next) => {
-  try {
-    const { userId } = req.params;
-
-    const orders = await OrdersMongo.find({ 'user._id': userId }).lean();
-
-    if (orders.length === 0) {
-      return res.status(404).json({ message: 'No orders found for this user' });
-    }
-
-    return res.status(200).json(orders);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'An error occurred while fetching orders' });
-  }
-};
-
 
 module.exports = {
   createOrder,
