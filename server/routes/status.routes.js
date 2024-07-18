@@ -14,8 +14,7 @@ const statusRouter = Router();
 // Route pour créer un status
 statusRouter.post(
   '/status',
-  checkAuth(authConfig.accessTokenSecret, true),
-  checkRole(['admin']),
+  // checkAuth(authConfig.accessTokenSecret, true),
   createStatus,
 );
 
@@ -27,7 +26,7 @@ statusRouter.get(
   getStatuses,
 );
 
-statusRouter.get('/status/:id', getStatuses);
+statusRouter.get('/status/:id', getStatus);
 
 statusRouter.put(
   '/status/:id',

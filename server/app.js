@@ -11,7 +11,8 @@ const shippingRouter = require('./routes/shipping.routes');
 const errorMiddleware = require('./middlewares/error.middleware');
 const deliveryChoiceRouter = require('./routes/deliveryChoice.routes');
 const paymentRouter = require('./routes/payment.routes');
-const {orderRouter} = require('./routes/order.routes');
+const basketRouter = require('./routes/basket.routes');
+const orderRouter = require('./routes/order.routes');
 const statusRouter = require('./routes/status.routes');  // Importez le routeur de status
 
 const app = express();
@@ -32,6 +33,8 @@ app.use(deliveryChoiceRouter);
 app.use(paymentRouter);
 app.use(orderRouter);
 app.use(statusRouter);  // Ajoutez le routeur de status
+app.use(statusRouter);  // Ajoutez le routeur de status
 app.use(errorMiddleware);
+
 
 module.exports = app;
