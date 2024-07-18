@@ -44,8 +44,19 @@ usersRouter.get(
   getUserRegistrations,
 );
 
-usersRouter.use('/users/:userId/addresses', addressesRouter);
-usersRouter.get('/users/:userId', getUser);
+usersRouter.use(
+  '/users/:userId/addresses',
+  checkAuth(authConfig.accessTokenSecret, false),
+  isOwnAccount,
+  addressesRouter,
+);
+
+usersRouter.use(
+  '/users/:userId/basket',
+  checkAuth(authConfig.accessTokenSecret, false),
+  isOwnAccount,
+  userBasketRouter,
+);
 
 usersRouter.put(
   '/users/:userId',
