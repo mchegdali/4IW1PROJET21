@@ -31,6 +31,22 @@ usersRouter.get(
   getUsers,
 );
 
+// Route pour obtenir le nombre total d'utilisateurs
+usersRouter.get(
+  '/users/count',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getUserCount,
+);
+
+// Route pour obtenir le nombre d'inscriptions d'utilisateurs par jour
+usersRouter.get(
+  '/users/registrations',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getUserRegistrations,
+);
+
 usersRouter.use('/users/:userId/addresses', addressesRouter);
 usersRouter.get('/users/:userId', getUser);
 
