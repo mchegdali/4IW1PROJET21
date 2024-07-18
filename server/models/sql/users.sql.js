@@ -47,18 +47,16 @@ const UsersSequelize = (sequelize) => {
       }
 
       return {
-        _id: this.id,
-        fullname: this.fullname,
-        email: this.email,
-        password: this.password,
-        passwordValidUntil: this.passwordValidUntil,
-        isVerified: this.isVerified,
-        role: this.role,
-        addresses: addressesMongo,
-        basket: basketItems,
-        createdAt: this.createdAt,
-        updatedAt: this.updatedAt,
-        deletedAt: this.deletedAt,
+        _id: this.getDataValue('id'),
+        fullname: this.getDataValue('fullname'),
+        email: this.getDataValue('email'),
+        password: this.getDataValue('password'),
+        passwordValidUntil: this.getDataValue('passwordValidUntil'),
+        isVerified: this.getDataValue('isVerified'),
+        role: this.getDataValue('role'),
+        addresses:
+          this.getDataValue('addresses')?.map((address) => address.toMongo()) ?? [],
+        order: order ? await order.toMongo() : null,
       };
     }
   }
