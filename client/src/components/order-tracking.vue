@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRoute } from 'vue-router';

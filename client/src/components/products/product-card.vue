@@ -2,7 +2,13 @@
 import { type Product } from '@/api/products.api';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import QuantityInput from '@/components/shared/quantity-input.vue';
+import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput
+} from '@/components/ui/number-field';
 import { ref } from 'vue';
 import Button from '../ui/button/Button.vue';
 import { useBasketStore } from '@/stores/basket';
@@ -13,44 +19,52 @@ const basketStore = useBasketStore();
 
 const count = ref(0);
 
-function onIncrement() {
-  count.value++;
-}
-
-function onDecrement() {
-  if (count.value > 0) {
-    count.value--;
+function handleQuantityChange(value: number) {
+  if (value >= 0) {
+    count.value = value;
+  } else {
+    count.value = 0;
   }
 }
 
 function handleAddToBasketClick() {
-  basketStore.addProduct(product, count.value);
-  count.value = 0;
+  if (count.value > 0) {
+    basketStore.addProduct(product, count.value);
+    count.value = 0;
+  }
 }
 </script>
 
 <template>
-  <Card class="shadow-sm shadow-primary/25 min-w-80 max-w-xs flex flex-col">
-    <CardHeader>
+  <Card class="shadow-sm shadow-primary/25">
+    <CardHeader class="pb-0 p-4">
       <div class="w-32 self-center">
         <AspectRatio :ratio="1" class="bg-muted object-center">
-          <img :src="product.image" class="rounded-lg object-cover object-center w-full h-full" />
+          <img :src="product.image" class="rounded-lg object-cover object-center size-full" />
         </AspectRatio>
       </div>
-      <CardTitle class="text-xl">
-        <RouterLink :to="{ path: `/products/${product._id}` }">{{ product.name }}</RouterLink>
+      <CardTitle class="text-md md:text-lg line-clamp-1">
+        <RouterLink :to="{ path: `/products/${product.slug}` }">{{ product.name }}</RouterLink>
       </CardTitle>
-      <CardDescription class="text-primary line-clamp-2">{{ product.description }}</CardDescription>
+      <CardDescription class="text-xs text-tea-600 font-semibold">{{
+        product.category.name
+      }}</CardDescription>
     </CardHeader>
-    <CardContent class="flex flex-col gap-1 items-center">
-      <p class="text-xl font-semibold">{{ product.price }}€</p>
-      <QuantityInput
-        @decrement="onDecrement"
-        @increment="onIncrement"
-        :value="count"
-        :is-decrease-disabled="count <= 0"
-      />
-      <Button class="uppercase font-medium" @click="handleAddToBasketClick">
+    <CardContent class="flex flex-col gap-1 items-center pt-0">
+      <p class="text-md md:text-lg font-semibold">{{ product.price }}€</p>
+      <NumberField
+        :model-value="count"
+        :min="0"
+        @update:model-value="handleQuantityChange"
+        class="max-w-40"
+      >
+        <NumberFieldContent>
+          <NumberFieldDecrement />
+          <NumberFieldInput />
+          <NumberFieldIncrement />
+        </NumberFieldContent>
+      </NumberField>
+      <Button class="uppercase font-medium text-xs md:text-sm" @click="handleAddToBasketClick">
         Ajouter au panier
       </Button>
     </CardContent>

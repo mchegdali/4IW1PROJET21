@@ -1,8 +1,9 @@
 const sequelize = require('../models/sql');
 
 sequelize
-  .sync({ alter: true })
-  .then((sequelize) => sequelize.close())
+  .authenticate()
+  .then(() => sequelize.sync({ alter: true }))
+  .then(() => sequelize.close())
   .then(() => {
     console.log('[SQL] Migrations completed');
   });

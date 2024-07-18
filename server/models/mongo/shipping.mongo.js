@@ -1,14 +1,9 @@
 const mongoose = require('mongoose');
 const connection = require('./db');
-
 const shippingSchema = new mongoose.Schema(
   {
-    id: {
+    _id: {
       type: mongoose.Schema.Types.UUID,
-      required: true,
-    },
-    emailCustomer: {
-      type: String,
       required: true,
     },
     fullname: {
@@ -32,15 +27,18 @@ const shippingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // shippingMode : {
-    //     type: String,
-    //     enum: ['Colissimo', 'Mondial Relay'],
-    //     required: true,
-    // },
-    // paymentMode: {
-    //     type: [String],
-    //     required: true,
-    // },
+    deliveryChoiceId: {
+      type: {
+        _id: {
+          type: mongoose.Schema.Types.UUID,
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
+      },
+    },
   },
   {
     toObject: {
@@ -51,19 +49,6 @@ const shippingSchema = new mongoose.Schema(
     },
   },
 );
-shippingSchema.index(
-  {
-    title: 'text',
-    description: 'text',
-  },
-  {
-    name: 'shipping_search_index',
-    weights: {
-      title: 10,
-      description: 5,
-    },
-  },
-);
 
-const shipping = connection.model('shipping', shippingSchema);
+const shipping = connection.model('shippings', shippingSchema);
 module.exports = shipping;

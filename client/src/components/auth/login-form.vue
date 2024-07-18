@@ -3,10 +3,12 @@ import Input from '@/components/ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { z } from 'zod';
 import { useForm } from '@/composables/form';
-import { useFetch } from '@vueuse/core';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useToast } from '../ui/toast';
+import Label from '../ui/label/Label.vue';
+import { onBeforeUnmount } from 'vue';
+import config from '@/config';
 
 const { toast } = useToast();
 
@@ -25,58 +27,75 @@ const router = useRouter();
 const userStore = useUserStore();
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Adresse e-mail invalide' }),
-  password: z.string().min(8, { message: 'Le mot de passe est obligatoire' })
+  email: z
+    .string({
+      required_error: 'Adresse e-mail obligatoire'
+    })
+    .min(1, { message: 'Adresse e-mail obligatoire' })
+    .email({ message: 'Adresse e-mail invalide' }),
+  password: z
+    .string({
+      required_error: 'Mot de passe obligatoire'
+    })
+    .min(8, { message: 'Le mot de passe doit contenir au moins 8 caractères' })
 });
 
-const initialData = {
+const defaultValues = {
   email: '',
   password: ''
 };
 
-const { formData, formErrors, formSubmitting, submitForm } = useForm(loginSchema, initialData);
-
-const { data, execute, error, statusCode } = useFetch(
-  `${import.meta.env.VITE_API_BASE_URL}/auth/login`,
-  {
-    immediate: false
-  }
-)
-  .post(formData)
-  .json<LoginResponse>();
-
-const { execute: resendConfirmationEmail } = useFetch(
-  `${import.meta.env.VITE_API_BASE_URL}/auth/resend-confirmation-email`,
-  {
-    immediate: false
-  }
-)
-  .post({
-    email: formData.value.email
-  })
-  .text();
-
-const handleSubmit = () => {
-  submitForm(async () => {
-    try {
-      await execute(true);
-      if (data?.value) {
-        userStore.$patch({
-          accessToken: data.value.accessToken,
-          refreshToken: data.value.refreshToken,
-          user: data.value.user
-        });
-        router.push({ name: 'home' });
-      }
-    } catch {
-      console.log('handleSubmit error', error.value);
-    }
+const { handleSubmit, isSubmitting, isError, defineField, errors, cancel, status, formValues } =
+  useForm({
+    validationSchema: loginSchema,
+    defaultValues
   });
-};
+
+const [email, emailField] = defineField('email');
+const [password, passwordField] = defineField('password');
+
+const submitHandler = handleSubmit(async (data, signal) => {
+  const response = await fetch(`${config.apiBaseUrl}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data),
+    signal
+  });
+
+  if (!response.ok) {
+    throw response;
+  }
+
+  const result: LoginResponse = await response.json();
+
+  userStore.$patch({
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+    user: result.user
+  });
+  router.push({ name: 'home' });
+});
+
+onBeforeUnmount(() => {
+  cancel();
+});
 
 const handleResendConfirmationEmail = async () => {
-  const response = await resendConfirmationEmail();
-  if (response) {
+  const response = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/auth/resend-confirmation-email`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: formValues.value.email
+      })
+    }
+  );
+  if (response.ok) {
     toast({
       title: 'Email de confirmation envoyé',
       description: 'Vérifiez votre boîte mail',
@@ -88,40 +107,35 @@ const handleResendConfirmationEmail = async () => {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-4">
+  <form @submit.prevent="submitHandler" class="space-y-4">
     <div>
-      <label
-        >Adresse e-mail
-        <Input
-          id="email"
-          v-model="formData.email"
-          :class="{ 'border-destructive': formErrors.email || statusCode === 401 }"
-          autofocus
-        />
-      </label>
-      <small class="text-destructive" v-if="formErrors.email">
-        {{ formErrors.email }}
+      <Label for="email" :class="{ 'text-destructive': errors.email }">Adresse e-mail</Label>
+      <Input
+        id="email"
+        v-model="email"
+        @input="emailField.onInput"
+        :class="{ 'border-destructive': errors.email || isError }"
+        autofocus
+      />
+      <small class="text-destructive" v-if="errors.email">
+        {{ errors.email }}
       </small>
-      <small class="text-destructive" v-else-if="statusCode === 401">
-        Email ou mot de passe incorrect
-      </small>
+      <small class="text-destructive" v-else-if="isError"> Email ou mot de passe incorrect </small>
     </div>
     <div>
-      <label
-        >Mot de passe
-        <Input
-          id="password"
-          type="password"
-          v-model="formData.password"
-          :class="{ 'border-destructive': formErrors.password || statusCode === 401 }"
-        />
-      </label>
-      <small class="text-destructive" v-if="formErrors.password">
-        {{ formErrors.password }}
+      <Label for="password" :class="{ 'text-destructive': errors.password }">Mot de passe</Label>
+      <Input
+        id="password"
+        type="password"
+        v-model="password"
+        @input="passwordField.onInput"
+        :class="{ 'border-destructive': errors.password || isError }"
+        autofocus
+      />
+      <small class="text-destructive" v-if="errors.password">
+        {{ errors.password }}
       </small>
-      <small class="text-destructive" v-else-if="statusCode === 401">
-        Email ou mot de passe incorrect
-      </small>
+      <small class="text-destructive" v-else-if="isError"> Email ou mot de passe incorrect </small>
     </div>
 
     <div class="flex gap-4">
@@ -129,13 +143,13 @@ const handleResendConfirmationEmail = async () => {
         <RouterLink :to="{ name: 'register' }" class="w-1/2"> Créer un compte </RouterLink>
       </Button>
 
-      <Button type="submit" class="w-1/2" :disabled="formSubmitting">Connexion</Button>
+      <Button type="submit" class="w-1/2" :disabled="isSubmitting">Connexion</Button>
     </div>
-    <div v-if="statusCode === 403" class="flex gap-4">
+    <div v-if="status === 403" class="flex gap-4">
       <small class="text-destructive">
         Votre compte n'est pas activé. Veuillez vérifier votre e-mail.
       </small>
-      <Button type="button" variant="link" @click="handleResendConfirmationEmail">
+      <Button type="button" variant="outline-destructive" @click="handleResendConfirmationEmail">
         Demander un nouvel email de confirmation
       </Button>
     </div>

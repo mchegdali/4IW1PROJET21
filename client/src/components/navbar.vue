@@ -1,53 +1,85 @@
 <script setup lang="ts">
-import { Search, ShoppingBasket } from 'lucide-vue-next';
-import Input from './ui/input/Input.vue';
+import { ShoppingBasket } from 'lucide-vue-next';
 import Button from '@/components/ui/button/Button.vue';
+import ProductsSearchForm from '@/components/products/products-search-form.vue';
 
 import logo from '@/assets/images/fanthesie.png';
 import { useUserStore } from '@/stores/user';
+import Badge from './ui/badge/Badge.vue';
+import { useBasketStore } from '@/stores/basket';
 import { ref } from 'vue';
 
 const userStore = useUserStore();
+const basketStore = useBasketStore();
 const isAuthenticated = ref(userStore.isAuthenticated);
 
+const nbItems = ref(basketStore.nbItems);
+
 userStore.$subscribe((mutation, state) => {
-  console.log('setIsAuthenticated', mutation, state);
   isAuthenticated.value = userStore.isAuthenticated;
   if (state.accessToken) {
-    localStorage.setItem("accessToken", state.accessToken);
+    localStorage.setItem('accessToken', state.accessToken);
   }
   if (state.refreshToken) {
-    localStorage.setItem("refreshToken", state.refreshToken);
+    localStorage.setItem('refreshToken', state.refreshToken);
   }
   if (state.user) {
-      localStorage.setItem("user", JSON.stringify(state.user));
+    localStorage.setItem('user', JSON.stringify(state.user));
   }
+});
+
+basketStore.$subscribe((mutation, state) => {
+  nbItems.value = state.products.length;
 });
 </script>
 
 <template>
-  <nav class="px-4 py-2 bg-gradient-to-r from-tea-600 to-tea-400 w-svw">
-    <div class="md:flex md:justify-around md:items-center md:gap-8">
-      <RouterLink :to="{ name: 'home' }"><img :src="logo" alt="Fanthesie"
-          class="hidden w-auto min-w-32 h-12 md:inline md:justify-self-start" /></RouterLink>
-      <div class="relative w-full md:max-w-lg lg:max-w-xl xl:max-w-4xl 2xl:max-w-5xl">
-        <Input id="search" type="text" placeholder="Rechercher votre thé sur Fanthesie" class="pl-10" />
-        <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
-          <Search class="size-6 text-muted-foreground" />
-        </span>
-      </div>
-      <div class="hidden md:flex">
-        <Button variant="link" as-child class="text-white">
-          <RouterLink :to="{ name: 'login' }" v-if="!isAuthenticated">Se connecter</RouterLink>
-          <RouterLink :to="{ name: 'account' }" v-else>Mon compte</RouterLink>
-        </Button>
-        <Button variant="link" as-child class="text-white">
-          <RouterLink :to="{ name: 'basket' }" class="flex items-end">
+  <nav
+    class="bg-gradient-to-r from-tea-600 to-tea-400 via-tea-500 via-75% flex justify-between items-center h-14 px-4 py-2"
+  >
+    <RouterLink
+      :to="{ name: 'home' }"
+      class="hidden lg:inline lg:justify-self-start h-full my-auto"
+    >
+      <img
+        :src="logo"
+        alt="Fanthesie"
+        class="w-[120px] h-[40px] object-center"
+        width="120"
+        height="40"
+      />
+    </RouterLink>
+    <div class="flex items-center gap-4 w-full lg:max-w-xl xl:max-w-4xl 2xl:max-w-5xl">
+      <ProductsSearchForm />
+    </div>
+    <div class="hidden lg:flex lg:h-full">
+      <Button
+        variant="outline"
+        as-child
+        class="bg-transparent text-white border border-transparent hover:border hover:border-primary-foreground"
+      >
+        <RouterLink :to="{ name: 'login' }" v-if="!isAuthenticated">Se connecter</RouterLink>
+        <RouterLink :to="{ name: 'account' }" v-else>Mon compte</RouterLink>
+      </Button>
+      <Button
+        variant="outline"
+        as-child
+        class="bg-transparent text-white border border-transparent hover:border hover:border-primary-foreground"
+      >
+        <RouterLink :to="{ name: 'basket' }" class="flex items-center gap-2">
+          Panier
+          <div class="relative">
             <ShoppingBasket class="size-8" />
-            Panier
-          </RouterLink>
-        </Button>
-      </div>
+            <Badge
+              variant="circle"
+              class="absolute -top-2 -right-2 size-[2.5ch]"
+              v-if="nbItems > 0"
+            >
+              {{ nbItems <= 9 ? nbItems : '9+' }}
+            </Badge>
+          </div>
+        </RouterLink>
+      </Button>
     </div>
   </nav>
 </template>

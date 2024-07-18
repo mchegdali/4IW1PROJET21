@@ -3,8 +3,8 @@ const slugify = require('../../utils/slugify');
 const { fakerFR: faker } = require('@faker-js/faker');
 const crypto = require('node:crypto');
 
-const minProducts = 2;
-const maxProducts = 5;
+const minProducts = 50;
+const maxProducts = 100;
 const imageFormats = ['png', 'jpg', 'jpeg', 'avif', 'webp'];
 
 function getRandomImageFormat() {
@@ -29,7 +29,7 @@ function createProduct(categoryId) {
     text: name,
   });
   const price = faker.commerce.price({ min: 10, max: 1000 });
-  const now = new Date();
+  const createdAt = faker.date.past();
 
   return {
     id,
@@ -39,8 +39,8 @@ function createProduct(categoryId) {
     image,
     price,
     categoryId,
-    createdAt: now,
-    updatedAt: now,
+    createdAt: createdAt,
+    updatedAt: createdAt,
   };
 }
 

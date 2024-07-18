@@ -45,11 +45,6 @@ const router = createRouter({
           component: () => import('../views/livraison-view.vue')
         },
         {
-          name: 'livraison',
-          path: '/livraison',
-          component: () => import('../views/livraison-view.vue')
-        },
-        {
           name: 'login',
           path: '/login',
           component: () => import('../views/login-view.vue')
@@ -63,6 +58,11 @@ const router = createRouter({
           name: 'register-confirmation',
           path: '/register-confirmation',
           component: () => import('../views/register-confirmation-view.vue')
+        },
+        {
+          name: 'forgot-password-confirmation',
+          path: '/forgot-password-confirmation',
+          component: () => import('../views/forgot-password-confirmation-view.vue')
         },
         {
           name: 'forgot-password',
@@ -79,6 +79,11 @@ const router = createRouter({
             }
             return next();
           }
+        },
+        {
+          name: 'reset-password-confirmation',
+          path: '/reset-password-confirmation',
+          component: () => import('../views/reset-password-confirmation-view.vue')
         },
         {
           name: 'account-verified',
@@ -121,6 +126,41 @@ const router = createRouter({
           name: 'tracking',
           path: '/tracking/:id',
           component: () => import('../views/order-tracking-view.vue')
+        },
+        {
+          name: 'conditions',
+          path: '/conditions',
+          component: () => import('../views/conditions-sale-use-view.vue')
+        },
+        {
+          name: 'confidentiality-declaration',
+          path: '/confidentiality-declaration',
+          component: () => import('../views/confidentiality-declaration-view.vue')
+        },
+        {
+          name: 'cookie-policy',
+          path: '/cookie-policy',
+          component: () => import('../views/cookie-policy-view.vue')
+        },
+        {
+          name: 'my-informations',
+          path: '/my-informations',
+          component: () => import('../views/my-informations-view.vue')
+        },
+        {
+          name: 'adresses',
+          path: '/adresses',
+          component: () => import('../views/adresse-view.vue')
+        },
+        {
+          name: 'add-adresse',
+          path: '/add-adresse',
+          component: () => import('../views/add-adresse-view.vue')
+        },
+        {
+          name: 'edit-adresse',
+          path: '/edit-adresse',
+          component: () => import('../views/edit-adresse-view.vue')
         }
       ]
     },

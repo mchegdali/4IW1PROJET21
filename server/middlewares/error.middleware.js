@@ -10,6 +10,7 @@ const brevo = require('@getbrevo/brevo');
  */
 // eslint-disable-next-line no-unused-vars
 const errorMiddleware = (error, req, res, _next) => {
+  console.error(error);
   if (error instanceof ZodError) {
     const flattenedErrors = {};
     for (const err of error.issues) {
