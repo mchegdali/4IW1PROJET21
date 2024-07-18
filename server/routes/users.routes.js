@@ -31,9 +31,6 @@ usersRouter.get(
   getUsers,
 );
 
-usersRouter.use('/users/:userId/addresses', addressesRouter);
-usersRouter.get('/users/:userId', getUser);
-
 // Route pour obtenir le nombre total d'utilisateurs
 usersRouter.get(
   '/users/count',
@@ -49,6 +46,9 @@ usersRouter.get(
   checkRole(['admin']),
   getUserRegistrations,
 );
+
+usersRouter.use('/users/:userId/addresses', addressesRouter);
+usersRouter.get('/users/:userId', getUser);
 
 usersRouter.put(
   '/users/:userId',
