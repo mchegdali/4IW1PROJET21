@@ -100,7 +100,7 @@ export default defineComponent({
         Csv,
         DialogUtilisateur
     },
-    emits: ['delete-clients'],
+    emits: ['delete-clients', 'update-client'],
     props: {
         clients: {
             type: Array as PropType<Client[]>,
@@ -256,10 +256,7 @@ export default defineComponent({
         };
 
         const saveClient = (client: Client) => {
-            const index = props.clients.findIndex(c => c.id === client.id);
-            if (index !== -1) {
-                props.clients.splice(index, 1, client);
-            }
+            emit('update-client', client);
         };
 
         return {
@@ -300,4 +297,3 @@ export default defineComponent({
     cursor: pointer;
 }
 </style>
-  
