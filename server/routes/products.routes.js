@@ -24,15 +24,15 @@ productsRouter.get(
 
 productsRouter.get(
   '/products/distribution-by-category',
-  // checkAuth(authConfig.accessTokenSecret, false),
-  // checkRole(['admin']),
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
   getProductDistributionByCategory
 );
 
 productsRouter.get(
   '/products/price-distribution', 
-  // checkAuth(authConfig.accessTokenSecret, false),
-  // checkRole(['admin']),
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
   getPriceDistribution
 );
 
