@@ -1,8 +1,5 @@
 <template>
     <section class="flex-1 ml-80">
-        <!-- <div class="w-100 bg-white h-12 flex items-center justify-start border-b-2 border-gray-100 mb-5 p-5">
-            <p class="font-bold">Prénom, nom</p>
-        </div> -->
         
         <div class="flex items-center justify-between mb-12 p-5">
             <h1 class="text-2xl font-bold text-green-900">Dashboard Fanthésie</h1>
@@ -77,7 +74,7 @@ import Card from '../Card.vue';
 import BarChart from '../BarChart.vue';
 import DonutChart from '../DonutChart.vue';
 
-interface Card {
+interface CardData {
     image: string;
     title: string;
     text: string;
@@ -131,7 +128,7 @@ export default defineComponent({
                     text: 'Utilisez des prévisions basées sur des données pour planifier votre stratégie future. Cliquez ici pour explorer les tendances et les prévisions détaillées !',
                     page: 'AdminTendances',
                 },
-            ] as Card[],
+            ] as CardData[],
         };
     },
     methods: {
