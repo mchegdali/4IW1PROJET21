@@ -32,7 +32,6 @@
 import { defineComponent } from 'vue';
 import StatisticsBlock from '../StatisticsBlock.vue';
 import LineChart from '../LineChart.vue';
-import AreaChart from '../AreaChart.vue';
 import StatCard from '../StatCard.vue';
 import BarChart from '../BarChart.vue';
 
@@ -53,7 +52,6 @@ export default defineComponent({
     components: {
         StatisticsBlock,
         LineChart,
-        AreaChart,
         StatCard,
         BarChart,
     },
