@@ -42,12 +42,15 @@ async function createOrder(req, res, next) {
       }
       const { items, totalPrice } = basket;
 
+      const status = await StatusMongo.findOne({ label: 'Pending' });
+      if (!status) {
+        throw new NotFound('Status not found');
+      }
+
       const order = await Orders.create(
         {
           userId: user._id,
-          paymentStatus: 'Pending',
-          deliveryStatus: 'Pending',
-          orderStatus: 'Pending',
+          statusId: status._id,
           items: JSON.stringify(items),
           totalPrice: totalPrice,
         },
@@ -61,9 +64,10 @@ async function createOrder(req, res, next) {
 
       const orderMongo = {
         _id: order.id,
-        paymentStatus: order.paymentStatus,
-        deliveryStatus: order.deliveryStatus,
-        orderStatus: order.orderStatus,
+        status: {
+          _id: status._id,
+          label: status.label,
+        },
         items: items.map((item) => ({
           _id: item._id.toString(),
           name: item.name,
@@ -115,7 +119,7 @@ async function getOrder(req, res, next) {
     };
 
     const order = await OrdersMongo.findOne(filter);
-    if (!orderQuerySchema) {
+    if (!order) {
       return res.sendStatus(404);
     }
     return res.json(order);
@@ -123,6 +127,7 @@ async function getOrder(req, res, next) {
     return next(error);
   }
 }
+
 /**
  *
  * @type {import('express').RequestHandler}
@@ -209,7 +214,7 @@ async function deleteOrder(req, res, next) {
       }
 
       const deletedCountSQL = await Orders.destroy({
-        where: id,
+        where: { id },
         transaction: t,
       });
 
@@ -225,6 +230,7 @@ async function deleteOrder(req, res, next) {
     return next(error);
   }
 }
+
 module.exports = {
   createOrder,
   getOrder,
