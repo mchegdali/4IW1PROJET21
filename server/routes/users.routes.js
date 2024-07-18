@@ -6,32 +6,15 @@ const {
   deleteUser,
   updateUser,
   getUserCount,
-  getUserRegistrations
+  getUserRegistrations,
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
 const { isOwnAccount } = require('../middlewares/users.middleware');
 const addressesRouter = require('./addresses.routes');
-const userBasketRouter = require('./basket.routes');
+const { userBasketRouter } = require('./basket.routes');
 
 const usersRouter = Router();
-
-// Route pour créer un utilisateur
-// Route pour créer un utilisateur
-usersRouter.post(
-  '/users',
-  checkAuth(authConfig.accessTokenSecret, true),
-  createUser,
-);
-
-// Route pour obtenir tous les utilisateurs
-// Route pour obtenir tous les utilisateurs
-usersRouter.get(
-  '/users',
-  checkAuth(authConfig.accessTokenSecret, false),
-  checkRole(['admin']),
-  getUsers,
-);
 
 // Route pour obtenir le nombre total d'utilisateurs
 usersRouter.get(
@@ -47,6 +30,20 @@ usersRouter.get(
   checkAuth(authConfig.accessTokenSecret, false),
   checkRole(['admin']),
   getUserRegistrations,
+);
+
+usersRouter.use(
+  '/users/:userId/addresses',
+  checkAuth(authConfig.accessTokenSecret, false),
+  isOwnAccount,
+  addressesRouter,
+);
+
+usersRouter.use(
+  '/users/:userId/basket',
+  checkAuth(authConfig.accessTokenSecret, false),
+  isOwnAccount,
+  userBasketRouter,
 );
 
 usersRouter.put(
@@ -70,6 +67,19 @@ usersRouter.delete(
   checkAuth(authConfig.accessTokenSecret, true),
   checkRole(['admin']),
   deleteUser,
+);
+
+usersRouter.post(
+  '/users',
+  checkAuth(authConfig.accessTokenSecret, true),
+  createUser,
+);
+
+usersRouter.get(
+  '/users',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getUsers,
 );
 
 module.exports = usersRouter;

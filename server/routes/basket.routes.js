@@ -6,11 +6,11 @@ const {
 } = require('../controllers/basket.controller');
 
 const userBasketRouter = Router({ mergeParams: true });
+const basketsRouter = Router();
 
-userBasketRouter
-  .route('/')
-  .get(getBasket)
-  .post(addItemToBasket)
-  .delete(removeItemFromBasket);
+userBasketRouter.route('/basket').patch(updateBasket).delete(deleteBasket);
 
-module.exports = userBasketRouter;
+basketsRouter.route('/baskets').get(getBaskets).post(createBasket);
+basketsRouter.route('/baskets/:id').get(getBasket);
+
+module.exports = { userBasketRouter, basketsRouter };
