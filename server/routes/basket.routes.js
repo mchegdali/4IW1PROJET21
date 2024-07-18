@@ -7,16 +7,12 @@ const {
   updateBasket,
 } = require('../controllers/basket.controller');
 
-const basketRouter = Router();
+const userBasketRouter = Router({ mergeParams: true });
+const basketsRouter = Router();
 
-// basketRouter.get('/deliveryChoices/:id/shipping', getShipping);
-basketRouter.post('/users/:id/basket', createBasket);
-basketRouter
-  .route('/basket/:id')
-  .get(getBasket)
-  .patch(updateBasket)
-  .delete(deleteBasket);
+userBasketRouter.route('/basket').patch(updateBasket).delete(deleteBasket);
 
-basketRouter.route('/basket').get(getBaskets);
+basketsRouter.route('/baskets').get(getBaskets).post(createBasket);
+basketsRouter.route('/baskets/:id').get(getBasket);
 
-module.exports = basketRouter;
+module.exports = { userBasketRouter, basketsRouter };

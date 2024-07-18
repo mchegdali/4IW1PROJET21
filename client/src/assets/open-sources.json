@@ -1,0 +1,240 @@
+[
+  {
+    "name": "@fontsource/inter",
+    "version": "^5.0.18",
+    "license": "OFL-1.1",
+    "npmLink": "https://www.npmjs.com/package/@fontsource/inter",
+    "repositoryLink": "https://github.com/fontsource/font-files"
+  },
+  {
+    "name": "@vueuse/core",
+    "version": "^10.9.0",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/@vueuse/core",
+    "repositoryLink": "https://github.com/vueuse/vueuse"
+  },
+  {
+    "name": "class-variance-authority",
+    "version": "^0.7.0",
+    "license": "Apache-2.0",
+    "npmLink": "https://www.npmjs.com/package/class-variance-authority",
+    "repositoryLink": "https://github.com/joe-bell/cva"
+  },
+  {
+    "name": "clsx",
+    "version": "^2.1.0",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/clsx",
+    "repositoryLink": "https://github.com/lukeed/clsx"
+  },
+  {
+    "name": "date-fns",
+    "version": "^3.6.0",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/date-fns",
+    "repositoryLink": "https://github.com/date-fns/date-fns"
+  },
+  {
+    "name": "embla-carousel",
+    "version": "^8.0.2",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/embla-carousel",
+    "repositoryLink": "https://github.com/davidjerleke/embla-carousel"
+  },
+  {
+    "name": "embla-carousel-vue",
+    "version": "^8.0.2",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/embla-carousel-vue",
+    "repositoryLink": "https://github.com/davidjerleke/embla-carousel"
+  },
+  {
+    "name": "jwt-decode",
+    "version": "^4.0.0",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/jwt-decode",
+    "repositoryLink": "https://github.com/auth0/jwt-decode"
+  },
+  {
+    "name": "lucide-vue-next",
+    "version": "^0.372.0",
+    "license": "ISC",
+    "npmLink": "https://www.npmjs.com/package/lucide-vue-next",
+    "repositoryLink": "https://github.com/lucide-icons/lucide"
+  },
+  {
+    "name": "pinia",
+    "version": "^2.1.7",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/pinia",
+    "repositoryLink": "https://github.com/vuejs/pinia"
+  },
+  {
+    "name": "radix-vue",
+    "version": "^1.7.1",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/radix-vue",
+    "repositoryLink": "https://github.com/radix-vue/radix-vue"
+  },
+  {
+    "name": "tailwind-merge",
+    "version": "^2.3.0",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/tailwind-merge",
+    "repositoryLink": "https://github.com/dcastil/tailwind-merge"
+  },
+  {
+    "name": "tailwindcss-animate",
+    "version": "^1.0.7",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/tailwindcss-animate",
+    "repositoryLink": "Non disponible"
+  },
+  {
+    "name": "vue",
+    "version": "^3.4.15",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/vue",
+    "repositoryLink": "https://github.com/vuejs/core"
+  },
+  {
+    "name": "vue-router",
+    "version": "^4.2.5",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/vue-router",
+    "repositoryLink": "https://github.com/vuejs/router"
+  },
+  {
+    "name": "vue-timeline",
+    "version": "^0.1.0",
+    "license": "BSD",
+    "npmLink": "https://www.npmjs.com/package/vue-timeline",
+    "repositoryLink": "https://github.com/trionfo1993/vue-timeline"
+  },
+  {
+    "name": "zod",
+    "version": "^3.23.7",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/zod",
+    "repositoryLink": "https://github.com/colinhacks/zod"
+  },
+  {
+    "name": "@rushstack/eslint-patch",
+    "version": "^1.3.3",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/@rushstack/eslint-patch",
+    "repositoryLink": "https://github.com/microsoft/rushstack"
+  },
+  {
+    "name": "@tsconfig/node20",
+    "version": "^20.1.2",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/@tsconfig/node20",
+    "repositoryLink": "https://github.com/tsconfig/bases"
+  },
+  {
+    "name": "@types/node",
+    "version": "^20.11.10",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/@types/node",
+    "repositoryLink": "https://github.com/DefinitelyTyped/DefinitelyTyped"
+  },
+  {
+    "name": "@vitejs/plugin-vue",
+    "version": "^5.0.3",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/@vitejs/plugin-vue",
+    "repositoryLink": "https://github.com/vitejs/vite-plugin-vue"
+  },
+  {
+    "name": "@vue/eslint-config-prettier",
+    "version": "^8.0.0",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/@vue/eslint-config-prettier",
+    "repositoryLink": "https://github.com/vuejs/eslint-config-prettier"
+  },
+  {
+    "name": "@vue/eslint-config-typescript",
+    "version": "^12.0.0",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/@vue/eslint-config-typescript",
+    "repositoryLink": "https://github.com/vuejs/eslint-config-typescript"
+  },
+  {
+    "name": "@vue/tsconfig",
+    "version": "^0.5.1",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/@vue/tsconfig",
+    "repositoryLink": "https://github.com/vuejs/tsconfig"
+  },
+  {
+    "name": "autoprefixer",
+    "version": "^10.4.19",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/autoprefixer",
+    "repositoryLink": "https://github.com/postcss/autoprefixer"
+  },
+  {
+    "name": "eslint",
+    "version": "^8.49.0",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/eslint",
+    "repositoryLink": "https://github.com/eslint/eslint"
+  },
+  {
+    "name": "eslint-plugin-vue",
+    "version": "^9.17.0",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/eslint-plugin-vue",
+    "repositoryLink": "https://github.com/vuejs/eslint-plugin-vue"
+  },
+  {
+    "name": "npm-run-all2",
+    "version": "^6.1.1",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/npm-run-all2",
+    "repositoryLink": "https://github.com/bcomnes/npm-run-all2"
+  },
+  {
+    "name": "postcss",
+    "version": "^8.4.38",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/postcss",
+    "repositoryLink": "https://github.com/postcss/postcss"
+  },
+  {
+    "name": "prettier",
+    "version": "^3.0.3",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/prettier",
+    "repositoryLink": "https://github.com/prettier/prettier"
+  },
+  {
+    "name": "tailwindcss",
+    "version": "^3.4.3",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/tailwindcss",
+    "repositoryLink": "https://github.com/tailwindlabs/tailwindcss"
+  },
+  {
+    "name": "typescript",
+    "version": "~5.3.0",
+    "license": "Apache-2.0",
+    "npmLink": "https://www.npmjs.com/package/typescript",
+    "repositoryLink": "https://github.com/Microsoft/TypeScript"
+  },
+  {
+    "name": "vite",
+    "version": "^5.0.11",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/vite",
+    "repositoryLink": "https://github.com/vitejs/vite"
+  },
+  {
+    "name": "vue-tsc",
+    "version": "^1.8.27",
+    "license": "MIT",
+    "npmLink": "https://www.npmjs.com/package/vue-tsc",
+    "repositoryLink": "https://github.com/vuejs/language-tools"
+  }
+]
