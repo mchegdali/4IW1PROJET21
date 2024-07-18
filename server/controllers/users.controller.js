@@ -318,11 +318,10 @@ async function getUserCount(req, res, next) {
  */
 async function getUser(req, res, next) {
   try {
-    const user = await UserMongo.findById(req.params.userId, {
-      password: 0,
-    });
+    const user = await UserMongo.findById(req.params.id);
 
     if (user === null) {
+      console.log('no user found');
       return res.sendStatus(404);
     }
 
@@ -339,43 +338,14 @@ async function getUser(req, res, next) {
  */
 async function getUserAddresses(req, res, next) {
   try {
-    const user = await UserMongo.findById(req.params.userId);
+    const user = await UserMongo.findById(req.params.id);
 
     if (user === null) {
+      console.log('no user found');
       return res.sendStatus(404);
     }
 
     return res.json(user.addresses);
-  } catch (error) {
-    return next(error);
-  }
-}
-
-/**
- * Récupérer le nombre d'inscriptions d'utilisateurs par mois sur les 12 derniers mois sur Mongo
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getUserRegistrationsLast12Months(req, res, next) {
-  try {
-    const lastYear = dayjs().subtract(12, 'months').toDate();
-    const registrations = await UserMongo.aggregate([
-      { $match: { createdAt: { $gte: lastYear } } },
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-    ]);
-    return res.status(200).json(
-      registrations.map((entry) => ({
-        date: entry._id,
-        count: entry.count,
-      })),
-    );
   } catch (error) {
     return next(error);
   }
@@ -391,5 +361,4 @@ module.exports = {
   updateUser,
   getUserAddresses,
   getUserRegistrations,
-  getUserRegistrationsLast12Months
 };
