@@ -55,17 +55,17 @@ const OrderSchema = new mongoose.Schema(
         },
       },
     },
-    orderStatus: {
-      type: String,
-      required: true,
-    },
-    deliveryStatus: {
-      type: String,
-      required: true,
-    },
-    paymentStatus: {
-      type: String,
-      required: true,
+    status: {
+      type: {
+        _id: {
+          type: mongoose.Schema.Types.UUID,
+          required: true,
+        },
+        label: {
+          type: String,
+          required: true,
+        },
+      },
     },
     items: [
       {

@@ -25,7 +25,6 @@ const UsersSequelize = (sequelize) => {
       const order = await this.sequelize.models.orders.findByPk(this.orderId);
       return {
         _id: this.getDataValue('id'),
-
         fullname: this.getDataValue('fullname'),
         email: this.getDataValue('email'),
         password: this.getDataValue('password'),
@@ -33,9 +32,8 @@ const UsersSequelize = (sequelize) => {
         isVerified: this.getDataValue('isVerified'),
         role: this.getDataValue('role'),
         addresses:
-          this.getDataValue('addresses')?.map((address) => address.toMongo()) ??
-          [],
-        order: order.toMongo(),
+          this.getDataValue('addresses')?.map((address) => address.toMongo()) ?? [],
+        order: order ? await order.toMongo() : null,
       };
     }
   }

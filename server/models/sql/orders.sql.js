@@ -11,20 +11,23 @@ const OrdersSequelize = (sequelize) => {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
+      Orders.belongsTo(models.status, {
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+        as: 'status',
+      });
     }
+
     async toMongo() {
       const user = await this.sequelize.models.users.findByPk(this.userId);
-      const shipping = await this.sequelize.models.users.findByPk(
-        this.shippingId,
-      );
+      const shipping = await this.sequelize.models.shippings.findByPk(this.shippingId);
+      const status = await this.sequelize.models.status.findByPk(this.statusId);
       return {
         _id: this.id,
-        paymentStatus: this.paymentStatus,
-        deliveryStatus: this.deliveryStatus,
-        orderStatus: this.orderStatus,
         items: this.items,
-        user: user.toMongo(),
-        shpping: shipping.toMongo,
+        user: user ? user.toMongo() : null,
+        shipping: shipping ? shipping.toMongo() : null,
+        status: status ? status.toMongo() : null,
       };
     }
   }
@@ -36,16 +39,8 @@ const OrdersSequelize = (sequelize) => {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
       },
-      paymentStatus: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      deliveryStatus: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      orderStatus: {
-        type: DataTypes.STRING,
+      statusId: {
+        type: DataTypes.UUID,
         allowNull: false,
       },
       items: {
