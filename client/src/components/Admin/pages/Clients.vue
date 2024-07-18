@@ -28,14 +28,14 @@
     </section>
   </template>
   
-  <script lang="ts">
-  import { defineComponent } from 'vue';
-  import StatisticsBlock from '../StatisticsBlock.vue';
-  import LineChart from '../LineChart.vue';
-  import StatCard from '../StatCard.vue';
-  import BarChart from '../BarChart.vue';
-  
-  interface Statistic {
+<script lang="ts">
+import { defineComponent } from 'vue';
+import StatisticsBlock from '../StatisticsBlock.vue';
+import LineChart from '../LineChart.vue';
+import StatCard from '../StatCard.vue';
+import BarChart from '../BarChart.vue';
+
+interface Statistic {
     value: string;
     text: string;
     color: string;
