@@ -1,7 +1,7 @@
 <template>
     <section class="flex-1 ml-80">
         <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Utilisateurs</h1>
-        <UtilisateurTable :clients="clients" @delete-clients="deleteClients" />
+        <UtilisateurTable :clients="clients" @delete-clients="deleteClients" @update-client="updateClient" />
     </section>
 </template>
 
@@ -41,9 +41,17 @@ export default defineComponent({
             clients.value = clients.value.filter(client => !clientIds.includes(client.id));
         };
 
+        const updateClient = (updatedClient: Client) => {
+            const index = clients.value.findIndex(client => client.id === updatedClient.id);
+            if (index !== -1) {
+                clients.value.splice(index, 1, updatedClient);
+            }
+        };
+
         return {
             clients,
             deleteClients,
+            updateClient,
         };
     },
 });
