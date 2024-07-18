@@ -147,7 +147,7 @@
                     text: 'Utilisez des prévisions basées sur des données pour planifier votre stratégie future. Cliquez ici pour explorer les tendances et les prévisions détaillées !',
                     page: 'AdminTendances',
                 },
-            ] as Card[],
+            ] as CardData[],
         };
     },
     methods: {
