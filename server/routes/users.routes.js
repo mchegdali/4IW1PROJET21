@@ -44,6 +44,9 @@ usersRouter.get(
   getUserRegistrations,
 );
 
+usersRouter.use('/users/:userId/addresses', addressesRouter);
+usersRouter.get('/users/:userId', getUser);
+
 usersRouter.put(
   '/users/:userId',
   checkAuth(authConfig.accessTokenSecret, true),
