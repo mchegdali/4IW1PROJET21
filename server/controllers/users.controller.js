@@ -269,6 +269,34 @@ async function deleteUser(req, res, next) {
 }
 
 /**
+ * Récupérer le nombre d'inscriptions d'utilisateurs par jour sur Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserRegistrations(req, res, next) {
+  try {
+    const registrations = await UserMongo.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    return res.status(200).json(
+      registrations.map((entry) => ({
+        date: entry._id,
+        count: entry.count,
+      })),
+    );
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
  * Récupère le nombre total d'utilisateurs dans Mongo
  *
  * @type {import('express').RequestHandler}
@@ -284,28 +312,42 @@ async function getUserCount(req, res, next) {
 }
 
 /**
- * Récupérer le nombre d'inscriptions d'utilisateurs par jour sur Mongo
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
-async function getUserRegistrations(req, res, next) {
+async function getUser(req, res, next) {
   try {
-      const registrations = await UserMongo.aggregate([
-          {
-              $group: {
-                  _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                  count: { $sum: 1 }
-              }
-          },
-          { $sort: { _id: 1 } }
-      ]);
-      return res.status(200).json(registrations.map(entry => ({
-          date: entry._id,
-          count: entry.count
-      })));
+    const user = await UserMongo.findById(req.params.id);
+
+    if (user === null) {
+      console.log('no user found');
+      return res.sendStatus(404);
+    }
+
+    return res.json(user);
   } catch (error) {
-      return next(error);
+    return next(error);
+  }
+}
+
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserAddresses(req, res, next) {
+  try {
+    const user = await UserMongo.findById(req.params.id);
+
+    if (user === null) {
+      console.log('no user found');
+      return res.sendStatus(404);
+    }
+
+    return res.json(user.addresses);
+  } catch (error) {
+    return next(error);
   }
 }
 
