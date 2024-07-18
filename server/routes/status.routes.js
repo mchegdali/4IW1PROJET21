@@ -26,7 +26,7 @@ statusRouter.get(
   getStatuses,
 );
 
-statusRouter.get('/status/:id', getStatus);
+statusRouter.get('/status/:id', getStatuses);
 
 statusRouter.put(
   '/status/:id',
