@@ -1,59 +1,51 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import HomePage from '../components/Admin/pages/Home.vue';
-import VentesPage from '../components/Admin/pages/Ventes.vue';
-import AdminLayout from '../components/Admin/pages/AdminLayout.vue';
-import UtilisateursPage from '../components/Admin/pages/Utilisateurs.vue';
-import ProduitsPage from '../components/Admin/pages/Produits.vue';
-import FinancesPage from '../components/Admin/pages/Finances.vue';
-import ClientsPage from '../components/Admin/pages/Clients.vue';
-import TendancesPage from '../components/Admin/pages/Tendances.vue';
+import { type RouteRecordRaw } from 'vue-router';
 
 const adminRoutes: Array<RouteRecordRaw> = [
   {
     path: '/admin',
-    component: AdminLayout,
+    component: () => import('../components/Admin/pages/AdminLayout.vue'),
     children: [
       {
         path: '',
         name: 'AdminHome',
-        component: HomePage,
-        meta: { needLoggedIn: true },
+        component: () => import('../components/Admin/pages/Home.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'ventes',
         name: 'AdminVentes',
-        component: VentesPage,
-        meta: { needLoggedIn: true },
+        component: () => import('../components/Admin/pages/Ventes.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'utilisateurs',
         name: 'AdminUtilisateurs',
-        component: UtilisateursPage,
-        meta: { needLoggedIn: true },
+        component: () => import('../components/Admin/pages/Utilisateurs.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'produits',
         name: 'AdminProduits',
-        component: ProduitsPage,
-        meta: { needLoggedIn: true },
+        component: () => import('../components/Admin/pages/Produits.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'finances',
         name: 'AdminFinances',
-        component: FinancesPage,
-        meta: { needLoggedIn: true },
+        component: () => import('../components/Admin/pages/Finances.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'clients',
         name: 'AdminClients',
-        component: ClientsPage,
-        meta: { needLoggedIn: true },
+        component: () => import('../components/Admin/pages/Clients.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'tendances',
         name: 'AdminTendances',
-        component: TendancesPage,
-        meta: { needLoggedIn: true },
+        component: () => import('../components/Admin/pages/Tendances.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   }
