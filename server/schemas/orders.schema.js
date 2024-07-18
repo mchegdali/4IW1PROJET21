@@ -11,9 +11,7 @@ const orderQuerySchema = z.object({
 const orderCreateSchema = z.object({
   user: z.string().uuid().optional(),
   shipping: z.string().uuid().optional(),
-  orderStatus: z.string().optional(),
-  deliveryStatus: z.string().optional(),
-  paymentStatus: z.string().optional(),
+  status: z.string().uuid().optional(), // Référence à la collection de statuts
   items: z
     .array(
       z.object({
