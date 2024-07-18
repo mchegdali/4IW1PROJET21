@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "paypal-rest-sdk": "^1.8.1",
     "zod": "^3.23.8"
   }
 }

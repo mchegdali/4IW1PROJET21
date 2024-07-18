@@ -7,7 +7,7 @@ const {
 const paymentRouter = Router();
 
 paymentRouter.post('/payment', createPayment);
-paymentRouter.get('/success', executePayment);
+paymentRouter.get('/payment/:id/success', executePayment);
 paymentRouter.get('/cancel', (req, res) => res.send('Cancelled'));
 
 module.exports = paymentRouter;
