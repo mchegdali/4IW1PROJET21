@@ -14,6 +14,7 @@ const { NotFound } = require('http-errors');
 const Users = sequelize.model('users');
 
 /**
+ * Créer un utilisateur
  *
  * @type {import('express').RequestHandler}
  * @returns
@@ -268,6 +269,88 @@ async function deleteUser(req, res, next) {
 }
 
 /**
+ * Récupère le nombre total d'utilisateurs dans Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserCount(req, res, next) {
+  try {
+    const count = await UserMongo.countDocuments();
+    return res.status(200).json({ count });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ * Récupérer le nombre d'inscriptions d'utilisateurs par jour sur Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserRegistrations(req, res, next) {
+  try {
+      const registrations = await UserMongo.aggregate([
+          {
+              $group: {
+                  _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                  count: { $sum: 1 }
+              }
+          },
+          { $sort: { _id: 1 } }
+      ]);
+      return res.status(200).json(registrations.map(entry => ({
+          date: entry._id,
+          count: entry.count
+      })));
+  } catch (error) {
+      return next(error);
+  }
+}
+
+/**
+ * Récupère le nombre total d'utilisateurs dans Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserCount(req, res, next) {
+  try {
+    const count = await UserMongo.countDocuments();
+    return res.status(200).json({ count });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ * Récupérer le nombre d'inscriptions d'utilisateurs par jour sur Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserRegistrations(req, res, next) {
+  try {
+      const registrations = await UserMongo.aggregate([
+          {
+              $group: {
+                  _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                  count: { $sum: 1 }
+              }
+          },
+          { $sort: { _id: 1 } }
+      ]);
+      return res.status(200).json(registrations.map(entry => ({
+          date: entry._id,
+          count: entry.count
+      })));
+  } catch (error) {
+      return next(error);
+  }
+}
+
+/**
  *
  * @type {import('express').RequestHandler}
  * @returns
@@ -308,6 +391,7 @@ async function getUserAddresses(req, res, next) {
 }
 
 module.exports = {
+  getUserCount,
   createUser,
   getUsers,
   getUser,
@@ -315,4 +399,5 @@ module.exports = {
   deleteUser,
   updateUser,
   getUserAddresses,
+  getUserRegistrations,
 };
