@@ -32,7 +32,7 @@ app.use(deliveryChoiceRouter);
 app.use(paymentRouter);
 app.use(orderRouter);
 app.use(statusRouter);  // Ajoutez le routeur de status
-app.use(statusRouter);  // Ajoutez le routeur de status
+
 app.use(errorMiddleware);
 
 
