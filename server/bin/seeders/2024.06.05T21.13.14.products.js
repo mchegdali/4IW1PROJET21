@@ -1,4 +1,3 @@
-const ProductMongo = require('../../models/mongo/products.mongo');
 const slugify = require('../../utils/slugify');
 const { fakerFR: faker } = require('@faker-js/faker');
 const crypto = require('node:crypto');

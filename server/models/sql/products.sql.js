@@ -38,9 +38,7 @@ const ProductsSequelize = (sequelize) => {
       });
 
       Products.addHook('afterUpdate', async (product) => {
-        console.log('afterUpdate', product);
         const productMongo = await product.toMongo();
-        console.log('afterUpdate', productMongo);
         await ProductMongo.updateOne(
           { _id: product.id },
           {

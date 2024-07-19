@@ -75,4 +75,4 @@ ProductSchema.index(
 
 const ProductMongo = connection.model('Product', ProductSchema);
 
-module.exports = ProductMongo;
+module.exports = { ProductMongo, ProductSchema };

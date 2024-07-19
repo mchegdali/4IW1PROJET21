@@ -2,7 +2,7 @@ const httpErrors = require('http-errors');
 const validator = require('validator');
 const sequelize = require('../models/sql');
 const CategoriesMongo = require('../models/mongo/categories.mongo');
-const ProductMongo = require('../models/mongo/products.mongo');
+const { ProductMongo } = require('../models/mongo/products.mongo');
 const {
   productCreateSchema,
   productQuerySchema,
