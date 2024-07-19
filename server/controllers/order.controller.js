@@ -231,10 +231,26 @@ async function deleteOrder(req, res, next) {
   }
 }
 
+/**
+ * Récupérer le nombre total de commandes dans MongoDB
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getOrderCount(req, res, next) {
+  try {
+    const count = await OrdersMongo.countDocuments();
+    return res.status(200).json({ count });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createOrder,
   getOrder,
   getOrders,
   updateOrder,
   deleteOrder,
+  getOrderCount,
 };
