@@ -58,6 +58,13 @@ usersRouter.use(
   userBasketRouter,
 );
 
+usersRouter.get(
+  '/users/:userId',
+  checkAuth(authConfig.accessTokenSecret, true),
+  isOwnAccount,
+  getUser,
+);
+
 usersRouter.put(
   '/users/:userId',
   checkAuth(authConfig.accessTokenSecret, true),
