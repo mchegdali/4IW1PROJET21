@@ -17,12 +17,10 @@ const productCount = computed(() => {
   return basketStore.products.filter((p) => p._id === product._id).length;
 });
 
-function onIncrement() {
-  basketStore.addProduct(product);
-}
+function onInput(value: number) {
+  console.log('onInput', value);
 
-function onDecrement() {
-  basketStore.removeProduct(product);
+  basketStore.setProductCount(product, value);
 }
 </script>
 
@@ -41,16 +39,21 @@ function onDecrement() {
         {{ product.description }}
       </p>
       <div class="flex gap-2 w-full">
-        <NumberField :model-value="productCount" :min="0" class="max-w-40">
+        <NumberField
+          :model-value="productCount"
+          :min="0"
+          class="max-w-40"
+          @update:model-value="onInput"
+        >
           <NumberFieldContent>
-            <NumberFieldDecrement v-if="productCount > 1" @click="onDecrement" />
-            <NumberFieldDecrement v-else @click="onDecrement">
+            <NumberFieldDecrement v-if="productCount > 0" />
+            <NumberFieldDecrement v-else>
               <template #default>
                 <Trash width="16" height="16" />
               </template>
             </NumberFieldDecrement>
             <NumberFieldInput />
-            <NumberFieldIncrement @click="onIncrement" />
+            <NumberFieldIncrement />
           </NumberFieldContent>
         </NumberField>
       </div>
