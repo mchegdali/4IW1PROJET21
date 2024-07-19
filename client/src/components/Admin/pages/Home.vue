@@ -86,11 +86,11 @@ import Card from '../Card.vue';
 import BarChart from '../BarChart.vue';
 import DonutChart from '../DonutChart.vue';
 
-interface Card {
-    image: string;
-    title: string;
-    text: string;
-    page: string;
+interface CardData {
+  image: string;
+  title: string;
+  text: string;
+  page: string;
 }
 
 export default defineComponent({

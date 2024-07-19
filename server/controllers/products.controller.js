@@ -9,6 +9,7 @@ const {
   productUpdateSchema,
 } = require('../schemas/products.schema');
 const { Op } = require('sequelize');
+const { Op } = require('sequelize');
 
 const { NotFound } = httpErrors;
 const Products = sequelize.model('products');
@@ -172,6 +173,9 @@ async function getProducts(req, res, next) {
  */
 async function getProduct(req, res, next) {
   try {
+    const product = await ProductMongo.findOne({
+      $or: [{ _id: req.params.product }, { slug: req.params.product }],
+    });
     const product = await ProductMongo.findOne({
       $or: [{ _id: req.params.product }, { slug: req.params.product }],
     });

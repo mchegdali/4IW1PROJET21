@@ -3,7 +3,6 @@ const {
   getBasket,
   addItemToBasket,
   removeItemFromBasket,
-  setItemQuantity,
 } = require('../controllers/basket.controller');
 
 const userBasketRouter = Router({ mergeParams: true });

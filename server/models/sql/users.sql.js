@@ -23,30 +23,13 @@ const UsersSequelize = (sequelize) => {
       });
     }
 
-    async toMongo(options) {
+    async toMongo({ transaction }) {
       const [addresses, basket] = await Promise.all([
-        this.getAddresses(options),
-        this.getBasket(options),
+        this.getAddresses({ transaction }),
+        this.getBasket({ transaction }),
       ]);
 
       const addressesMongo = addresses.map((address) => address.toMongo());
-
-      let basketItems = [];
-
-      if (basket) {
-        await basket.getItems({
-          include: {
-            model: this.sequelize.models.products,
-          },
-          transaction: options?.transaction,
-        });
-
-        basketItems = await Promise.all(
-          basketItems.map((item) =>
-            item.getDataValue('product').toMongo(options),
-          ),
-        );
-      }
 
       return {
         _id: this.id,
@@ -57,7 +40,7 @@ const UsersSequelize = (sequelize) => {
         isVerified: this.isVerified,
         role: this.role,
         addresses: addressesMongo,
-        basket: basketItems,
+        basket: basket ?? [],
       };
     }
   }
