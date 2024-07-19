@@ -12,7 +12,7 @@ const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
 const { isOwnAccount } = require('../middlewares/users.middleware');
 const addressesRouter = require('./addresses.routes');
-const { userBasketRouter } = require('./basket.routes');
+const userBasketRouter = require('./basket.routes');
 
 const usersRouter = Router();
 
@@ -44,6 +44,13 @@ usersRouter.use(
   checkAuth(authConfig.accessTokenSecret, false),
   isOwnAccount,
   userBasketRouter,
+);
+
+usersRouter.get(
+  '/users/:userId',
+  checkAuth(authConfig.accessTokenSecret, true),
+  isOwnAccount,
+  getUser,
 );
 
 usersRouter.put(

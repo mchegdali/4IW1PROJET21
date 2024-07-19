@@ -3,6 +3,7 @@ const dayjs = require('dayjs');
 const { hash } = require('@node-rs/argon2');
 const authConfig = require('../../config/auth.config');
 const UserMongo = require('../mongo/user.mongo');
+const UserMongo = require('../mongo/user.mongo');
 
 const UsersSequelize = (sequelize) => {
   class Users extends Model {
@@ -11,6 +12,7 @@ const UsersSequelize = (sequelize) => {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       });
+      Users.hasMany(models.orders, {
       Users.hasMany(models.orders, {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
@@ -38,10 +40,7 @@ const UsersSequelize = (sequelize) => {
         isVerified: this.isVerified,
         role: this.role,
         addresses: addressesMongo,
-        basket: basketItems,
-        createdAt: this.createdAt,
-        updatedAt: this.updatedAt,
-        deletedAt: this.deletedAt,
+        basket: basket ?? [],
       };
     }
   }
@@ -94,6 +93,7 @@ const UsersSequelize = (sequelize) => {
       sequelize,
       modelName: 'users',
       paranoid: true,
+      paranoid: true,
       hooks: {
         afterValidate: async (user, { fields }) => {
           if (fields.includes('password')) {
@@ -103,6 +103,36 @@ const UsersSequelize = (sequelize) => {
             );
             user.password = newPassword;
             user.passwordValidUntil = dayjs().add(60, 'day').toDate();
+          }
+        },
+        afterCreate: async (user, { transaction }) => {
+          const userMongo = await user.toMongo({ transaction });
+          await UserMongo.create(userMongo);
+        },
+        afterUpdate: async (user, { transaction }) => {
+          const userMongo = await user.toMongo({ transaction });
+          await UserMongo.updateOne(
+            { _id: user.id },
+            {
+              $set: userMongo,
+            },
+            {
+              upsert: true,
+            },
+          );
+        },
+        afterDestroy: async (user, { force }) => {
+          if (force) {
+            await UserMongo.deleteOne({ _id: user.id });
+          } else {
+            await UserMongo.updateOne(
+              { _id: user.id },
+              {
+                $set: {
+                  deletedAt: user.deletedAt,
+                },
+              },
+            );
           }
         },
         afterCreate: async (user, { transaction }) => {
