@@ -2,6 +2,7 @@ const { fakerFR: faker } = require('@faker-js/faker');
 const UserMongo = require('../../models/mongo/user.mongo');
 const crypto = require('node:crypto');
 const dayjs = require('dayjs');
+const dayjs = require('dayjs');
 
 /**
  * @typedef { Object } MigrationParams
@@ -115,9 +116,6 @@ const up = async ({ context: { sequelize } }) => {
               'zipCode',
               'country',
               'phone',
-              'createdAt',
-              'updatedAt',
-              'deletedAt',
             ],
           },
         ],
