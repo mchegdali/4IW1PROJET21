@@ -1,4 +1,4 @@
-const paypal = require('paypal-rest-sdk');
+const stripe = require('stripe')('sk_test_51PeDeeId99a4h4TCtZHFvfkpMCxcomJbjMa4RydO0hrpOaU9iJRyXXfNbj9ZOipRemzUtCoyUhPRIY0SAsmACML30075O7ZqDl')
 const httpErrors = require('http-errors');
 const OrdersMongo = require('../models/mongo/orders.mongo');
 const UsersMongo = require('../models/mongo/user.mongo');
@@ -6,46 +6,50 @@ const PaymentsMongo = require('../models/mongo/payment.mongo');
 const sequelize = require('../models/sql');
 const { NotFound } = httpErrors;
 const Payments = sequelize.model("payments");
-paypal.configure({
-  mode: 'sandbox', 
-  client_id: process.env.PAYPAL_CLIENT_ID,
-  client_secret: process.env.PAYPAL_SECRET,
-});
 
-const {
-  paymentQuerySchema,
-  paymentCreateSchema,
-  paymentUpdateSchema,
-} = require('../schemas/payments.schema');
+const { paymentQuerySchema, paymentCreateSchema, paymentUpdateSchema} = require('../schemas/payments.schema');
+
 const createPayment = async (req, res, next) => {
   try {
+    // Parse request body
     const paymentCreateBody = await paymentCreateSchema.parseAsync(req.body);
+
+    // Find the user
     const user = await UsersMongo.findById(paymentCreateBody.user);
-    console.log("first log ",user)
     if (!user) {
       throw new NotFound('User not found');
     }
+    console.log("first log", user);
 
+    // Transaction to ensure atomic operations
     const result = await sequelize.transaction(async (t) => {
-      const order = await OrdersMongo.findOne({ user: user })
-        .sort({ createdAt: -1 })
-        .exec();
-        console.log("sec log ",order)
+      // Find the latest order for the user
+      const order = await OrdersMongo.findOne({ user: user }).sort({ createdAt: -1 }).exec();
       if (!order) {
         throw new NotFound('Order not found');
       }
+      console.log("second log", order);
 
+      // Ensure order.items is an array
+      if (!Array.isArray(order.items)) {
+        throw new Error('Order items are not an array');
+      }
+
+      // Calculate total price
       const totalPrice = order.items.reduce((total, item) => {
         return total + parseFloat(item.price.toString());
       }, 0);
 
+      // Create payment record in SQL
       const payment = await Payments.create({
         userId: user._id,
         orderId: order._id,
         paymentStatus: 'Pending',
         totalPrice: totalPrice.toFixed(2),
       }, { transaction: t });
-      console.log("third log ",payment)
+      console.log("third log", payment);
+
+      // Create payment document for MongoDB
       const paymentMongo = {
         _id: payment.id,
         user: {
@@ -66,114 +70,64 @@ const createPayment = async (req, res, next) => {
         paymentStatus: 'Pending',
         totalPrice: totalPrice.toFixed(2),
       };
-      console.log("quartuor log ",paymentMongo)
-      const paymentDoc = await PaymentsMongo.create(paymentMongo);
-      console.log("cinq log ",paymentDoc)
+      console.log("fourth log", paymentMongo);
 
-      //paypal dynamique 
-      const create_payment_json = {
-        intent: 'sale',
-        payer: { payment_method: 'paypal' },
-        redirect_urls: {
-          return_url: process.env.VITE_API_BASE_URL.toString(),
-          cancel_url: 'http://localhost:3000/cancel',
-        },
-        transactions: [
-          {
-            item_list: {
-              items: order.items.map((item) => ({
-                name: item.name,
-                sku: item._id.toString(),
-                price: parseFloat(item.price.toString()).toFixed(2),
-                currency: 'EUR',
-                quantity: 1,
-              })),
-            },
-            amount: {
-              currency: 'EUR',
-              total: totalPrice.toFixed(2),
-            },
-            description: `commande Order : ${order._id}`,
-          },
-        ],
-      };
-      console.log("SIX LOG", create_payment_json)
-      return new Promise((resolve, reject) => {
-        paypal.payment.create(create_payment_json, async (error, payment) => {
-          if (error) {
-            console.error('PayPal create payment error:', error);
-            await t.rollback();
-            return reject(new Error('Failed to create PayPal payment'));
-          } else {
-            for (let link of payment.links) {
-              if (link.rel === 'approval_url') {
-                await t.commit();
-                return resolve({ redirectUrl: link.href, payment: paymentDoc });
-              }
-            }
-            await t.rollback();
-            return reject(new Error('No approval_url found in PayPal payment response'));
-          }
-      
-        });
-      });
-    
+      // Save payment document in MongoDB
+      const paymentDoc = await PaymentsMongo.create(paymentMongo);
+      return { paymentDoc, order };
     });
 
-    return res.status(201).json(result);
+    // Extract payment document and order
+    const { paymentDoc, order } = result;
+
+    // Map line items for Stripe
+    const line_items = order.items.map(item => ({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.name,
+        },
+        unit_amount: parseFloat(item.price.toString()) * 100, // Convert to cents
+      },
+      quantity: 1,
+    }));
+
+    // Create Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items,
+      mode: 'payment',
+      success_url: 'http://localhost:3000/complete?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: 'http://localhost:3000/cancel',
+      shipping_address_collection: {
+        allowed_countries: ['US', 'BR'],
+      },
+    });
+
+    // Redirect to Stripe Checkout
+    res.redirect(303, session.url);
   } catch (error) {
     console.error('createPayment error:', error);
     return next(error);
   }
 };
-
-const executePayment = async (req, res) => {
-  console.log("execute payment ",req.body,"req.parmas",req.params.paymentId)
-  const payerId = req.query.PayerID;
-  const paymentId = req.query.paymentId;
-  const { orderId } = req.body.orderId;
-
+const completePayment = async (req, res, next) => {
   try {
-    
-    const order = await OrdersMongo.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
+    const sessionId = req.query.session_id;
 
-    const totalPrice = order.items.reduce((total, item) => {
-      return total + parseFloat(item.price);
-    }, 0);
+    const [session, lineItems] = await Promise.all([
+      stripe.checkout.sessions.retrieve(sessionId, { expand: ['payment_intent.payment_method'] }),
+      stripe.checkout.sessions.listLineItems(sessionId),
+    ]);
 
-    const execute_payment_json = {
-      payer_id: payerId,
-      transactions: [
-        {
-          amount: {
-            currency: 'USD',
-            total: totalPrice.toFixed(2),
-          },
-        },
-      ],
-    };
+    console.log(JSON.stringify({ session, lineItems }));
 
-    paypal.payment.execute(paymentId, execute_payment_json, async function (error, payment) {
-      if (error) {
-        console.error(error.response);
-       
-        order.paymentStatus = 'payment-failed';
-        await order.save();
-        res.status(500).json({ error: 'Payment execution failed' });
-      } else {
-
-        order.paymentStatus = 'paid';
-        await order.save();
-        res.json({ message: 'Payment successful', payment });
-      }
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.send('Your payment was successful');
+  } catch (error) {
+    console.error('completePayment error:', error);
+    next(error);
   }
 };
 
-module.exports = { createPayment, executePayment };
+
+module.exports = { createPayment, completePayment};
