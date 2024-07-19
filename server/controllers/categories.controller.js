@@ -2,7 +2,7 @@ const CategoriesSequelize = require('../models/sql/categories.sql');
 const CategoriesMongo = require('../models/mongo/categories.mongo');
 const sequelize = require('../models/sql/db');
 const { NotFound } = require('http-errors');
-const ProductMongo = require('../models/mongo/products.mongo');
+const { ProductMongo } = require('../models/mongo/products.mongo');
 
 const {
   categoryCreateSchema,

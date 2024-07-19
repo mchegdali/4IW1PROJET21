@@ -38,25 +38,8 @@ export const useBasketStore = defineStore('basket', {
         this.products.push(product);
       }
     },
-    setProductNumber(product: Product, count: number) {
-      if (count <= 0) {
-        return;
-      }
-
-      if (count === 0) {
-        this.products = this.products.filter((p) => p._id !== product._id);
-      }
-
-      const productCount = this.products.filter((p) => p._id === product._id);
-      const diff = count - productCount.length;
-      const absDiff = Math.abs(diff);
-      for (let i = 0; i < absDiff; i++) {
-        if (diff > 0) {
-          this.products.push(product);
-        } else {
-          this.removeProduct(product);
-        }
-      }
+    setProducts(products: Product[]) {
+      this.products = structuredClone(products);
     },
     removeProduct(product: Product) {
       const lastIndex = this.products.findLastIndex((p) => p._id === product._id);

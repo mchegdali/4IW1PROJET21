@@ -1,11 +1,13 @@
 export type ProductCategory = {
   _id: string;
+  id: string;
   name: string;
   slug: string;
 };
 
 export interface Product {
   _id: string;
+  id: string;
   slug: string;
   name: string;
   category: ProductCategory;
