@@ -1,6 +1,6 @@
 const { DataTypes, Model } = require('sequelize');
 const slugify = require('../../utils/slugify');
-const ProductMongo = require('../mongo/products.mongo');
+const { ProductMongo } = require('../mongo/products.mongo');
 const UserMongo = require('../mongo/user.mongo');
 
 const ProductsSequelize = (sequelize) => {
