@@ -31,7 +31,7 @@ const up = async ({ context: { sequelize } }) => {
       const month = Math.floor(Math.random() * 12);
       const day = Math.floor(Math.random() * 28) + 1;
       const createdAt = dayjs(new Date(2024, month, day)).toDate();
-      const updatedAt = createdAt; // Si vous voulez que updatedAt soit le même que createdAt
+      const updatedAt = createdAt;
     
       usersToCreate.push({
         id: crypto.randomUUID(),
@@ -53,10 +53,12 @@ const up = async ({ context: { sequelize } }) => {
             phone: faker.phone.number(),
             createdAt,
             updatedAt,
+            deletedAt: null,
           },
         ],
         createdAt,
         updatedAt,
+        deletedAt: null,
       });
     }
 
@@ -108,10 +110,12 @@ const up = async ({ context: { sequelize } }) => {
             phone: faker.phone.number(),
             createdAt: new Date(),
             updatedAt: new Date(),
+            deletedAt: null,
           },
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
       },
       {
         validate: true,
@@ -156,10 +160,12 @@ const up = async ({ context: { sequelize } }) => {
             phone: faker.phone.number(),
             createdAt: new Date(),
             updatedAt: new Date(),
+            deletedAt: null,
           },
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
       },
       {
         validate: true,
@@ -206,10 +212,12 @@ const up = async ({ context: { sequelize } }) => {
             phone: faker.phone.number(),
             createdAt: new Date(),
             updatedAt: new Date(),
+            deletedAt: null,
           },
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
       },
       {
         validate: true,
@@ -246,11 +254,15 @@ const up = async ({ context: { sequelize } }) => {
       addresses: u.getDataValue('addresses').map((a) => a.toMongo()),
       createdAt: u.createdAt,
       updatedAt: u.updatedAt,
-
+      deletedAt: u.deletedAt,
     }));
 
+    console.log(createdUsersMongo);
+
     await UserMongo.insertMany(createdUsersMongo);
+    console.log("salut");
   });
+  console.log("hey");
 };
 
 /**
