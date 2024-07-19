@@ -1,62 +1,59 @@
 const paypal = require('paypal-rest-sdk');
 const httpErrors = require('http-errors');
-const OrdersMongo = require('../models/mongo/orders.mongo'); 
-const UsersMongo = require ("../models/mongo/user.mongo")
+const OrdersMongo = require('../models/mongo/orders.mongo');
+const UsersMongo = require('../models/mongo/user.mongo');
+const PaymentsMongo = require('../models/mongo/payment.mongo');
+const sequelize = require('../models/sql');
 const { NotFound } = httpErrors;
-const sequelize = require ("../models/sql");
-const Payment = sequelize.model("payments")
+const Payments = sequelize.model("payments");
 paypal.configure({
   mode: 'sandbox', 
   client_id: process.env.PAYPAL_CLIENT_ID,
   client_secret: process.env.PAYPAL_SECRET,
 });
+
 const {
   paymentQuerySchema,
   paymentCreateSchema,
   paymentUpdateSchema,
 } = require('../schemas/payments.schema');
-
 const createPayment = async (req, res, next) => {
   try {
     const paymentCreateBody = await paymentCreateSchema.parseAsync(req.body);
-    console.log("test : ",paymentCreateBody)
     const user = await UsersMongo.findById(paymentCreateBody.user);
-    console.log("first log", user);
+    console.log("first log ",user)
     if (!user) {
       throw new NotFound('User not found');
     }
 
-    const order = await OrdersMongo.findOne({ user: user })
-      .sort({ createdAt: -1 })
-      .exec();
-    if (!order) {
-      throw new NotFound('Order not found');
-    }
+    const result = await sequelize.transaction(async (t) => {
+      const order = await OrdersMongo.findOne({ user: user })
+        .sort({ createdAt: -1 })
+        .exec();
+        console.log("sec log ",order)
+      if (!order) {
+        throw new NotFound('Order not found');
+      }
 
-    console.log('Found order:', order);
-    console.log('Found user:', user);
+      const totalPrice = order.items.reduce((total, item) => {
+        return total + parseFloat(item.price.toString());
+      }, 0);
 
-    // Verify that the order has required fields
-    if (!order._id || !order.deliveryStatus || !order.orderStatus) {
-      throw new Error('Order validation failed: missing required fields');
-    }
-
-    const totalPrice = order.items.reduce((total, item) => {
-      return total + parseFloat(item.price.toString());
-    }, 0);
-
-    const paymentMongo = {
-      user: {
-        _id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-      },
-      order: {
-        _id: order._id,
-        paymentStatus: order.paymentStatus,
-        deliveryStatus: order.deliveryStatus,
-        orderStatus: order.orderStatus,
-        items: order.items.map((item) => ({
+      const payment = await Payments.create({
+        userId: user._id,
+        orderId: order._id,
+        paymentStatus: 'Pending',
+        totalPrice: totalPrice.toFixed(2),
+      }, { transaction: t });
+      console.log("third log ",payment)
+      const paymentMongo = {
+        _id: payment.id,
+        user: {
+          _id: user._id,
+          fullname: user.fullname,
+          email: user.email,
+        },
+        order: order.items.map((item) => ({
           _id: item._id,
           name: item.name,
           category: {
@@ -66,57 +63,64 @@ const createPayment = async (req, res, next) => {
           },
           price: item.price,
         })),
-      },
-      paymentStatus: 'Pending',
-      totalPrice: totalPrice.toFixed(2),
-    };
-console.log("payment mongo ",paymentMongo)
-    const paymentDoc = await Payment.create(paymentMongo);
+        paymentStatus: 'Pending',
+        totalPrice: totalPrice.toFixed(2),
+      };
+      console.log("quartuor log ",paymentMongo)
+      const paymentDoc = await PaymentsMongo.create(paymentMongo);
+      console.log("cinq log ",paymentDoc)
 
-    // Prepare PayPal payment JSON
-    const create_payment_json = {
-      intent: 'sale',
-      payer: {
-        payment_method: 'paypal',
-      },
-      redirect_urls: {
-        return_url: 'http://localhost:3000/success',
-        cancel_url: 'http://localhost:3000/cancel',
-      },
-      transactions: [
-        {
-          item_list: {
-            items: order.items.map((item) => ({
-              name: item.name,
-              sku: item._id.toString(),
-              price: parseFloat(item.price.toString()).toFixed(2),
-              currency: 'EUR',
-              quantity: 1,
-            })),
-          },
-          amount: {
-            currency: 'EUR',
-            total: totalPrice.toFixed(2),
-          },
-          description: `Order ID: ${order._id}`,
+      //paypal dynamique 
+      const create_payment_json = {
+        intent: 'sale',
+        payer: { payment_method: 'paypal' },
+        redirect_urls: {
+          return_url: process.env.VITE_API_BASE_URL.toString(),
+          cancel_url: 'http://localhost:3000/cancel',
         },
-      ],
-    };
-
-    paypal.payment.create(create_payment_json, (error, payment) => {
-      if (error) {
-        console.error('PayPal create payment error:', error);
-        throw new Error('Failed to create PayPal payment');
-      } else {
-        for (let i = 0; i < payment.links.length; i++) {
-          if (payment.links[i].rel === 'approval_url') {
-            return res.json({ redirectUrl: payment.links[i].href, payment: paymentDoc });
+        transactions: [
+          {
+            item_list: {
+              items: order.items.map((item) => ({
+                name: item.name,
+                sku: item._id.toString(),
+                price: parseFloat(item.price.toString()).toFixed(2),
+                currency: 'EUR',
+                quantity: 1,
+              })),
+            },
+            amount: {
+              currency: 'EUR',
+              total: totalPrice.toFixed(2),
+            },
+            description: `commande Order : ${order._id}`,
+          },
+        ],
+      };
+      console.log("SIX LOG", create_payment_json)
+      return new Promise((resolve, reject) => {
+        paypal.payment.create(create_payment_json, async (error, payment) => {
+          if (error) {
+            console.error('PayPal create payment error:', error);
+            await t.rollback();
+            return reject(new Error('Failed to create PayPal payment'));
+          } else {
+            for (let link of payment.links) {
+              if (link.rel === 'approval_url') {
+                await t.commit();
+                return resolve({ redirectUrl: link.href, payment: paymentDoc });
+              }
+            }
+            await t.rollback();
+            return reject(new Error('No approval_url found in PayPal payment response'));
           }
-        }
-        throw new Error('No approval_url found in PayPal payment response');
-      }
+      
+        });
+      });
+    
     });
 
+    return res.status(201).json(result);
   } catch (error) {
     console.error('createPayment error:', error);
     return next(error);

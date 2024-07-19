@@ -4,14 +4,14 @@ const connection = require('./db');
 const paymentSchema = new mongoose.Schema(
   {
     _id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.UUID,
       required: true,
       auto: true,
     },
     user: {
       type: {
         _id: {
-          type: mongoose.Schema.Types.ObjectId,
+          type: mongoose.Schema.Types.UUID,
           required: true,
         },
         fullname: {
@@ -25,60 +25,39 @@ const paymentSchema = new mongoose.Schema(
       },
       required: true,
     },
-    order: {
-      type: {
+    order: [
+      {
         _id: {
-          type: mongoose.Schema.Types.ObjectId,
+          type: mongoose.Schema.Types.UUID,
           required: true,
         },
-        items: [
-          {
-            _id: {
-              type: mongoose.Schema.Types.ObjectId,
-              required: true,
-            },
-            name: {
-              type: String,
-              required: true,
-            },
-            category: {
-              _id: {
-                type: mongoose.Schema.Types.ObjectId,
-                required: true,
-              },
-              name: {
-                type: String,
-                required: true,
-              },
-              slug: {
-                type: String,
-                required: true,
-              },
-            },
-            price: {
-              type: mongoose.Schema.Types.Decimal128,
-              required: true,
-              get(v) {
-                return v.toString();
-              },
-            },
+        name: {
+          type: String,
+          required: true,
+        },
+        category: {
+          _id: {
+            type: mongoose.Schema.Types.UUID,
+            required: true,
           },
-        ],
-        paymentStatus: {
-          type: String,
-          required: true,
+          name: {
+            type: String,
+            required: true,
+          },
+          slug: {
+            type: String,
+            required: true,
+          },
         },
-        deliveryStatus: {
-          type: String,
+        price: {
+          type: mongoose.Schema.Types.Decimal128,
           required: true,
-        },
-        orderStatus: {
-          type: String,
-          required: true,
+          get(v) {
+            return v.toString();
+          },
         },
       },
-      required: true,
-    },
+    ],
     paymentStatus: {
       type: String,
       required: true,
@@ -92,12 +71,8 @@ const paymentSchema = new mongoose.Schema(
     },
   },
   {
-    toObject: {
-      getters: true,
-    },
-    toJSON: {
-      getters: true,
-    },
+    toObject: { getters: true },
+    toJSON: { getters: true },
   }
 );
 
