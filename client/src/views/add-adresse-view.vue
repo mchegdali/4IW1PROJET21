@@ -2,6 +2,7 @@
 import AdresseForm from '@/components/adresse-form.vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { MoveLeft } from 'lucide-vue-next';
 
 const initialAddressData = ref({
   firstName: '',
@@ -23,7 +24,7 @@ const handleFormSubmission = () => {
 
 <template>
   <main class="grow">
-    <div class="flex items-center w-full relative align">
+    <div class="flex items-center w-full relative align px-4 mt-2">
       <div class="block lg:hidden">
         <router-link :to="{ name: 'addresses' }"><MoveLeft /></router-link>
       </div>
