@@ -43,5 +43,5 @@ docker compose exec node npm run db:seed:up
 Revert all seed data:
 
 ```bash
-docker compose exec node npm run db:seed:down-all
+docker compose exec node npm run db:seed:down
 ```
