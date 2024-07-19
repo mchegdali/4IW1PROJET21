@@ -1,13 +1,35 @@
+<!-- AdresseForm.vue -->
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import Input from './ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { z } from 'zod';
 import { useForm } from '@/composables/form';
 
+const props = defineProps<{
+  isEditing: boolean;
+  initialAddressData?: {
+    firstName: string;
+    lastName: string;
+    street: string;
+    city: string;
+    region: string;
+    zipCode: string;
+    country: string;
+    phone: string;
+  };
+}>();
+
+const emit = defineEmits<{
+  (e: 'submitted'): void;
+}>();
+
 const router = useRouter();
+const route = useRoute();
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 const userId = user.id;
+const addressId = route.params.id as string;
 
 const nameRegex = /^[a-zA-ZÀ-ÿ '-]{2,}$/;
 const streetRegex = /^[a-zA-Z0-9À-ÿ '-]{2,}$/;
@@ -26,7 +48,7 @@ const addressSchema = z.object({
   phone: z.string().regex(phoneRegex, 'Numéro de téléphone invalide')
 });
 
-const initialAddressData = {
+const initialAddressData = props.initialAddressData || {
   firstName: '',
   lastName: '',
   street: '',
@@ -40,9 +62,9 @@ const initialAddressData = {
 const {
   handleSubmit,
   isSubmitting,
-  isError,
   defineField,
-  errors
+  errors,
+  formValues
 } = useForm({
   validationSchema: addressSchema,
   defaultValues: initialAddressData
@@ -59,8 +81,14 @@ const [phone, phoneField] = defineField('phone');
 
 const submitHandler = handleSubmit(async (data) => {
   try {
-    const response = await fetch(`http://localhost:3000/users/${userId}/addresses`, {
-      method: 'POST',
+    const url = props.isEditing 
+      ? `http://localhost:3000/users/${userId}/addresses/${addressId}`
+      : `http://localhost:3000/users/${userId}/addresses`;
+
+    const method = props.isEditing ? 'PUT' : 'POST';
+
+    const response = await fetch(url, {
+      method,
       headers: {
         'Content-Type': 'application/json'
       },
@@ -68,22 +96,42 @@ const submitHandler = handleSubmit(async (data) => {
     });
 
     if (!response.ok) {
-      throw new Error("Erreur lors de l'ajout de l'adresse");
+      throw new Error(props.isEditing ? "Erreur lors de la mise à jour de l'adresse" : "Erreur lors de l'ajout de l'adresse");
     }
 
+    emit('submitted');
     router.push({ name: 'adresses', params: { userId } });
   } catch (error) {
-    console.error("Erreur lors de l'ajout de l'adresse:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error(props.isEditing ? "Erreur lors de la mise à jour de l'adresse:" : "Erreur lors de l'ajout de l'adresse:", error);
+    }
   }
 });
+
+watch(() => props.isEditing, async (newVal) => {
+  if (newVal && addressId) {
+    try {
+      const response = await fetch(`http://localhost:3000/users/${userId}/addresses/${addressId}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const addressData = await response.json();
+      Object.assign(formValues.value, addressData);
+    } catch (error) {
+      if (import.meta.env.MODE === 'development') {
+        console.error('Erreur lors du chargement de l’adresse:', error);
+      }
+    }
+  }
+}, { immediate: true });
 </script>
 
 <template>
   <div class="mt-10 mx-4">
     <form @submit.prevent="submitHandler" class="flex flex-col gap-4">
       <div>
-        <label
-          >Prénom
+        <label>
+          Prénom
           <Input
             id="firstName"
             v-model="firstName"
@@ -97,8 +145,8 @@ const submitHandler = handleSubmit(async (data) => {
         </small>
       </div>
       <div>
-        <label
-          >Nom
+        <label>
+          Nom
           <Input
             id="lastName"
             v-model="lastName"
@@ -111,8 +159,8 @@ const submitHandler = handleSubmit(async (data) => {
         </small>
       </div>
       <div>
-        <label
-          >Rue
+        <label>
+          Rue
           <Input
             id="street"
             v-model="street"
@@ -125,8 +173,8 @@ const submitHandler = handleSubmit(async (data) => {
         </small>
       </div>
       <div>
-        <label
-          >Ville
+        <label>
+          Ville
           <Input
             id="city"
             v-model="city"
@@ -139,8 +187,8 @@ const submitHandler = handleSubmit(async (data) => {
         </small>
       </div>
       <div>
-        <label
-          >Région
+        <label>
+          Région
           <Input
             id="region"
             v-model="region"
@@ -153,8 +201,8 @@ const submitHandler = handleSubmit(async (data) => {
         </small>
       </div>
       <div>
-        <label
-          >Code postal
+        <label>
+          Code postal
           <Input
             id="zipCode"
             v-model="zipCode"
@@ -167,8 +215,8 @@ const submitHandler = handleSubmit(async (data) => {
         </small>
       </div>
       <div>
-        <label
-          >Pays
+        <label>
+          Pays
           <Input
             id="country"
             v-model="country"
@@ -181,8 +229,8 @@ const submitHandler = handleSubmit(async (data) => {
         </small>
       </div>
       <div>
-        <label
-          >Numéro de téléphone
+        <label>
+          Numéro de téléphone
           <Input
             id="phone"
             v-model="phone"
@@ -194,7 +242,9 @@ const submitHandler = handleSubmit(async (data) => {
           {{ errors.phone }}
         </small>
       </div>
-      <Button type="submit" class="w-full" :disabled="isSubmitting">Soumettre</Button>
+      <Button type="submit" class="w-full" :disabled="isSubmitting">
+        {{ props.isEditing ? 'Mettre à jour' : 'Ajouter' }}
+      </Button>
     </form>
   </div>
 </template>
