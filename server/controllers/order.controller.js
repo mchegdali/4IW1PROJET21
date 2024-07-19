@@ -48,6 +48,7 @@ async function createOrder(req, res, next) {
         throw new NotFound('Status not found');
       }
 
+
       const order = await Orders.create(
         {
           userId: user._id,
@@ -132,6 +133,7 @@ async function getOrder(req, res, next) {
     return res.json(order);
   } catch (error) {
     return next(error);
+  }
   }
 }
 
