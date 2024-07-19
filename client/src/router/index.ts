@@ -159,7 +159,7 @@ const router = createRouter({
         },
         {
           name: 'edit-adresse',
-          path: '/edit-adresse',
+          path: '/edit-adresse/:id',
           component: () => import('../views/edit-adresse-view.vue')
         }
       ]
