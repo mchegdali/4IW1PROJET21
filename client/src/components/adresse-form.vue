@@ -100,7 +100,7 @@ const submitHandler = handleSubmit(async (data) => {
 </script>
 
 <template>
-  <div class="mt-10">
+  <div class="mt-10 mx-4">
     <form @submit.prevent="submitHandler" class="flex flex-col gap-4">
       <div>
         <label>
