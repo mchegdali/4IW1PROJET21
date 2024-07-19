@@ -18,6 +18,7 @@ const dayjs = require('dayjs');
  *
  */
 const up = async ({ context: { sequelize } }) => {
+  console.log("début");
   const Users = sequelize.model('users');
   const Addresses = sequelize.model('addresses');
 
@@ -124,6 +125,7 @@ const up = async ({ context: { sequelize } }) => {
       });
     }
   });
+  console.log("hey");
 };
 
 /**
