@@ -39,7 +39,7 @@
                 <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full">
                 </div>
                 <div class="text-center mt-4">
-                <div class="text-2xl font-bold">135</div>
+                <div class="text-2xl font-bold" id="orderCount">{{ orderCount }}</div>
                 <div class="text-sm text-gray-500 mt-2">Nombre de commandes total</div>
                 </div>
             </div>
@@ -142,4 +142,3 @@ export default defineComponent({
   
 <style lang="scss">
 </style>
-  
