@@ -51,12 +51,3 @@ onMounted(() => {
     />
   </main>
 </template>
-
-<style scoped>
-.border-destructive {
-  border-color: #f00;
-}
-.text-destructive {
-  color: #f00;
-}
-</style>
