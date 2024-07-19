@@ -18,7 +18,6 @@ const dayjs = require('dayjs');
  *
  */
 const up = async ({ context: { sequelize } }) => {
-  console.log("début");
   const Users = sequelize.model('users');
   const Addresses = sequelize.model('addresses');
 
@@ -27,14 +26,13 @@ const up = async ({ context: { sequelize } }) => {
 
     // Boucle pour créer 40 utilisateurs par mois avec des createdAt randoms
     for (let i = 0; i < 40; i++) {
-
       const month = Math.floor(Math.random() * 12);
       const day = Math.floor(Math.random() * 28) + 1;
       const createdAt = dayjs(new Date(2024, month, day)).toDate();
       const updatedAt = createdAt;
-    
+
       usersToCreate.push({
-        id: crypto.randomUUID(),
+        // id: crypto.randomUUID(),
         fullname: `User USER ${i}`,
         email: `user${i}@user.fr`,
         password: 'Password1234.',
@@ -42,7 +40,7 @@ const up = async ({ context: { sequelize } }) => {
         isVerified: true,
         addresses: [
           {
-            id: crypto.randomUUID(),
+            //id: crypto.randomUUID(),
             firstName: faker.lorem.word(),
             lastName: faker.lorem.word(),
             street: faker.location.streetAddress(true),
@@ -89,9 +87,9 @@ const up = async ({ context: { sequelize } }) => {
       createdUsers.push(user);
     }
 
-    const admin = await Users.create(
+    await Users.create(
       {
-        id: crypto.randomUUID(),
+        //id: crypto.randomUUID(),
         fullname: 'Admin ADMIN',
         email: 'admin@admin.fr',
         password: 'Password1234.',
@@ -99,7 +97,7 @@ const up = async ({ context: { sequelize } }) => {
         isVerified: true,
         addresses: [
           {
-            id: crypto.randomUUID(),
+            //id: crypto.randomUUID(),
             firstName: faker.lorem.word(),
             lastName: faker.lorem.word(),
             street: faker.location.streetAddress(true),
@@ -141,7 +139,7 @@ const up = async ({ context: { sequelize } }) => {
       },
     );
 
-    const accountant = await Users.create(
+    await Users.create(
       {
         fullname: 'Accountant ACCOUNTANT',
         email: 'accountant@accountant.fr',
@@ -191,9 +189,9 @@ const up = async ({ context: { sequelize } }) => {
       },
     );
 
-    const user = await Users.create(
+    await Users.create(
       {
-        id: crypto.randomUUID(),
+        //id: crypto.randomUUID(),
         fullname: 'User USER',
         email: 'user@user.fr',
         password: 'Password1234.',
@@ -201,7 +199,7 @@ const up = async ({ context: { sequelize } }) => {
         isVerified: true,
         addresses: [
           {
-            id: crypto.randomUUID(),
+            //id: crypto.randomUUID(),
             firstName: faker.lorem.word(),
             lastName: faker.lorem.word(),
             street: faker.location.streetAddress(true),
@@ -242,27 +240,7 @@ const up = async ({ context: { sequelize } }) => {
         transaction: t,
       },
     );
-
-    const createdUsersMongo = [...createdUsers, admin, accountant, user].map((u) => ({
-      _id: u.id,
-      fullname: u.fullname,
-      email: u.email,
-      password: u.password,
-      passwordValidUntil: u.passwordValidUntil,
-      role: u.role,
-      isVerified: u.isVerified,
-      addresses: u.getDataValue('addresses').map((a) => a.toMongo()),
-      createdAt: u.createdAt,
-      updatedAt: u.updatedAt,
-      deletedAt: u.deletedAt,
-    }));
-
-    console.log(createdUsersMongo);
-
-    await UserMongo.insertMany(createdUsersMongo);
-    console.log("salut");
   });
-  console.log("hey");
 };
 
 /**
