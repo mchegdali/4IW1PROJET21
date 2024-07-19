@@ -255,6 +255,50 @@ async function getOrderCount(req, res, next) {
   }
 }
 
+/**
+ * Récupérer le chiffre d'affaires total dans MongoDB
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getTotalRevenue(req, res, next) {
+  try {
+    const totalRevenueData = await OrdersMongo.aggregate([
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: {
+            $sum: {
+              $multiply: [
+                {
+                  $convert: {
+                    input: '$items.price',
+                    to: 'double',
+                    onError: 0,
+                    onNull: 0,
+                  },
+                },
+                { $ifNull: ['$items.quantity', 1] },
+              ],
+            },
+          },
+        },
+      },
+      { $project: { _id: 0, totalRevenue: 1 } },
+    ]);
+
+    console.log('Total Revenue Data:', totalRevenueData);
+
+    const totalRevenue = totalRevenueData[0]?.totalRevenue || 0;
+
+    return res.status(200).json({ totalRevenue });
+  } catch (error) {
+    console.error('Error calculating total revenue:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
 module.exports = {
   createOrder,
   getOrder,
@@ -262,4 +306,5 @@ module.exports = {
   updateOrder,
   deleteOrder,
   getOrderCount,
+  getTotalRevenue,
 };
