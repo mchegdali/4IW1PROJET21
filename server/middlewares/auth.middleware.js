@@ -11,10 +11,6 @@ const UserMongo = require('../models/mongo/user.mongo');
 const checkAuth =
   (secret, skipIfNoHeader = false) =>
   async (req, res, next) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('process.env.NODE_ENV', process.env.NODE_ENV);
-      return next();
-    }
     try {
       if (!req.headers.authorization) {
         if (skipIfNoHeader) {
@@ -59,10 +55,6 @@ const checkAuth =
 const checkRole =
   (allowedRoles = ['admin']) =>
   (req, res, next) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('process.env.NODE_ENV', process.env.NODE_ENV);
-      return next();
-    }
     if (!req.user || !req.user.isVerified) {
       return res.sendStatus(403);
     }
