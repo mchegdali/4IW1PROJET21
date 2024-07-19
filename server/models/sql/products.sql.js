@@ -1,17 +1,24 @@
 const { DataTypes, Model } = require('sequelize');
 const slugify = require('../../utils/slugify');
-const { ProductMongo } = require('../mongo/products.mongo');
+const ProductMongo = require('../mongo/products.mongo');
 const UserMongo = require('../mongo/user.mongo');
 
 const ProductsSequelize = (sequelize) => {
   class Products extends Model {
-    async toMongo(options) {
-      const category = await this.getCategory(options);
+    async toMongo() {
+      const category = await this.getCategory();
       return {
         _id: this.id,
         slug: this.slug,
         name: this.name,
         description: this.description,
+        category: category
+          ? {
+              _id: category.id,
+              name: category.name,
+              slug: category.slug,
+            }
+          : null,
         category: category
           ? {
               _id: category.id,
@@ -32,13 +39,15 @@ const ProductsSequelize = (sequelize) => {
 
       Products.hasMany(models.basketsItems);
 
-      Products.addHook('afterCreate', async (product, { transaction }) => {
-        const productMongo = await product.toMongo({ transaction });
+      Products.addHook('afterCreate', async (product) => {
+        const productMongo = await product.toMongo();
         await ProductMongo.create(productMongo);
       });
 
-      Products.addHook('afterUpdate', async (product, { transaction }) => {
-        const productMongo = await product.toMongo({ transaction });
+      Products.addHook('afterUpdate', async (product) => {
+        console.log('afterUpdate', product);
+        const productMongo = await product.toMongo();
+        console.log('afterUpdate', productMongo);
         await ProductMongo.updateOne(
           { _id: product.id },
           {
@@ -95,6 +104,7 @@ const ProductsSequelize = (sequelize) => {
         unique: true,
       },
       price: {
+        type: DataTypes.DECIMAL(10, 2).UNSIGNED,
         type: DataTypes.DECIMAL(10, 2).UNSIGNED,
         allowNull: false,
       },

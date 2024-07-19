@@ -318,10 +318,11 @@ async function getUserCount(req, res, next) {
  */
 async function getUser(req, res, next) {
   try {
-    const user = await UserMongo.findById(req.params.id);
+    const user = await UserMongo.findById(req.params.userId, {
+      password: 0,
+    });
 
     if (user === null) {
-      console.log('no user found');
       return res.sendStatus(404);
     }
 
@@ -338,10 +339,9 @@ async function getUser(req, res, next) {
  */
 async function getUserAddresses(req, res, next) {
   try {
-    const user = await UserMongo.findById(req.params.id);
+    const user = await UserMongo.findById(req.params.userId);
 
     if (user === null) {
-      console.log('no user found');
       return res.sendStatus(404);
     }
 

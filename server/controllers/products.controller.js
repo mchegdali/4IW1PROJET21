@@ -9,6 +9,7 @@ const {
   productUpdateSchema,
 } = require('../schemas/products.schema');
 const { Op } = require('sequelize');
+const { Op } = require('sequelize');
 
 const { NotFound } = httpErrors;
 const Products = sequelize.model('products');
@@ -168,6 +169,9 @@ async function getProduct(req, res, next) {
     const product = await ProductMongo.findOne({
       $or: [{ _id: req.params.product }, { slug: req.params.product }],
     });
+    const product = await ProductMongo.findOne({
+      $or: [{ _id: req.params.product }, { slug: req.params.product }],
+    });
     if (!product) {
       return res.sendStatus(404);
     }
@@ -223,7 +227,18 @@ async function updateProduct(req, res, next) {
       returning: true,
       individualHooks: true,
     });
+    const productUpdateBody = productUpdateSchema.parse(req.body);
 
+    await Products.update(productUpdateBody, {
+      where: {
+        [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
+      },
+      limit: 1,
+      returning: true,
+      individualHooks: true,
+    });
+
+    return res.sendStatus(204);
     return res.sendStatus(204);
   } catch (error) {
     return next(error);
@@ -244,7 +259,15 @@ async function deleteProduct(req, res, next) {
       limit: 1,
       individualHooks: true,
     });
+    const deletedCountSql = await Products.destroy({
+      where: {
+        [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
+      },
+      limit: 1,
+      individualHooks: true,
+    });
 
+    if (deletedCountSql === 0) {
     if (deletedCountSql === 0) {
       return res.sendStatus(404);
     }
@@ -263,11 +286,77 @@ async function deleteProduct(req, res, next) {
  */
 async function getProductCount(req, res, next) {
   try {
-    console.log('getProductCount called'); // Log pour vérifier si la route est atteinte
     const count = await ProductMongo.countDocuments();
     return res.status(200).json({ count });
   } catch (error) {
     return next(error);
+  }
+}
+
+/**
+ * Récupère la répartition des produits par catégorie
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getProductDistributionByCategory(req, res, next) {
+  try {
+    const distribution = await ProductMongo.aggregate([
+      {
+        $group: {
+          _id: '$category.name',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    return res.status(200).json(distribution);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ * Récupère la distribution des produits par tranche de prix depuis MongoDB
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getPriceDistribution(req, res, next) {
+  try {
+    const products = await ProductMongo.find().exec();
+    const priceDistribution = [
+      { range: 'Moins de 100 €', count: 0 },
+      { range: '100 € - 300 €', count: 0 },
+      { range: '300 € - 500 €', count: 0 },
+      { range: '500 € - 700 €', count: 0 },
+      { range: 'Plus de 700 €', count: 0 },
+    ];
+
+    products.forEach((product) => {
+      const price = parseFloat(product.price);
+      if (!isNaN(price)) {
+        if (price < 100) {
+          priceDistribution[0].count += 1;
+        } else if (price >= 100 && price < 300) {
+          priceDistribution[1].count += 1;
+        } else if (price >= 300 && price < 500) {
+          priceDistribution[2].count += 1;
+        } else if (price >= 500 && price < 700) {
+          priceDistribution[3].count += 1;
+        } else if (price >= 700) {
+          priceDistribution[4].count += 1;
+        }
+      } else {
+        console.warn(
+          `Invalid price for product: ${product.name}, price: ${product.price}`,
+        );
+      }
+    });
+
+    res.status(200).json(priceDistribution);
+  } catch (error) {
+    console.error('Error in getPriceDistribution:', error);
+    res.status(500).send('Internal Server Error');
   }
 }
 
