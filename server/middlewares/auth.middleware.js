@@ -1,6 +1,5 @@
 const jose = require('jose');
-const sequelize = require('../models/sql');
-const Users = sequelize.model('users');
+const UserMongo = require('../models/mongo/user.mongo');
 
 /**
  * @description
@@ -33,7 +32,7 @@ const checkAuth =
       }
 
       const decodedToken = await jose.jwtVerify(token, secret);
-      const user = await Users.findByPk(decodedToken.payload.sub);
+      const user = await UserMongo.findById(decodedToken.payload.sub);
 
       if (!user) {
         return res.sendStatus(401);

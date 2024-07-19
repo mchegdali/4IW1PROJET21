@@ -17,12 +17,12 @@ const productCount = computed(() => {
   return basketStore.products.filter((p) => p._id === product._id).length;
 });
 
-function handleQuantityChange(value: number) {
-  if (value > 0) {
-    basketStore.setProductNumber(product, value);
-  } else {
-    basketStore.removeProduct(product);
-  }
+function onIncrement() {
+  basketStore.addProduct(product);
+}
+
+function onDecrement() {
+  basketStore.removeProduct(product);
 }
 </script>
 
@@ -41,21 +41,16 @@ function handleQuantityChange(value: number) {
         {{ product.description }}
       </p>
       <div class="flex gap-2 w-full">
-        <NumberField
-          :model-value="productCount"
-          :min="0"
-          class="max-w-40"
-          @update:model-value="handleQuantityChange"
-        >
+        <NumberField :model-value="productCount" :min="0" class="max-w-40">
           <NumberFieldContent>
-            <NumberFieldDecrement v-if="productCount > 1" />
-            <NumberFieldDecrement v-else>
+            <NumberFieldDecrement v-if="productCount > 1" @click="onDecrement" />
+            <NumberFieldDecrement v-else @click="onDecrement">
               <template #default>
                 <Trash width="16" height="16" />
               </template>
             </NumberFieldDecrement>
             <NumberFieldInput />
-            <NumberFieldIncrement />
+            <NumberFieldIncrement @click="onIncrement" />
           </NumberFieldContent>
         </NumberField>
       </div>

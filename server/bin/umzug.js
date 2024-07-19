@@ -13,11 +13,13 @@ async function umzug() {
 
   const seeder = new Umzug({
     create: {
-      folder: 'seeders',
+      folder: path.join(__dirname, 'seeders'),
       template: (filepath) => [
         [
           filepath,
-          fs.readFileSync(path.join(__dirname, 'templates/seeder')).toString(),
+          fs
+            .readFileSync(path.join(__dirname, 'templates/seeder.js'))
+            .toString(),
         ],
       ],
     },

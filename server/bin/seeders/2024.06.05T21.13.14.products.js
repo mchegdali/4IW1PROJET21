@@ -1,15 +1,10 @@
-const ProductMongo = require('../../models/mongo/products.mongo');
 const slugify = require('../../utils/slugify');
 const { fakerFR: faker } = require('@faker-js/faker');
 const crypto = require('node:crypto');
 
-const minProducts = 50;
-const maxProducts = 100;
-const imageFormats = ['png', 'jpg', 'jpeg', 'avif', 'webp'];
-
-function getRandomImageFormat() {
-  return faker.helpers.arrayElement(imageFormats);
-}
+const minProducts = 10;
+const maxProducts = 20;
+const imageFormats = ['png', 'jpg', 'jpeg', 'webp'];
 
 /**
  *
@@ -25,7 +20,7 @@ function createProduct(categoryId) {
   const image = faker.image.urlPlaceholder({
     width: 200,
     height: 200,
-    format: getRandomImageFormat(),
+    format: faker.helpers.arrayElement(imageFormats),
     text: name,
   });
   const price = faker.commerce.price({ min: 10, max: 1000 });
@@ -78,16 +73,11 @@ const up = async ({ context: { sequelize } }) => {
 
   // throw new Error('TODO');
 
-  const createdProducts = await Products.bulkCreate(products, {
+  await Products.bulkCreate(products, {
     validate: true,
     returning: true,
+    individualHooks: true,
   });
-
-  const createdProductsMongo = await Promise.all(
-    createdProducts.map((p) => p.toMongo()),
-  );
-
-  await ProductMongo.insertMany(createdProductsMongo);
 };
 
 /**
@@ -97,8 +87,12 @@ const up = async ({ context: { sequelize } }) => {
  */
 const down = async ({ context: { sequelize } }) => {
   const Products = sequelize.model('products');
-  await Products.destroy({ truncate: true, cascade: true, force: true });
-  await ProductMongo.deleteMany({});
+  await Products.destroy({
+    truncate: true,
+    cascade: true,
+    force: true,
+    individualHooks: true,
+  });
 };
 
 module.exports = { up, down };

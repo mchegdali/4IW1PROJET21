@@ -2,12 +2,13 @@ const httpErrors = require('http-errors');
 const validator = require('validator');
 const sequelize = require('../models/sql');
 const CategoriesMongo = require('../models/mongo/categories.mongo');
-const ProductMongo = require('../models/mongo/products.mongo');
+const { ProductMongo } = require('../models/mongo/products.mongo');
 const {
   productCreateSchema,
   productQuerySchema,
   productUpdateSchema,
 } = require('../schemas/products.schema');
+const { Op } = require('sequelize');
 
 const { NotFound } = httpErrors;
 const Products = sequelize.model('products');
@@ -164,13 +165,9 @@ async function getProducts(req, res, next) {
  */
 async function getProduct(req, res, next) {
   try {
-    const isUUID = validator.isUUID(req.params.product);
-
-    const filter = {
-      [isUUID ? '_id' : 'slug']: req.params.product,
-    };
-
-    const product = await ProductMongo.findOne(filter);
+    const product = await ProductMongo.findOne({
+      $or: [{ _id: req.params.product }, { slug: req.params.product }],
+    });
     if (!product) {
       return res.sendStatus(404);
     }
@@ -216,61 +213,18 @@ async function getRelatedProducts(req, res, next) {
  */
 async function updateProduct(req, res, next) {
   try {
-    const isUUID = validator.isUUID(req.params.product);
-    const sqlWhere = {
-      [isUUID ? 'id' : 'slug']: req.params.product,
-    };
-    const mongoWhere = {
-      [isUUID ? '_id' : 'slug']: req.params.product,
-    };
+    const productUpdateBody = productUpdateSchema.parse(req.body);
 
-    const productUpdateBody = await productUpdateSchema.parseAsync(req.body);
-    const updatedKeys = Object.keys(productUpdateBody);
-
-    const result = await sequelize.transaction(async (t) => {
-      const [affectedRowsCount, affectedRows] = await Products.update(
-        productUpdateBody,
-        {
-          where: sqlWhere,
-          limit: 1,
-          transaction: t,
-          returning: true,
-        },
-      );
-
-      if (affectedRowsCount === 0) {
-        throw new NotFound('Produit introuvable');
-      }
-
-      const product = await Products.scope('toMongo').findByPk(
-        affectedRows[0].getDataValue('id'),
-        {
-          transaction: t,
-        },
-      );
-
-      const productMongo = {};
-
-      for (const key of updatedKeys) {
-        productMongo[key] = product.getDataValue(key);
-      }
-
-      const replaceResult = await ProductMongo.findOneAndUpdate(
-        mongoWhere,
-        productMongo,
-        {
-          new: true,
-        },
-      );
-
-      if (!replaceResult) {
-        throw new NotFound('Produit introuvable');
-      }
-
-      return replaceResult;
+    await Products.update(productUpdateBody, {
+      where: {
+        [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
+      },
+      limit: 1,
+      returning: true,
+      individualHooks: true,
     });
 
-    return res.status(200).json(result);
+    return res.sendStatus(204);
   } catch (error) {
     return next(error);
   }
@@ -283,21 +237,15 @@ async function updateProduct(req, res, next) {
  */
 async function deleteProduct(req, res, next) {
   try {
-    const isUUID = validator.isUUID(req.params.product);
+    const deletedCountSql = await Products.destroy({
+      where: {
+        [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
+      },
+      limit: 1,
+      individualHooks: true,
+    });
 
-    const sqlWhere = {
-      [isUUID ? 'id' : 'slug']: req.params.product,
-    };
-    const mongoWhere = {
-      [isUUID ? '_id' : 'slug']: req.params.product,
-    };
-
-    const [deletedCountSql, deletedCountMongo] = await Promise.all([
-      Products.destroy({ where: sqlWhere }),
-      ProductMongo.deleteOne(mongoWhere),
-    ]);
-
-    if (deletedCountSql === 0 && deletedCountMongo.deletedCount === 0) {
+    if (deletedCountSql === 0) {
       return res.sendStatus(404);
     }
 
@@ -315,7 +263,6 @@ async function deleteProduct(req, res, next) {
  */
 async function getProductCount(req, res, next) {
   try {
-    console.log('getProductCount called'); // Log pour vérifier si la route est atteinte
     const count = await ProductMongo.countDocuments();
     return res.status(200).json({ count });
   } catch (error) {
@@ -353,41 +300,42 @@ async function getProductDistributionByCategory(req, res, next) {
  */
 async function getPriceDistribution(req, res, next) {
   try {
-      const products = await ProductMongo.find().exec();
-      const priceDistribution = [
-          { range: 'Moins de 100 €', count: 0 },
-          { range: '100 € - 300 €', count: 0 },
-          { range: '300 € - 500 €', count: 0 },
-          { range: '500 € - 700 €', count: 0 },
-          { range: 'Plus de 700 €', count: 0 },
-      ];
+    const products = await ProductMongo.find().exec();
+    const priceDistribution = [
+      { range: 'Moins de 100 €', count: 0 },
+      { range: '100 € - 300 €', count: 0 },
+      { range: '300 € - 500 €', count: 0 },
+      { range: '500 € - 700 €', count: 0 },
+      { range: 'Plus de 700 €', count: 0 },
+    ];
 
-      products.forEach(product => {
-          const price = parseFloat(product.price);
-          if (!isNaN(price)) {
-              if (price < 100) {
-                  priceDistribution[0].count += 1;
-              } else if (price >= 100 && price < 300) {
-                  priceDistribution[1].count += 1;
-              } else if (price >= 300 && price < 500) {
-                  priceDistribution[2].count += 1;
-              } else if (price >= 500 && price < 700) {
-                  priceDistribution[3].count += 1;
-              } else if (price >= 700) {
-                  priceDistribution[4].count += 1;
-              }
-          } else {
-              console.warn(`Invalid price for product: ${product.name}, price: ${product.price}`);
-          }
-      });
+    products.forEach((product) => {
+      const price = parseFloat(product.price);
+      if (!isNaN(price)) {
+        if (price < 100) {
+          priceDistribution[0].count += 1;
+        } else if (price >= 100 && price < 300) {
+          priceDistribution[1].count += 1;
+        } else if (price >= 300 && price < 500) {
+          priceDistribution[2].count += 1;
+        } else if (price >= 500 && price < 700) {
+          priceDistribution[3].count += 1;
+        } else if (price >= 700) {
+          priceDistribution[4].count += 1;
+        }
+      } else {
+        console.warn(
+          `Invalid price for product: ${product.name}, price: ${product.price}`,
+        );
+      }
+    });
 
-      res.status(200).json(priceDistribution);
+    res.status(200).json(priceDistribution);
   } catch (error) {
-      console.error("Error in getPriceDistribution:", error);
-      res.status(500).send("Internal Server Error");
+    console.error('Error in getPriceDistribution:', error);
+    res.status(500).send('Internal Server Error');
   }
 }
-
 
 module.exports = {
   createProduct,
