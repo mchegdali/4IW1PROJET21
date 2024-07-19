@@ -112,6 +112,8 @@
             userCount: "-",
             orderCount: "-",
             totalRevenue: "-",
+            orderStatusSeries: null,
+            donutChartOptions: null,
             cards: [
                 {
                     image: 'https://picsum.photos/500/500',
@@ -183,11 +185,33 @@
                 this.totalRevenue = "-"; 
             }
         },
+        async fetchOrderStatusDistribution() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/status-distribution`);
+                const data = await response.json();
+                this.orderStatusSeries = data.map(item => item.count);
+                this.donutChartOptions = {
+                    chart: {
+                        id: 'order-status-distribution'
+                    },
+                    labels: data.map(item => item.label),
+                    title: {
+                        text: 'Répartition des commandes par statut',
+                        align: 'left'
+                    }
+                };
+            } catch (error) {
+                console.error('Error fetching order status distribution:', error);
+                this.orderStatusSeries = [];
+                this.donutChartOptions = null;
+            }
+        },
     },
     mounted() {
         this.fetchUserCount();
         this.fetchOrderCount();
         this.fetchTotalRevenue();
+        this.fetchOrderStatusDistribution();
     },
 });
 </script>

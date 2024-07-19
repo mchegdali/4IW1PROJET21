@@ -301,6 +301,36 @@ async function getTotalRevenue(req, res, next) {
   }
 }
 
+/**
+ * Récupère la répartition des commandes par status dans MongoDB
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getOrderStatusDistribution(req, res, next) {
+  try {
+    const distribution = await OrdersMongo.aggregate([
+      {
+        $group: {
+          _id: '$status.label',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          label: '$_id',
+          count: 1,
+          _id: 0,
+        },
+      },
+    ]);
+
+    return res.status(200).json(distribution);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createOrder,
   getOrder,
@@ -309,4 +339,5 @@ module.exports = {
   deleteOrder,
   getOrderCount,
   getTotalRevenue,
+  getOrderStatusDistribution,
 };

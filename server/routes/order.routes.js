@@ -7,6 +7,7 @@ const {
   updateOrder,
   getOrderCount,
   getTotalRevenue,
+  getOrderStatusDistribution,
 } = require('../controllers/order.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -27,6 +28,12 @@ orderRouter.get('/orders/revenue',
   checkAuth(authConfig.accessTokenSecret, false),
   checkRole(['admin']),
   getTotalRevenue
+);
+
+orderRouter.get('/orders/status-distribution',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getOrderStatusDistribution
 );
 
 orderRouter
