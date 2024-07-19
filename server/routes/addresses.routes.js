@@ -9,7 +9,7 @@ const {
 } = require('../controllers/addresses.controller');
 const { checkAuth } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
-const { isOwnAccount } = require('../middlewares/users.middleware');
+const { isOwnAccount } = require('../middlewares/user.middleware');
 
 const addressesRouter = Router({ mergeParams: true });
 
