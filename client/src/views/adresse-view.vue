@@ -77,7 +77,7 @@ onMounted(() => {
 
 <template>
   <div class="mx-4">
-    <div class="flex items-center w-full relative align">
+    <div class="flex items-center w-full relative align mt-2">
       <div class="block lg:hidden">
         <RouterLink :to="{ name: 'account' }"><MoveLeft /></RouterLink>
       </div>
