@@ -85,9 +85,9 @@ onMounted(() => {
       <h1 class="font-bold text-lg text-center w-full sm:text-3xl">Carnet d’adresses</h1>
     </div>
 
-    <div class="mt-10 flex">
+    <div class="mt-4 flex">
       <RouterLink
-        :to="{ name: 'add-adresse' }"
+        :to="{ name: 'add-addresse' }"
         class="w-full bg-tea-600 rounded-lg text-white p-2 text-center"
         >Ajouter une nouvelle adresse</RouterLink
       >
@@ -110,7 +110,7 @@ onMounted(() => {
 
       <div class="flex space-x-4">
         <RouterLink
-          :to="{ name: 'edit-adresse', params: { id: address._id } }"
+          :to="{ name: 'edit-addresse', params: { id: address._id } }"
           class="text-blue-500 hover:text-blue-700"
         >
           <FilePenLine class="w-5 h-5" />

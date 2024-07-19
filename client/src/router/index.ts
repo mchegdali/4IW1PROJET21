@@ -155,16 +155,16 @@ const router = createRouter({
         {
           name: 'addresses',
           path: '/addresses',
-          component: () => import('../views/address/address-view.vue')
+          component: () => import('../views/adresse-view.vue')
         },
         {
           name: 'add-addresse',
           path: '/add-addresse',
-          component: () => import('../views/address/add-address-view.vue')
+          component: () => import('../views/add-adresse-view.vue')
         },
         {
-          name: 'edit-adresse',
-          path: '/edit-adresse/:id',
+          name: 'edit-addresse',
+          path: '/edit-addresse/:id',
           component: () => import('../views/edit-adresse-view.vue')
         }
       ]
