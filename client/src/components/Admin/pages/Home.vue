@@ -111,6 +111,7 @@
         return {
             userCount: "-",
             orderCount: "-",
+            totalRevenue: "-",
             cards: [
                 {
                     image: 'https://picsum.photos/500/500',
@@ -172,10 +173,21 @@
                 this.orderCount = "-"; 
             }
         },
+        async fetchTotalRevenue() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/revenue`);
+                const data = await response.json();
+                this.totalRevenue = data.totalRevenue.toFixed(2); // Limiter à 2 chiffres après la virgule
+            } catch (error) {
+                console.error('Error fetching total revenue:', error);
+                this.totalRevenue = "-"; 
+            }
+        },
     },
     mounted() {
         this.fetchUserCount();
         this.fetchOrderCount();
+        this.fetchTotalRevenue();
     },
 });
 </script>
