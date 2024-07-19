@@ -30,7 +30,7 @@ import { Package2, ChevronRight, Undo2, CreditCard, Home, SquareUser } from 'luc
   <div class="w-full bg-white flex border-b border-gray-200 p-4 pl-10 justify-between">
     <div class="flex gap-4">
       <p class="text-slate-500"><Home /></p>
-      <RouterLink :to="{ name: 'adresses' }">Carnet d’adresses</RouterLink>
+      <RouterLink :to="{ name: 'addresses' }">Carnet d’adresses</RouterLink>
     </div>
     <span><ChevronRight /></span>
   </div>
