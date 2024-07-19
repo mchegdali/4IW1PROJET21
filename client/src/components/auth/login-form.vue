@@ -11,11 +11,14 @@ import { onBeforeUnmount } from 'vue';
 import config from '@/config';
 import { useBasketStore } from '@/stores/basket';
 import type { Product } from '@/api/products.api';
+import { useBasketStore } from '@/stores/basket';
+import type { Product } from '@/api/products.api';
 
 const { toast } = useToast();
 
 const router = useRouter();
 const userStore = useUserStore();
+const basketStore = useBasketStore();
 const basketStore = useBasketStore();
 
 const loginSchema = z.object({
@@ -57,11 +60,41 @@ const submitHandler = handleSubmit(async (data) => {
     }
   });
 
+  if (!response.ok) {
+    throw response;
+  }
+
+  const loginResponseBody: {
+    accessToken: string;
+    refreshToken: string;
+    user: {
+      id: string;
+      fullname: string;
+      email: string;
+      role: 'user' | 'admin' | 'accountant';
+    };
+  } = await response.json();
+
+  const user = loginResponseBody.user;
+
+  const basketResponse = await fetch(`${config.apiBaseUrl}/users/${user.id}/basket`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${loginResponseBody.accessToken}`
+    }
+  });
+
   if (basketResponse.ok) {
     const basketResponseBody: Product[] = await basketResponse.json();
     basketStore.setProducts(basketResponseBody);
   }
 
+  userStore.$patch({
+    accessToken: loginResponseBody.accessToken,
+    refreshToken: loginResponseBody.refreshToken,
+    user: loginResponseBody.user
+  });
   router.push({ name: 'home' });
 });
 

@@ -45,13 +45,13 @@ export const useBasketStore = defineStore('basket', {
     },
     setProducts(products: Product[]) {
       this.products = structuredClone(products);
-      localStorage.setItem('basket', JSON.stringify(this.products));
     },
-    setProductCount(product: Product, count: number) {
-      const filteredProducts = this.products.filter((p) => p.id !== product.id);
-      const newProducts = Array(count).fill(product);
-      this.products = [...filteredProducts, ...newProducts];
-      localStorage.setItem('basket', JSON.stringify(this.products));
+    removeProduct(product: Product) {
+      const lastIndex = this.products.findLastIndex((p) => p._id === product._id);
+
+      if (lastIndex !== -1) {
+        this.products.splice(lastIndex, 1);
+      }
     }
   }
 });

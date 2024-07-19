@@ -24,17 +24,12 @@ const productCount = computed(() => {
   return basketStore.products.filter((p) => p.id === product.id).length;
 });
 
-async function onInput(count: number) {
-  if (readonly) return;
-  if (userStore.isAuthenticated) {
-    await setProductCountToBasket(userStore.user?.id!, userStore.accessToken!, product, count);
-    const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
-    if (response.ok) {
-      basketStore.products = await response.json();
-    }
-  } else {
-    basketStore.setProductCount(product, count);
-  }
+function onIncrement() {
+  basketStore.addProduct(product);
+}
+
+function onDecrement() {
+  basketStore.removeProduct(product);
 }
 </script>
 
@@ -52,22 +47,16 @@ async function onInput(count: number) {
         {{ product.description }}
       </p>
       <div class="flex gap-2 w-full">
-        <NumberField
-          v-if="!readonly"
-          :model-value="productCount"
-          :min="0"
-          class="max-w-40"
-          @update:model-value="onInput"
-        >
+        <NumberField :model-value="productCount" :min="0" class="max-w-40">
           <NumberFieldContent>
-            <NumberFieldDecrement v-if="productCount > 1" />
-            <NumberFieldDecrement v-else>
+            <NumberFieldDecrement v-if="productCount > 1" @click="onDecrement" />
+            <NumberFieldDecrement v-else @click="onDecrement">
               <template #default>
                 <Trash width="16" height="16" class="text-red-500" />
               </template>
             </NumberFieldDecrement>
             <NumberFieldInput />
-            <NumberFieldIncrement />
+            <NumberFieldIncrement @click="onIncrement" />
           </NumberFieldContent>
         </NumberField>
         <div v-else class="text-sm font-medium">Quantité: {{ productCount }}</div>
