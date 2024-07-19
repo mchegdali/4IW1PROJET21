@@ -32,7 +32,7 @@ const up = async ({ context: { sequelize } }) => {
       const updatedAt = createdAt;
 
       usersToCreate.push({
-        id: crypto.randomUUID(),
+        // id: crypto.randomUUID(),
         fullname: `User USER ${i}`,
         email: `user${i}@user.fr`,
         password: 'Password1234.',
@@ -40,7 +40,7 @@ const up = async ({ context: { sequelize } }) => {
         isVerified: true,
         addresses: [
           {
-            id: crypto.randomUUID(),
+            //id: crypto.randomUUID(),
             firstName: faker.lorem.word(),
             lastName: faker.lorem.word(),
             street: faker.location.streetAddress(true),
@@ -92,7 +92,7 @@ const up = async ({ context: { sequelize } }) => {
 
     await Users.create(
       {
-        id: crypto.randomUUID(),
+        //id: crypto.randomUUID(),
         fullname: 'Admin ADMIN',
         email: 'admin@admin.fr',
         password: 'Password1234.',
@@ -100,7 +100,7 @@ const up = async ({ context: { sequelize } }) => {
         isVerified: true,
         addresses: [
           {
-            id: crypto.randomUUID(),
+            //id: crypto.randomUUID(),
             firstName: faker.lorem.word(),
             lastName: faker.lorem.word(),
             street: faker.location.streetAddress(true),
@@ -200,7 +200,7 @@ const up = async ({ context: { sequelize } }) => {
 
     await Users.create(
       {
-        id: crypto.randomUUID(),
+        //id: crypto.randomUUID(),
         fullname: 'User USER',
         email: 'user@user.fr',
         password: 'Password1234.',
@@ -208,7 +208,7 @@ const up = async ({ context: { sequelize } }) => {
         isVerified: true,
         addresses: [
           {
-            id: crypto.randomUUID(),
+            //id: crypto.randomUUID(),
             firstName: faker.lorem.word(),
             lastName: faker.lorem.word(),
             street: faker.location.streetAddress(true),
