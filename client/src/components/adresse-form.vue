@@ -100,7 +100,7 @@ const submitHandler = handleSubmit(async (data) => {
     }
 
     emit('submitted');
-    router.push({ name: 'adresses', params: { userId } });
+    router.push({ name: 'addresses', params: { userId } });
   } catch (error) {
     if (import.meta.env.MODE === 'development') {
       console.error(props.isEditing ? "Erreur lors de la mise à jour de l'adresse:" : "Erreur lors de l'ajout de l'adresse:", error);
