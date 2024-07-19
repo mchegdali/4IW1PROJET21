@@ -1,6 +1,7 @@
 const slugify = require('../../utils/slugify');
 const { fakerFR: faker } = require('@faker-js/faker');
 const crypto = require('node:crypto');
+
 const minProducts = 10;
 const maxProducts = 20;
 const imageFormats = ['png', 'jpg', 'jpeg', 'webp'];
@@ -19,6 +20,7 @@ function createProduct(categoryId) {
   const image = faker.image.urlPlaceholder({
     width: 200,
     height: 200,
+    format: faker.helpers.arrayElement(imageFormats),
     format: faker.helpers.arrayElement(imageFormats),
     text: name,
   });
@@ -73,8 +75,11 @@ const up = async ({ context: { sequelize } }) => {
   // throw new Error('TODO');
 
   await Products.bulkCreate(products, {
+  await Products.bulkCreate(products, {
     validate: true,
     returning: true,
+    individualHooks: true,
+  });
     individualHooks: true,
   });
 };
@@ -86,6 +91,12 @@ const up = async ({ context: { sequelize } }) => {
  */
 const down = async ({ context: { sequelize } }) => {
   const Products = sequelize.model('products');
+  await Products.destroy({
+    truncate: true,
+    cascade: true,
+    force: true,
+    individualHooks: true,
+  });
   await Products.destroy({
     truncate: true,
     cascade: true,

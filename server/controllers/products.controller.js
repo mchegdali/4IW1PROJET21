@@ -172,12 +172,9 @@ async function getProducts(req, res, next) {
  */
 async function getProduct(req, res, next) {
   try {
-    const isUUID = validator.isUUID(req.params.product);
-    const filter = {
-      [isUUID ? '_id' : 'slug']: req.params.product,
-    };
-    const product = await ProductMongo.findOne(filter);
-
+    const product = await ProductMongo.findOne({
+      $or: [{ _id: req.params.product }, { slug: req.params.product }],
+    });
     if (!product) {
       return res.sendStatus(404);
     }
@@ -233,7 +230,18 @@ async function updateProduct(req, res, next) {
       returning: true,
       individualHooks: true,
     });
+    const productUpdateBody = productUpdateSchema.parse(req.body);
 
+    await Products.update(productUpdateBody, {
+      where: {
+        [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
+      },
+      limit: 1,
+      returning: true,
+      individualHooks: true,
+    });
+
+    return res.sendStatus(204);
     return res.sendStatus(204);
   } catch (error) {
     return next(error);
@@ -254,7 +262,15 @@ async function deleteProduct(req, res, next) {
       limit: 1,
       individualHooks: true,
     });
+    const deletedCountSql = await Products.destroy({
+      where: {
+        [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
+      },
+      limit: 1,
+      individualHooks: true,
+    });
 
+    if (deletedCountSql === 0) {
     if (deletedCountSql === 0) {
       return res.sendStatus(404);
     }
@@ -273,7 +289,6 @@ async function deleteProduct(req, res, next) {
  */
 async function getProductCount(req, res, next) {
   try {
-    console.log('getProductCount called'); // Log pour vérifier si la route est atteinte
     const count = await ProductMongo.countDocuments();
     return res.status(200).json({ count });
   } catch (error) {
