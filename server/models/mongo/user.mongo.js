@@ -87,10 +87,61 @@ const UserSchema = new mongoose.Schema(
       required: true,
       default: [],
     },
+    basket: [
+      {
+        type: {
+          _id: {
+            type: mongoose.Schema.Types.UUID,
+            required: true,
+          },
+          name: {
+            type: String,
+            required: true,
+          },
+          category: {
+            type: {
+              _id: {
+                type: mongoose.Schema.Types.UUID,
+                required: true,
+              },
+              name: {
+                type: String,
+                required: true,
+              },
+              slug: {
+                type: String,
+                required: true,
+              },
+            },
+            default: null,
+          },
+          image: {
+            type: String,
+            required: true,
+          },
+          price: {
+            type: mongoose.Schema.Types.Decimal128,
+            required: true,
+            /**
+             *
+             * @param {import('mongoose').Types.Decimal128} v
+             */
+            get(v) {
+              return v.toString();
+            },
+          },
+        },
+      },
+    ],
     isVerified: {
       type: Boolean,
       required: true,
       default: false,
+    },
+    deletedAt: {
+      type: Date,
+      required: false,
+      default: null,
     },
   },
   {

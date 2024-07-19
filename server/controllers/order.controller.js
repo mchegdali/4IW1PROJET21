@@ -10,7 +10,6 @@ const Orders = sequelize.model('orders');
 const Shippings = sequelize.model('shippings');
 const OrdersMongo = require('../models/mongo/orders.mongo');
 const UsersMongo = require('../models/mongo/user.mongo');
-const BasketsMongo = require('../models/mongo/baskets.mongo');
 const ShippingsMongo = require('../models/mongo/shipping.mongo');
 const StatusMongo = require('../models/mongo/status.mongo');
 
@@ -20,11 +19,10 @@ const StatusMongo = require('../models/mongo/status.mongo');
 async function createOrder(req, res, next) {
   try {
     const orderCreateBody = await orderCreateSchema.parseAsync(req.body);
-    const user = await UsersMongo.findById(orderCreateBody.user);
 
     const result = await sequelize.transaction(async (t) => {
-      const userId = await UsersMongo.findById(orderCreateBody.user);
-      if (!userId) {
+      const user = await UsersMongo.findById(orderCreateBody.user);
+      if (!user) {
         throw new NotFound();
       }
 
@@ -33,9 +31,7 @@ async function createOrder(req, res, next) {
         throw new NotFound();
       }
 
-      const basket = await BasketsMongo.findOne({ user: user })
-        .sort({ createdAt: -1 })
-        .exec();
+      const basket = user.basket;
 
       if (!basket) {
         throw new NotFound();

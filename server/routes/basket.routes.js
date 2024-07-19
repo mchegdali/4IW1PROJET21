@@ -1,18 +1,16 @@
 const { Router } = require('express');
 const {
-  createBasket,
-  deleteBasket,
   getBasket,
-  getBaskets,
-  updateBasket,
+  addItemToBasket,
+  removeItemFromBasket,
 } = require('../controllers/basket.controller');
 
 const userBasketRouter = Router({ mergeParams: true });
-const basketsRouter = Router();
 
-userBasketRouter.route('/basket').patch(updateBasket).delete(deleteBasket);
+userBasketRouter
+  .route('/')
+  .get(getBasket)
+  .post(addItemToBasket)
+  .delete(removeItemFromBasket);
 
-basketsRouter.route('/baskets').get(getBaskets).post(createBasket);
-basketsRouter.route('/baskets/:id').get(getBasket);
-
-module.exports = { userBasketRouter, basketsRouter };
+module.exports = userBasketRouter;

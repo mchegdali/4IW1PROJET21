@@ -3,12 +3,13 @@ const mongoose = require('mongoose');
 const connection = mongoose.createConnection(process.env.MONGODB_URL, {
   dbName: process.env.MONGODB_DBNAME,
 });
-// .then(() => {
-//   console.log('[MongoDB] Connected to database');
-// })
-// .catch((err) => {
-//   console.error('[MongoDB] Error connecting to database', err);
-//   process.exit(1);
-// });
+
+mongoose.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: function (doc, ret) {
+    delete ret._id;
+  },
+});
 
 module.exports = connection;

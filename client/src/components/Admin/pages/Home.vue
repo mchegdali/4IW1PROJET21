@@ -1,14 +1,20 @@
 <template>
-    <section class="flex-1 ml-80">
-        <!-- <div class="w-100 bg-white h-12 flex items-center justify-start border-b-2 border-gray-100 mb-5 p-5">
-        <!-- <div class="w-100 bg-white h-12 flex items-center justify-start border-b-2 border-gray-100 mb-5 p-5">
-            <p class="font-bold">Prénom, nom</p>
-        </div> -->
-        </div> -->
-        
-        <div class="flex items-center justify-between mb-12 p-5">
-            <h1 class="text-2xl font-bold text-green-900">Dashboard Fanthésie</h1>
-            <img src="../../../../public/images/fanthesie2.png" alt="Image" class="rounded-md">
+  <section class="flex-1 ml-80">
+    <div class="flex items-center justify-between mb-12 p-5">
+      <h1 class="text-2xl font-bold text-green-900">Dashboard Fanthésie</h1>
+      <img src="/images/fanthesie2.png" alt="Image" class="rounded-md" />
+    </div>
+
+    <!-- Stats globales -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 h-100 p-5">
+      <!-- En faire des composants -->
+      <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
+        <div class="flex items-center justify-center py-4">
+          <img
+            src="https://picsum.photos/500/500"
+            alt="Logo"
+            class="object-contain h-20 rounded-full"
+          />
         </div>
 
         <!-- Stats globales -->
@@ -34,15 +40,19 @@
                 </div>
             </div>
 
-            <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
-                <div class="flex items-center justify-center py-4">
-                <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full">
-                </div>
-                <div class="text-center mt-4">
-                <div class="text-2xl font-bold" id="orderCount">{{ orderCount }}</div>
-                <div class="text-sm text-gray-500 mt-2">Nombre de commandes total</div>
-                </div>
+          <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
+            <div class="flex items-center justify-center py-4">
+              <img
+                src="https://picsum.photos/500/500"
+                alt="Logo"
+                class="object-contain h-20 rounded-full"
+              />
             </div>
+            <div class="text-center mt-4">
+              <div class="text-2xl font-bold" id="orderCount">{{ orderCount }}</div>
+              <div class="text-sm text-gray-500 mt-2">Nombre de commandes total</div>
+            </div>
+          </div>
 
             <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
                 <div class="flex items-center justify-center py-4">
@@ -72,7 +82,7 @@
         </div>
     </section>
 </template>
-  
+
 <script lang="ts">
 import { defineComponent } from 'vue';
 import Card from '../Card.vue';
@@ -80,10 +90,10 @@ import BarChart from '../BarChart.vue';
 import DonutChart from '../DonutChart.vue';
 
 interface CardData {
-    image: string;
-    title: string;
-    text: string;
-    page: string;
+  image: string;
+  title: string;
+  text: string;
+  page: string;
 }
 
 export default defineComponent({
@@ -201,6 +211,5 @@ export default defineComponent({
     },
 });
 </script>
-  
-<style lang="scss">
-</style>
+
+<style lang="scss"></style>
