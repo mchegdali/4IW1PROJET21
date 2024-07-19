@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { FilePenLine, MoveLeft, Trash } from 'lucide-vue-next';
-import ConfirmModal from '../components/confirm-modal.vue';
+import ConfirmModal from '../../components/modal/confirm-modal.vue';
 
 interface Address {
   _id: string; // Assurez-vous que cet ID est bien une chaîne de caractères
@@ -111,7 +111,7 @@ onMounted(() => {
       <div class="flex space-x-4">
         <RouterLink
           :to="{ name: 'edit-addresse', params: { id: address._id } }"
-          class="text-blue-500 hover:text-blue-700"
+          class="text-tea-600 hover:text-tea-900"
         >
           <FilePenLine class="w-5 h-5" />
         </RouterLink>
