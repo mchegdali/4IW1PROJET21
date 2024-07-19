@@ -5,8 +5,8 @@ const UserMongo = require('../mongo/user.mongo');
 
 const ProductsSequelize = (sequelize) => {
   class Products extends Model {
-    async toMongo() {
-      const category = await this.getCategory();
+    async toMongo(options) {
+      const category = await this.getCategory(options);
       return {
         _id: this.id,
         slug: this.slug,
@@ -32,13 +32,13 @@ const ProductsSequelize = (sequelize) => {
 
       Products.hasMany(models.basketsItems);
 
-      Products.addHook('afterCreate', async (product) => {
-        const productMongo = await product.toMongo();
+      Products.addHook('afterCreate', async (product, { transaction }) => {
+        const productMongo = await product.toMongo({ transaction });
         await ProductMongo.create(productMongo);
       });
 
-      Products.addHook('afterUpdate', async (product) => {
-        const productMongo = await product.toMongo();
+      Products.addHook('afterUpdate', async (product, { transaction }) => {
+        const productMongo = await product.toMongo({ transaction });
         await ProductMongo.updateOne(
           { _id: product.id },
           {
