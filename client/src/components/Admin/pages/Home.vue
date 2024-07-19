@@ -39,7 +39,7 @@
                 <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full">
                 </div>
                 <div class="text-center mt-4">
-                <div class="text-2xl font-bold">135</div>
+                <div class="text-2xl font-bold" id="orderCount">{{ orderCount }}</div>
                 <div class="text-sm text-gray-500 mt-2">Nombre de commandes total</div>
                 </div>
             </div>
@@ -95,50 +95,46 @@ export default defineComponent({
     },
     data() {
         return {
-        cards: [
-            {
-                image: 'https://picsum.photos/500/500',
-                title: 'Ventes',
-                text: 'Explorez les dernières tendances de vente et optimisez votre stratégie commerciale en temps réel. Cliquez ici pour consulter les statistiques de ventes !',
-                page: 'AdminVentes',
-                page: 'AdminVentes',
-            },
-            {
-                image: 'https://picsum.photos/500/500',
-                title: 'Utilisateurs',
-                text: 'Découvrez les nouvelles inscriptions et analysez le comportement de vos utilisateurs. Cliquez ici pour accéder aux statistiques des utilisateurs !',
-                page: 'AdminUtilisateurs',
-                page: 'AdminUtilisateurs',
-            },
-            {
-                image: 'https://picsum.photos/500/500',
-                title: 'Produits',
-                text: 'Suivez la performance de vos produits et identifiez les best-sellers. Cliquez ici pour consulter les statistiques détaillées de vos produits !',
-                page: 'AdminProduits',
-                page: 'AdminProduits',
-            },
-            {
-                image: 'https://picsum.photos/500/500',
-                title: 'Finances',
-                text: 'Obtenez un aperçu complet de vos finances et suivez vos revenus et dépenses. Cliquez ici pour consulter les statistiques financières détaillées !',
-                page: 'AdminFinances',
-                page: 'AdminFinances',
-            },
-            {
-                image: 'https://picsum.photos/500/500',
-                title: 'Clients',
-                text: 'Analysez les données de vos clients et améliorez votre relation client. Cliquez ici pour accéder aux statistiques détaillées de vos clients !',
-                page: 'AdminClients',
-                page: 'AdminClients',
-            },
-            {
-                image: 'https://picsum.photos/500/500',
-                title: 'Tendances et Prévisions',
-                text: 'Utilisez des prévisions basées sur des données pour planifier votre stratégie future. Cliquez ici pour explorer les tendances et les prévisions détaillées !',
-                page: 'AdminTendances',
-                page: 'AdminTendances',
-            },
-        ] as Card[],
+            userCount: "-",
+            orderCount: "-",
+            cards: [
+                {
+                    image: 'https://picsum.photos/500/500',
+                    title: 'Ventes',
+                    text: 'Explorez les dernières tendances de vente et optimisez votre stratégie commerciale en temps réel. Cliquez ici pour consulter les statistiques de ventes !',
+                    page: 'AdminVentes',
+                },
+                {
+                    image: 'https://picsum.photos/500/500',
+                    title: 'Utilisateurs',
+                    text: 'Découvrez les nouvelles inscriptions et analysez le comportement de vos utilisateurs. Cliquez ici pour accéder aux statistiques des utilisateurs !',
+                    page: 'AdminUtilisateurs',
+                },
+                {
+                    image: 'https://picsum.photos/500/500',
+                    title: 'Produits',
+                    text: 'Suivez la performance de vos produits et identifiez les best-sellers. Cliquez ici pour consulter les statistiques détaillées de vos produits !',
+                    page: 'AdminProduits',
+                },
+                {
+                    image: 'https://picsum.photos/500/500',
+                    title: 'Finances',
+                    text: 'Obtenez un aperçu complet de vos finances et suivez vos revenus et dépenses. Cliquez ici pour consulter les statistiques financières détaillées !',
+                    page: 'AdminFinances',
+                },
+                {
+                    image: 'https://picsum.photos/500/500',
+                    title: 'Clients',
+                    text: 'Analysez les données de vos clients et améliorez votre relation client. Cliquez ici pour accéder aux statistiques détaillées de vos clients !',
+                    page: 'AdminClients',
+                },
+                {
+                    image: 'https://picsum.photos/500/500',
+                    title: 'Tendances et Prévisions',
+                    text: 'Utilisez des prévisions basées sur des données pour planifier votre stratégie future. Cliquez ici pour explorer les tendances et les prévisions détaillées !',
+                    page: 'AdminTendances',
+                },
+            ] as CardData[],
         };
     },
     methods: {
@@ -152,13 +148,23 @@ export default defineComponent({
                 this.userCount = "-"; 
             }
         },
+        async fetchOrderCount() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/count`);
+                const data = await response.json();
+                this.orderCount = data.count;
+            } catch (error) {
+                console.error('Error fetching order count:', error);
+                this.orderCount = "-"; 
+            }
+        },
     },
     mounted() {
         this.fetchUserCount();
+        this.fetchOrderCount();
     },
 });
 </script>
   
 <style lang="scss">
 </style>
-  
