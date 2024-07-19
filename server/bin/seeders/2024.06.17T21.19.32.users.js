@@ -19,60 +19,84 @@ const crypto = require('node:crypto');
 const up = async ({ context: { sequelize } }) => {
   const Users = sequelize.model('users');
   const Addresses = sequelize.model('addresses');
-  const users = [];
 
-  users.push({
-    fullname: 'Accountant ACCOUNTANT',
-    email: 'accountant@accountant.fr',
-    password: 'Password1234.',
-    role: 'accountant',
-    isVerified: true,
-    addresses: [
-      {
-        firstName: faker.lorem.word(),
-        lastName: faker.lorem.word(),
-        street: faker.location.streetAddress(true),
-        city: faker.location.city(),
-        region: faker.lorem.word(),
-        zipCode: faker.location.zipCode(),
-        country: faker.location.country(),
-        phone: faker.phone.number(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  const users = [
+    {
+      id: crypto.randomUUID(),
+      fullname: 'User USER',
+      email: 'user@user.fr',
+      password: 'Password1234.',
+      role: 'user',
+      isVerified: true,
+      addresses: [
+        {
+          firstName: faker.lorem.word(),
+          lastName: faker.lorem.word(),
+          street: faker.location.streetAddress(true),
+          city: faker.location.city(),
+          region: faker.lorem.word(),
+          zipCode: faker.location.zipCode(),
+          country: faker.location.country(),
+          phone: faker.phone.number(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      id: crypto.randomUUID(),
+      fullname: 'Admin ADMIN',
+      email: 'admin@admin.fr',
+      password: 'Password1234.',
+      role: 'admin',
+      isVerified: true,
+      addresses: [
+        {
+          firstName: faker.lorem.word(),
+          lastName: faker.lorem.word(),
+          street: faker.location.streetAddress(true),
+          city: faker.location.city(),
+          region: faker.lorem.word(),
+          zipCode: faker.location.zipCode(),
+          country: faker.location.country(),
+          phone: faker.phone.number(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      fullname: 'Accountant ACCOUNTANT',
+      email: 'accountant@accountant.fr',
+      password: 'Password1234.',
+      role: 'accountant',
+      isVerified: true,
+      addresses: [
+        {
+          firstName: faker.lorem.word(),
+          lastName: faker.lorem.word(),
+          street: faker.location.streetAddress(true),
+          city: faker.location.city(),
+          region: faker.lorem.word(),
+          zipCode: faker.location.zipCode(),
+          country: faker.location.country(),
+          phone: faker.phone.number(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ];
 
   await sequelize.transaction(async (t) => {
-    const user = await Users.create(
-      {
-        id: crypto.randomUUID(),
-        fullname: 'User USER',
-        email: 'user@user.fr',
-        password: 'Password1234.',
-        role: 'user',
-        isVerified: true,
-        addresses: [
-          {
-            id: crypto.randomUUID(),
-            firstName: faker.lorem.word(),
-            lastName: faker.lorem.word(),
-            street: faker.location.streetAddress(true),
-            city: faker.location.city(),
-            region: faker.lorem.word(),
-            zipCode: faker.location.zipCode(),
-            country: faker.location.country(),
-            phone: faker.phone.number(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
+    for (const user of users) {
+      await Users.create(user, {
         validate: true,
         returning: true,
         include: [
@@ -93,119 +117,8 @@ const up = async ({ context: { sequelize } }) => {
           },
         ],
         transaction: t,
-      },
-    );
-
-    const admin = await Users.create(
-      {
-        id: crypto.randomUUID(),
-        fullname: 'Admin ADMIN',
-        email: 'admin@admin.fr',
-        password: 'Password1234.',
-        role: 'admin',
-        isVerified: true,
-        addresses: [
-          {
-            id: crypto.randomUUID(),
-            firstName: faker.lorem.word(),
-            lastName: faker.lorem.word(),
-            street: faker.location.streetAddress(true),
-            city: faker.location.city(),
-            region: faker.lorem.word(),
-            zipCode: faker.location.zipCode(),
-            country: faker.location.country(),
-            phone: faker.phone.number(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        validate: true,
-        returning: true,
-        include: [
-          {
-            model: Addresses,
-            as: 'addresses',
-            attributes: [
-              'id',
-              'firstName',
-              'lastName',
-              'street',
-              'city',
-              'region',
-              'zipCode',
-              'country',
-              'phone',
-            ],
-          },
-        ],
-        transaction: t,
-      },
-    );
-
-    const accountant = await Users.create(
-      {
-        fullname: 'Accountant ACCOUNTANT',
-        email: 'accountant@accountant.fr',
-        password: 'Password1234.',
-        role: 'accountant',
-        isVerified: true,
-        addresses: [
-          {
-            firstName: faker.lorem.word(),
-            lastName: faker.lorem.word(),
-            street: faker.location.streetAddress(true),
-            city: faker.location.city(),
-            region: faker.lorem.word(),
-            zipCode: faker.location.zipCode(),
-            country: faker.location.country(),
-            phone: faker.phone.number(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        validate: true,
-        returning: true,
-        include: [
-          {
-            model: Addresses,
-            as: 'addresses',
-            attributes: [
-              'id',
-              'firstName',
-              'lastName',
-              'street',
-              'city',
-              'region',
-              'zipCode',
-              'country',
-              'phone',
-            ],
-          },
-        ],
-        transaction: t,
-      },
-    );
-
-    const createdUsersMongo = [user, admin, accountant].map((u) => ({
-      _id: u.id,
-      fullname: u.fullname,
-      email: u.email,
-      password: u.password,
-      passwordValidUntil: u.passwordValidUntil,
-      role: u.role,
-      isVerified: u.isVerified,
-      addresses: u.getDataValue('addresses').map((a) => a.toMongo()),
-    }));
-
-    await UserMongo.insertMany(createdUsersMongo);
+      });
+    }
   });
 };
 

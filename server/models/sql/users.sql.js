@@ -1,8 +1,8 @@
 const { DataTypes, Model } = require('sequelize');
-
 const dayjs = require('dayjs');
 const { hash } = require('@node-rs/argon2');
 const authConfig = require('../../config/auth.config');
+const UserMongo = require('../mongo/user.mongo');
 
 const UsersSequelize = (sequelize) => {
   class Users extends Model {
@@ -11,7 +11,7 @@ const UsersSequelize = (sequelize) => {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       });
-      Users.belongsTo(models.orders, {
+      Users.hasMany(models.orders, {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       });
@@ -21,19 +21,24 @@ const UsersSequelize = (sequelize) => {
       });
     }
 
-    async toMongo() {
-      const order = await this.sequelize.models.orders.findByPk(this.orderId);
+    async toMongo({ transaction }) {
+      const [addresses, basket] = await Promise.all([
+        this.getAddresses({ transaction }),
+        this.getBasket({ transaction }),
+      ]);
+
+      const addressesMongo = addresses.map((address) => address.toMongo());
+
       return {
-        _id: this.getDataValue('id'),
-        fullname: this.getDataValue('fullname'),
-        email: this.getDataValue('email'),
-        password: this.getDataValue('password'),
-        passwordValidUntil: this.getDataValue('passwordValidUntil'),
-        isVerified: this.getDataValue('isVerified'),
-        role: this.getDataValue('role'),
-        addresses:
-          this.getDataValue('addresses')?.map((address) => address.toMongo()) ?? [],
-        order: order ? await order.toMongo() : null,
+        _id: this.id,
+        fullname: this.fullname,
+        email: this.email,
+        password: this.password,
+        passwordValidUntil: this.passwordValidUntil,
+        isVerified: this.isVerified,
+        role: this.role,
+        addresses: addressesMongo,
+        basket: basket ?? [],
       };
     }
   }
@@ -85,6 +90,7 @@ const UsersSequelize = (sequelize) => {
     {
       sequelize,
       modelName: 'users',
+      paranoid: true,
       hooks: {
         afterValidate: async (user, { fields }) => {
           if (fields.includes('password')) {
@@ -96,26 +102,36 @@ const UsersSequelize = (sequelize) => {
             user.passwordValidUntil = dayjs().add(60, 'day').toDate();
           }
         },
-        // beforeUpsert: async function (user, { fields }) {
-        //   if (fields.includes('password')) {
-        //     const newPassword = await hash(
-        //       user.password,
-        //       authConfig.hashOptions,
-        //     );
-        //     user.password = newPassword;
-        //     user.passwordValidUntil = dayjs().add(60, 'day').toDate();
-        //   }
-        // },
-        // beforeUpdate: async (user, { fields }) => {
-        //   if (fields.includes('password')) {
-        //     const newPassword = await hash(
-        //       user.password,
-        //       authConfig.hashOptions,
-        //     );
-        //     user.password = newPassword;
-        //     user.passwordValidUntil = dayjs().add(60, 'day').toDate();
-        //   }
-        // },
+        afterCreate: async (user, { transaction }) => {
+          const userMongo = await user.toMongo({ transaction });
+          await UserMongo.create(userMongo);
+        },
+        afterUpdate: async (user, { transaction }) => {
+          const userMongo = await user.toMongo({ transaction });
+          await UserMongo.updateOne(
+            { _id: user.id },
+            {
+              $set: userMongo,
+            },
+            {
+              upsert: true,
+            },
+          );
+        },
+        afterDestroy: async (user, { force }) => {
+          if (force) {
+            await UserMongo.deleteOne({ _id: user.id });
+          } else {
+            await UserMongo.updateOne(
+              { _id: user.id },
+              {
+                $set: {
+                  deletedAt: user.deletedAt,
+                },
+              },
+            );
+          }
+        },
       },
     },
   );

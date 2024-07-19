@@ -3,15 +3,8 @@ const { z } = require('zod');
 const entitySchema = require('./entity.schema');
 const timestampsSchema = require('./timestamps.schema');
 
-const basketQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  text: z.string().min(2).optional(),
-});
-
 const basketCreateSchema = z.object({
-  items: z.array(z.string().uuid()).optional(),
-  user: z.string().uuid().optional(),
-  totalPrice: z.number().optional(),
+  items: z.array(z.string().uuid()),
 });
 
 const basketUpdateSchema = basketCreateSchema.partial().refine((a) => {
@@ -22,14 +15,12 @@ const basketSchema = basketCreateSchema
   .merge(entitySchema)
   .merge(timestampsSchema);
 
-/** @typedef { z.infer<typeof basketCreateSchema>} ShippingCreateBody */
-/** @typedef { z.infer<typeof basketUpdateSchema>} ShippingUpdateBody */
-/** @typedef { z.infer<typeof basketSchema>} Shipping */
-/** @typedef { z.infer<typeof basketQuerySchema>} ShippingQuery */
+/** @typedef { z.infer<typeof basketCreateSchema>} BasketCreateBody */
+/** @typedef { z.infer<typeof basketUpdateSchema>} BasketUpdateBody */
+/** @typedef { z.infer<typeof basketSchema>} Basket */
 
 module.exports = {
-  basketQuerySchema: basketQuerySchema,
-  basketCreateSchema: basketCreateSchema,
-  basketUpdateSchema: basketUpdateSchema,
-  basketSchema: basketSchema,
+  basketCreateSchema,
+  basketUpdateSchema,
+  basketSchema,
 };
