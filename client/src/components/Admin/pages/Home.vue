@@ -14,7 +14,7 @@
                 <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full">
                 </div>
                 <div class="text-center mt-4">
-                <div class="text-2xl font-bold">{{ userCount }}</div>
+                <div class="text-2xl font-bold" id="userCount">{{ userCount }}</div>
                 <div class="text-sm text-gray-500 mt-2">Nombre d'utilisateurs totaux</div>
                 </div>
             </div>
@@ -24,7 +24,7 @@
                 <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full">
                 </div>
                 <div class="text-center mt-4">
-                <div class="text-2xl font-bold">15 258 €</div>
+                <div class="text-2xl font-bold" id="totalRevenue">{{ totalRevenue }} €</div>
                 <div class="text-sm text-gray-500 mt-2">Chiffre d'affaires total</div>
                 </div>
             </div>
@@ -45,7 +45,7 @@
                 </div>
                 <div class="text-center mt-4">
                 <div class="text-2xl font-bold">75,5 €</div>
-                <div class="text-sm text-gray-500 mt-2">Panier moyen</div>
+                <div class="text-sm text-gray-500 mt-2">TODO Panier moyen</div>
                 </div>
             </div>
         </div>
@@ -92,6 +92,7 @@ export default defineComponent({
         return {
             userCount: "-",
             orderCount: "-",
+            totalRevenue: "-",
             cards: [
                 {
                     image: 'https://picsum.photos/500/500',
@@ -153,10 +154,21 @@ export default defineComponent({
                 this.orderCount = "-"; 
             }
         },
+        async fetchTotalRevenue() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/revenue`);
+                const data = await response.json();
+                this.totalRevenue = data.totalRevenue.toFixed(2); // Limiter à 2 chiffres après la virgule
+            } catch (error) {
+                console.error('Error fetching total revenue:', error);
+                this.totalRevenue = "-"; 
+            }
+        },
     },
     mounted() {
         this.fetchUserCount();
         this.fetchOrderCount();
+        this.fetchTotalRevenue();
     },
 });
 </script>
