@@ -29,6 +29,7 @@ const router = useRouter();
 const route = useRoute();
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 const userId = user.id;
+const addressId = route.params.id as string;
 
 const nameRegex = /^[a-zA-ZÀ-ÿ '-]{2,}$/;
 const streetRegex = /^[a-zA-Z0-9À-ÿ '-]{2,}$/;
@@ -61,9 +62,9 @@ const initialAddressData = props.initialAddressData || {
 const {
   handleSubmit,
   isSubmitting,
-  isError,
   defineField,
-  errors
+  errors,
+  formValues
 } = useForm({
   validationSchema: addressSchema,
   defaultValues: initialAddressData
@@ -80,8 +81,14 @@ const [phone, phoneField] = defineField('phone');
 
 const submitHandler = handleSubmit(async (data) => {
   try {
-    const response = await fetch(`http://localhost:3000/users/${userId}/addresses`, {
-      method: 'POST',
+    const url = props.isEditing 
+      ? `http://localhost:3000/users/${userId}/addresses/${addressId}`
+      : `http://localhost:3000/users/${userId}/addresses`;
+
+    const method = props.isEditing ? 'PUT' : 'POST';
+
+    const response = await fetch(url, {
+      method,
       headers: {
         'Content-Type': 'application/json'
       },
@@ -89,14 +96,34 @@ const submitHandler = handleSubmit(async (data) => {
     });
 
     if (!response.ok) {
-      throw new Error("Erreur lors de l'ajout de l'adresse");
+      throw new Error(props.isEditing ? "Erreur lors de la mise à jour de l'adresse" : "Erreur lors de l'ajout de l'adresse");
     }
 
+    emit('submitted');
     router.push({ name: 'adresses', params: { userId } });
   } catch (error) {
-    console.error("Erreur lors de l'ajout de l'adresse:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error(props.isEditing ? "Erreur lors de la mise à jour de l'adresse:" : "Erreur lors de l'ajout de l'adresse:", error);
+    }
   }
 });
+
+watch(() => props.isEditing, async (newVal) => {
+  if (newVal && addressId) {
+    try {
+      const response = await fetch(`http://localhost:3000/users/${userId}/addresses/${addressId}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const addressData = await response.json();
+      Object.assign(formValues.value, addressData);
+    } catch (error) {
+      if (import.meta.env.MODE === 'development') {
+        console.error('Erreur lors du chargement de l’adresse:', error);
+      }
+    }
+  }
+}, { immediate: true });
 </script>
 
 <template>
@@ -255,7 +282,9 @@ const submitHandler = handleSubmit(async (data) => {
           {{ errors.phone }}
         </small>
       </div>
-      <Button type="submit" class="w-full" :disabled="isSubmitting">Soumettre</Button>
+      <Button type="submit" class="w-full" :disabled="isSubmitting">
+        {{ props.isEditing ? 'Mettre à jour' : 'Ajouter' }}
+      </Button>
     </form>
   </div>
 </template>

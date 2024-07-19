@@ -163,9 +163,9 @@ const router = createRouter({
           component: () => import('../views/address/add-address-view.vue')
         },
         {
-          name: 'edit-addresse',
-          path: '/edit-addresse/:id',
-          component: () => import('../views/address/edit-address-view.vue')
+          name: 'edit-adresse',
+          path: '/edit-adresse/:id',
+          component: () => import('../views/edit-adresse-view.vue')
         }
       ]
     },
