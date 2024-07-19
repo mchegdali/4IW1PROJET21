@@ -206,17 +206,17 @@ const forgotPassword = async (req, res, next) => {
 const resetPassword = async (req, res, next) => {
   try {
     const { password } = resetPasswordSchema.parse(req.body);
-    const user = req.user;
 
     await sequelize.transaction(async (t) => {
-      await req.user.update(
+      await Users.update(
         {
           password,
         },
         {
           where: {
-            id: user.id,
+            id: req.user.id,
           },
+          limit: 1,
           returning: true,
           individualHooks: true,
           transaction: t,
