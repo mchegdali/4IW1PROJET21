@@ -9,28 +9,6 @@ const router = useRouter();
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 const userId = user.id;
 
-const handleSubmit = () => {
-  submitForm(async (data) => {
-    try {
-      const response = await fetch(`http://localhost:3000/users/${userId}/addresses`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        throw new Error("Erreur lors de l'ajout de l'adresse");
-      }
-
-      router.push({ name: 'adresses', params: { userId } });
-    } catch (error) {
-      console.error("Erreur lors de l'ajout de l'adresse:", error);
-    }
-  });
-};
-
 const nameRegex = /^[a-zA-ZÀ-ÿ '-]{2,}$/;
 const streetRegex = /^[a-zA-Z0-9À-ÿ '-]{2,}$/;
 const cityRegionCountryRegex = /^[a-zA-ZÀ-ÿ '-]{2,}$/;
@@ -59,27 +37,63 @@ const initialAddressData = {
   phone: ''
 };
 
-const { formData, formErrors, formSubmitting, submitForm } = useForm(
-  addressSchema,
-  initialAddressData
-);
+const {
+  handleSubmit,
+  isSubmitting,
+  isError,
+  defineField,
+  errors
+} = useForm({
+  validationSchema: addressSchema,
+  defaultValues: initialAddressData
+});
+
+const [firstName, firstNameField] = defineField('firstName');
+const [lastName, lastNameField] = defineField('lastName');
+const [street, streetField] = defineField('street');
+const [city, cityField] = defineField('city');
+const [region, regionField] = defineField('region');
+const [zipCode, zipCodeField] = defineField('zipCode');
+const [country, countryField] = defineField('country');
+const [phone, phoneField] = defineField('phone');
+
+const submitHandler = handleSubmit(async (data) => {
+  try {
+    const response = await fetch(`http://localhost:3000/users/${userId}/addresses`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de l'ajout de l'adresse");
+    }
+
+    router.push({ name: 'adresses', params: { userId } });
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de l'adresse:", error);
+  }
+});
 </script>
 
 <template>
   <div class="mt-10">
-    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+    <form @submit.prevent="submitHandler" class="flex flex-col gap-4">
       <div>
         <label
           >Prénom
           <Input
             id="firstName"
-            v-model="formData.firstName"
-            :class="{ 'border-destructive': formErrors.firstName }"
+            v-model="firstName"
+            @input="firstNameField.onInput"
+            :class="{ 'border-destructive': errors.firstName }"
             autofocus
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.firstName">
-          {{ formErrors.firstName }}
+        <small class="text-destructive" v-if="errors.firstName">
+          {{ errors.firstName }}
         </small>
       </div>
       <div>
@@ -87,12 +101,13 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
           >Nom
           <Input
             id="lastName"
-            v-model="formData.lastName"
-            :class="{ 'border-destructive': formErrors.lastName }"
+            v-model="lastName"
+            @input="lastNameField.onInput"
+            :class="{ 'border-destructive': errors.lastName }"
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.lastName">
-          {{ formErrors.lastName }}
+        <small class="text-destructive" v-if="errors.lastName">
+          {{ errors.lastName }}
         </small>
       </div>
       <div>
@@ -100,12 +115,13 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
           >Rue
           <Input
             id="street"
-            v-model="formData.street"
-            :class="{ 'border-destructive': formErrors.street }"
+            v-model="street"
+            @input="streetField.onInput"
+            :class="{ 'border-destructive': errors.street }"
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.street">
-          {{ formErrors.street }}
+        <small class="text-destructive" v-if="errors.street">
+          {{ errors.street }}
         </small>
       </div>
       <div>
@@ -113,12 +129,13 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
           >Ville
           <Input
             id="city"
-            v-model="formData.city"
-            :class="{ 'border-destructive': formErrors.city }"
+            v-model="city"
+            @input="cityField.onInput"
+            :class="{ 'border-destructive': errors.city }"
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.city">
-          {{ formErrors.city }}
+        <small class="text-destructive" v-if="errors.city">
+          {{ errors.city }}
         </small>
       </div>
       <div>
@@ -126,12 +143,13 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
           >Région
           <Input
             id="region"
-            v-model="formData.region"
-            :class="{ 'border-destructive': formErrors.region }"
+            v-model="region"
+            @input="regionField.onInput"
+            :class="{ 'border-destructive': errors.region }"
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.region">
-          {{ formErrors.region }}
+        <small class="text-destructive" v-if="errors.region">
+          {{ errors.region }}
         </small>
       </div>
       <div>
@@ -139,12 +157,13 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
           >Code postal
           <Input
             id="zipCode"
-            v-model="formData.zipCode"
-            :class="{ 'border-destructive': formErrors.zipCode }"
+            v-model="zipCode"
+            @input="zipCodeField.onInput"
+            :class="{ 'border-destructive': errors.zipCode }"
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.zipCode">
-          {{ formErrors.zipCode }}
+        <small class="text-destructive" v-if="errors.zipCode">
+          {{ errors.zipCode }}
         </small>
       </div>
       <div>
@@ -152,12 +171,13 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
           >Pays
           <Input
             id="country"
-            v-model="formData.country"
-            :class="{ 'border-destructive': formErrors.country }"
+            v-model="country"
+            @input="countryField.onInput"
+            :class="{ 'border-destructive': errors.country }"
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.country">
-          {{ formErrors.country }}
+        <small class="text-destructive" v-if="errors.country">
+          {{ errors.country }}
         </small>
       </div>
       <div>
@@ -165,15 +185,16 @@ const { formData, formErrors, formSubmitting, submitForm } = useForm(
           >Numéro de téléphone
           <Input
             id="phone"
-            v-model="formData.phone"
-            :class="{ 'border-destructive': formErrors.phone }"
+            v-model="phone"
+            @input="phoneField.onInput"
+            :class="{ 'border-destructive': errors.phone }"
           />
         </label>
-        <small class="text-destructive" v-if="formErrors.phone">
-          {{ formErrors.phone }}
+        <small class="text-destructive" v-if="errors.phone">
+          {{ errors.phone }}
         </small>
       </div>
-      <Button type="submit" class="w-full" :disabled="formSubmitting">Soumettre</Button>
+      <Button type="submit" class="w-full" :disabled="isSubmitting">Soumettre</Button>
     </form>
   </div>
 </template>
