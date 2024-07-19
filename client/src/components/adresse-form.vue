@@ -127,8 +127,8 @@ watch(() => props.isEditing, async (newVal) => {
 </script>
 
 <template>
-  <div class="mt-10 mx-4">
-    <form @submit.prevent="submitHandler" class="flex flex-col gap-4">
+  <div class="mx-4 mt-4">
+    <form @submit.prevent="submitHandler" class="flex flex-col gap-4 mb-4">
       <div>
         <label>
           Prénom

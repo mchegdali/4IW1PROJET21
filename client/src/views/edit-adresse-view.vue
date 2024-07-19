@@ -2,6 +2,7 @@
 import AdresseForm from '@/components/adresse-form.vue';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { MoveLeft } from 'lucide-vue-next';
 
 const route = useRoute();
 const router = useRouter();
@@ -37,7 +38,7 @@ onMounted(() => {
 
 <template>
   <main class="grow">
-    <div class="flex items-center w-full relative align">
+    <div class="flex items-center w-full relative align px-4 mt-2">
       <div class="block lg:hidden">
         <router-link :to="{ name: 'adresses' }"><MoveLeft /></router-link>
       </div>
