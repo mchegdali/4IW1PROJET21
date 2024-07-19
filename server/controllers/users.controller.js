@@ -146,7 +146,7 @@ async function getUsers(req, res, next) {
  */
 async function replaceUser(req, res, next) {
   try {
-    const userId = req.params.id;
+    const userId = req.params.userId;
 
     if (req.user.role !== 'admin' && req.user.id !== userId) {
       return res.sendStatus(403);
@@ -198,7 +198,7 @@ async function replaceUser(req, res, next) {
  */
 async function updateUser(req, res, next) {
   try {
-    const userId = req.params.id;
+    const userId = req.params.userId;
 
     if (req.user.role !== 'admin' && req.user.id !== userId) {
       return res.sendStatus(403);
@@ -254,7 +254,7 @@ async function updateUser(req, res, next) {
  */
 async function deleteUser(req, res, next) {
   try {
-    const userId = req.params.id;
+    const userId = req.params.userId;
     const nbDeleted = await Users.destroy({ where: { id: userId } });
     const { deletedCount } = await UserMongo.deleteOne({ _id: userId });
 
@@ -318,10 +318,11 @@ async function getUserCount(req, res, next) {
  */
 async function getUser(req, res, next) {
   try {
-    const user = await UserMongo.findById(req.params.id);
+    const user = await UserMongo.findById(req.params.userId, {
+      password: 0,
+    });
 
     if (user === null) {
-      console.log('no user found');
       return res.sendStatus(404);
     }
 
@@ -338,10 +339,9 @@ async function getUser(req, res, next) {
  */
 async function getUserAddresses(req, res, next) {
   try {
-    const user = await UserMongo.findById(req.params.id);
+    const user = await UserMongo.findById(req.params.userId);
 
     if (user === null) {
-      console.log('no user found');
       return res.sendStatus(404);
     }
 

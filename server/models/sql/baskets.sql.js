@@ -1,29 +1,56 @@
 const { DataTypes, Model } = require('sequelize');
+const UserMongo = require('../mongo/user.mongo');
 
 const BasketsSequelize = (sequelize) => {
   class Baskets extends Model {
-    static associate(models) {
-      Baskets.hasMany(models.products, {
-        onDelete: 'SET NULL',
-        onUpdate: 'CASCADE',
-      });
+    async toMongo(options) {
+      const items = await this.getItems(options);
+      return items;
     }
 
-    /**
-     * @description
-     * Transform the model into a MongoDB-like object
-     * Use after a creation or update
-     * @returns
-     */
-    async toMongo() {
-      const items = await this.sequelize.models.products.findByPk(
-        this.productId,
-      );
-      return {
-        _id: this.id,
-        items: items.toMongo(),
-        totalPrice: this.totalPrice,
-      };
+    static associate(models) {
+      Baskets.belongsTo(models.users, {
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      });
+      Baskets.hasMany(models.basketsItems, {
+        as: 'items',
+      });
+
+      Baskets.addHook('afterCreate', async (basket, options) => {
+        const basketMongo = await basket.toMongo(options);
+        await UserMongo.updateOne(
+          { _id: basket.userId },
+          {
+            $set: {
+              basket: basketMongo,
+            },
+          },
+        );
+      });
+
+      Baskets.addHook('afterDestroy', async (basket) => {
+        await UserMongo.updateOne(
+          { _id: basket.userId },
+          {
+            $set: {
+              basket: [],
+            },
+          },
+        );
+      });
+
+      Baskets.addHook('afterUpdate', async (basket, { transaction }) => {
+        const basketMongo = await basket.toMongo({ transaction });
+        await UserMongo.updateOne(
+          { _id: basket.userId },
+          {
+            $set: {
+              basket: basketMongo,
+            },
+          },
+        );
+      });
     }
   }
 
@@ -33,14 +60,6 @@ const BasketsSequelize = (sequelize) => {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
-      },
-      user: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-      },
-      totalPrice: {
-        type: DataTypes.DECIMAL.UNSIGNED,
-        allowNull: true,
       },
     },
     {
