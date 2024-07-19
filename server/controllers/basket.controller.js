@@ -159,8 +159,77 @@ const removeItemFromBasket = async (req, res, next) => {
   }
 };
 
+const setItemQuantity = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const { productId, quantity } = z
+      .object({
+        productId: z.string().uuid(),
+        quantity: z.coerce.number().int().min(1).default(1),
+      })
+      .parse(req.body);
+
+    const [user, product] = await Promise.all([
+      Users.findByPk(userId),
+      Products.findByPk(productId),
+    ]);
+
+    if (!user || !product) {
+      return res.sendStatus(404);
+    }
+
+    let basket = await user.getBasket();
+
+    if (!basket) {
+      basket = await user.createBasket();
+    }
+
+    const itemsToCreate = Array(quantity).fill({
+      productId,
+      basketId: basket.id,
+    });
+
+    await BasketItems.destroy({
+      where: { productId: product.id, basketId: basket.id },
+    });
+
+    await BasketItems.bulkCreate(itemsToCreate, {
+      validate: true,
+      returning: true,
+      individualHooks: true,
+    });
+
+    const productMongo = await product.toMongo();
+
+    await UserMongo.updateOne(
+      { _id: userId },
+      {
+        $pull: {
+          basket: { _id: product.id },
+        },
+      },
+    );
+
+    await UserMongo.updateOne(
+      { _id: userId },
+      {
+        $push: {
+          basket: {
+            $each: Array(quantity).fill(productMongo),
+          },
+        },
+      },
+    );
+
+    return res.sendStatus(204);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   getBasket,
   addItemToBasket,
   removeItemFromBasket,
+  setItemQuantity,
 };
