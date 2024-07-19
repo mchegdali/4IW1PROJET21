@@ -1,6 +1,7 @@
 const { fakerFR: faker } = require('@faker-js/faker');
 const UserMongo = require('../../models/mongo/user.mongo');
 const crypto = require('node:crypto');
+const dayjs = require('dayjs');
 
 /**
  * @typedef { Object } MigrationParams
@@ -19,38 +20,22 @@ const crypto = require('node:crypto');
 const up = async ({ context: { sequelize } }) => {
   const Users = sequelize.model('users');
   const Addresses = sequelize.model('addresses');
-  const users = [];
-
-  users.push({
-    fullname: 'Accountant ACCOUNTANT',
-    email: 'accountant@accountant.fr',
-    password: 'Password1234.',
-    role: 'accountant',
-    isVerified: true,
-    addresses: [
-      {
-        firstName: faker.lorem.word(),
-        lastName: faker.lorem.word(),
-        street: faker.location.streetAddress(true),
-        city: faker.location.city(),
-        region: faker.lorem.word(),
-        zipCode: faker.location.zipCode(),
-        country: faker.location.country(),
-        phone: faker.phone.number(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
 
   await sequelize.transaction(async (t) => {
-    const user = await Users.create(
-      {
+    const usersToCreate = [];
+
+    // Boucle pour créer 40 utilisateurs par mois avec des createdAt randoms
+    for (let i = 0; i < 40; i++) {
+
+      const month = Math.floor(Math.random() * 12);
+      const day = Math.floor(Math.random() * 28) + 1;
+      const createdAt = dayjs(new Date(2024, month, day)).toDate();
+      const updatedAt = createdAt; // Si vous voulez que updatedAt soit le même que createdAt
+    
+      usersToCreate.push({
         id: crypto.randomUUID(),
-        fullname: 'User USER',
-        email: 'user@user.fr',
+        fullname: `User USER ${i}`,
+        email: `user${i}@user.fr`,
         password: 'Password1234.',
         role: 'user',
         isVerified: true,
@@ -65,14 +50,18 @@ const up = async ({ context: { sequelize } }) => {
             zipCode: faker.location.zipCode(),
             country: faker.location.country(),
             phone: faker.phone.number(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt,
+            updatedAt,
           },
         ],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
+        createdAt,
+        updatedAt,
+      });
+    }
+
+    const createdUsers = [];
+    for (const userData of usersToCreate) {
+      const user = await Users.create(userData, {
         validate: true,
         returning: true,
         include: [
@@ -93,8 +82,9 @@ const up = async ({ context: { sequelize } }) => {
           },
         ],
         transaction: t,
-      },
-    );
+      });
+      createdUsers.push(user);
+    }
 
     const admin = await Users.create(
       {
@@ -194,7 +184,57 @@ const up = async ({ context: { sequelize } }) => {
       },
     );
 
-    const createdUsersMongo = [user, admin, accountant].map((u) => ({
+    const user = await Users.create(
+      {
+        id: crypto.randomUUID(),
+        fullname: 'User USER',
+        email: 'user@user.fr',
+        password: 'Password1234.',
+        role: 'user',
+        isVerified: true,
+        addresses: [
+          {
+            id: crypto.randomUUID(),
+            firstName: faker.lorem.word(),
+            lastName: faker.lorem.word(),
+            street: faker.location.streetAddress(true),
+            city: faker.location.city(),
+            region: faker.lorem.word(),
+            zipCode: faker.location.zipCode(),
+            country: faker.location.country(),
+            phone: faker.phone.number(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        validate: true,
+        returning: true,
+        include: [
+          {
+            model: Addresses,
+            as: 'addresses',
+            attributes: [
+              'id',
+              'firstName',
+              'lastName',
+              'street',
+              'city',
+              'region',
+              'zipCode',
+              'country',
+              'phone',
+            ],
+          },
+        ],
+        transaction: t,
+      },
+    );
+
+    const createdUsersMongo = [...createdUsers, admin, accountant, user].map((u) => ({
       _id: u.id,
       fullname: u.fullname,
       email: u.email,
@@ -203,6 +243,9 @@ const up = async ({ context: { sequelize } }) => {
       role: u.role,
       isVerified: u.isVerified,
       addresses: u.getDataValue('addresses').map((a) => a.toMongo()),
+      createdAt: u.createdAt,
+      updatedAt: u.updatedAt,
+
     }));
 
     await UserMongo.insertMany(createdUsersMongo);
