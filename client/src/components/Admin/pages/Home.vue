@@ -110,6 +110,7 @@
     data() {
         return {
             userCount: "-",
+            orderCount: "-",
             cards: [
                 {
                     image: 'https://picsum.photos/500/500',
@@ -161,13 +162,23 @@
                 this.userCount = "-"; 
             }
         },
+        async fetchOrderCount() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/count`);
+                const data = await response.json();
+                this.orderCount = data.count;
+            } catch (error) {
+                console.error('Error fetching order count:', error);
+                this.orderCount = "-"; 
+            }
+        },
     },
     mounted() {
         this.fetchUserCount();
+        this.fetchOrderCount();
     },
 });
 </script>
   
 <style lang="scss">
 </style>
-  
