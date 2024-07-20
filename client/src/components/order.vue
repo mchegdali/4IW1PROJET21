@@ -27,13 +27,15 @@ interface OrderItem {
 }
 
 interface Order {
+  _id: string;
   orderNumber: string;
   createdAt: string;
   shippingDate: string;
   deliveryStatus?: boolean;
   shipping: Shipping;
   items: OrderItem[];
-  paymentType: string
+  paymentType: string;
+  status: { label: string };
 }
 
 const route = useRoute();
@@ -42,8 +44,8 @@ const products = ref<Product[]>([]);
 
 const fetchProductDetails = async (productIds: string[]) => {
   try {
-    const productPromises = productIds.map(id =>
-      fetch(`http://localhost:3000/products/${id}`).then(response => response.json())
+    const productPromises = productIds.map((id) =>
+      fetch(`http://localhost:3000/products/${id}`).then((response) => response.json())
     );
     const productData = await Promise.all(productPromises);
     products.value = productData;
@@ -67,7 +69,7 @@ const fetchOrderDetails = async () => {
     const data: Order = await response.json();
     order.value = data;
 
-    await fetchProductDetails(data.items.map(item => item.id));
+    await fetchProductDetails(data.items.map((item) => item.id));
   } catch (error) {
     console.error('Erreur lors de la récupération des détails de la commande:', error);
   }
@@ -84,7 +86,7 @@ const computeOrderTotal = (): string => {
 };
 
 const getProductDetails = (productId: string): Product | {} => {
-  return products.value.find(product => product.id === productId) || {};
+  return products.value.find((product) => product.id === productId) || {};
 };
 
 const getProductImage = (productId: string): string => {
@@ -102,7 +104,6 @@ onMounted(() => {
 });
 </script>
 
-
 <template>
   <div class="items-center flex justify-center flex-col">
     <div v-if="order" class="sm:w-2/3 sm:flex flex-row justify-center md:w-full">
@@ -118,7 +119,13 @@ onMounted(() => {
             <p>
               Date de commande:
               <span class="font-bold">
-                {{ new Date(order.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) }}
+                {{
+                  new Date(order.createdAt).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                  })
+                }}
               </span>
             </p>
           </div>
@@ -150,11 +157,26 @@ onMounted(() => {
           <div class="sm:flex w-full items-center justify-between">
             <p class="text-sm font-bold text-gray-700 sm:text-sm">
               DATE PRÉVUE DE LIVRAISON :
-              {{ new Date(order.shippingDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) }}
+              {{
+                new Date(
+                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 4)
+                ).toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                })
+              }}
             </p>
-            <div class="bg-white py-2 text-sm flex items-center gap-2">
+
+            <div
+              class="bg-white py-2 text-sm flex items-center gap-2"
+              v-if="order.status.label == 'Shipped'"
+            >
               <Truck />
-              <RouterLink :to="{ name: 'tracking', params: { id: order.orderNumber } }" class="text-tea-600 sm:text-lg">
+              <RouterLink
+                :to="{ name: 'tracking', params: { id: order._id } }"
+                class="text-tea-600 sm:text-lg"
+              >
                 Suivre le colis
               </RouterLink>
             </div>
@@ -163,7 +185,8 @@ onMounted(() => {
             <div class="h-full bg-tea-600" style="width: 45%"></div>
           </div>
           <p class="text-xs sm:text-sm">
-            Votre colis est en cours de livraison. Merci de votre patience et nous espérons que vous apprécierez votre commande lorsqu'elle arrivera !
+            Votre colis est en cours de livraison. Merci de votre patience et nous espérons que vous
+            apprécierez votre commande lorsqu'elle arrivera !
           </p>
         </div>
 
@@ -174,7 +197,13 @@ onMounted(() => {
           </div>
           <p class="text-sm font-bold text-gray-700 sm:text-lg">
             LIVRAISON LE :
-            {{ new Date(order.shippingDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) }}
+            {{
+              new Date(order.shippingDate).toLocaleDateString('fr-FR', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })
+            }}
           </p>
           <div class="w-full h-3 bg-tea-600 rounded-xl"></div>
           <p class="text-xs sm:text-sm">
@@ -184,7 +213,14 @@ onMounted(() => {
 
         <!-- Order Items -->
         <div class="flex flex-col w-full gap-2 px-2 sm:px-4 pb-2">
-          <div v-for="(item, index) in order.items" :key="item.id" :class="['h-28 flex w-full gap-8 pb-2', index !== order.items.length - 1 ? 'border-b border-gray-300' : '']">
+          <div
+            v-for="(item, index) in order.items"
+            :key="item.id"
+            :class="[
+              'h-28 flex w-full gap-8 pb-2',
+              index !== order.items.length - 1 ? 'border-b border-gray-300' : ''
+            ]"
+          >
             <img class="min-w-24 h-full bg-slate-400" :src="getProductImage(item.id)" alt="" />
             <div class="flex flex-col text-sm gap-2">
               <p class="font-bold">{{ getProductTitle(item.id) }}</p>
@@ -202,7 +238,11 @@ onMounted(() => {
         </h6>
         <div class="flex gap-4 items-center p-2 sm:p-4 text-xs">
           <span v-if="order.paymentType === 'credit_card'" class="flex gap-4 items-center">
-            <img class="w-9 px-2 py-1 sm:w-12" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/300px-MasterCard_Logo.svg.png" alt="Carte bancaire" />
+            <img
+              class="w-9 px-2 py-1 sm:w-12"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/300px-MasterCard_Logo.svg.png"
+              alt="Carte bancaire"
+            />
             <h1 class="px-2 text-sm sm:text-lg">Carte bancaire</h1>
           </span>
         </div>
@@ -224,4 +264,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
