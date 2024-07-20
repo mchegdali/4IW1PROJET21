@@ -4,27 +4,6 @@ import { useUserStore } from './user';
 
 const defaultProducts: Product[] = [];
 
-async function addProductToBasket(
-  userId: string,
-  accessToken: string,
-  product: Product,
-  count: number
-) {
-  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${userId}/basket`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`
-    },
-    body: JSON.stringify({
-      productId: product.id,
-      quantity: count
-    })
-  });
-
-  return response;
-}
-
 async function setProductCountToBasket(
   userId: string,
   accessToken: string,
@@ -43,26 +22,6 @@ async function setProductCountToBasket(
     })
   });
 
-  return response;
-}
-
-async function removeProductFromBasket(
-  userId: string,
-  accessToken: string,
-  product: Product,
-  count: number
-) {
-  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${userId}/basket`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`
-    },
-    body: JSON.stringify({
-      productId: product.id,
-      quantity: count
-    })
-  });
   return response;
 }
 
@@ -119,30 +78,18 @@ export const useBasketStore = defineStore('basket', {
       this.products = structuredClone(products);
       localStorage.setItem('basket', JSON.stringify(this.products));
     },
-    async setProductCount(product: Product, count: number) {
-      if (this.products.length === count) {
-        return;
-      }
-      const userStore = useUserStore();
+    setProductCount(product: Product, count: number) {
+      const currentCount = this.products.filter((p) => p._id === product._id).length;
 
-      if (userStore.isAuthenticated) {
-        const response = await addProductToBasket(
-          userStore.user?.id!,
-          userStore.accessToken!,
-          product,
-          count
-        );
-        if (response.status === 401) {
-          const isRefreshed = await userStore.getRefreshToken();
-          if (isRefreshed) {
-            await addProductToBasket(userStore.user?.id!, userStore.accessToken!, product, count);
-          }
-        }
+      if (currentCount === count) {
+        return;
       }
 
       const productIndex = this.products.findIndex((p) => p._id === product._id);
       if (productIndex === -1) {
-        this.addProduct(product, count);
+        for (let i = 0; i < count; i++) {
+          this.products.push(product);
+        }
       } else {
         const previousProducts = this.products.slice(0, productIndex);
         const nextProducts = this.products
@@ -150,23 +97,7 @@ export const useBasketStore = defineStore('basket', {
           .filter((p) => p.id !== product.id);
         const newProducts = Array(count).fill(product);
         this.products = [...previousProducts, ...newProducts, ...nextProducts];
-
-        localStorage.setItem('basket', JSON.stringify(this.products));
       }
-    },
-    removeProduct(product: Product, count = 1) {
-      for (let i = 0; i < count; i++) {
-        const lastIndex = this.products.findLastIndex((p) => p._id === product._id);
-
-        if (lastIndex !== -1) {
-          this.products = this.products.toSpliced(lastIndex, 1);
-        }
-      }
-
-      localStorage.setItem('basket', JSON.stringify(this.products));
-    },
-    removeAllProducts(product: Product) {
-      this.products = this.products.filter((p) => p.id !== product.id);
 
       localStorage.setItem('basket', JSON.stringify(this.products));
     }

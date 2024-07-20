@@ -17,6 +17,7 @@ const { readonly, product } = withDefaults(defineProps<{ readonly: boolean; prod
   readonly: false
 });
 
+const userStore = useUserStore();
 const basketStore = useBasketStore();
 const userStore = useUserStore();
 
@@ -24,9 +25,8 @@ const productCount = computed(() => {
   return basketStore.products.filter((p) => p.id === product.id).length;
 });
 
-function onInput(value: number) {
-  console.log('onInput', value);
-
+async function onInput(value: number) {
+  const
   basketStore.setProductCount(product, value);
 }
 </script>

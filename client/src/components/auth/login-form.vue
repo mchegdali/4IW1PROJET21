@@ -81,7 +81,7 @@ const submitHandler = handleSubmit(async (data) => {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${loginResponseBody.accessToken}`
+      Authorization: `Bearer ${accessToken}`
     }
   });
 
@@ -90,11 +90,6 @@ const submitHandler = handleSubmit(async (data) => {
     basketStore.setProducts(basketResponseBody);
   }
 
-  userStore.$patch({
-    accessToken: loginResponseBody.accessToken,
-    refreshToken: loginResponseBody.refreshToken,
-    user: loginResponseBody.user
-  });
   router.push({ name: 'home' });
 });
 
