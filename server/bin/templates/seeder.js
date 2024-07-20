@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-vars */
-const { DataTypes } = require('sequelize');
-
 /**
  * @typedef { Object } MigrationParams
  * @property { string } name
@@ -16,13 +13,14 @@ const { DataTypes } = require('sequelize');
  *
  */
 const up = async ({ context: { sequelize } }) => {
-  const queryInterface = sequelize.getQueryInterface();
   try {
     /*
      add your seeder here
     */
+
+    await sequelize.transaction(async (t) => {});
   } catch {
-    /* empty */
+    /* add your rollback code here, should be same as down */
   }
 };
 
