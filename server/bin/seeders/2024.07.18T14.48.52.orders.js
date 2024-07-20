@@ -46,7 +46,11 @@ const up = async ({ context: { sequelize } }) => {
           label: status.label
         },
         items: faker.helpers.arrayElements(products, { min: 1, max: 3 }),
-        userId: user.id,
+        user:{
+          _id: user.id,
+          fullname: user.fullname,
+          email: user.email
+        },
         shipping: {
           _id: crypto.randomUUID(),
           fullname: faker.person.fullName(),
