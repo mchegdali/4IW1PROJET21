@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { reactive, computed } from 'vue';
 import Input from './ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { z } from 'zod';
 import { useForm } from '@/composables/form';
+import { onBeforeUnmount } from 'vue';
 
 const userInfosSchema = z.object({
   email: z.string().email({ message: "L'e-mail doit être sous cette forme : exemple@example.com" }),
@@ -12,19 +12,22 @@ const userInfosSchema = z.object({
   })
 });
 
-const { handleSubmit, isSubmitting, isError, defineField, errors, cancel, status, formValues } =
-  useForm({
-    validationSchema: userInfosSchema,
-    defaultValues: {
-      email: '',
-      name: ''
-    }
-  });
+const { handleSubmit, defineField, errors, cancel } = useForm({
+  validationSchema: userInfosSchema,
+  defaultValues: {
+    email: '',
+    name: ''
+  }
+});
 
 const [email, emailField] = defineField('email');
 const [name, nameField] = defineField('name');
 
-const submitHandler = handleSubmit(async (data, signal) => {});
+const submitHandler = handleSubmit(async () => {});
+
+onBeforeUnmount(() => {
+  cancel();
+});
 </script>
 
 <template>
