@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { Badge } from '@/components/ui/badge';
+import { Calendar, Package2, Truck } from 'lucide-vue-next';
 
 interface Order {
   _id: string;
@@ -263,9 +264,10 @@ window.addEventListener('resize', () => {
           </div>
         </div>
         <div
-          class="border-b border-t border-gray-200 py-2"
+          class="border-b border-t border-gray-200 py-2 flex gap-3"
           v-if="order.status.label == 'Shipped'"
         >
+          <Truck />
           <router-link
             :to="{ name: 'tracking', params: { id: order._id } }"
             class="w-1/2 text-tea-600"
@@ -274,11 +276,13 @@ window.addEventListener('resize', () => {
         </div>
 
         <div>
-          <p>
+          <p class="flex gap-3">
+            <Package2 />
             N° de commande: <span class="font-bold">{{ order.orderNumber }}</span>
           </p>
-          <p>
-            <span v-if="order.shippingDate" class="font-bold">
+          <p class="flex gap-3" v-if="order.shippingDate">
+            <Calendar />
+            <span class="font-bold">
               {{ "Date d'expédition :" + formatDate(order.shippingDate) }}
             </span>
           </p>
