@@ -26,9 +26,10 @@ const up = async ({ context: { sequelize } }) => {
 
     // Boucle pour créer 40 utilisateurs par mois avec des createdAt randoms
     for (let i = 0; i < 40; i++) {
-      const month = Math.floor(Math.random() * 12);
-      const day = Math.floor(Math.random() * 28) + 1;
-      const createdAt = dayjs(new Date(2024, month, day)).toDate();
+      const createdAt = faker.date.between({
+        from: dayjs().startOf('year').toDate(),
+        to: dayjs().toDate(),
+      });
       const updatedAt = createdAt;
 
       usersToCreate.push({
@@ -49,13 +50,13 @@ const up = async ({ context: { sequelize } }) => {
             zipCode: faker.location.zipCode(),
             country: faker.location.country(),
             phone: faker.phone.number(),
-            createdAt: createdAt,
-            updatedAt: createdAt,
+            createdAt,
+            updatedAt,
             deletedAt: null,
           },
         ],
-        createdAt: createdAt,
-        updatedAt: createdAt,
+        createdAt,
+        updatedAt,
         deletedAt: null,
       });
     }
@@ -81,7 +82,7 @@ const up = async ({ context: { sequelize } }) => {
               'phone',
               'createdAt',
               'updatedAt',
-              'deletedAt'
+              'deletedAt',
             ],
           },
         ],
@@ -134,10 +135,10 @@ const up = async ({ context: { sequelize } }) => {
               'region',
               'zipCode',
               'country',
-              'phone', 
+              'phone',
               'createdAt',
               'updatedAt',
-              'deletedAt'
+              'deletedAt',
             ],
           },
         ],
@@ -190,7 +191,7 @@ const up = async ({ context: { sequelize } }) => {
               'phone',
               'createdAt',
               'updatedAt',
-              'deletedAt'
+              'deletedAt',
             ],
           },
         ],
@@ -245,7 +246,7 @@ const up = async ({ context: { sequelize } }) => {
               'phone',
               'createdAt',
               'updatedAt',
-              'deletedAt'
+              'deletedAt',
             ],
           },
         ],

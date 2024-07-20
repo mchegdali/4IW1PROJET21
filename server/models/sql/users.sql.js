@@ -56,6 +56,9 @@ const UsersSequelize = (sequelize) => {
         role: this.role,
         addresses: addressesMongo,
         basket: basketItems,
+        createdAt: this.createdAt,
+        updatedAt: this.updatedAt,
+        deletedAt: this.deletedAt,
       };
     }
   }
