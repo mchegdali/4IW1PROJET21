@@ -35,7 +35,6 @@ usersRouter.get(
   getUserRegistrationsLast12Months,
 );
 
-
 // Route pour obtenir le nombre d'inscriptions d'utilisateurs par jour
 usersRouter.get(
   '/users/registrations',
@@ -60,7 +59,7 @@ usersRouter.use(
 
 usersRouter.get(
   '/users/:userId',
-  checkAuth(authConfig.accessTokenSecret, true),
+  checkAuth(authConfig.accessTokenSecret, false),
   isOwnAccount,
   getUser,
 );
