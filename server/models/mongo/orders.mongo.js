@@ -7,6 +7,23 @@ const OrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.UUID,
       required: true,
     },
+    orderNumber: {
+      type: String,
+      required: true,
+    },
+    deliveryDate: {
+      type: Date,
+      default: null,
+    },
+    shippingDate: {
+      type: Date,
+      default: null,
+    },
+    paymentType: {
+      type: String,
+      enum: ['credit_card', 'paypal', 'bank_transfer', 'other'],
+      required: true,
+    },
     shipping: {
       type: {
         _id: {

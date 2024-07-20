@@ -357,7 +357,6 @@ async function getDistinctCustomerCount(req, res, next) {
   }
 }
 
-
 module.exports = {
   createOrder,
   getOrder,
@@ -368,5 +367,5 @@ module.exports = {
   getTotalRevenue,
   getOrderStatusDistribution,
   getTotalSales,
-  getDistinctCustomerCount,
+  getDistinctCustomerCount
 };

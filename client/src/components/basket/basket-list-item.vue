@@ -13,7 +13,9 @@ import { Trash } from 'lucide-vue-next';
 import { fetchBasket, setProductCountToBasket } from '@/api/basket';
 import { useUserStore } from '@/stores/user';
 
-const { product } = defineProps<{ product: Product }>();
+const { readonly, product } = withDefaults(defineProps<{ readonly: boolean; product: Product }>(), {
+  readonly: false
+});
 
 const basketStore = useBasketStore();
 const userStore = useUserStore();
@@ -23,6 +25,7 @@ const productCount = computed(() => {
 });
 
 async function onInput(count: number) {
+  if (readonly) return;
   if (userStore.isAuthenticated) {
     await setProductCountToBasket(userStore.user?.id!, userStore.accessToken!, product, count);
     const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
@@ -44,13 +47,13 @@ async function onInput(count: number) {
       <div class="flex justify-between w-full">
         <h2 class="font-bold text-sm">{{ product.price }} €</h2>
       </div>
-
       <h2 class="text-sm">{{ product.name }}</h2>
       <p class="text-sm text-gray-500 line-clamp-2">
         {{ product.description }}
       </p>
       <div class="flex gap-2 w-full">
         <NumberField
+          v-if="!readonly"
           :model-value="productCount"
           :min="0"
           class="max-w-40"
@@ -67,6 +70,7 @@ async function onInput(count: number) {
             <NumberFieldIncrement />
           </NumberFieldContent>
         </NumberField>
+        <div v-else class="text-sm font-medium">Quantité: {{ productCount }}</div>
       </div>
     </div>
   </div>
