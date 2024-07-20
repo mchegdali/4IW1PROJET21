@@ -12,9 +12,12 @@ import {
 import { ref } from 'vue';
 import Button from '../ui/button/Button.vue';
 import { useBasketStore } from '@/stores/basket';
+import { useUserStore } from '@/stores/user';
+import { addProductToBasket, fetchBasket } from '@/api/basket';
 
 const { product } = defineProps<{ product: Product }>();
 
+const userStore = useUserStore();
 const basketStore = useBasketStore();
 
 const count = ref(0);
@@ -27,9 +30,24 @@ function handleQuantityChange(value: number) {
   }
 }
 
-function handleAddToBasketClick() {
+async function handleAddToBasketClick() {
   if (count.value > 0) {
-    basketStore.addProduct(product, count.value);
+    if (userStore.isAuthenticated) {
+      const addToBasketResponse = await addProductToBasket(
+        userStore.user?.id!,
+        userStore.accessToken!,
+        product,
+        count.value
+      );
+      if (addToBasketResponse.ok) {
+        const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
+        if (response.ok) {
+          basketStore.products = await response.json();
+        }
+      }
+    } else {
+      basketStore.addProduct(product, count.value);
+    }
     count.value = 0;
   }
 }

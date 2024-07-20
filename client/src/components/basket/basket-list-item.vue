@@ -10,21 +10,28 @@ import {
 } from '@/components/ui/number-field';
 import { useBasketStore } from '@/stores/basket';
 import { Trash } from 'lucide-vue-next';
+import { fetchBasket, setProductCountToBasket } from '@/api/basket';
 import { useUserStore } from '@/stores/user';
+
 const { product } = defineProps<{ product: Product }>();
 
-const userStore = useUserStore();
 const basketStore = useBasketStore();
-
-const accessToken = computed(() => userStore.accessToken);
+const userStore = useUserStore();
 
 const productCount = computed(() => {
-  return basketStore.products.filter((p) => p._id === product._id).length;
+  return basketStore.products.filter((p) => p.id === product.id).length;
 });
 
-async function onInput(value: number) {
-  const
-  basketStore.setProductCount(product, value);
+async function onInput(count: number) {
+  if (userStore.isAuthenticated) {
+    await setProductCountToBasket(userStore.user?.id!, userStore.accessToken!, product, count);
+    const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
+    if (response.ok) {
+      basketStore.products = await response.json();
+    }
+  } else {
+    basketStore.setProductCount(product, count);
+  }
 }
 </script>
 
@@ -50,10 +57,10 @@ async function onInput(value: number) {
           @update:model-value="onInput"
         >
           <NumberFieldContent>
-            <NumberFieldDecrement v-if="productCount > 0" />
+            <NumberFieldDecrement v-if="productCount > 1" />
             <NumberFieldDecrement v-else>
               <template #default>
-                <Trash width="16" height="16" />
+                <Trash width="16" height="16" class="text-red-500" />
               </template>
             </NumberFieldDecrement>
             <NumberFieldInput />

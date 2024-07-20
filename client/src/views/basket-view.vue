@@ -2,6 +2,22 @@
 import BasketInformation from '@/components/basket/basket-information.vue';
 import BasketList from '@/components/basket/basket-list.vue';
 import Button from '@/components/ui/button/Button.vue';
+import { onBeforeMount } from 'vue';
+import { useBasketStore } from '@/stores/basket';
+import { fetchBasket } from '@/api/basket';
+import { useUserStore } from '@/stores/user';
+
+const userStore = useUserStore();
+const basketStore = useBasketStore();
+
+onBeforeMount(async () => {
+  if (userStore.isAuthenticated) {
+    {
+      const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
+      basketStore.products = await response.json();
+    }
+  }
+});
 </script>
 
 <template>

@@ -57,13 +57,11 @@ const addItemToBasket = async (req, res, next) => {
 
     const itemsToAdd = Array(quantity).fill({ productId, basketId: basket.id });
 
-    const addedItems = await BasketItems.bulkCreate(itemsToAdd, {
+    await BasketItems.bulkCreate(itemsToAdd, {
       validate: true,
       returning: true,
       individualHooks: true,
     });
-
-    console.log('nbAddedItems', addedItems.length);
 
     const productMongo = await product.toMongo();
 
@@ -152,7 +150,7 @@ const setItemQuantity = async (req, res, next) => {
     const { productId, quantity } = z
       .object({
         productId: z.string().uuid(),
-        quantity: z.coerce.number().int().min(1).default(1),
+        quantity: z.coerce.number().int().min(0).default(1),
       })
       .parse(req.body);
 
@@ -179,15 +177,6 @@ const setItemQuantity = async (req, res, next) => {
     await BasketItems.destroy({
       where: { productId: product.id, basketId: basket.id },
     });
-
-    await BasketItems.bulkCreate(itemsToCreate, {
-      validate: true,
-      returning: true,
-      individualHooks: true,
-    });
-
-    const productMongo = await product.toMongo();
-
     await UserMongo.updateOne(
       { _id: userId },
       {
@@ -197,16 +186,25 @@ const setItemQuantity = async (req, res, next) => {
       },
     );
 
-    await UserMongo.updateOne(
-      { _id: userId },
-      {
-        $push: {
-          basket: {
-            $each: Array(quantity).fill(productMongo),
+    if (quantity > 0) {
+      await BasketItems.bulkCreate(itemsToCreate, {
+        validate: true,
+        returning: true,
+        individualHooks: true,
+      });
+      const productMongo = await product.toMongo();
+
+      await UserMongo.updateOne(
+        { _id: userId },
+        {
+          $push: {
+            basket: {
+              $each: Array(quantity).fill(productMongo),
+            },
           },
         },
-      },
-    );
+      );
+    }
 
     return res.sendStatus(204);
   } catch (error) {
