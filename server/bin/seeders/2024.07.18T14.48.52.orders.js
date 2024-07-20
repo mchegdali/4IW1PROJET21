@@ -46,7 +46,15 @@ const up = async ({ context: { sequelize } }) => {
         },
         items: faker.helpers.arrayElements(products, { min: 1, max: 3 }),
         userId: user.id,
-        shippingId: null,
+        shipping: {
+          _id: crypto.randomUUID(),
+          fullname: faker.person.fullName(),
+          street: faker.location.streetAddress(),
+          zipCode: faker.location.zipCode(),
+          city: faker.location.city(),
+          phone: faker.phone.number(),
+          deliveryChoiceId: crypto.randomUUID(),
+        },
       };
       orders.push(order);
     }

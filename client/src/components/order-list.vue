@@ -1,9 +1,24 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { Badge } from '@/components/ui/badge';
 
-const orders = ref([]);
-const itemDetails = ref({});
+interface Order {
+  _id: string;
+  id: string;
+  createdAt: string;
+  status: { label: string };
+  items: { _id: string }[];
+  orderNumber: string;
+  shippingDate?: string;
+}
+
+interface Product {
+  id: string;
+  image: string;
+}
+
+const orders = ref<Order[]>([]);
+const itemDetails = ref<Record<string, Product>>({});
 const searchQuery = ref('');
 const selectedStatus = ref('');
 const selectedDate = ref('');
@@ -12,7 +27,7 @@ const selectedEndDate = ref('');
 
 const isMobile = ref(window.innerWidth < 640);
 
-function formatDate(dateString) {
+function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
@@ -20,7 +35,7 @@ function formatDate(dateString) {
   });
 }
 
-function statusClass(status) {
+function statusClass(status: string): string {
   switch (status) {
     case 'Delivered':
       return 'Livrée';
@@ -50,7 +65,7 @@ const filteredOrders = computed(() => {
   });
 });
 
-async function fetchOrders() {
+async function fetchOrders(): Promise<void> {
   try {
     const response = await fetch('http://localhost:3000/orders');
     if (!response.ok) throw new Error('Network response was not ok');
@@ -62,8 +77,8 @@ async function fetchOrders() {
   }
 }
 
-async function fetchProductDetails(orders) {
-  const productIds = new Set();
+async function fetchProductDetails(orders: Order[]): Promise<void> {
+  const productIds = new Set<string>();
   orders.forEach((order) => {
     order.items.forEach((item) => {
       if (item._id) productIds.add(item._id);
@@ -210,18 +225,21 @@ window.addEventListener('resize', () => {
         :key="order.id"
         class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white w-full sm:w-full"
       >
-        <div
-          :class="
-            order.status.label
-              ? 'flex justify-between items-center'
-              : 'flex flex-col lg:flex-row sm:justify-between lg:items-center'
-          "
-        >
-          <h1 class="font-bold text-lg">Commande du {{ formatDate(order.createdAt) }}</h1>
-          <Badge>
-            {{ statusClass(order.status.label) }}
-          </Badge>
-        </div>
+        <router-link :to="{ name: 'order', params: { id: order._id } }">
+          <div
+            :class="
+              order.status.label
+                ? 'flex justify-between items-center'
+                : 'flex flex-col lg:flex-row sm:justify-between lg:items-center'
+            "
+            class="cursor-pointer"
+          >
+            <h1 class="font-bold text-lg">Commande du {{ formatDate(order.createdAt) }}</h1>
+            <Badge variant="outline" class="border-tea-600 text-tea-600">
+              {{ statusClass(order.status.label) }}
+            </Badge>
+          </div>
+        </router-link>
 
         <div
           :class="
@@ -246,14 +264,15 @@ window.addEventListener('resize', () => {
         </div>
         <div
           class="border-b border-t border-gray-200 py-2"
-          v-if="!order.status.label === 'Delivered'"
+          v-if="order.status.label == 'Shipped'"
         >
           <router-link
-            :to="{ name: 'tracking', params: { id: order.id } }"
+            :to="{ name: 'tracking', params: { id: order._id } }"
             class="w-1/2 text-tea-600"
             >Suivre le colis</router-link
           >
         </div>
+
         <div>
           <p>
             N° de commande: <span class="font-bold">{{ order.orderNumber }}</span>
