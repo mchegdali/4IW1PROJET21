@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import useAuthFetch from '@/composables/use-auth-fetch';
 import dayjs from 'dayjs';
 import { useBasketStore } from './basket';
+import config from '@/config';
 
 type User = {
   fullname: string;
@@ -33,19 +34,58 @@ export const useUserStore = defineStore('user', {
     }
   },
   actions: {
+    async login(email: string, password: string) {
+      const response = await fetch(`${config.apiBaseUrl}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+
+      const data: {
+        accessToken: string;
+        refreshToken: string;
+        user: User;
+      } = await response.json();
+
+      if (!data.accessToken || !data.refreshToken || !data.user) {
+        throw response;
+      }
+
+      this.accessToken = data.accessToken;
+      this.refreshToken = data.refreshToken;
+      this.user = data.user;
+
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      return {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        user: data.user
+      };
+    },
     async refreshAccessToken() {
       if (!this.refreshToken) {
-        return false;
+        return;
       }
 
       const decodedRefreshToken = jwtDecode(this.refreshToken);
       if (!decodedRefreshToken.exp) {
-        return false;
+        return;
       }
 
-      const oneMinuteBeforeExpiration = dayjs(decodedRefreshToken.exp * 1000).subtract(1, 'minute');
-      if (dayjs().isBefore(oneMinuteBeforeExpiration)) {
-        return false;
+      const fiveMinutesBeforeExpiration = dayjs(decodedRefreshToken.exp * 1000).subtract(
+        5,
+        'minutes'
+      );
+      if (dayjs().isBefore(fiveMinutesBeforeExpiration)) {
+        return;
       }
 
       const { data } = useAuthFetch('/refresh-token', {
@@ -59,7 +99,7 @@ export const useUserStore = defineStore('user', {
       } as RequestInit).text();
 
       if (!data.value) {
-        return false;
+        return;
       }
 
       this.accessToken = data.value;

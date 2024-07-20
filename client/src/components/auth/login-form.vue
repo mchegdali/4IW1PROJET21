@@ -47,8 +47,7 @@ const [email, emailField] = defineField('email');
 const [password, passwordField] = defineField('password');
 
 const submitHandler = handleSubmit(async (data) => {
-  const user = await userStore.login(data.email, data.password);
-  const accessToken = userStore.accessToken;
+  const { user, accessToken } = await userStore.login(data.email, data.password);
 
   const basketResponse = await fetch(`${config.apiBaseUrl}/users/${user.id}/basket`, {
     method: 'GET',
