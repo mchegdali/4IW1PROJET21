@@ -331,6 +331,26 @@ async function getOrderStatusDistribution(req, res, next) {
   }
 }
 
+/**
+ * Récupére le nombre total de ventes basé sur les produits dans les commandes
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getTotalSales(req, res, next) {
+  try {
+    const orders = await OrdersMongo.aggregate([
+      { $unwind: "$items" },
+      { $group: { _id: null, totalSales: { $sum: 1 } } }
+    ]);
+
+    const totalSales = orders.length ? orders[0].totalSales : 0;
+    return res.status(200).json({ totalSales });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createOrder,
   getOrder,
@@ -340,4 +360,5 @@ module.exports = {
   getOrderCount,
   getTotalRevenue,
   getOrderStatusDistribution,
+  getTotalSales
 };
