@@ -13,7 +13,7 @@ const products = computed(() => {
 <template>
   <div
     v-for="product in products"
-    :key="product._id"
+    :key="product.slug"
     class="w-full bg-white p-4 border-b border-gray-200"
   >
     <BasketListItem :product="product" />

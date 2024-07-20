@@ -46,38 +46,14 @@ const { handleSubmit, isSubmitting, isError, defineField, errors, cancel, status
 const [email, emailField] = defineField('email');
 const [password, passwordField] = defineField('password');
 
-const submitHandler = handleSubmit(async (data, signal) => {
-  const response = await fetch(`${config.apiBaseUrl}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data),
-    signal
-  });
-
-  if (!response.ok) {
-    throw response;
-  }
-
-  const loginResponseBody: {
-    accessToken: string;
-    refreshToken: string;
-    user: {
-      id: string;
-      fullname: string;
-      email: string;
-      role: 'user' | 'admin' | 'accountant';
-    };
-  } = await response.json();
-
-  const user = loginResponseBody.user;
+const submitHandler = handleSubmit(async (data) => {
+  const { user, accessToken } = await userStore.login(data.email, data.password);
 
   const basketResponse = await fetch(`${config.apiBaseUrl}/users/${user.id}/basket`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${loginResponseBody.accessToken}`
+      Authorization: `Bearer ${accessToken}`
     }
   });
 
@@ -86,11 +62,6 @@ const submitHandler = handleSubmit(async (data, signal) => {
     basketStore.setProducts(basketResponseBody);
   }
 
-  userStore.$patch({
-    accessToken: loginResponseBody.accessToken,
-    refreshToken: loginResponseBody.refreshToken,
-    user: loginResponseBody.user
-  });
   router.push({ name: 'home' });
 });
 

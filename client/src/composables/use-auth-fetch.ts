@@ -15,9 +15,6 @@ const useAuthFetch = createFetch({
       return { options };
     }
   }
-  // fetchOptions: {
-  //   mode: 'cors',
-  // },
 });
 
 export default useAuthFetch;

@@ -10,19 +10,28 @@ import {
 } from '@/components/ui/number-field';
 import { useBasketStore } from '@/stores/basket';
 import { Trash } from 'lucide-vue-next';
+import { fetchBasket, setProductCountToBasket } from '@/api/basket';
+import { useUserStore } from '@/stores/user';
+
 const { product } = defineProps<{ product: Product }>();
 
 const basketStore = useBasketStore();
+const userStore = useUserStore();
+
 const productCount = computed(() => {
-  return basketStore.products.filter((p) => p._id === product._id).length;
+  return basketStore.products.filter((p) => p.id === product.id).length;
 });
 
-function onIncrement() {
-  basketStore.addProduct(product);
-}
-
-function onDecrement() {
-  basketStore.removeProduct(product);
+async function onInput(count: number) {
+  if (userStore.isAuthenticated) {
+    await setProductCountToBasket(userStore.user?.id!, userStore.accessToken!, product, count);
+    const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
+    if (response.ok) {
+      basketStore.products = await response.json();
+    }
+  } else {
+    basketStore.setProductCount(product, count);
+  }
 }
 </script>
 
@@ -41,16 +50,21 @@ function onDecrement() {
         {{ product.description }}
       </p>
       <div class="flex gap-2 w-full">
-        <NumberField :model-value="productCount" :min="0" class="max-w-40">
+        <NumberField
+          :model-value="productCount"
+          :min="0"
+          class="max-w-40"
+          @update:model-value="onInput"
+        >
           <NumberFieldContent>
-            <NumberFieldDecrement v-if="productCount > 1" @click="onDecrement" />
-            <NumberFieldDecrement v-else @click="onDecrement">
+            <NumberFieldDecrement v-if="productCount > 1" />
+            <NumberFieldDecrement v-else>
               <template #default>
-                <Trash width="16" height="16" />
+                <Trash width="16" height="16" class="text-red-500" />
               </template>
             </NumberFieldDecrement>
             <NumberFieldInput />
-            <NumberFieldIncrement @click="onIncrement" />
+            <NumberFieldIncrement />
           </NumberFieldContent>
         </NumberField>
       </div>

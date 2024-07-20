@@ -4,7 +4,11 @@ import { defineStore } from 'pinia';
 const defaultProducts: Product[] = [];
 
 export const useBasketStore = defineStore('basket', {
-  state: () => ({ products: defaultProducts }),
+  state: () => ({
+    products: localStorage.getItem('basket')
+      ? (JSON.parse(localStorage.getItem('basket') as string) as Product[])
+      : defaultProducts
+  }),
   getters: {
     totalPrice(state) {
       return (
@@ -21,32 +25,33 @@ export const useBasketStore = defineStore('basket', {
       const products: Product[] = [];
 
       for (let i = 0; i < productsLen; i++) {
-        if (!products.find((p) => p._id === state.products[i]._id)) {
+        if (!products.find((p) => p.id === state.products[i].id)) {
           products.push(state.products[i]);
         }
       }
 
-      return products;
+      return products.toSorted((a, b) => a.name.localeCompare(b.name));
     },
     nbItems(state) {
       return state.products.length;
     }
   },
   actions: {
-    addProduct(product: Product, count = 1) {
+    async addProduct(product: Product, count: number) {
       for (let i = 0; i < count; i++) {
         this.products.push(product);
       }
+      localStorage.setItem('basket', JSON.stringify(this.products));
     },
     setProducts(products: Product[]) {
       this.products = structuredClone(products);
+      localStorage.setItem('basket', JSON.stringify(this.products));
     },
-    removeProduct(product: Product) {
-      const lastIndex = this.products.findLastIndex((p) => p._id === product._id);
-
-      if (lastIndex !== -1) {
-        this.products.splice(lastIndex, 1);
-      }
+    setProductCount(product: Product, count: number) {
+      const filteredProducts = this.products.filter((p) => p.id !== product.id);
+      const newProducts = Array(count).fill(product);
+      this.products = [...filteredProducts, ...newProducts];
+      localStorage.setItem('basket', JSON.stringify(this.products));
     }
   }
 });

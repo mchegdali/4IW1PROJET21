@@ -130,7 +130,11 @@ async function getProducts(req, res, next) {
           data: [
             { $skip: (page - 1) * pageSize },
             { $limit: pageSize },
-            { $set: { price: { $toString: '$price' } } },
+            {
+              $set: {
+                price: { $toString: '$price' },
+              },
+            },
           ],
         },
       },
@@ -151,7 +155,10 @@ async function getProducts(req, res, next) {
         totalPages: 0,
         pageSize,
       },
-      data: products[0].data,
+      data: products[0].data.map((product) => ({
+        ...product,
+        id: product._id.toString(),
+      })),
     });
   } catch (error) {
     return next(error);

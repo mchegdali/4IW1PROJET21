@@ -1,7 +1,6 @@
 const slugify = require('../../utils/slugify');
 const { fakerFR: faker } = require('@faker-js/faker');
 const crypto = require('node:crypto');
-
 const minProducts = 10;
 const maxProducts = 20;
 const imageFormats = ['png', 'jpg', 'jpeg', 'webp'];

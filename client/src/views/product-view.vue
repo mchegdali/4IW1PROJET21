@@ -14,6 +14,8 @@ import {
   NumberFieldIncrement,
   NumberFieldInput
 } from '@/components/ui/number-field';
+import { useUserStore } from '@/stores/user';
+import { addProductToBasket, fetchBasket } from '@/api/basket';
 
 const route = useRoute();
 const basketStore = useBasketStore();
@@ -34,9 +36,25 @@ function handleQuantityChange(value: number) {
   }
 }
 
-function handleAddToBasketClick() {
+async function handleAddToBasketClick() {
   if (product.value) {
-    basketStore.addProduct(product.value, count.value);
+    if (useUserStore().isAuthenticated) {
+      const response = await addProductToBasket(
+        useUserStore().user?.id!,
+        useUserStore().accessToken!,
+        product.value,
+        count.value
+      );
+
+      if (response.ok) {
+        const basketResponse = await fetchBasket(
+          useUserStore().user?.id!,
+          useUserStore().accessToken!
+        );
+
+        basketStore.products = await basketResponse.json();
+      }
+    }
     count.value = 0;
   }
 }
