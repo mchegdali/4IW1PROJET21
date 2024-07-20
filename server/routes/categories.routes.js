@@ -9,6 +9,9 @@ const {
 } = require('../controllers/categories.controller');
 const isUUIDOrSlug = require('../utils/is-uuid-or-slug');
 const { getProducts } = require('../controllers/products.controller');
+const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
+const authConfig = require('../config/auth.config');
+
 
 const categoriesRouter = Router();
 
