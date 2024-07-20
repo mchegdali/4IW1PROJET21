@@ -148,19 +148,19 @@ const router = createRouter({
           component: () => import('../views/my-informations-view.vue')
         },
         {
-          name: 'adresses',
-          path: '/adresses',
-          component: () => import('../views/adresse-view.vue')
+          name: 'addresses',
+          path: '/addresses',
+          component: () => import('../views/address/address-view.vue')
         },
         {
-          name: 'add-adresse',
-          path: '/add-adresse',
-          component: () => import('../views/add-adresse-view.vue')
+          name: 'add-addresse',
+          path: '/add-addresse',
+          component: () => import('../views/address/add-address-view.vue')
         },
         {
-          name: 'edit-adresse',
-          path: '/edit-adresse',
-          component: () => import('../views/edit-adresse-view.vue')
+          name: 'edit-addresse',
+          path: '/edit-addresse/:id',
+          component: () => import('../views/address/edit-address-view.vue')
         }
       ]
     },
