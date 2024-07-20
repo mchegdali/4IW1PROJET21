@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { jwtDecode } from 'jwt-decode';
+import useAuthFetch from '@/composables/use-auth-fetch';
 import dayjs from 'dayjs';
-import router from '@/router';
+import { useBasketStore } from './basket';
 
 type User = {
   fullname: string;
@@ -19,62 +20,35 @@ export const useUserStore = defineStore('user', {
       : null,
     refreshAccessTokenTimeout: null as number | null
   }),
-  getters: {},
-  actions: {
-    async login(email: string, password: string) {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
-
-      if (!response.ok) {
-        throw response;
+  getters: {
+    isAuthenticated(state) {
+      if (!state.accessToken) {
+        return false;
       }
-
-      const body: {
-        accessToken: string;
-        refreshToken: string;
-        user: {
-          id: string;
-          fullname: string;
-          email: string;
-          role: 'user' | 'admin' | 'accountant';
-        };
-      } = await response.json();
-      this.accessToken = body.accessToken;
-      this.refreshToken = body.refreshToken;
-      this.user = body.user;
-
-      localStorage.setItem('accessToken', this.accessToken!);
-      localStorage.setItem('refreshToken', this.refreshToken!);
-      localStorage.setItem('user', JSON.stringify(this.user!));
-      this.startRefreshTokenTimer();
-
-      return body.user;
-    },
+      const decodedAccessToken = jwtDecode(state.accessToken);
+      if (!decodedAccessToken.exp) {
+        return false;
+      }
+      return decodedAccessToken.exp * 1000 > Date.now();
+    }
+  },
+  actions: {
     async refreshAccessToken() {
       if (!this.refreshToken) {
-        router.push({ name: 'login' });
-        return;
+        return false;
       }
 
       const decodedRefreshToken = jwtDecode(this.refreshToken);
       if (!decodedRefreshToken.exp) {
-        router.push({ name: 'login' });
-        return;
-      }
-      if (dayjs().isAfter(decodedRefreshToken.exp * 1000)) {
-        router.push({ name: 'login' });
-        return;
+        return false;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/refresh-token`, {
+      const oneMinuteBeforeExpiration = dayjs(decodedRefreshToken.exp * 1000).subtract(1, 'minute');
+      if (dayjs().isBefore(oneMinuteBeforeExpiration)) {
+        return false;
+      }
+
+      const { data } = useAuthFetch('/refresh-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -82,16 +56,16 @@ export const useUserStore = defineStore('user', {
         body: JSON.stringify({
           refreshToken: this.refreshToken
         })
-      });
+      } as RequestInit).text();
 
-      if (!response.ok) {
-        router.push({ name: 'login' });
-        return;
+      if (!data.value) {
+        return false;
       }
 
-      const accessToken = await response.text();
-      this.accessToken = accessToken;
-      localStorage.setItem('accessToken', accessToken);
+      this.accessToken = data.value;
+      localStorage.setItem('accessToken', data.value);
+
+      return true;
     },
     startRefreshTokenTimer() {
       const decodedAccessToken = jwtDecode(this.accessToken!);
@@ -104,16 +78,16 @@ export const useUserStore = defineStore('user', {
       }
     },
     logout() {
+      const basketStore = useBasketStore();
+      basketStore.$reset();
+
       this.accessToken = null;
       this.refreshToken = null;
       this.user = null;
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
+
       if (this.refreshAccessTokenTimeout) {
         clearTimeout(this.refreshAccessTokenTimeout);
       }
-      router.push({ name: 'login' });
     }
   }
 });
