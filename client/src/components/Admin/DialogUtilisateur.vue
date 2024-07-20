@@ -38,7 +38,8 @@
 </template>
   
 <script lang="ts">
-import { defineComponent, PropType, watch } from 'vue';
+import { defineComponent, watch } from 'vue';
+import type { PropType } from 'vue';
 
 interface Client {
     id: number;
@@ -49,53 +50,53 @@ interface Client {
 }
 
 export default defineComponent({
-name: 'DialogUtilisateur',
-props: {
-    client: {
-        type: Object as PropType<Client>,
-        required: true,
+    name: 'DialogUtilisateur',
+    props: {
+        client: {
+            type: Object as PropType<Client>,
+            required: true,
+        },
+        modelValue: {
+            type: Boolean,
+            required: true,
+        },
+        isEditMode: {
+            type: Boolean,
+            default: false,
+        },
     },
-    modelValue: {
-        type: Boolean,
-        required: true,
+    emits: ['update:modelValue', 'save'],
+    data() {
+        return {
+            isOpen: this.modelValue,
+            localClient: { ...this.client },
+        };
     },
-    isEditMode: {
-        type: Boolean,
-        default: false,
+    watch: {
+        modelValue(newVal) {
+            this.isOpen = newVal;
+        },
+        isOpen(newVal) {
+            this.$emit('update:modelValue', newVal);
+        },
+        client(newVal) {
+            this.localClient = { ...newVal };
+        },
     },
-},
-emits: ['update:modelValue', 'save'],
-data() {
-    return {
-        isOpen: this.modelValue,
-        localClient: { ...this.client },
-    };
-},
-watch: {
-    modelValue(newVal) {
-        this.isOpen = newVal;
+    computed: {
+        title() {
+            return this.isEditMode ? 'Modifier l\'utilisateur' : 'Détails de l\'utilisateur';
+        }
     },
-    isOpen(newVal) {
-        this.$emit('update:modelValue', newVal);
+    methods: {
+        closeDialog() {
+            this.isOpen = false;
+        },
+        saveChanges() {
+            this.$emit('save', this.localClient);
+            this.closeDialog();
+        },
     },
-    client(newVal) {
-        this.localClient = { ...newVal };
-    },
-},
-computed: {
-    title() {
-        return this.isEditMode ? 'Modifier l\'utilisateur' : 'Détails de l\'utilisateur';
-    }
-},
-methods: {
-    closeDialog() {
-        this.isOpen = false;
-    },
-    saveChanges() {
-        this.$emit('save', this.localClient);
-        this.closeDialog();
-    },
-},
 });
 </script>
   
