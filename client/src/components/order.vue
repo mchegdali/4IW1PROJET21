@@ -33,7 +33,7 @@ interface Order {
   deliveryStatus?: boolean;
   shipping: Shipping;
   items: OrderItem[];
-  paymentType: 'bank_transfer' | 'cb';
+  paymentType: string
 }
 
 const route = useRoute();
@@ -201,11 +201,7 @@ onMounted(() => {
           INFORMATION DE PAIEMENT
         </h6>
         <div class="flex gap-4 items-center p-2 sm:p-4 text-xs">
-          <span v-if="order.paymentType === 'bank_transfer'" class="flex gap-4 items-center">
-            <img class="w-9 px-2 py-1" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png" alt="Paypal" />
-            <h1 class="px-2 text-sm sm:text-lg">Paypal</h1>
-          </span>
-          <span v-if="order.paymentType === 'cb'" class="flex gap-4 items-center">
+          <span v-if="order.paymentType === 'credit_card'" class="flex gap-4 items-center">
             <img class="w-9 px-2 py-1 sm:w-12" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/300px-MasterCard_Logo.svg.png" alt="Carte bancaire" />
             <h1 class="px-2 text-sm sm:text-lg">Carte bancaire</h1>
           </span>

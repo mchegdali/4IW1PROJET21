@@ -39,7 +39,7 @@ const up = async ({ context: { sequelize } }) => {
         orderNumber: crypto.randomUUID(),
         deliveryDate: faker.datatype.boolean() ? faker.date.future() : null,
         shippingDate: shippingDate,
-        paymentType: faker.helpers.arrayElement(['credit_card', 'paypal', 'bank_transfer', 'other']),
+        paymentType: 'credit_card',
         status: {  
           _id: status.id,
           label: status.label
