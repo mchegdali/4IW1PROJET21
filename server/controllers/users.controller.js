@@ -15,7 +15,6 @@ const Users = sequelize.model('users');
 
 /**
  * Créer un utilisateur
- * Créer un utilisateur
  *
  * @type {import('express').RequestHandler}
  * @returns
@@ -270,6 +269,34 @@ async function deleteUser(req, res, next) {
 }
 
 /**
+ * Récupérer le nombre d'inscriptions d'utilisateurs par jour sur Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserRegistrations(req, res, next) {
+  try {
+    const registrations = await UserMongo.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    return res.status(200).json(
+      registrations.map((entry) => ({
+        date: entry._id,
+        count: entry.count,
+      })),
+    );
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
  * Récupère le nombre total d'utilisateurs dans Mongo
  *
  * @type {import('express').RequestHandler}
@@ -285,12 +312,11 @@ async function getUserCount(req, res, next) {
 }
 
 /**
- * Récupérer le nombre d'inscriptions d'utilisateurs par jour sur Mongo
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
-async function getUserRegistrations(req, res, next) {
+async function getUser(req, res, next) {
   try {
     const user = await UserMongo.findById(req.params.userId, {
       password: 0,
@@ -321,12 +347,41 @@ async function getUserAddresses(req, res, next) {
 
     return res.json(user.addresses);
   } catch (error) {
-      return next(error);
+    return next(error);
+  }
+}
+
+/**
+ * Récupérer le nombre d'inscriptions d'utilisateurs par mois sur les 12 derniers mois sur Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserRegistrationsLast12Months(req, res, next) {
+  try {
+    const lastYear = dayjs().subtract(12, 'months').toDate();
+    const registrations = await UserMongo.aggregate([
+      { $match: { createdAt: { $gte: lastYear } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    return res.status(200).json(
+      registrations.map((entry) => ({
+        date: entry._id,
+        count: entry.count,
+      })),
+    );
+  } catch (error) {
+    return next(error);
   }
 }
 
 module.exports = {
-  getUserCount,
   getUserCount,
   createUser,
   getUsers,
@@ -334,5 +389,7 @@ module.exports = {
   replaceUser,
   deleteUser,
   updateUser,
+  getUserAddresses,
   getUserRegistrations,
+  getUserRegistrationsLast12Months
 };

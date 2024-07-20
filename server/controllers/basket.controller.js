@@ -1,15 +1,8 @@
 const { z } = require('zod');
-const httpErrors = require('http-errors');
-const validator = require('validator');
 const sequelize = require('../models/sql');
-const UsersMongo = require('../models/mongo/user.mongo');
 const UserMongo = require('../models/mongo/user.mongo');
-const { NotFound } = httpErrors;
 
 const Products = sequelize.model('products');
-const Basket = sequelize.model('baskets');
-const Users = sequelize.model('users');
-const BasketItems = sequelize.model('basketsItems');
 const Basket = sequelize.model('baskets');
 const Users = sequelize.model('users');
 const BasketItems = sequelize.model('basketsItems');
@@ -20,23 +13,16 @@ const BasketItems = sequelize.model('basketsItems');
  * @returns
  */
 const getBasket = async (req, res, next) => {
-const getBasket = async (req, res, next) => {
   try {
-    const user = await UserMongo.findById(req.params.userId);
-    if (!user) {
     const user = await UserMongo.findById(req.params.userId);
     if (!user) {
       return res.sendStatus(404);
     }
 
     return res.json(user.basket);
-
-    return res.json(user.basket);
   } catch (error) {
     return next(error);
   }
-};
-
 };
 
 /**
@@ -47,9 +33,10 @@ const getBasket = async (req, res, next) => {
 const addItemToBasket = async (req, res, next) => {
   try {
     const userId = req.params.userId;
-    const { productId } = z
+    const { productId, quantity } = z
       .object({
         productId: z.string().uuid(),
+        quantity: z.coerce.number().int().min(1).default(1),
       })
       .parse(req.body);
 
@@ -68,14 +55,23 @@ const addItemToBasket = async (req, res, next) => {
       basket = await user.createBasket();
     }
 
-    await basket.createItem({ productId });
+    const itemsToAdd = Array(quantity).fill({ productId, basketId: basket.id });
+
+    const addedItems = await BasketItems.bulkCreate(itemsToAdd, {
+      validate: true,
+      returning: true,
+      individualHooks: true,
+    });
+
+    console.log('nbAddedItems', addedItems.length);
+
     const productMongo = await product.toMongo();
 
     await UserMongo.updateOne(
       { _id: userId },
       {
         $push: {
-          basket: productMongo,
+          basket: Array(quantity).fill(productMongo),
         },
       },
     );
@@ -86,20 +82,18 @@ const addItemToBasket = async (req, res, next) => {
   }
 };
 
-};
-
 /**
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
 const removeItemFromBasket = async (req, res, next) => {
-const removeItemFromBasket = async (req, res, next) => {
   try {
     const userId = req.params.userId;
-    const { productId } = z
+    const { productId, quantity } = z
       .object({
         productId: z.string().uuid(),
+        quantity: z.coerce.number().int().min(1).default(1),
       })
       .parse(req.body);
 
@@ -118,17 +112,27 @@ const removeItemFromBasket = async (req, res, next) => {
 
     const deletedCount = await BasketItems.destroy({
       where: { productId: product.id, basketId: basket.id },
-      limit: 1,
+      limit: quantity,
     });
+
+    const basketItems = await basket.getItems({
+      include: {
+        model: Products,
+      },
+    });
+
+    const basketProducts = basketItems.map((item) =>
+      item.getDataValue('product'),
+    );
+
+    const mongoBasket = await Promise.all(
+      basketProducts.map((product) => product.toMongo()),
+    );
 
     const { modifiedCount } = await UserMongo.updateOne(
       { _id: userId, 'basket._id': product.id },
       {
-        $pull: {
-          basket: {
-            _id: product.id,
-          },
-        },
+        basket: mongoBasket,
       },
     );
 
@@ -142,8 +146,77 @@ const removeItemFromBasket = async (req, res, next) => {
   }
 };
 
+const setItemQuantity = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const { productId, quantity } = z
+      .object({
+        productId: z.string().uuid(),
+        quantity: z.coerce.number().int().min(1).default(1),
+      })
+      .parse(req.body);
+
+    const [user, product] = await Promise.all([
+      Users.findByPk(userId),
+      Products.findByPk(productId),
+    ]);
+
+    if (!user || !product) {
+      return res.sendStatus(404);
+    }
+
+    let basket = await user.getBasket();
+
+    if (!basket) {
+      basket = await user.createBasket();
+    }
+
+    const itemsToCreate = Array(quantity).fill({
+      productId,
+      basketId: basket.id,
+    });
+
+    await BasketItems.destroy({
+      where: { productId: product.id, basketId: basket.id },
+    });
+
+    await BasketItems.bulkCreate(itemsToCreate, {
+      validate: true,
+      returning: true,
+      individualHooks: true,
+    });
+
+    const productMongo = await product.toMongo();
+
+    await UserMongo.updateOne(
+      { _id: userId },
+      {
+        $pull: {
+          basket: { _id: product.id },
+        },
+      },
+    );
+
+    await UserMongo.updateOne(
+      { _id: userId },
+      {
+        $push: {
+          basket: {
+            $each: Array(quantity).fill(productMongo),
+          },
+        },
+      },
+    );
+
+    return res.sendStatus(204);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   getBasket,
   addItemToBasket,
   removeItemFromBasket,
+  setItemQuantity,
 };

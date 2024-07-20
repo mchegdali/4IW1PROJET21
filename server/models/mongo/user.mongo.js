@@ -204,11 +204,6 @@ const UserSchema = new mongoose.Schema(
       required: false,
       default: null,
     },
-    deletedAt: {
-      type: Date,
-      required: false,
-      default: null,
-    },
   },
   {
     toObject: {
