@@ -8,7 +8,8 @@ const {
   getOrderCount,
   getTotalRevenue,
   getOrderStatusDistribution,
-  getTotalSales
+  getTotalSales,
+  getDistinctCustomerCount
 } = require('../controllers/order.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -35,6 +36,14 @@ orderRouter.get(
   checkAuth(authConfig.accessTokenSecret, false),
   checkRole(['admin']),
   getTotalSales
+);
+
+//Nombre d'users distinct
+orderRouter.get(
+  '/orders/distinct-customers',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getDistinctCustomerCount,
 );
 
 orderRouter.get('/orders/status-distribution',
