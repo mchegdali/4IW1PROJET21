@@ -95,9 +95,9 @@ interface Card {
 export default defineComponent({
     name: 'HomePage',
     components: {
-        Card,
-        BarChart,
-        DonutChart,
+      Card,
+      BarChart,
+      DonutChart,
     },
     data() {
         return {
@@ -141,7 +141,8 @@ export default defineComponent({
         ] as Card[],
         };
     },
-});
-</script>
-
-<style lang="scss"></style>
+  });
+  </script>
+  
+  <style lang="scss"></style>
+  
