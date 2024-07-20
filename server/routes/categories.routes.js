@@ -5,9 +5,13 @@ const {
   getCategory,
   getCategories,
   updateCategory,
+  getCategoryCount,
 } = require('../controllers/categories.controller');
 const isUUIDOrSlug = require('../utils/is-uuid-or-slug');
 const { getProducts } = require('../controllers/products.controller');
+const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
+const authConfig = require('../config/auth.config');
+
 
 const categoriesRouter = Router();
 
@@ -25,6 +29,13 @@ categoriesRouter.param('category', (req, res, next, category) => {
   };
   return next();
 });
+
+categoriesRouter.get(
+  '/categories/count', 
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getCategoryCount
+);
 
 categoriesRouter.get('/categories/:category/products', getProducts);
 

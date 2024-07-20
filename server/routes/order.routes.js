@@ -9,6 +9,8 @@ const {
   getTotalRevenue,
   getOrderStatusDistribution,
   getTotalSales,
+  getDistinctCustomerCount,
+  getTopProductsDistribution,
   getUserOrders,
 } = require('../controllers/order.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
@@ -40,6 +42,20 @@ orderRouter.get(
   getTotalSales,
 );
 
+orderRouter.get(
+  '/orders/top-products-distribution', 
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getTopProductsDistribution
+);
+
+
+orderRouter.get('/orders/revenue',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getTotalRevenue
+);
+
 // Nombre total de ventes
 orderRouter.get(
   '/orders/total-sales',
@@ -50,6 +66,20 @@ orderRouter.get(
 orderRouter.get(
   '/orders/total-sales',
   getTotalSales,
+);
+
+//Nombre d'users distinct
+orderRouter.get(
+  '/orders/distinct-customers',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getDistinctCustomerCount,
+);
+
+orderRouter.get('/orders/status-distribution',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getOrderStatusDistribution
 );
 
 orderRouter.get(

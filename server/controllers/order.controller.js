@@ -336,6 +336,78 @@ async function getTotalSales(req, res, next) {
   }
 }
 
+
+/**
+ * Compte les clients distincts dans orders
+ * 
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getDistinctCustomerCount(req, res, next) {
+  try {
+    const distinctCustomers = await OrdersMongo.aggregate([
+      { $group: { _id: "$user._id" } },
+      { $count: "distinctCustomerCount" }
+    ]);
+
+    const count = distinctCustomers.length > 0 ? distinctCustomers[0].distinctCustomerCount : 0;
+
+    return res.status(200).json({ distinctCustomerCount: count });
+  } catch (error) {
+    return next(error);
+  }
+}
+ 
+/**
+ * Calcule la distribution des produits les plus vendus
+ * 
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getTopProductsDistribution(req, res, next) {
+  try {
+    const productsDistribution = await OrdersMongo.aggregate([
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items._id",
+          name: { $first: "$items.name" },
+          totalSold: { $sum: "$items.quantity" } 
+        }
+      },
+      { $sort: { totalSold: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      { $unwind: "$product" },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          totalSold: 1,
+          price: "$product.price",
+        }
+      }
+    ]);
+
+    const totalProductsSold = productsDistribution.reduce((acc, product) => acc + product.totalSold, 0);
+    const productsWithPercentage = productsDistribution.map(product => ({
+      ...product,
+      percentage: totalProductsSold > 0 ? (product.totalSold / totalProductsSold) * 100 : 0
+    }));
+
+    res.status(200).json(productsWithPercentage);
+  } catch (error) {
+    next(error);
+  }
+}
+
 const getUserOrders = async (req, res, next) => {
   try {
     const { userId } = req.params;
@@ -354,6 +426,7 @@ const getUserOrders = async (req, res, next) => {
 };
 
 
+
 module.exports = {
   createOrder,
   getOrder,
@@ -364,5 +437,7 @@ module.exports = {
   getTotalRevenue,
   getOrderStatusDistribution,
   getTotalSales,
+  getDistinctCustomerCount,
+  getTopProductsDistribution,
   getUserOrders
 };

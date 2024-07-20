@@ -78,9 +78,9 @@ export default defineComponent({
     data() {
         return {
             statisticsData: [
-                { value: '10', text: 'Ventes', color: 'text-blue-600' },
-                { value: '20', text: 'Clients', color: 'text-green-600' },
-                { value: '', text: 'Produits', color: 'text-red-600' }
+                { value: '-', text: 'Ventes', color: 'text-blue-600' },
+                { value: '-', text: 'Catégories', color: 'text-green-600' },
+                { value: '-', text: 'Produits', color: 'text-red-600' }
             ] as Statistic[],
             donutChartOptions: null as ChartOptions | null,
             donutChartSeries: null as number[] | null,
@@ -88,7 +88,34 @@ export default defineComponent({
             priceChartSeries: null as number[] | null,
         };
     },
+    async mounted() {
+        await this.fetchTotalSales();
+        await this.fetchCategoryCount();
+        await this.fetchProductCount();
+        await this.fetchProductDistribution();
+        await this.fetchPriceDistribution();
+    },
     methods: {
+        async fetchTotalSales() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/total-sales`);
+                const data = await response.json();
+                this.statisticsData[0].value = data.totalSales.toString();
+            } catch (error) {
+                console.error('Error fetching total sales:', error);
+                this.statisticsData[0].value = "-";
+            }
+        },
+        async fetchCategoryCount() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/count`);
+                const data = await response.json();
+                this.statisticsData[1].value = data.count.toString();
+            } catch (error) {
+                console.error('Error fetching category count:', error);
+                this.statisticsData[1].value = "-"; 
+            }
+        },
         async fetchProductCount() {
             try {
                 const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/count`);
@@ -137,11 +164,6 @@ export default defineComponent({
                 console.error('Error fetching price distribution:', error);
             }
         }
-    },
-    mounted() {
-        this.fetchProductCount();
-        this.fetchProductDistribution();
-        this.fetchPriceDistribution();
     },
 });
 </script>

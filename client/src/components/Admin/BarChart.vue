@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, watch } from 'vue';
 
 interface BarChartOptions {
   chart: {
@@ -7,6 +7,10 @@ interface BarChartOptions {
   };
   xaxis: {
     categories: string[];
+  };
+  title: {
+    text: string;
+    align: string;
   };
 }
 
@@ -19,6 +23,14 @@ const props = defineProps<{ options: BarChartOptions; series: BarChartSeries[] }
 
 const options = ref(props.options);
 const series = ref(props.series);
+
+watch(() => props.options, (newOptions) => {
+  options.value = newOptions;
+}, { deep: true });
+
+watch(() => props.series, (newSeries) => {
+  series.value = newSeries;
+}, { deep: true });
 </script>
 
 <template>
