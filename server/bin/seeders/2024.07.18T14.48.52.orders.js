@@ -18,7 +18,6 @@ const { fakerFR: faker } = require('@faker-js/faker');
 const up = async ({ context: { sequelize } }) => {
   const Users = sequelize.model('users');
   const Status = sequelize.model('status');
-  const Orders = sequelize.model('orders');
   const products = await ProductMongo.find({}).lean({});
 
   const users = await Users.findAll();
@@ -32,34 +31,47 @@ const up = async ({ context: { sequelize } }) => {
 
   for (const user of users) {
     for (const status of statuses) {
+      const isShippedOrDelivered = status.label === 'Shipped' || status.label === 'Delivered';
+      const createdAt = faker.date.past();
+      const shippingDate = isShippedOrDelivered ? new Date(createdAt.getTime() + 2 * 24 * 60 * 60 * 1000) : null;
+  
       const order = {
-        id: crypto.randomUUID(),
-        statusId: status.id,
-        items: faker.helpers.arrayElements(products, { min: 1, max: 3 }),
-        userId: user.id,
-        shippingId: null, // Pas de livraison initiale
+        _id: crypto.randomUUID(),
+        orderNumber: crypto.randomUUID(),
+        deliveryDate: faker.datatype.boolean() ? faker.date.future() : null,
+        shippingDate: shippingDate,
+        paymentType: 'credit_card',
+        status: {
+          _id: status.id,
+          label: status.label
+        },
+        items: faker.helpers.arrayElements(products, { min: 4, max: 5 }),
+        user:{
+          _id: user.id,
+          fullname: user.fullname,
+          email: user.email
+        },
+        shipping: {
+          _id: crypto.randomUUID(),
+          fullname: faker.person.fullName(),
+          street: faker.location.streetAddress(),
+          zipCode: faker.location.zipCode(),
+          city: faker.location.city(),
+          phone: faker.phone.number(),
+          deliveryChoiceId: crypto.randomUUID(),
+        },
+        createdAt: createdAt,
       };
       orders.push(order);
     }
   }
+  
 
-  const createdOrders = await Orders.bulkCreate(orders, {
-    validate: true,
-    returning: true,
-    individualHooks: true,
-  });
+  if (typeof OrderMongo.insertMany !== 'function') {
+    throw new Error('OrderMongo.insertMany is not a function. Make sure OrderMongo is defined correctly and is a valid Mongoose model.');
+  }
 
-  // Convertion MongoDB
-  const createdOrdersMongo = await Promise.all(
-    createdOrders.map(async (order) => {
-      const orderMongo = await order.toMongo();
-      orderMongo.user = await orderMongo.user;
-      orderMongo.status = await orderMongo.status;
-      return orderMongo;
-    }),
-  );
-
-  await OrderMongo.insertMany(createdOrdersMongo);
+  await OrderMongo.insertMany(orders);
 };
 
 /**

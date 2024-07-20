@@ -32,6 +32,11 @@ const router = createRouter({
           component: () => import('../views/basket-view.vue')
         },
         {
+          name: 'basket-confirmation',
+          path: '/basket/confirmation',
+          component: () => import('../views/basket-confirmation-view.vue')
+        },
+        {
           name: 'account',
           path: '/account',
           component: () => import('../views/account-view.vue'),

@@ -10,19 +10,36 @@ const {
   getOrderStatusDistribution,
   getTotalSales,
   getDistinctCustomerCount,
-  getTopProductsDistribution
+  getTopProductsDistribution,
+  getUserOrders,
 } = require('../controllers/order.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
 
 const orderRouter = Router();
+const userOrderRouter = Router({ mergeParams: true });
 
+// orderRouter.use(
+//   '/orders',
+//   checkAuth(authConfig.accessTokenSecret, false),
+//   checkRole(['admin']),
+// );
 orderRouter.route('/orders').get(getOrders).post(createOrder);
 
-orderRouter.get('/orders/count',
-  checkAuth(authConfig.accessTokenSecret, false),
-  checkRole(['admin']),
-  getOrderCount
+orderRouter.get(
+  '/orders/count',
+  getOrderCount,
+);
+
+orderRouter.get(
+  '/orders/revenue',
+  getTotalRevenue,
+);
+
+// Nombre total de ventes
+orderRouter.get(
+  '/orders/total-sales',
+  getTotalSales,
 );
 
 orderRouter.get(
@@ -42,9 +59,13 @@ orderRouter.get('/orders/revenue',
 // Nombre total de ventes
 orderRouter.get(
   '/orders/total-sales',
-  checkAuth(authConfig.accessTokenSecret, false),
-  checkRole(['admin']),
-  getTotalSales
+  getTotalSales,
+);
+
+// Nombre total de ventes
+orderRouter.get(
+  '/orders/total-sales',
+  getTotalSales,
 );
 
 //Nombre d'users distinct
@@ -61,10 +82,20 @@ orderRouter.get('/orders/status-distribution',
   getOrderStatusDistribution
 );
 
+orderRouter.get(
+  '/orders/status-distribution',
+  getOrderStatusDistribution,
+);
+
 orderRouter
   .route('/orders/:id')
   .get(getOrder)
   .patch(updateOrder)
   .delete(deleteOrder);
 
-module.exports = orderRouter;
+userOrderRouter.get(
+  '/',
+  getUserOrders,
+);
+
+module.exports = { orderRouter, userOrderRouter };

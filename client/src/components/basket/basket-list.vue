@@ -3,6 +3,10 @@ import { useBasketStore } from '@/stores/basket';
 import BasketListItem from './basket-list-item.vue';
 import { computed } from 'vue';
 
+const { readonly } = withDefaults(defineProps<{ readonly: boolean }>(), {
+  readonly: false
+});
+
 const basketStore = useBasketStore();
 
 const products = computed(() => {
@@ -16,6 +20,6 @@ const products = computed(() => {
     :key="product.slug"
     class="w-full bg-white p-4 border-b border-gray-200"
   >
-    <BasketListItem :product="product" />
+    <BasketListItem :product="product" :readonly="readonly" />
   </div>
 </template>
