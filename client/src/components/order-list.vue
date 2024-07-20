@@ -1,48 +1,84 @@
-<script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import ordersData from '@/api/order.json';
-import { Input } from './ui/input';
-import { Badge } from '@/components/ui/badge';
+<script setup>
+import { ref, computed, onMounted } from 'vue';
 
-const orders = ref<Array<any>>(ordersData.orders);
+const orders = ref([]);
+const itemDetails = ref({});
 const searchQuery = ref('');
 const selectedStatus = ref('');
 const selectedDate = ref('');
 const selectedStartDate = ref('');
 const selectedEndDate = ref('');
-const isMobile = ref(false);
 
-const checkScreenSize = () => {
-  isMobile.value = window.innerWidth < 640;
-};
+const isMobile = ref(window.innerWidth < 640);
 
-onMounted(() => {
-  checkScreenSize();
-  window.addEventListener('resize', checkScreenSize);
-});
+function formatDate(dateString) {
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
 
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreenSize);
-});
+function statusClass(status) {
+  switch (status) {
+    case 'Delivered':
+      return 'text-green-600';
+    case 'Pending':
+      return 'text-orange-600';
+    case 'Cancelled':
+      return 'text-red-600';
+    default:
+      return 'text-gray-600';
+  }
+}
 
 const filteredOrders = computed(() => {
-  return orders.value.filter((order) => {
-    const matchesSearchQuery = searchQuery.value
-      ? order.orderNumber.toLowerCase().includes(searchQuery.value.toLowerCase())
-      : true;
-    const matchesStatus = selectedStatus.value
-      ? selectedStatus.value === 'livré'
-        ? order.deliveryStatus === true
-        : order.deliveryStatus === false
-      : true;
-    const matchesDate = selectedDate.value ? order.orderDate === selectedDate.value : true;
-    const matchesDateRange =
-      selectedStartDate.value && selectedEndDate.value
-        ? new Date(order.orderDate) >= new Date(selectedStartDate.value) &&
-          new Date(order.orderDate) <= new Date(selectedEndDate.value)
-        : true;
-    return matchesSearchQuery && matchesStatus && matchesDate && matchesDateRange;
+  return orders.value.filter(order => {
+    const matchesQuery = searchQuery.value ? order.id.includes(searchQuery.value) : true;
+    const matchesStatus = selectedStatus.value ? order.status.label === selectedStatus.value : true;
+    const matchesDate = selectedDate.value ? new Date(order.createdAt).toISOString().split('T')[0] === selectedDate.value : true;
+    const matchesStartDate = selectedStartDate.value ? new Date(order.createdAt) >= new Date(selectedStartDate.value) : true;
+    const matchesEndDate = selectedEndDate.value ? new Date(order.createdAt) <= new Date(selectedEndDate.value) : true;
+    return matchesQuery && matchesStatus && matchesDate && matchesStartDate && matchesEndDate;
   });
+});
+
+async function fetchOrders() {
+  try {
+    const response = await fetch('http://localhost:3000/orders'); // URL de votre API
+    if (!response.ok) throw new Error('Network response was not ok');
+    const data = await response.json();
+    orders.value = data;
+    await fetchProductDetails(data);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+  }
+}
+
+async function fetchProductDetails(orders) {
+  const productIds = new Set();
+  orders.forEach(order => {
+    order.items.forEach(item => {
+      if (item._id) productIds.add(item._id);
+    });
+  });
+
+  for (const productId of productIds) {
+    try {
+      const response = await fetch(`http://localhost:3000/products/${productId}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const product = await response.json();
+      itemDetails.value = { ...itemDetails.value, [product.id]: product };
+    } catch (error) {
+      console.error('Error fetching product details for ID', productId, ':', error);
+    }
+  }
+}
+
+onMounted(fetchOrders);
+
+window.addEventListener('resize', () => {
+  isMobile.value = window.innerWidth < 640;
 });
 </script>
 
@@ -55,26 +91,26 @@ const filteredOrders = computed(() => {
     >
       <summary class="font-semibold text-gray-700 cursor-pointer">Filtrer</summary>
       <div class="mt-4 p-2">
-        <Input
+        <input
           v-model="searchQuery"
           type="text"
           placeholder="Nº commande : 78524263"
           class="w-full p-2 border border-gray-300 rounded mb-4"
         />
-        <label for="status" class="block text-gray-700 font-semibold mb-2"
-          >Statut de la commande
+        <label for="status" class="block text-gray-700 font-semibold mb-2">
+          Statut de la commande
           <select
             id="status"
             v-model="selectedStatus"
             class="w-full p-2 border border-gray-300 rounded mb-4"
           >
             <option value="">Tous</option>
-            <option value="livré">Livré</option>
-            <option value="en cours">En cours</option>
+            <option value="Delivered">Livré</option>
+            <option value="Pending">En cours</option>
           </select>
         </label>
-        <label for="date" class="block text-gray-700 font-semibold mb-2"
-          >Date de commande
+        <label for="date" class="block text-gray-700 font-semibold mb-2">
+          Date de commande
           <input
             type="date"
             id="date"
@@ -83,8 +119,8 @@ const filteredOrders = computed(() => {
           />
         </label>
         <div class="flex gap-4">
-          <label for="startDate" class="block text-gray-700 font-semibold mb-2"
-            >Date de début
+          <label for="startDate" class="block text-gray-700 font-semibold mb-2">
+            Date de début
             <input
               type="date"
               id="startDate"
@@ -92,8 +128,8 @@ const filteredOrders = computed(() => {
               class="w-full p-2 border border-gray-300 rounded mb-4"
             />
           </label>
-          <label for="endDate" class="block text-gray-700 font-semibold mb-2"
-            >Date de fin
+          <label for="endDate" class="block text-gray-700 font-semibold mb-2">
+            Date de fin
             <input
               type="date"
               id="endDate"
@@ -110,26 +146,26 @@ const filteredOrders = computed(() => {
         Filtrer les commandes
       </div>
       <div class="p-6">
-        <Input
+        <input
           v-model="searchQuery"
           type="text"
           placeholder="Nº commande : 78524263"
           class="w-full p-2 border border-gray-300 rounded mb-4"
         />
-        <label for="status" class="block font-semibold mb-2 text-gray-700"
-          >Statut de la commande
+        <label for="status" class="block font-semibold mb-2 text-gray-700">
+          Statut de la commande
           <select
             id="status"
             v-model="selectedStatus"
             class="w-full p-2 border border-gray-300 rounded mb-4 bg-white"
           >
             <option value="">Tous</option>
-            <option value="livré">Livré</option>
-            <option value="en cours">En cours</option>
+            <option value="Delivered">Livré</option>
+            <option value="Pending">En cours</option>
           </select>
         </label>
-        <label for="date" class="block text-gray-700 font-semibold mb-2"
-          >Date de commande
+        <label for="date" class="block text-gray-700 font-semibold mb-2">
+          Date de commande
           <input
             type="date"
             id="date"
@@ -137,10 +173,9 @@ const filteredOrders = computed(() => {
             class="w-full p-2 border border-gray-300 rounded mb-4"
           />
         </label>
-
         <div class="flex gap-4">
-          <label for="startDate" class="block text-gray-700 font-semibold mb-2"
-            >Date de début
+          <label for="startDate" class="block text-gray-700 font-semibold mb-2">
+            Date de début
             <input
               type="date"
               id="startDate"
@@ -148,8 +183,8 @@ const filteredOrders = computed(() => {
               class="w-full p-2 border border-gray-300 rounded mb-4"
             />
           </label>
-          <label for="endDate" class="block text-gray-700 font-semibold mb-2"
-            >Date de fin
+          <label for="endDate" class="block text-gray-700 font-semibold mb-2">
+            Date de fin
             <input
               type="date"
               id="endDate"
@@ -163,94 +198,37 @@ const filteredOrders = computed(() => {
 
     <!-- Commandes -->
     <div class="flex flex-col items-center w-full sm:w-3/4">
-      <RouterLink
-        v-for="order in filteredOrders"
-        :key="order.orderId"
-        class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white w-full sm:w-full"
-        :to="{ name: 'order', params: { id: order.orderId } }"
-      >
-        <div
-          :class="
-            order.deliveryStatus
-              ? 'flex justify-between items-center'
-              : 'flex flex-col lg:flex-row sm:justify-between lg:items-center'
-          "
-        >
+      <div v-for="order in filteredOrders" :key="order.id" class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white w-full sm:w-full">
+        <div :class="order.status.label ? 'flex justify-between items-center' : 'flex flex-col lg:flex-row sm:justify-between lg:items-center'">
           <h1 class="font-bold text-lg">
-            Commande du
-            {{
-              new Date(order.orderDate).toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-              })
-            }}
+            Commande du {{ formatDate(order.createdAt) }}
           </h1>
-
-          <Badge
-            variant="outline"
-            class="border-tea-600 text-tea-600"
-            v-if="order.deliveryStatus === true"
-            >Livré</Badge
-          >
-
-          <Badge variant="outline" class="border-tea-600 text-tea-600 w-fit" v-else
-            >Livraison prévue le
-            {{
-              new Date(order.shippingDate).toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-              })
-            }}</Badge
-          >
+          <span :class="statusClass(order.status.label)">
+            {{ order.status.label }}
+          </span>
         </div>
 
-        <div
-          :class="
-            order.items.length < 3
-              ? 'flex justify-start gap-4'
-              : 'flex justify-between sm:justify-start sm:gap-4 w-full'
-          "
-        >
-          <div
-            v-for="(item, index) in order.items.slice(0, 3)"
-            :key="item.id"
-            class="relative w-24 h-24"
-          >
-            <img class="min-w-24 h-full bg-slate-400" :src="item.image" alt="" />
-            <div
-              v-if="index === 2 && order.items.length > 3"
-              class="extra-items-count w-full h-full flex justify-center items-center font-bold text-2xl top-0 right-0 text-white absolute bg-black bg-opacity-55"
-            >
+        <div :class="order.items.length < 3 ? 'flex justify-start gap-4' : 'flex justify-between sm:justify-start sm:gap-4 w-full'">
+          <div v-for="(item, index) in order.items.slice(0, 3)" :key="item._id" class="relative w-24 h-24">
+            <img class="min-w-24 h-full bg-slate-400" :src="itemDetails[item._id]?.image" alt="" />
+            <div v-if="index === 2 && order.items.length > 3" class="extra-items-count w-full h-full flex justify-center items-center font-bold text-2xl top-0 right-0 text-white absolute bg-black bg-opacity-55">
               +{{ order.items.length - 3 }}
             </div>
           </div>
         </div>
-        <div class="border-b border-t border-gray-200 py-2" v-if="order.deliveryStatus === false">
-          <RouterLink
-            :to="{ name: 'tracking', params: { id: order.orderId } }"
-            class="w-1/2 text-tea-600"
-          >
-            Suivre le colis
-          </RouterLink>
+        <div class="border-b border-t border-gray-200 py-2" v-if="!order.status.label === 'Delivered'">
+          <router-link :to="{ name: 'tracking', params: { id: order.id } }" class="w-1/2 text-tea-600">Suivre le colis</router-link>
         </div>
         <div>
           <p>
-            N° de commande: <span class="font-bold">{{ order.orderNumber }}</span>
+            N° de commande: <span class="font-bold">{{ order.id }}</span>
           </p>
           <p>
             Date d'expédition:
-            <span class="font-bold">{{
-              new Date(order.shippingDate).toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-              })
-            }}</span>
+            <span class="font-bold">{{ formatDate(order.shippingDate) }}</span>
           </p>
         </div>
-      </RouterLink>
+      </div>
     </div>
   </div>
 </template>
