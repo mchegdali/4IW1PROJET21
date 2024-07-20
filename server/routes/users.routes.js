@@ -8,6 +8,7 @@ const {
   getUser,
   getUserCount,
   getUserRegistrations,
+  getUserRegistrationsLast12Months
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -24,6 +25,15 @@ usersRouter.get(
   checkRole(['admin']),
   getUserCount,
 );
+
+// Obtient le nombre d'inscriptions des 12 derniers mois
+usersRouter.get(
+  '/users/registrations-last-12-months',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getUserRegistrationsLast12Months,
+);
+
 
 // Route pour obtenir le nombre d'inscriptions d'utilisateurs par jour
 usersRouter.get(
