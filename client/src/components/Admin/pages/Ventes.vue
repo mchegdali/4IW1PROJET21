@@ -47,7 +47,7 @@ export default defineComponent({
       statisticsData: [
         { value: '-', text: 'Ventes', color: 'text-blue-600' },
         { value: '-', text: 'Clients', color: 'text-green-600' },
-        { value: '30', text: 'Produits', color: 'text-red-600' },
+        { value: '-', text: 'Produits', color: 'text-red-600' },
       ] as Statistic[],
       donutChartOptions: {
         chart: {
@@ -65,6 +65,7 @@ export default defineComponent({
   async mounted() {
     await this.fetchTotalSales();
     await this.fetchDistinctCustomerCount();
+    await this.fetchTotalProducts();
   },
   methods: {
     async fetchTotalSales() {
@@ -85,6 +86,16 @@ export default defineComponent({
       } catch (error) {
         console.error('Error fetching distinct customer count:', error);
         this.statisticsData[1].value = "-";
+      }
+    },
+    async fetchTotalProducts() {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/count`);
+        const data = await response.json();
+        this.statisticsData[2].value = data.count.toString();
+      } catch (error) {
+        console.error('Error fetching total products:', error);
+        this.statisticsData[2].value = "-";
       }
     },
   },
