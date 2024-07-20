@@ -5,7 +5,7 @@ import { MoveLeft } from 'lucide-vue-next';
 
 <template>
   <main class="grow">
-    <div class="flex items-center w-full relative align">
+    <div class="flex items-center w-full relative align px-4 mt-2">
       <div class="block lg:hidden">
         <RouterLink :to="{ name: 'account' }"><MoveLeft /></RouterLink>
       </div>

@@ -5,7 +5,7 @@ import Order from '@/components/order.vue';
 
 <template>
   <main class="grow">
-    <div class="flex items-center w-full relative align">
+    <div class="flex items-center w-full relative align px-4 mt-2">
       <div class="block lg:hidden">
         <RouterLink :to="{ name: 'orders' }"><MoveLeft /></RouterLink>
       </div>
