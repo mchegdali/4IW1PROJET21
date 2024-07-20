@@ -27,8 +27,8 @@ const up = async ({ context: { sequelize } }) => {
     // Boucle pour créer 40 utilisateurs par mois avec des createdAt randoms
     for (let i = 0; i < 40; i++) {
       const createdAt = faker.date.between({
-        from: dayjs('2024-01-01').toDate(),
-        to: dayjs('2024-12-31').toDate(),
+        from: dayjs().startOf('year').toDate(),
+        to: dayjs().toDate(),
       });
       const updatedAt = createdAt;
 
@@ -82,7 +82,7 @@ const up = async ({ context: { sequelize } }) => {
               'phone',
               'createdAt',
               'updatedAt',
-              'deletedAt'
+              'deletedAt',
             ],
           },
         ],
@@ -135,10 +135,10 @@ const up = async ({ context: { sequelize } }) => {
               'region',
               'zipCode',
               'country',
-              'phone', 
+              'phone',
               'createdAt',
               'updatedAt',
-              'deletedAt'
+              'deletedAt',
             ],
           },
         ],
@@ -191,7 +191,7 @@ const up = async ({ context: { sequelize } }) => {
               'phone',
               'createdAt',
               'updatedAt',
-              'deletedAt'
+              'deletedAt',
             ],
           },
         ],
@@ -246,7 +246,7 @@ const up = async ({ context: { sequelize } }) => {
               'phone',
               'createdAt',
               'updatedAt',
-              'deletedAt'
+              'deletedAt',
             ],
           },
         ],
