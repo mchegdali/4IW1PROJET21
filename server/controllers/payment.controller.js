@@ -11,36 +11,35 @@ const { paymentQuerySchema, paymentCreateSchema, paymentUpdateSchema} = require(
 
 const createPayment = async (req, res, next) => {
   try {
-    // Parse request body
+  
     const paymentCreateBody = await paymentCreateSchema.parseAsync(req.body);
 
-    // Find the user
+
     const user = await UsersMongo.findById(paymentCreateBody.user);
     if (!user) {
       throw new NotFound('User not found');
     }
     console.log("first log", user);
 
-    // Transaction to ensure atomic operations
+
     const result = await sequelize.transaction(async (t) => {
-      // Find the latest order for the user
+ 
       const order = await OrdersMongo.findOne({ user: user }).sort({ createdAt: -1 }).exec();
       if (!order) {
         throw new NotFound('Order not found');
       }
       console.log("second log", order);
 
-      // Ensure order.items is an array
+
       if (!Array.isArray(order.items)) {
         throw new Error('Order items are not an array');
       }
 
-      // Calculate total price
+
       const totalPrice = order.items.reduce((total, item) => {
         return total + parseFloat(item.price.toString());
       }, 0);
 
-      // Create payment record in SQL
       const payment = await Payments.create({
         userId: user._id,
         orderId: order._id,
@@ -49,7 +48,7 @@ const createPayment = async (req, res, next) => {
       }, { transaction: t });
       console.log("third log", payment);
 
-      // Create payment document for MongoDB
+     
       const paymentMongo = {
         _id: payment.id,
         user: {
@@ -72,27 +71,25 @@ const createPayment = async (req, res, next) => {
       };
       console.log("fourth log", paymentMongo);
 
-      // Save payment document in MongoDB
+      
       const paymentDoc = await PaymentsMongo.create(paymentMongo);
       return { paymentDoc, order };
     });
 
-    // Extract payment document and order
     const { paymentDoc, order } = result;
 
-    // Map line items for Stripe
+ 
     const line_items = order.items.map(item => ({
       price_data: {
-        currency: 'usd',
+        currency: 'eur',
         product_data: {
           name: item.name,
         },
-        unit_amount: parseFloat(item.price.toString()) * 100, // Convert to cents
+        unit_amount: parseFloat(item.price.toString()) * 100, 
       },
       quantity: 1,
     }));
 
-    // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
@@ -104,7 +101,7 @@ const createPayment = async (req, res, next) => {
       },
     });
 
-    // Redirect to Stripe Checkout
+    
     res.redirect(303, session.url);
   } catch (error) {
     console.error('createPayment error:', error);
