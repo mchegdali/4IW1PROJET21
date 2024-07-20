@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Package2, Truck } from 'lucide-vue-next';
+import { useUserStore } from '@/stores/user';
 
 interface Order {
   _id: string;
@@ -66,9 +67,19 @@ const filteredOrders = computed(() => {
   });
 });
 
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+const userId = user.id;
+
+const userStore = useUserStore();
+userStore.accessToken;
+
 async function fetchOrders(): Promise<void> {
   try {
-    const response = await fetch('http://localhost:3000/orders');
+    const response = await fetch(`http://localhost:3000/users/${userId}/orders`, {
+      headers: {
+        Authorization: `Bearer ${userStore.accessToken}`
+      }
+    });
     if (!response.ok) throw new Error('Network response was not ok');
     const data = await response.json();
     orders.value = data;
