@@ -11,7 +11,7 @@ import { ref } from 'vue';
 
 const userStore = useUserStore();
 const basketStore = useBasketStore();
-const isAuthenticated = ref(userStore.isAuthenticated);
+const isAuthenticated = ref(!!userStore.user);
 
 const nbItems = ref(basketStore.nbItems);
 

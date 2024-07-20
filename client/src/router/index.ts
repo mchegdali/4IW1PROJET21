@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import HomeView from '../views/home-view.vue';
 import Layout from '../layouts/layout.vue';
-import adminRoutes from './admin'; 
+import adminRoutes from './admin';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -168,21 +168,17 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   const userStore = useUserStore();
-  if (!to.meta?.requiresAuth) {
-    return next();
-  }
+  const authRequired = to.meta?.requiresAuth === true;
 
-  if (!userStore.isAuthenticated) {
-    const isSuccess = await userStore.getRefreshToken();
-    if (isSuccess) {
-      next();
-    } else {
-      next('/login');
-    }
-  } else {
-    next();
+  if (authRequired && !userStore.user) {
+    return {
+      name: 'login',
+      query: {
+        returnUrl: to.path
+      }
+    };
   }
 });
 
