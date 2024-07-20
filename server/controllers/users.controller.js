@@ -348,6 +348,39 @@ async function getUserAddresses(req, res, next) {
     return res.json(user.addresses);
   } catch (error) {
     return next(error);
+<<<<<<< HEAD
+=======
+  }
+}
+
+/**
+ * Récupérer le nombre d'inscriptions d'utilisateurs par mois sur les 12 derniers mois sur Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserRegistrationsLast12Months(req, res, next) {
+  try {
+    const lastYear = dayjs().subtract(12, 'months').toDate();
+    const registrations = await UserMongo.aggregate([
+      { $match: { createdAt: { $gte: lastYear } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    return res.status(200).json(
+      registrations.map((entry) => ({
+        date: entry._id,
+        count: entry.count,
+      })),
+    );
+  } catch (error) {
+    return next(error);
+>>>>>>> 472b0f9 (modif front panier debut liaison a stripe et gestion conglit)
   }
 }
 
@@ -359,6 +392,11 @@ module.exports = {
   replaceUser,
   deleteUser,
   updateUser,
+  getUserAddresses,
   getUserRegistrations,
+<<<<<<< HEAD
   getUserRegistrations,
+=======
+  getUserRegistrationsLast12Months
+>>>>>>> 472b0f9 (modif front panier debut liaison a stripe et gestion conglit)
 };

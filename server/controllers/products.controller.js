@@ -9,7 +9,6 @@ const {
   productUpdateSchema,
 } = require('../schemas/products.schema');
 const { Op } = require('sequelize');
-const { Op } = require('sequelize');
 
 const { NotFound } = httpErrors;
 const Products = sequelize.model('products');
@@ -173,12 +172,12 @@ async function getProducts(req, res, next) {
  */
 async function getProduct(req, res, next) {
   try {
-    const product = await ProductMongo.findOne({
-      $or: [{ _id: req.params.product }, { slug: req.params.product }],
-    });
-    const product = await ProductMongo.findOne({
-      $or: [{ _id: req.params.product }, { slug: req.params.product }],
-    });
+    const isUUID = validator.isUUID(req.params.product);
+    const filter = {
+      [isUUID ? '_id' : 'slug']: req.params.product,
+    };
+    const product = await ProductMongo.findOne(filter);
+
     if (!product) {
       return res.sendStatus(404);
     }
@@ -234,18 +233,7 @@ async function updateProduct(req, res, next) {
       returning: true,
       individualHooks: true,
     });
-    const productUpdateBody = productUpdateSchema.parse(req.body);
 
-    await Products.update(productUpdateBody, {
-      where: {
-        [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
-      },
-      limit: 1,
-      returning: true,
-      individualHooks: true,
-    });
-
-    return res.sendStatus(204);
     return res.sendStatus(204);
   } catch (error) {
     return next(error);
@@ -266,15 +254,7 @@ async function deleteProduct(req, res, next) {
       limit: 1,
       individualHooks: true,
     });
-    const deletedCountSql = await Products.destroy({
-      where: {
-        [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
-      },
-      limit: 1,
-      individualHooks: true,
-    });
 
-    if (deletedCountSql === 0) {
     if (deletedCountSql === 0) {
       return res.sendStatus(404);
     }
@@ -331,4 +311,8 @@ module.exports = {
   deleteProduct,
   getProductCount,
   getProductDistributionByCategory,
+<<<<<<< HEAD
+=======
+  getPriceDistribution,
+>>>>>>> 472b0f9 (modif front panier debut liaison a stripe et gestion conglit)
 };
