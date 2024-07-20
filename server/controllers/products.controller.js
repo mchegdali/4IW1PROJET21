@@ -165,9 +165,12 @@ async function getProducts(req, res, next) {
  */
 async function getProduct(req, res, next) {
   try {
-    const product = await ProductMongo.findOne({
-      $or: [{ _id: req.params.product }, { slug: req.params.product }],
-    });
+    const isUUID = validator.isUUID(req.params.product);
+    const filter = {
+      [isUUID ? '_id' : 'slug']: req.params.product,
+    };
+    const product = await ProductMongo.findOne(filter);
+
     if (!product) {
       return res.sendStatus(404);
     }
