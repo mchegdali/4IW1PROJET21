@@ -356,56 +356,7 @@ async function getDistinctCustomerCount(req, res, next) {
     return next(error);
   }
 }
- 
-/**
- * Calcule la distribution des produits les plus vendus
- * 
- * @type {import('express').RequestHandler}
- * @returns
- */
-async function getTopProductsDistribution(req, res, next) {
-  try {
-    const productsDistribution = await OrdersMongo.aggregate([
-      { $unwind: "$items" },
-      {
-        $group: {
-          _id: "$items._id",
-          name: { $first: "$items.name" },
-          totalSold: { $sum: "$items.quantity" } 
-        }
-      },
-      { $sort: { totalSold: -1 } },
-      { $limit: 5 },
-      {
-        $lookup: {
-          from: "products",
-          localField: "_id",
-          foreignField: "_id",
-          as: "product"
-        }
-      },
-      { $unwind: "$product" },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          totalSold: 1,
-          price: "$product.price",
-        }
-      }
-    ]);
 
-    const totalProductsSold = productsDistribution.reduce((acc, product) => acc + product.totalSold, 0);
-    const productsWithPercentage = productsDistribution.map(product => ({
-      ...product,
-      percentage: totalProductsSold > 0 ? (product.totalSold / totalProductsSold) * 100 : 0
-    }));
-
-    res.status(200).json(productsWithPercentage);
-  } catch (error) {
-    next(error);
-  }
-}
 
 module.exports = {
   createOrder,
@@ -418,5 +369,4 @@ module.exports = {
   getOrderStatusDistribution,
   getTotalSales,
   getDistinctCustomerCount,
-  getTopProductsDistribution
 };

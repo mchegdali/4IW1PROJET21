@@ -10,7 +10,6 @@ const {
   getOrderStatusDistribution,
   getTotalSales,
   getDistinctCustomerCount,
-  getTopProductsDistribution
 } = require('../controllers/order.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -23,13 +22,6 @@ orderRouter.get('/orders/count',
   checkAuth(authConfig.accessTokenSecret, false),
   checkRole(['admin']),
   getOrderCount
-);
-
-orderRouter.get(
-  '/orders/top-products-distribution', 
-  checkAuth(authConfig.accessTokenSecret, false),
-  checkRole(['admin']),
-  getTopProductsDistribution
 );
 
 
