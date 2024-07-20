@@ -1,60 +1,3 @@
-<script setup lang="ts">
-import { ref } from 'vue';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { useRoute } from 'vue-router';
-
-const route = useRoute();
-const trackingId = route.params.id;
-
-const orderData = ref({
-  event: [],
-  timeline: []
-});
-
-const formatDate = (dateString: string) => {
-  return format(new Date(dateString), 'PPPpp', { locale: fr });
-};
-
-onMounted(async () => {
-  try {
-    const response = await fetch(`http://localhost:3000/v1/tracking?tracking_number=${trackingId}`);
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
-    }
-
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('La réponse n\'est pas au format JSON');
-    }
-
-    const data = await response.json();
-    orderData.value = {
-      idShip: data.tracking_number,
-      timeline: data.events.map(event => ({
-        id: event.event_code,
-        shortLabel: event.description,
-        longLabel: `Votre colis est arrivé à ${event.city_locality}, ${event.state_province}, ${event.country_code}.`,
-        status: true,
-        type: -1,
-        date: event.occurred_at,
-        country: event.country_code
-      })),
-      event: [{
-        date: data.events[0].occurred_at,
-        label: data.status_description,
-        code: data.status_code
-      }],
-      product: data.carrier_code,
-      entryDate: data.events[0].occurred_at,
-      estimDate: data.events[0].occurred_at,
-      deliveryDate: data.events[data.events.length - 1].occurred_at
-    };
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données de suivi:', error.message);
-  }
-});
-</script>
 <template>
   <div class="flex flex-col gap-6 p-6">
     <!-- Section Informations de commande -->
@@ -63,12 +6,12 @@ onMounted(async () => {
     </div>
 
     <!-- Section Evénements de livraison -->
-    <div v-for="event in orderData.event" :key="event.date" class="">
+    <div v-if="orderData.event.length > 0" class="">
       <h3 class="text-xl font-semibold">Evénements de livraison</h3>
       <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-        {{ formatDate(event.date) }}
+        {{ formatDate(orderData.event[0].date) }}
       </time>
-      <p class="text-base font-normal text-gray-500 dark:text-gray-400">{{ event.label }}</p>
+      <p class="text-base font-normal text-gray-500 dark:text-gray-400">{{ orderData.event[0].label }}</p>
     </div>
 
     <!-- Section Ligne de temps -->
@@ -107,3 +50,59 @@ onMounted(async () => {
   </div>
 </template>
 
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const trackingId = route.params.id;
+
+const orderData = ref({
+  idShip: '',
+  event: [],
+  timeline: []
+});
+
+const formatDate = (dateString: string) => {
+  return format(new Date(dateString), 'PPPpp', { locale: fr });
+};
+
+onMounted(async () => {
+  try {
+    const response = await fetch(`http://localhost:3000/v1/tracking?tracking_number=${trackingId}`);
+    if (!response.ok) throw new Error('Failed to fetch tracking data');
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('La réponse n\'est pas au format JSON');
+    }
+
+    const data = await response.json();
+    orderData.value = {
+      idShip: data.tracking_number,
+      timeline: data.events.map(event => ({
+        id: event.event_code,
+        shortLabel: event.description,
+        longLabel: `Votre colis est arrivé à ${event.city_locality}, ${event.state_province}, ${event.country_code}.`,
+        status: true,
+        type: -1,
+        date: event.occurred_at,
+        country: event.country_code
+      })),
+      event: [{
+        date: data.events[0].occurred_at,
+        label: data.status_description,
+        code: data.status_code
+      }],
+      product: data.carrier_code,
+      entryDate: data.events[0].occurred_at,
+      estimDate: data.events[0].occurred_at,
+      deliveryDate: data.events[data.events.length - 1].occurred_at
+    };
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données de suivi:', error.message);
+  }
+});
+</script>

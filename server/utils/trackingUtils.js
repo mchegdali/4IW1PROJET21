@@ -1,83 +1,75 @@
-// trackingUtils.js
-
-// Fonction pour générer une date aléatoire dans une plage donnée
-const randomDate = (start, end) => {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-};
-
-// Fonction pour ajouter des jours à une date
-const addDays = (date, days) => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-};
-
-// Fonction pour simuler des données aléatoires de suivi de colis
-const simulateTrackingResponse = (trackingNumber) => {
-  const randomCarrierCode = Math.random() < 0.5 ? "ups" : "fedex"; // Choisir aléatoirement entre "ups" et "fedex"
-  
-  // Générer une date de commande aléatoire (entre le 20 et le 24 juillet)
-  const orderDate = randomDate(new Date(2023, 6, 20), new Date(2023, 6, 24));
-
-  // Générer une date de livraison au moins 3 jours après la date de commande
-  const deliveredDate = addDays(orderDate, 3 + Math.floor(Math.random() * 3));
-
-  // Générer des événements aléatoires
+const generateTrackingEvents = (order) => {
   const events = [];
+  const createdAt = new Date(order.createdAt);
 
-  // Première étape: Expédition de Paris
+  // Calcul des dates des événements
+  const shippingDate = new Date(createdAt);
+  shippingDate.setDate(createdAt.getDate() + 1); // Expédition 1 jour après la création
+
+  const inTransitDate = new Date(shippingDate);
+  inTransitDate.setDate(shippingDate.getDate() + 2); // En transit 2 jours après l'expédition
+
+  const deliveryDate = new Date(inTransitDate);
+  deliveryDate.setDate(inTransitDate.getDate() + 5); // Livraison 5 jours après le transit
+
+  // Ajouter les événements de suivi
   events.push({
-    occurred_at: addDays(orderDate, 1).toISOString(),
-    description: "Colis parti de l'installation.",
+    occurred_at: createdAt.toISOString(),
+    description: "Commande reçue.",
     city_locality: "Paris",
     state_province: "Île-de-France",
     country_code: "FR",
-    event_code: "DEPARTURE"
+    event_code: "RECEIVED"
   });
 
-  // Étape intermédiaire: Tri au centre de distribution à Cergy (dans le 95)
-  const sortedDate = addDays(orderDate, 2);
-  events.push({
-    occurred_at: sortedDate.toISOString(),
-    description: "Colis trié au centre de distribution.",
-    city_locality: "Cergy",
-    state_province: "Île-de-France",
-    country_code: "FR",
-    event_code: "SORTING"
-  });
+  if (order.status.label !== 'Delivered') {
+    events.push({
+      occurred_at: shippingDate.toISOString(),
+      description: "Colis expédié.",
+      city_locality: "Paris",
+      state_province: "Île-de-France",
+      country_code: "FR",
+      event_code: "SHIPPED"
+    });
 
-  // Dernière étape: En cours de livraison dans le 95
-  const inTransitDate = randomDate(sortedDate, deliveredDate);
-  events.push({
-    occurred_at: inTransitDate.toISOString(),
-    description: "Colis en cours de livraison.",
-    city_locality: "Argenteuil",
-    state_province: "Île-de-France",
-    country_code: "FR",
-    event_code: "IN_TRANSIT"
-  });
+    events.push({
+      occurred_at: inTransitDate.toISOString(),
+      description: "Colis en transit.",
+      city_locality: "Cergy",
+      state_province: "Île-de-France",
+      country_code: "FR",
+      event_code: "IN_TRANSIT"
+    });
 
-  // Événement final: Livraison dans le 95
-  events.push({
-    occurred_at: deliveredDate.toISOString(),
-    description: "Colis livré avec succès.",
-    city_locality: "Argenteuil",
-    state_province: "Île-de-France",
-    country_code: "FR",
-    event_code: "DELIVERED"
-  });
+    events.push({
+      occurred_at: deliveryDate.toISOString(),
+      description: "Colis livré.",
+      city_locality: "Aubervilliers",
+      state_province: "Île-de-France",
+      country_code: "FR",
+      event_code: "DELIVERED"
+    });
+  } else {
+    // Ajouter la livraison si l'état est 'Delivered'
+    events.push({
+      occurred_at: order.deliveryDate,
+      description: "Colis livré.",
+      city_locality: "Aubervilliers",
+      state_province: "Île-de-France",
+      country_code: "FR",
+      event_code: "DELIVERED"
+    });
+  }
 
   return {
-    tracking_number: trackingNumber,
-    tracking_url: `http://www.example.com/tracking/${trackingNumber}`,
-    status_code: "DL",
-    carrier_code: randomCarrierCode,
-    carrier_id: Math.floor(Math.random() * 10) + 1, // Identifiant de transporteur aléatoire entre 1 et 10
-    status_description: "Livré",
-    events: events.sort((a, b) => new Date(a.occurred_at) - new Date(b.occurred_at))
+    tracking_number: order.orderNumber,
+    status_description: order.status.label,
+    status_code: order.status._id.toString(),
+    carrier_code: "DHL",
+    events
   };
 };
 
 module.exports = {
-  simulateTrackingResponse
+  generateTrackingEvents
 };

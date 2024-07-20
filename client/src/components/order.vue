@@ -1,109 +1,3 @@
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import { RouterLink } from 'vue-router';
-import { Calendar, Package2, Truck } from 'lucide-vue-next';
-
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  image: string;
-}
-
-interface Shipping {
-  fullname: string;
-  street: string;
-  zipCode: string;
-  city: string;
-  phone: string;
-  deliveryChoiceId: string;
-}
-
-interface OrderItem {
-  id: string;
-  price: string;
-  quantity?: number;
-}
-
-interface Order {
-  _id: string;
-  orderNumber: string;
-  createdAt: string;
-  shippingDate: string;
-  deliveryStatus?: boolean;
-  shipping: Shipping;
-  items: OrderItem[];
-  paymentType: string;
-  status: { label: string };
-}
-
-const route = useRoute();
-const order = ref<Order | null>(null);
-const products = ref<Product[]>([]);
-
-const fetchProductDetails = async (productIds: string[]) => {
-  try {
-    const productPromises = productIds.map((id) =>
-      fetch(`http://localhost:3000/products/${id}`).then((response) => response.json())
-    );
-    const productData = await Promise.all(productPromises);
-    products.value = productData;
-  } catch (error) {
-    console.error('Erreur lors de la récupération des détails des produits:', error);
-  }
-};
-
-const fetchOrderDetails = async () => {
-  try {
-    const response = await fetch(`http://localhost:3000/orders/${route.params.id}`);
-    if (!response.ok) {
-      throw new Error(`Erreur réseau: ${response.statusText}`);
-    }
-
-    const contentType = response.headers.get('Content-Type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Le serveur a renvoyé un contenu non JSON');
-    }
-
-    const data: Order = await response.json();
-    order.value = data;
-
-    await fetchProductDetails(data.items.map((item) => item.id));
-  } catch (error) {
-    console.error('Erreur lors de la récupération des détails de la commande:', error);
-  }
-};
-
-const computeOrderTotal = (): string => {
-  if (!order.value) return '0.00';
-  const total = order.value.items.reduce((acc, item) => {
-    const price = parseFloat(item.price);
-    const quantity = item.quantity || 1;
-    return acc + price * quantity;
-  }, 0);
-  return total.toFixed(2);
-};
-
-const getProductDetails = (productId: string): Product | {} => {
-  return products.value.find((product) => product.id === productId) || {};
-};
-
-const getProductImage = (productId: string): string => {
-  const product = getProductDetails(productId) as Product;
-  return product.image || 'https://via.placeholder.com/200x200';
-};
-
-const getProductTitle = (productId: string): string => {
-  const product = getProductDetails(productId) as Product;
-  return product.name || 'Produit inconnu';
-};
-
-onMounted(() => {
-  fetchOrderDetails();
-});
-</script>
-
 <template>
   <div class="items-center flex justify-center flex-col px-4 mt-2">
     <div v-if="order" class="sm:w-2/3 sm:flex flex-row justify-center md:w-full">
@@ -170,11 +64,11 @@ onMounted(() => {
 
             <div
               class="bg-white py-2 text-sm flex items-center gap-2"
-              v-if="order.status.label == 'Shipped'"
+              v-if="order.status.label === 'Shipped'"
             >
               <Truck />
               <RouterLink
-                :to="{ name: 'tracking', params: { id: order._id } }"
+                :to="{ name: 'tracking', params: { id: order.orderNumber } }"
                 class="text-tea-600 sm:text-lg"
               >
                 Suivre le colis
@@ -182,7 +76,7 @@ onMounted(() => {
             </div>
           </div>
           <div class="w-full h-3 bg-gray-200 overflow-hidden rounded-xl">
-            <div class="h-full bg-tea-600" style="width: 45%"></div>
+            <div class="h-full bg-tea-600" :style="{ width: '45%' }"></div>
           </div>
           <p class="text-xs sm:text-sm">
             Votre colis est en cours de livraison. Merci de votre patience et nous espérons que vous
@@ -264,3 +158,86 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { RouterLink } from 'vue-router';
+import { Calendar, Package2, Truck } from 'lucide-vue-next';
+
+interface Product {
+  id: string;
+  name: string;
+  price: string;
+  image: string;
+}
+
+interface Shipping {
+  fullname: string;
+  street: string;
+  zipCode: string;
+  city: string;
+  phone: string;
+  deliveryChoiceId: string;
+}
+
+interface OrderItem {
+  id: string;
+  price: string;
+  quantity?: number;
+}
+
+interface Order {
+  _id: string;
+  orderNumber: string;
+  createdAt: string;
+  shippingDate: string;
+  deliveryStatus?: boolean;
+  shipping: Shipping;
+  items: OrderItem[];
+  paymentType: string;
+  status: { label: string };
+}
+
+const route = useRoute();
+const order = ref<Order | null>(null);
+const products = ref<Product[]>([]);
+
+const fetchProductDetails = async (productIds: string[]) => {
+  try {
+    const productPromises = productIds.map((id) =>
+      fetch(`http://localhost:3000/products/${id}`).then((response) => response.json())
+    );
+    const productData = await Promise.all(productPromises);
+    products.value = productData;
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+  }
+};
+
+const getProductImage = (productId: string) => {
+  const product = products.value.find((p) => p.id === productId);
+  return product?.image || '';
+};
+
+const getProductTitle = (productId: string) => {
+  const product = products.value.find((p) => p.id === productId);
+  return product?.name || 'Unknown Product';
+};
+
+const computeOrderTotal = () => {
+  return order.value?.items.reduce((total, item) => total + parseFloat(item.price) * (item.quantity || 1), 0).toFixed(2) || '0.00';
+};
+
+onMounted(async () => {
+  const orderId = route.params.id as string;
+  try {
+    const response = await fetch(`http://localhost:3000/orders/${orderId}`);
+    if (!response.ok) throw new Error('Failed to fetch order');
+    order.value = await response.json();
+    await fetchProductDetails(order.value.items.map(item => item.id));
+  } catch (error) {
+    console.error('Error fetching order:', error);
+  }
+});
+</script>

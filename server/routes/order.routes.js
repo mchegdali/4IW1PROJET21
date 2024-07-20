@@ -18,6 +18,10 @@ const authConfig = require('../config/auth.config');
 const orderRouter = Router();
 const userOrderRouter = Router({ mergeParams: true });
 
+// orderRouter.use(
+//   '/orders',
+//   checkAuth(authConfig.accessTokenSecret, false),
+// );
 orderRouter.route('/orders').get(getOrders).post(createOrder);
 
 orderRouter.get(
