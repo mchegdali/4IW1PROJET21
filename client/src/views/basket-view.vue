@@ -6,18 +6,22 @@ import { onBeforeMount } from 'vue';
 import { useBasketStore } from '@/stores/basket';
 import { fetchBasket } from '@/api/basket';
 import { useUserStore } from '@/stores/user';
+import { useRouter } from 'vue-router';
 
 const userStore = useUserStore();
 const basketStore = useBasketStore();
+const router = useRouter();
 
 onBeforeMount(async () => {
   if (userStore.isAuthenticated) {
-    {
-      const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
-      basketStore.products = await response.json();
-    }
+    const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
+    basketStore.products = await response.json();
   }
 });
+
+const goToConfirmation = () => {
+  router.push({ name: 'basket-confirmation' });
+};
 </script>
 
 <template>
@@ -26,7 +30,7 @@ onBeforeMount(async () => {
     <BasketInformation />
     <BasketList />
     <div class="m-4">
-      <Button class="w-full">Paiement</Button>
+      <Button class="w-full" @click="goToConfirmation">Confirmer</Button>
     </div>
   </main>
 </template>
