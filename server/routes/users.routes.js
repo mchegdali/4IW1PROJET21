@@ -51,8 +51,8 @@ usersRouter.use(
 );
 
 usersRouter.use('/users/:userId/orders', 
-  // checkAuth(authConfig.accessTokenSecret, false), 
-  // isOwnAccount, 
+  checkAuth(authConfig.accessTokenSecret, false), 
+  isOwnAccount, 
   userOrderRouter);
 
 usersRouter.use(
