@@ -21,22 +21,10 @@ export const useUserStore = defineStore('user', {
       : null,
     refreshAccessTokenTimeout: null as number | null
   }),
-  getters: {},
-  actions: {
-    async login(email: string, password: string) {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
-
-      if (!response.ok) {
-        throw response;
+  getters: {
+    isAuthenticated(state) {
+      if (!state.accessToken) {
+        return false;
       }
       const decodedAccessToken = jwtDecode(state.accessToken);
       if (!decodedAccessToken.exp) {
