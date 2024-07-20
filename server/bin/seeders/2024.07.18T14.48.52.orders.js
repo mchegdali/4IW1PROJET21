@@ -1,5 +1,7 @@
 const OrderMongo = require('../../models/mongo/orders.mongo');
+const { ProductMongo } = require('../../models/mongo/products.mongo');
 const crypto = require('node:crypto');
+const { fakerFR: faker } = require('@faker-js/faker');
 
 /**
  * @typedef { Object } MigrationParams
@@ -17,6 +19,7 @@ const up = async ({ context: { sequelize } }) => {
   const Users = sequelize.model('users');
   const Status = sequelize.model('status');
   const Orders = sequelize.model('orders');
+  const products = await ProductMongo.find({}).lean({});
 
   const users = await Users.findAll();
   const statuses = await Status.findAll();
@@ -32,28 +35,7 @@ const up = async ({ context: { sequelize } }) => {
       const order = {
         id: crypto.randomUUID(),
         statusId: status.id,
-        items: [
-          {
-            _id: crypto.randomUUID(),
-            name: 'Product 1',
-            category: {
-              _id: crypto.randomUUID(),
-              name: 'Category 1',
-              slug: 'category-1',
-            },
-            price: 29.99,
-          },
-          {
-            _id: crypto.randomUUID(),
-            name: 'Product 2',
-            category: {
-              _id: crypto.randomUUID(),
-              name: 'Category 2',
-              slug: 'category-2',
-            },
-            price: 49.99,
-          },
-        ],
+        items: faker.helpers.arrayElements(products, { min: 1, max: 3 }),
         userId: user.id,
         shippingId: null, // Pas de livraison initiale
       };
@@ -64,6 +46,7 @@ const up = async ({ context: { sequelize } }) => {
   const createdOrders = await Orders.bulkCreate(orders, {
     validate: true,
     returning: true,
+    individualHooks: true,
   });
 
   // Convertion MongoDB
@@ -73,9 +56,8 @@ const up = async ({ context: { sequelize } }) => {
       orderMongo.user = await orderMongo.user;
       orderMongo.status = await orderMongo.status;
       return orderMongo;
-    })
+    }),
   );
-
 
   await OrderMongo.insertMany(createdOrdersMongo);
 };
@@ -87,7 +69,6 @@ const down = async ({ context: { sequelize } }) => {
   const Orders = sequelize.model('orders');
 
   await Orders.destroy({ truncate: true, cascade: true, force: true });
-
 
   await OrderMongo.deleteMany({});
 };
