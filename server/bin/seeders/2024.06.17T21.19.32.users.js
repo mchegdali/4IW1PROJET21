@@ -26,9 +26,10 @@ const up = async ({ context: { sequelize } }) => {
 
     // Boucle pour créer 40 utilisateurs par mois avec des createdAt randoms
     for (let i = 0; i < 40; i++) {
-      const month = Math.floor(Math.random() * 12);
-      const day = Math.floor(Math.random() * 28) + 1;
-      const createdAt = dayjs(new Date(2024, month, day)).toDate();
+      const createdAt = faker.date.between({
+        from: dayjs('2024-01-01').toDate(),
+        to: dayjs('2024-12-31').toDate(),
+      });
       const updatedAt = createdAt;
 
       const updatedAt = createdAt;
