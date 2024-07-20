@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { ShoppingBasket } from 'lucide-vue-next';
 import Button from '@/components/ui/button/Button.vue';
 import ProductsSearchForm from '@/components/products/products-search-form.vue';
 
 import logo from '@/assets/images/fanthesie.png';
 import { useUserStore } from '@/stores/user';
-import Badge from './ui/badge/Badge.vue';
 import { useBasketStore } from '@/stores/basket';
 import { ref } from 'vue';
+import ShoppingBasketWithCount from './shared/shopping-basket-with-count.vue';
 
 const userStore = useUserStore();
 const basketStore = useBasketStore();
@@ -68,16 +67,7 @@ basketStore.$subscribe((mutation, state) => {
       >
         <RouterLink :to="{ name: 'basket' }" class="flex items-center gap-2">
           Panier
-          <div class="relative">
-            <ShoppingBasket class="size-8" />
-            <Badge
-              variant="circle"
-              class="absolute -top-2 -right-2 size-[2.5ch]"
-              v-if="nbItems > 0"
-            >
-              {{ nbItems <= 9 ? nbItems : '9+' }}
-            </Badge>
-          </div>
+          <ShoppingBasketWithCount v-model:nbItems="nbItems" />
         </RouterLink>
       </Button>
     </div>

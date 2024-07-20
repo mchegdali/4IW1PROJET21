@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { Home, User, ShoppingBasket } from 'lucide-vue-next';
 import AppbarLink from '@/components/appbar-link.vue';
+import { useBasketStore } from '@/stores/basket';
+import { ref } from 'vue';
+import ShoppingBasketWithCount from './shared/shopping-basket-with-count.vue';
+
+const basketStore = useBasketStore();
+const nbItems = ref(basketStore.nbItems);
+
+basketStore.$subscribe((mutation, state) => {
+  nbItems.value = state.products.length;
+});
 </script>
 
 <template>
@@ -17,7 +27,7 @@ import AppbarLink from '@/components/appbar-link.vue';
     </AppbarLink>
     <AppbarLink :to="{ name: 'basket' }">
       <template v-slot:icon>
-        <ShoppingBasket class="w-6 h-6 text-primary" />
+        <ShoppingBasketWithCount v-model:nbItems="nbItems" size="small" />
       </template>
     </AppbarLink>
   </nav>
