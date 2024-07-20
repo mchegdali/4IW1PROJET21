@@ -25,6 +25,7 @@ const productCount = computed(() => {
 });
 
 async function onInput(count: number) {
+  if (readonly) return;
   if (userStore.isAuthenticated) {
     await setProductCountToBasket(userStore.user?.id!, userStore.accessToken!, product, count);
     const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
@@ -52,6 +53,7 @@ async function onInput(count: number) {
       </p>
       <div class="flex gap-2 w-full">
         <NumberField
+          v-if="!readonly"
           :model-value="productCount"
           :min="0"
           class="max-w-40"
