@@ -351,6 +351,36 @@ async function getUserAddresses(req, res, next) {
   }
 }
 
+/**
+ * Récupérer le nombre d'inscriptions d'utilisateurs par mois sur les 12 derniers mois sur Mongo
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUserRegistrationsLast12Months(req, res, next) {
+  try {
+    const lastYear = dayjs().subtract(12, 'months').toDate();
+    const registrations = await UserMongo.aggregate([
+      { $match: { createdAt: { $gte: lastYear } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    return res.status(200).json(
+      registrations.map((entry) => ({
+        date: entry._id,
+        count: entry.count,
+      })),
+    );
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getUserCount,
   createUser,
@@ -361,4 +391,5 @@ module.exports = {
   updateUser,
   getUserRegistrations,
   getUserRegistrations,
+  getUserRegistrationsLast12Months
 };
