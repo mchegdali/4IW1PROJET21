@@ -418,5 +418,4 @@ module.exports = {
   getOrderStatusDistribution,
   getTotalSales,
   getDistinctCustomerCount,
-  getTopProductsDistribution
 };
