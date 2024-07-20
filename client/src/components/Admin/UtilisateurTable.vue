@@ -75,11 +75,10 @@
         </div>
 
         <!-- La modal pour visualiser ou éditer l'utilisateur -->
-        <DialogUtilisateur :client="selectedClient || {}" v-model="isDialogOpen" :isEditMode="isEditMode" @save="saveClient" />
+        <DialogUtilisateur :client="selectedClient || defaultClient" v-model="isDialogOpen" :isEditMode="isEditMode" @save="saveClient" />
     </div>
 </template>
 
-  
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
 import type { PropType } from 'vue';
@@ -111,7 +110,7 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const searchQuery = ref('');
-        const sortedColumn = ref<keyof Client>('');
+        const sortedColumn = ref<keyof Client>('id');
         const sortOrder = ref<'asc' | 'desc'>('asc');
         const currentPage = ref(1);
         const perPage = ref(10);
@@ -119,6 +118,14 @@ export default defineComponent({
         const selectedClient = ref<Client | null>(null);
         const isDialogOpen = ref(false);
         const isEditMode = ref(false);
+
+        const defaultClient: Client = {
+            id: 0,
+            nom: '',
+            prenom: '',
+            email: '',
+            ville: ''
+        };
 
         const filteredClients = computed(() => {
             if (!searchQuery.value) {
@@ -290,11 +297,12 @@ export default defineComponent({
             selectedClient,
             saveClient,
             isEditMode,
+            defaultClient,
         };
     },
 });
 </script>
-  
+
 <style scoped>
 .container {
     max-width: 1200px;
