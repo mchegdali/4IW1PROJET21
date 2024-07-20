@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { useBasketStore } from '@/stores/basket';
 import Button from '@/components/ui/button/Button.vue';
-import { computed, onBeforeMount } from 'vue';
+import { onBeforeMount } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
 import BasketInformation from '@/components/basket/basket-information.vue';
-import BasketListItem from '@/components/basket/basket-list-item.vue';
 import { useUserStore } from '@/stores/user';
 import { fetchBasket } from '@/api/basket';
 import BasketList from '@/components/basket/basket-list.vue';
@@ -12,8 +11,6 @@ import BasketList from '@/components/basket/basket-list.vue';
 const basketStore = useBasketStore();
 const userStore = useUserStore();
 const router = useRouter();
-
-const basketItems = computed(() => basketStore.view);
 
 onBeforeMount(async () => {
   if (userStore.isAuthenticated) {
