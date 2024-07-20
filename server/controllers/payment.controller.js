@@ -1,19 +1,18 @@
-const stripe = require('stripe')('sk_test_51PeDeeId99a4h4TCtZHFvfkpMCxcomJbjMa4RydO0hrpOaU9iJRyXXfNbj9ZOipRemzUtCoyUhPRIY0SAsmACML30075O7ZqDl')
 const httpErrors = require('http-errors');
+const sequelize = require('../models/sql');
+const {
+  paymentCreateSchema,
+} = require('../schemas/payments.schema');
+const { NotFound } = httpErrors;
+const Payments = sequelize.model('payments');
 const OrdersMongo = require('../models/mongo/orders.mongo');
 const UsersMongo = require('../models/mongo/user.mongo');
 const PaymentsMongo = require('../models/mongo/payment.mongo');
-const sequelize = require('../models/sql');
-const { NotFound } = httpErrors;
-const Payments = sequelize.model("payments");
-
-const { paymentQuerySchema, paymentCreateSchema, paymentUpdateSchema} = require('../schemas/payments.schema');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); 
 
 const createPayment = async (req, res, next) => {
   try {
-  
     const paymentCreateBody = await paymentCreateSchema.parseAsync(req.body);
-
 
     const user = await UsersMongo.findById(paymentCreateBody.user);
     if (!user) {
@@ -21,23 +20,19 @@ const createPayment = async (req, res, next) => {
     }
     console.log("first log", user);
 
-
     const result = await sequelize.transaction(async (t) => {
- 
       const order = await OrdersMongo.findOne({ user: user }).sort({ createdAt: -1 }).exec();
       if (!order) {
         throw new NotFound('Order not found');
       }
       console.log("second log", order);
 
-
       if (!Array.isArray(order.items)) {
         throw new Error('Order items are not an array');
       }
 
-
       const totalPrice = order.items.reduce((total, item) => {
-        return total + parseFloat(item.price.toString());
+        return total + parseFloat(item.price.toString()) * (item.quantity || 1);
       }, 0);
 
       const payment = await Payments.create({
@@ -48,7 +43,6 @@ const createPayment = async (req, res, next) => {
       }, { transaction: t });
       console.log("third log", payment);
 
-     
       const paymentMongo = {
         _id: payment.id,
         user: {
@@ -71,43 +65,59 @@ const createPayment = async (req, res, next) => {
       };
       console.log("fourth log", paymentMongo);
 
-      
       const paymentDoc = await PaymentsMongo.create(paymentMongo);
       return { paymentDoc, order };
     });
 
     const { paymentDoc, order } = result;
 
- 
-    const line_items = order.items.map(item => ({
+    
+    const itemCounts = order.items.reduce((acc, item) => {
+      const itemKey = item._id.toString();
+      if (acc[itemKey]) {
+        acc[itemKey].quantity += item.quantity || 1;
+      } else {
+        acc[itemKey] = {
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity || 1,
+        };
+      }
+      return acc;
+    }, {});
+
+    
+    const line_items = Object.values(itemCounts).map(item => ({
       price_data: {
         currency: 'eur',
         product_data: {
           name: item.name,
         },
-        unit_amount: parseFloat(item.price.toString()) * 100, 
+        unit_amount: parseFloat(item.price.toString()) * 100,
       },
-      quantity: 1,
+      quantity: item.quantity,
     }));
-
+    const url = new URL(process.env.APP_URL);
+    console.log(url)
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      success_url: 'http://localhost:3000/complete?session_id={CHECKOUT_SESSION_ID}',
+      success_url:  url.toString(),
       cancel_url: 'http://localhost:3000/cancel',
       shipping_address_collection: {
-        allowed_countries: ['US', 'BR'],
+        allowed_countries: ['US', 'BR','FR'],
       },
-    });
 
-    
+    });
+    console.log(session)
     res.redirect(303, session.url);
   } catch (error) {
     console.error('createPayment error:', error);
     return next(error);
   }
 };
+
 const completePayment = async (req, res, next) => {
   try {
     const sessionId = req.query.session_id;
@@ -118,8 +128,8 @@ const completePayment = async (req, res, next) => {
     ]);
 
     console.log(JSON.stringify({ session, lineItems }));
-
-    res.send('Your payment was successful');
+    const url =  new URL('/complete', process.env.APP_URL).toString();
+    res.redirect(url);
   } catch (error) {
     console.error('completePayment error:', error);
     next(error);
