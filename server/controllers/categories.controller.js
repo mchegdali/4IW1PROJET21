@@ -197,10 +197,24 @@ async function deleteCategory(req, res, next) {
   }
 }
 
+/**
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getCategoryCount(req, res, next) {
+  try {
+    const count = await CategoriesMongo.countDocuments();
+    return res.status(200).json({ count });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createCategory,
   getCategories,
   getCategory,
   updateCategory,
   deleteCategory,
+  getCategoryCount,
 };
