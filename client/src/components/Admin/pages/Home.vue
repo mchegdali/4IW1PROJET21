@@ -78,27 +78,27 @@
             <Card v-for="(card, index) in cards" :key="index" :image="card.image" :title="card.title" :text="card.text" :page="card.page"/>
         </div>
     </section>
-</template>
-
-<script lang="ts">
-import { defineComponent } from 'vue';
-import Card from '../Card.vue';
-import BarChart from '../BarChart.vue';
-import DonutChart from '../DonutChart.vue';
-
-interface CardData {
-  image: string;
-  title: string;
-  text: string;
-  page: string;
-}
-
-export default defineComponent({
+  </template>
+  
+  <script lang="ts">
+  import { defineComponent } from 'vue';
+  import Card from '../Card.vue';
+  import BarChart from '../BarChart.vue';
+  import DonutChart from '../DonutChart.vue';
+  
+  interface CardData {
+    image: string;
+    title: string;
+    text: string;
+    page: string;
+  }
+  
+  export default defineComponent({
     name: 'HomePage',
     components: {
-        Card,
-        BarChart,
-        DonutChart,
+      Card,
+      BarChart,
+      DonutChart,
     },
     data() {
         return {

@@ -5,10 +5,11 @@
             <span class="text-gray-500 mt-2">{{ stat.text }}</span>
         </div>
     </div>
-  </template>
-  
+</template>
+
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent } from 'vue';
+import type { PropType } from 'vue';
 
 interface Stat {
     value: string;
@@ -31,7 +32,6 @@ export default defineComponent({
     }
 });
 </script>
-  
+
 <style scoped>
 </style>
-  
