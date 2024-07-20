@@ -105,7 +105,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="items-center flex justify-center flex-col">
+  <div class="items-center flex justify-center flex-col px-4 mt-2">
     <div v-if="order" class="sm:w-2/3 sm:flex flex-row justify-center md:w-full">
       <!-- Order Details -->
       <div>

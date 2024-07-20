@@ -105,7 +105,7 @@ window.addEventListener('resize', () => {
 </script>
 
 <template>
-  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-center">
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-center px-4 mt-2">
     <!-- Filtres -->
     <details
       v-if="isMobile"
