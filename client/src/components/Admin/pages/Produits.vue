@@ -32,7 +32,7 @@
         </div>
     </section>
 </template>
-  
+
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AreaChart from '../AreaChart.vue';
@@ -44,6 +44,27 @@ interface Statistic {
     value: string;
     text: string;
     color: string;
+}
+
+interface DistributionData {
+    count: number;
+    _id: string;
+}
+
+interface PriceDistributionData {
+    count: number;
+    range: string;
+}
+
+interface ChartOptions {
+    chart: {
+        id: string;
+    };
+    labels: string[];
+    title: {
+        text: string;
+        align: string;
+    };
 }
 
 export default defineComponent({
@@ -61,10 +82,10 @@ export default defineComponent({
                 { value: '20', text: 'Clients', color: 'text-green-600' },
                 { value: '', text: 'Produits', color: 'text-red-600' }
             ] as Statistic[],
-            donutChartOptions: null,
-            donutChartSeries: null,
-            priceChartOptions: null,
-            priceChartSeries: null,
+            donutChartOptions: null as ChartOptions | null,
+            donutChartSeries: null as number[] | null,
+            priceChartOptions: null as ChartOptions | null,
+            priceChartSeries: null as number[] | null,
         };
     },
     methods: {
@@ -81,13 +102,13 @@ export default defineComponent({
         async fetchProductDistribution() {
             try {
                 const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/distribution-by-category`);
-                const data = await response.json();
-                this.donutChartSeries = data.map(item => item.count);
+                const data: DistributionData[] = await response.json();
+                this.donutChartSeries = data.map((item: DistributionData) => item.count);
                 this.donutChartOptions = {
                     chart: {
                         id: 'vuechart-example-donut'
                     },
-                    labels: data.map(item => item._id),
+                    labels: data.map((item: DistributionData) => item._id),
                     title: {
                         text: 'Répartition des produits par catégorie',
                         align: 'left'
@@ -100,13 +121,13 @@ export default defineComponent({
         async fetchPriceDistribution() {
             try {
                 const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/price-distribution`);
-                const data = await response.json();
-                this.priceChartSeries = data.map(item => item.count);
+                const data: PriceDistributionData[] = await response.json();
+                this.priceChartSeries = data.map((item: PriceDistributionData) => item.count);
                 this.priceChartOptions = {
                     chart: {
                         id: 'price-distribution-donut'
                     },
-                    labels: data.map(item => item.range),
+                    labels: data.map((item: PriceDistributionData) => item.range),
                     title: {
                         text: 'Répartition des produits par tranches de prix',
                         align: 'left'
@@ -124,7 +145,5 @@ export default defineComponent({
     },
 });
 </script>
-  
-<style lang="scss" scoped>
-</style>
-  
+
+<style lang="scss" scoped></style>
