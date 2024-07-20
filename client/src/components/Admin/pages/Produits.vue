@@ -34,7 +34,7 @@
         </div>
     </section>
 </template>
-  
+
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AreaChart from '../AreaChart.vue';
@@ -48,6 +48,27 @@ interface Statistic {
     color: string;
 }
 
+interface DistributionData {
+    count: number;
+    _id: string;
+}
+
+interface PriceDistributionData {
+    count: number;
+    range: string;
+}
+
+interface ChartOptions {
+    chart: {
+        id: string;
+    };
+    labels: string[];
+    title: {
+        text: string;
+        align: string;
+    };
+}
+
 export default defineComponent({
     name: 'Produits',
     components: {
@@ -58,11 +79,15 @@ export default defineComponent({
     },
     data() {
         return {
-        statisticsData: [
-            { value: '10', text: 'Ventes', color: 'text-blue-600' },
-            { value: '20', text: 'Clients', color: 'text-green-600' },
-            { value: '-', text: 'Produits', color: 'text-red-600' }
-        ] as Statistic[],
+            statisticsData: [
+                { value: '10', text: 'Ventes', color: 'text-blue-600' },
+                { value: '20', text: 'Clients', color: 'text-green-600' },
+                { value: '', text: 'Produits', color: 'text-red-600' }
+            ] as Statistic[],
+            donutChartOptions: null as ChartOptions | null,
+            donutChartSeries: null as number[] | null,
+            priceChartOptions: null as ChartOptions | null,
+            priceChartSeries: null as number[] | null,
         };
     },
     methods: {
@@ -73,15 +98,52 @@ export default defineComponent({
                 this.statisticsData[2].value = data.count.toString();
             } catch (error) {
                 console.error('Error fetching product count:', error);
+                this.statisticsData[2].value = "-"; 
             }
         },
+        async fetchProductDistribution() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/distribution-by-category`);
+                const data: DistributionData[] = await response.json();
+                this.donutChartSeries = data.map((item: DistributionData) => item.count);
+                this.donutChartOptions = {
+                    chart: {
+                        id: 'vuechart-example-donut'
+                    },
+                    labels: data.map((item: DistributionData) => item._id),
+                    title: {
+                        text: 'Répartition des produits par catégorie',
+                        align: 'left'
+                    }
+                };
+            } catch (error) {
+                console.error('Error fetching product distribution:', error);
+            }
+        },
+        async fetchPriceDistribution() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/price-distribution`);
+                const data: PriceDistributionData[] = await response.json();
+                this.priceChartSeries = data.map((item: PriceDistributionData) => item.count);
+                this.priceChartOptions = {
+                    chart: {
+                        id: 'price-distribution-donut'
+                    },
+                    labels: data.map((item: PriceDistributionData) => item.range),
+                    title: {
+                        text: 'Répartition des produits par tranches de prix',
+                        align: 'left'
+                    }
+                };
+            } catch (error) {
+                console.error('Error fetching price distribution:', error);
+            }
+        }
     },
     mounted() {
         this.fetchProductCount();
     },
 });
 </script>
-  
-<style lang="scss" scoped>
-</style>
-  
+
+<style lang="scss" scoped></style>
