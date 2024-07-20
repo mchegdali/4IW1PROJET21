@@ -289,12 +289,12 @@ window.addEventListener('resize', () => {
         <div>
           <p class="flex gap-3">
             <Package2 />
-            N° de commande: <span class="font-bold">{{ order.orderNumber }}</span>
+            N° de commande : <span class="font-bold">{{ order.orderNumber }}</span>
           </p>
           <p class="flex gap-3" v-if="order.shippingDate">
             <Calendar />
             <span class="font-bold">
-              {{ "Date d'expédition :" + formatDate(order.shippingDate) }}
+              {{ "Date d'expédition : " + formatDate(order.shippingDate) }}
             </span>
           </p>
         </div>
