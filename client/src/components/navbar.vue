@@ -11,21 +11,12 @@ import { ref } from 'vue';
 
 const userStore = useUserStore();
 const basketStore = useBasketStore();
-const isAuthenticated = ref(userStore.isAuthenticated);
+const isAuthenticated = ref(!!userStore.user);
 
 const nbItems = ref(basketStore.nbItems);
 
 userStore.$subscribe((mutation, state) => {
-  isAuthenticated.value = userStore.isAuthenticated;
-  if (state.accessToken) {
-    localStorage.setItem('accessToken', state.accessToken);
-  }
-  if (state.refreshToken) {
-    localStorage.setItem('refreshToken', state.refreshToken);
-  }
-  if (state.user) {
-    localStorage.setItem('user', JSON.stringify(state.user));
-  }
+  isAuthenticated.value = !!state.user;
 });
 
 basketStore.$subscribe((mutation, state) => {

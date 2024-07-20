@@ -10,16 +10,20 @@ import {
 } from '@/components/ui/number-field';
 import { useBasketStore } from '@/stores/basket';
 import { Trash } from 'lucide-vue-next';
+import { useUserStore } from '@/stores/user';
 const { product } = defineProps<{ product: Product }>();
 
+const userStore = useUserStore();
 const basketStore = useBasketStore();
+
+const accessToken = computed(() => userStore.accessToken);
+
 const productCount = computed(() => {
   return basketStore.products.filter((p) => p._id === product._id).length;
 });
 
-function onInput(value: number) {
-  console.log('onInput', value);
-
+async function onInput(value: number) {
+  const
   basketStore.setProductCount(product, value);
 }
 </script>
