@@ -118,6 +118,10 @@ export default defineComponent({
         xaxis: {
           categories: [] as string[],
         },
+        title: {
+          text: 'Évolution du nombre d\'inscriptions sur les 7 derniers mois',
+          align: 'center'
+        }
       },
       barChartSeries: [
         {
