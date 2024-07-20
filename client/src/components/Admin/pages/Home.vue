@@ -202,7 +202,7 @@
     <div class="p-5">
       <div class="flex flex-row space-x-4">
         <div class="w-3/5 bg-white rounded-xl p-2">
-          <BarChart />
+          <BarChart :series="barChartSeries" :options="barChartOptions" />
         </div>
         <div class="w-2/5 bg-white rounded-xl">
           <DonutChart v-if="donutChartOptions && orderStatusSeries" :options="donutChartOptions" :series="orderStatusSeries" />
@@ -224,15 +224,15 @@ import BarChart from '../BarChart.vue';
 import DonutChart from '../DonutChart.vue';
 
 interface CardData {
-image: string;
-title: string;
-text: string;
-page: string;
+  image: string;
+  title: string;
+  text: string;
+  page: string;
 }
 
 interface OrderStatus {
-count: number;
-label: string;
+  count: number;
+  label: string;
 }
 
 export default defineComponent({
