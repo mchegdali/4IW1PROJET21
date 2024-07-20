@@ -38,7 +38,10 @@ const UsersSequelize = (sequelize) => {
         isVerified: this.isVerified,
         role: this.role,
         addresses: addressesMongo,
-        basket: basket ?? [],
+        basket: basketItems,
+        createdAt: this.createdAt,
+        updatedAt: this.updatedAt,
+        deletedAt: this.deletedAt,
       };
     }
   }
