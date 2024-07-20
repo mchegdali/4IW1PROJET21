@@ -336,7 +336,6 @@ async function getTotalSales(req, res, next) {
   }
 }
 
-
 /**
  * Compte les clients distincts dans orders
  * 
@@ -408,25 +407,6 @@ async function getTopProductsDistribution(req, res, next) {
   }
 }
 
-const getUserOrders = async (req, res, next) => {
-  try {
-    const { userId } = req.params;
-
-    const orders = await OrdersMongo.find({ 'user._id': userId }).lean();
-
-    if (orders.length === 0) {
-      return res.status(404).json({ message: 'No orders found for this user' });
-    }
-
-    return res.status(200).json(orders);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'An error occurred while fetching orders' });
-  }
-};
-
-
-
 module.exports = {
   createOrder,
   getOrder,
@@ -438,6 +418,4 @@ module.exports = {
   getOrderStatusDistribution,
   getTotalSales,
   getDistinctCustomerCount,
-  getTopProductsDistribution,
-  getUserOrders
 };
