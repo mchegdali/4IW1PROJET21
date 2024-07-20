@@ -7,6 +7,6 @@ import Appbar from '@/components/appbar.vue';
   <div class="h-svh flex flex-col md:h-auto">
     <Navbar class="sticky top-0 z-10 md:relative" />
     <RouterView />
-    <Appbar class="sticky bottom-0 z-10 md:relative md:hidden" />
+    <Appbar class="sticky bottom-0 z-10 lg:relative lg:hidden" />
   </div>
 </template>

@@ -14,6 +14,7 @@ import Button from '../ui/button/Button.vue';
 import { useBasketStore } from '@/stores/basket';
 import { useUserStore } from '@/stores/user';
 import { addProductToBasket, fetchBasket } from '@/api/basket';
+import { toast } from '../ui/toast';
 
 const { product } = defineProps<{ product: Product }>();
 
@@ -48,6 +49,14 @@ async function handleAddToBasketClick() {
     } else {
       basketStore.addProduct(product, count.value);
     }
+
+    toast({
+      title: `${count.value} ${product.name} ajouté au panier`,
+      description: 'Vous pouvez maintenant vous déplacer dans votre panier',
+      type: 'foreground',
+      duration: 2500,
+      variant: 'success'
+    });
     count.value = 0;
   }
 }
