@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { Badge } from '@/components/ui/badge';
 
 const orders = ref([]);
 const itemDetails = ref({});
@@ -15,37 +16,43 @@ function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric',
+    day: 'numeric'
   });
 }
 
 function statusClass(status) {
   switch (status) {
     case 'Delivered':
-      return 'text-green-600';
-    case 'Pending':
-      return 'text-orange-600';
+      return 'Livrée';
+    case 'Shipped':
+      return 'Expédiée';
     case 'Cancelled':
-      return 'text-red-600';
+      return 'Annulée';
     default:
-      return 'text-gray-600';
+      return 'En cours de traitement';
   }
 }
 
 const filteredOrders = computed(() => {
-  return orders.value.filter(order => {
+  return orders.value.filter((order) => {
     const matchesQuery = searchQuery.value ? order.id.includes(searchQuery.value) : true;
     const matchesStatus = selectedStatus.value ? order.status.label === selectedStatus.value : true;
-    const matchesDate = selectedDate.value ? new Date(order.createdAt).toISOString().split('T')[0] === selectedDate.value : true;
-    const matchesStartDate = selectedStartDate.value ? new Date(order.createdAt) >= new Date(selectedStartDate.value) : true;
-    const matchesEndDate = selectedEndDate.value ? new Date(order.createdAt) <= new Date(selectedEndDate.value) : true;
+    const matchesDate = selectedDate.value
+      ? new Date(order.createdAt).toISOString().split('T')[0] === selectedDate.value
+      : true;
+    const matchesStartDate = selectedStartDate.value
+      ? new Date(order.createdAt) >= new Date(selectedStartDate.value)
+      : true;
+    const matchesEndDate = selectedEndDate.value
+      ? new Date(order.createdAt) <= new Date(selectedEndDate.value)
+      : true;
     return matchesQuery && matchesStatus && matchesDate && matchesStartDate && matchesEndDate;
   });
 });
 
 async function fetchOrders() {
   try {
-    const response = await fetch('http://localhost:3000/orders'); // URL de votre API
+    const response = await fetch('http://localhost:3000/orders');
     if (!response.ok) throw new Error('Network response was not ok');
     const data = await response.json();
     orders.value = data;
@@ -57,8 +64,8 @@ async function fetchOrders() {
 
 async function fetchProductDetails(orders) {
   const productIds = new Set();
-  orders.forEach(order => {
-    order.items.forEach(item => {
+  orders.forEach((order) => {
+    order.items.forEach((item) => {
       if (item._id) productIds.add(item._id);
     });
   });
@@ -198,34 +205,63 @@ window.addEventListener('resize', () => {
 
     <!-- Commandes -->
     <div class="flex flex-col items-center w-full sm:w-3/4">
-      <div v-for="order in filteredOrders" :key="order.id" class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white w-full sm:w-full">
-        <div :class="order.status.label ? 'flex justify-between items-center' : 'flex flex-col lg:flex-row sm:justify-between lg:items-center'">
-          <h1 class="font-bold text-lg">
-            Commande du {{ formatDate(order.createdAt) }}
-          </h1>
-          <span :class="statusClass(order.status.label)">
-            {{ order.status.label }}
-          </span>
+      <div
+        v-for="order in filteredOrders"
+        :key="order.id"
+        class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white w-full sm:w-full"
+      >
+        <div
+          :class="
+            order.status.label
+              ? 'flex justify-between items-center'
+              : 'flex flex-col lg:flex-row sm:justify-between lg:items-center'
+          "
+        >
+          <h1 class="font-bold text-lg">Commande du {{ formatDate(order.createdAt) }}</h1>
+          <Badge>
+            {{ statusClass(order.status.label) }}
+          </Badge>
         </div>
 
-        <div :class="order.items.length < 3 ? 'flex justify-start gap-4' : 'flex justify-between sm:justify-start sm:gap-4 w-full'">
-          <div v-for="(item, index) in order.items.slice(0, 3)" :key="item._id" class="relative w-24 h-24">
+        <div
+          :class="
+            order.items.length < 3
+              ? 'flex justify-start gap-4'
+              : 'flex justify-between sm:justify-start sm:gap-4 w-full'
+          "
+        >
+          <div
+            v-for="(item, index) in order.items.slice(0, 3)"
+            :key="item._id"
+            class="relative w-24 h-24"
+          >
             <img class="min-w-24 h-full bg-slate-400" :src="itemDetails[item._id]?.image" alt="" />
-            <div v-if="index === 2 && order.items.length > 3" class="extra-items-count w-full h-full flex justify-center items-center font-bold text-2xl top-0 right-0 text-white absolute bg-black bg-opacity-55">
+            <div
+              v-if="index === 2 && order.items.length > 3"
+              class="extra-items-count w-full h-full flex justify-center items-center font-bold text-2xl top-0 right-0 text-white absolute bg-black bg-opacity-55"
+            >
               +{{ order.items.length - 3 }}
             </div>
           </div>
         </div>
-        <div class="border-b border-t border-gray-200 py-2" v-if="!order.status.label === 'Delivered'">
-          <router-link :to="{ name: 'tracking', params: { id: order.id } }" class="w-1/2 text-tea-600">Suivre le colis</router-link>
+        <div
+          class="border-b border-t border-gray-200 py-2"
+          v-if="!order.status.label === 'Delivered'"
+        >
+          <router-link
+            :to="{ name: 'tracking', params: { id: order.id } }"
+            class="w-1/2 text-tea-600"
+            >Suivre le colis</router-link
+          >
         </div>
         <div>
           <p>
-            N° de commande: <span class="font-bold">{{ order.id }}</span>
+            N° de commande: <span class="font-bold">{{ order.orderNumber }}</span>
           </p>
           <p>
-            Date d'expédition:
-            <span class="font-bold">{{ formatDate(order.shippingDate) }}</span>
+            <span v-if="order.shippingDate" class="font-bold">
+              {{ "Date d'expédition :" + formatDate(order.shippingDate) }}
+            </span>
           </p>
         </div>
       </div>
