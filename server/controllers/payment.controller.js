@@ -98,20 +98,19 @@ const createPayment = async (req, res, next) => {
       quantity: item.quantity,
     }));
     const url = new URL(process.env.APP_URL);
-    console.log(url)
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
       success_url:  url.toString(),
-      cancel_url: 'http://localhost:3000/cancel',
+      cancel_url:  'http://localhost:3000/cancel',
       shipping_address_collection: {
         allowed_countries: ['US', 'BR','FR'],
       },
 
     });
     console.log(session)
-    res.redirect(303, session.url);
+    res.json({ id: session.id });
   } catch (error) {
     console.error('createPayment error:', error);
     return next(error);

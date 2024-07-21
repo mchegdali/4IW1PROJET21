@@ -8,7 +8,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import Button from '@/components/ui/button/Button.vue';
 import BasketInformation from '@/components/basket/basket-information.vue';
 import BasketList from '@/components/basket/basket-list.vue';
-import config from '@/config';
+
 const basketStore = useBasketStore();
 const userStore = useUserStore();
 const router = useRouter();
@@ -19,67 +19,25 @@ onBeforeMount(async () => {
   if (userStore.isAuthenticated) {
     const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
     basketStore.products = await response.json();
-  }
-  stripe.value = await loadStripe(`${config.STRIPE_KEY}`); // Replace with your actual Stripe public key
+  } 
 });
 
-const goBackToBasket = () => {
-  router.push({ name: 'basket' });
+const goBackHome = () => {
+  router.push({ name: 'home' });
 };
 
-const proceedToCheckout = async () => {
-  console.log(userStore);
-  console.log('Proceeding to checkout');
-  
-  if (basketStore.products.length === 0) {
-    alert('Votre panier est vide');
-    return;
-  }
 
-  try {
-    const response = await fetch(`${config.apiBaseUrl}/payment/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ user: userStore.user?.id }),
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      throw new Error('Erreur lors de la création de la session de paiement');
-    }
-
-    const session = await response.json();
-    
-    if (session.id) {
-      const { error } = await stripe.value.redirectToCheckout({
-        sessionId: session.id,
-      });
-      
-      if (error) {
-        message.value = error.message;
-      }
-    } else {
-      throw new Error('No session ID returned from server');
-    }
-  } catch (error) {
-    console.error('Error creating payment session:', error);
-    message.value = error.message;
-    alert('Une erreur est survenue lors de la création de la session de paiement');
-  }
-};
 </script>
 
 <template>
   <main class="grow">
-    <h1 class="text-3xl font-bold m-2">Récapitulatif de votre panier</h1>
+    <h1 class="text-3xl font-bold m-2">Récapitulatif de vos achat</h1>
     <BasketInformation />
     <BasketList readonly />
     <div class="flex flex-col gap-4 m-4 items-center w-full">
+      <p> Paiement réaliser avec succès </p>
       <div class="flex w-full justify-center gap-4">
-        <Button @click="goBackToBasket" class="w-fit" variant="outline">Retour au panier</Button>
-        <Button @click="proceedToCheckout" class="w-fit">Procéder au paiement</Button>
+        <Button @click="goBackHome" class="w-fit" variant="outline">Retour a l'accueil</Button>
       </div>
       <p v-if="message" class="text-red-500">{{ message }}</p>
       <p class="text-sm text-gray-600 m-4">
