@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { generateTrackingEvents } = require('../utils/trackingUtils');
-const Order = require('../models/mongo/orders.mongo'); // Assurez-vous que le chemin est correct
+const Order = require('../models/mongo/orders.mongo');
 
-// Route GET pour le suivi de colis
 router.get('/', async (req, res) => {
   const { tracking_number } = req.query;
 
@@ -13,14 +12,12 @@ router.get('/', async (req, res) => {
   }
 
   try {
-    // Trouver la commande dans la base de données en utilisant l'ID de suivi
     const order = await Order.findOne({ orderNumber: tracking_number }).exec();
 
     if (!order) {
       return res.status(404).json({ error: 'Commande non trouvée' });
     }
 
-    // Générer les événements de suivi en utilisant les informations de la commande
     const response = generateTrackingEvents(order);
     res.json(response);
   } catch (error) {

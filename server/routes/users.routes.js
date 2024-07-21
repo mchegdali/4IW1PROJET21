@@ -89,15 +89,15 @@ usersRouter.get(
 
 usersRouter.put(
   '/users/:userId',
-  // checkAuth(authConfig.accessTokenSecret),
-  // isOwnAccount,
+  checkAuth(authConfig.accessTokenSecret),
+  isOwnAccount,
   replaceUser,
 );
 
 usersRouter.patch(
   '/users/:userId',
-  // checkAuth(authConfig.accessTokenSecret),
-  // isOwnAccount,
+  checkAuth(authConfig.accessTokenSecret),
+  isOwnAccount,
   updateUser,
 );
 
