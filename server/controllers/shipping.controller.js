@@ -8,61 +8,137 @@ const {
 const { NotFound } = httpErrors;
 const Shippings = sequelize.model('shippings');
 
-const ShippingMongo = require('../models/mongo/shipping.mongo');
-
+const ShippingMongo = require('../models/mongo/shipping.mongo.js');
 const DeliveryChoiceMongo = require('../models/mongo/deliveryChoice.mongo');
-
+const Addresses = sequelize.model('addresses');
+const AddressesMongo = require('../models/mongo/addresses.mongo.js');
 /**
  *
  * @type {import('express').RequestHandler}
  * @returns
  */
-
 async function createShipping(req, res, next) {
   try {
     const shippingCreateBody = await shippingCreateSchema.parseAsync(req.body);
+    console.log("Parsed shipping request body:", shippingCreateBody);
 
     const result = await sequelize.transaction(async (t) => {
+     
+      const addressData = shippingCreateBody.address;
+      console.log("Address data to be created:", addressData);
+
+      const address = await Addresses.create(addressData, { transaction: t });
+      console.log("Created address in SQL database:", address);
+
+      const addressMongo = {
+        _id: address.id,
+        firstName: addressData.firstName,
+        lastName: addressData.lastName,
+        country: addressData.country,
+        region: addressData.region,
+        street: addressData.street,
+        zipCode: addressData.zipCode,
+        city: addressData.city,
+        phone: addressData.phone,
+      };
+      console.log("Prepared address data for MongoDB:", addressMongo);
+
+      const addressDoc = await AddressesMongo.create(addressMongo);
+      console.log("Created address in MongoDB:", addressDoc);
+
+    
       const deliveryChoiceId = await DeliveryChoiceMongo.findById(
-        shippingCreateBody.deliveryChoiceId,
+        shippingCreateBody.deliveryChoice,
       );
+      console.log("  shippingCreateBody.deliveryChoice ",   shippingCreateBody.deliveryChoice)
+      console.log("Fetched delivery choice from MongoDB:", deliveryChoiceId);
 
       const shipping = await Shippings.create(
         {
-          fullname: shippingCreateBody.fullname,
-          street: shippingCreateBody.street,
-          zipCode: shippingCreateBody.zipCode,
-          city: shippingCreateBody.city,
-          phone: shippingCreateBody.phone,
-          deliveryChoiceId: deliveryChoiceId._id,
+          address: address.id,
+          deliveryChoice: deliveryChoiceId.id,
         },
         { transaction: t },
       );
-
+      console.log("Created shipping entry in SQL database:", shipping);
       const shippingMongo = {
         _id: shipping.id,
-        fullname: shipping.fullname,
-        street: shipping.street,
-        zipCode: shipping.zipCode,
-        city: shipping.city,
-        phone: shipping.phone,
-        deliveryChoiceId: deliveryChoiceId._id,
-      };
+        address: {
+          _id: address.id,
+          firstName: address.firstName,
+          lastName: address.lastName,
+          country: address.country,
+          region: address.region,
+          street: address.street,
+          zipCode: address.zipCode,
+          city: address.city,
+          phone: address.phone,
+        },
+        deliveryChoice: {
+          _id: deliveryChoiceId._id,
+          name: deliveryChoiceId.name,
 
+        },
+      };
+      console.log("Created shipping entry in mongo database:", shippingMongo);
       const shippingDoc = await ShippingMongo.create(shippingMongo);
       return shippingDoc;
     });
 
     return res.status(201).json(result);
   } catch (error) {
+    console.error('Error creating shipping:', error);
     return next(error);
   }
 }
-/**
- *
- * @type {import('express').RequestHandler}
- * @returns
- */
+// }
+// async function createShipping(req, res, next) {
+//   try {
+//     const shippingCreateBody = await shippingCreateSchema.parseAsync(req.body);
+
+//     const result = await sequelize.transaction(async (t) => {
+//       const deliveryChoiceId = await DeliveryChoiceMongo.findById(
+//         shippingCreateBody.deliveryChoiceId,
+//       );
+
+//       const shipping = await Shippings.create(
+//         {
+//           adressesId: {
+//             _id: shippingCreateBody.adressesId._id,
+//             fullname: shippingCreateBody.adressesId.fullname,
+//             street: shippingCreateBody.adressesId.street,
+//             zipCode: shippingCreateBody.adressesId.zipCode,
+//             city: shippingCreateBody.adressesId.city,
+//             phone: shippingCreateBody.adressesId.phone,
+//           },
+//           deliveryChoiceId: deliveryChoiceId._id,
+//         },
+//         { transaction: t },
+//       );
+
+//       const shippingMongo = {
+//         _id: shipping.id,
+//         adressesId: {
+//           _id: shipping.adressesId._id,
+//           fullname: shipping.adressesId.fullname,
+//           street: shipping.adressesId.street,
+//           zipCode: shipping.adressesId.zipCode,
+//           city: shipping.adressesId.city,
+//           phone: shipping.adressesId.phone,
+//         },
+//         deliveryChoiceId: deliveryChoiceId._id,
+//       };
+
+//       const shippingDoc = await ShippingMongo.create(shippingMongo);
+//       return shippingDoc;
+//     });
+
+//     return res.status(201).json(result);
+//   } catch (error) {
+//     return next(error);
+//   }
+// }
+//
 async function getShipping(req, res, next) {
   try {
     const id = req.params.id;

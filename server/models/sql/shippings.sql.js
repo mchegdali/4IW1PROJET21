@@ -13,19 +13,13 @@ const ShippingSequelize = (sequelize) => {
       });
     }
     async toMongo() {
-      const deliveryChoiceId =
-        await this.sequelize.models.deliveryChoices.findByPk(
-          this.deliveryChoiceId,
-        );
+      const deliveryChoice = await this.sequelize.models.deliveryChoices.findByPk(this.deliveryChoiceId);
+      const address =  await this.sequelize.models.addresses.findByPk(  this.addressesId );
       const orders = await this.sequelize.models.orders.findByPk(this.orders);
       return {
         _id: this.id,
-        fullname: this.fullname,
-        street: this.street,
-        zipCode: this.zipCode,
-        city: this.city,
-        phone: this.phone,
-        deliveryChoiceId: deliveryChoiceId.toMongo(),
+        address: address.toMongo(),
+        deliveryChoice: deliveryChoice.toMongo(),
         orders: orders(),
       };
     }
@@ -36,26 +30,6 @@ const ShippingSequelize = (sequelize) => {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
-      },
-      fullname: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      street: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      zipCode: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      city: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      phone: {
-        type: DataTypes.STRING,
-        allowNull: false,
       },
     },
     {
