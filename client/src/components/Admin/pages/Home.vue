@@ -10,7 +10,11 @@
       <!-- En faire des composants -->
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
-          <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full" />
+          <img
+            src="https://picsum.photos/500/500"
+            alt="Logo"
+            class="object-contain h-20 rounded-full"
+          />
         </div>
         <div class="text-center mt-4">
           <div class="text-2xl font-bold" id="userCount">{{ userCount }}</div>
@@ -34,7 +38,11 @@
 
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
-          <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full" />
+          <img
+            src="https://picsum.photos/500/500"
+            alt="Logo"
+            class="object-contain h-20 rounded-full"
+          />
         </div>
         <div class="text-center mt-4">
           <div class="text-2xl font-bold" id="orderCount">{{ orderCount }}</div>
@@ -44,7 +52,11 @@
 
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
-          <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full" />
+          <img
+            src="https://picsum.photos/500/500"
+            alt="Logo"
+            class="object-contain h-20 rounded-full"
+          />
         </div>
         <div class="text-center mt-4">
           <div class="text-2xl font-bold">75,5 €</div>
@@ -188,8 +200,8 @@ export default defineComponent({
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
+            Authorization: `Bearer ${accessToken}`
+          }
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -211,8 +223,8 @@ export default defineComponent({
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
+            Authorization: `Bearer ${accessToken}`
+          }
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -234,8 +246,8 @@ export default defineComponent({
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
+            Authorization: `Bearer ${accessToken}`
+          }
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -253,13 +265,16 @@ export default defineComponent({
       const accessToken = userStore.accessToken;
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/status-distribution`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/orders/status-distribution`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`
+            }
+          }
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -287,13 +302,16 @@ export default defineComponent({
       const accessToken = userStore.accessToken;
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/registrations-last-12-months`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/users/registrations-last-12-months`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`
+            }
+          }
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

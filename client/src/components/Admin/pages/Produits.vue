@@ -1,7 +1,23 @@
 <template>
   <section class="flex-1 ml-80">
     <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Produits</h1>
+  <section class="flex-1 ml-80">
+    <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Produits</h1>
 
+    <div class="p-5">
+      <div class="flex flex-row space-x-4">
+        <div class="w-3/5 bg-white rounded-xl p-2">
+          <AreaChart />
+        </div>
+        <div class="w-2/5 bg-white rounded-xl">
+          <DonutChart
+            v-if="donutChartOptions && donutChartSeries"
+            :options="donutChartOptions"
+            :series="donutChartSeries"
+          />
+        </div>
+      </div>
+    </div>
     <div class="p-5">
       <div class="flex flex-row space-x-4">
         <div class="w-3/5 bg-white rounded-xl p-2">
@@ -107,12 +123,12 @@ export default defineComponent({
   methods: {
     async fetchTotalSales() {
       try {
-                const userStore = useUserStore();
+        const userStore = useUserStore();
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/total-sales`, {
-                    headers: {
-                        Authorization: `Bearer ${userStore.accessToken}`,
-                    },
-                });
+          headers: {
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
+        });
         const data = await response.json();
         this.statisticsData[0].value = data.totalSales.toString();
       } catch (error) {
@@ -122,12 +138,12 @@ export default defineComponent({
     },
     async fetchCategoryCount() {
       try {
-                const userStore = useUserStore();
+        const userStore = useUserStore();
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/count`, {
-                    headers: {
-                        Authorization: `Bearer ${userStore.accessToken}`,
-                    },
-                });
+          headers: {
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
+        });
         const data = await response.json();
         this.statisticsData[1].value = data.count.toString();
       } catch (error) {
@@ -137,12 +153,12 @@ export default defineComponent({
     },
     async fetchProductCount() {
       try {
-                const userStore = useUserStore();
+        const userStore = useUserStore();
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/count`, {
-                    headers: {
-                        Authorization: `Bearer ${userStore.accessToken}`,
-                    },
-                });
+          headers: {
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
+        });
         const data = await response.json();
         this.statisticsData[2].value = data.count.toString();
       } catch (error) {
@@ -152,14 +168,15 @@ export default defineComponent({
     },
     async fetchProductDistribution() {
       try {
-                const userStore = useUserStore();
+        const userStore = useUserStore();
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/products/distribution-by-category`
-        , {
-                    headers: {
-                        Authorization: `Bearer ${userStore.accessToken}`,
-                    },
-                });
+          `${import.meta.env.VITE_API_BASE_URL}/products/distribution-by-category`,
+          {
+            headers: {
+              Authorization: `Bearer ${userStore.accessToken}`
+            }
+          }
+        );
         const data: DistributionData[] = await response.json();
         this.donutChartSeries = data.map((item: DistributionData) => item.count);
         this.donutChartOptions = {
@@ -178,14 +195,15 @@ export default defineComponent({
     },
     async fetchPriceDistribution() {
       try {
-                const userStore = useUserStore();
+        const userStore = useUserStore();
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/products/price-distribution`
-        , {
-                    headers: {
-                        Authorization: `Bearer ${userStore.accessToken}`,
-                    },
-                });
+          `${import.meta.env.VITE_API_BASE_URL}/products/price-distribution`,
+          {
+            headers: {
+              Authorization: `Bearer ${userStore.accessToken}`
+            }
+          }
+        );
         const data: PriceDistributionData[] = await response.json();
         this.priceChartSeries = data.map((item: PriceDistributionData) => item.count);
         this.priceChartOptions = {

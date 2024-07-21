@@ -27,6 +27,7 @@ productsRouter.get(
   checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getProductDistributionByCategory,
+  getProductDistributionByCategory,
 );
 
 productsRouter.get(

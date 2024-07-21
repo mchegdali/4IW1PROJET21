@@ -65,10 +65,10 @@ export default defineComponent({
         labels: [],
         title: {
           text: 'Les produits les plus vendus',
-          align: 'left',
-        },
+          align: 'left'
+        }
       } as { chart: { id: string }; labels: string[]; title: { text: string; align: string } },
-      donutChartSeries: [] as number[],
+      donutChartSeries: [] as number[]
     };
   },
   async mounted() {
@@ -83,8 +83,8 @@ export default defineComponent({
         const userStore = useUserStore();
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/total-sales`, {
           headers: {
-            Authorization: `Bearer ${userStore.accessToken}`,
-          },
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
         });
         const data = await response.json();
         this.statisticsData[0].value = data.totalSales.toString();
@@ -96,11 +96,14 @@ export default defineComponent({
     async fetchDistinctCustomerCount() {
       try {
         const userStore = useUserStore();
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/distinct-customers`, {
-          headers: {
-            Authorization: `Bearer ${userStore.accessToken}`,
-          },
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/orders/distinct-customers`,
+          {
+            headers: {
+              Authorization: `Bearer ${userStore.accessToken}`
+            }
+          }
+        );
         const data = await response.json();
         this.statisticsData[1].value = data.distinctCustomerCount.toString();
       } catch (error) {
@@ -113,8 +116,8 @@ export default defineComponent({
         const userStore = useUserStore();
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/count`, {
           headers: {
-            Authorization: `Bearer ${userStore.accessToken}`,
-          },
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
         });
         const data = await response.json();
         this.statisticsData[2].value = data.count.toString();
@@ -128,8 +131,8 @@ export default defineComponent({
         const userStore = useUserStore();
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/top-products`, {
           headers: {
-            Authorization: `Bearer ${userStore.accessToken}`,
-          },
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
         });
         const data = await response.json();
         this.donutChartOptions.labels = data.map((item: Product) => item.name);
@@ -137,8 +140,8 @@ export default defineComponent({
       } catch (error) {
         console.error('Error fetching top products:', error);
       }
-    },
-  },
+    }
+  }
 });
 </script>
 
