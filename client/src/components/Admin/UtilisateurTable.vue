@@ -18,7 +18,7 @@
           <th class="py-2 px-4 w-1/6">
             <input type="checkbox" @change="selectAll($event)" :checked="allSelected" />
           </th>
-          <th @click="sortBy('id')" class="py-2 px-4 cursor-pointer hover:bg-gray-200 w-1/6 bg-red-500">
+          <th @click="sortBy('id')" class="py-2 px-4 cursor-pointer hover:bg-gray-200 w-1/6">
             ID
             <DoubleArrow class="inline-block ml-2" />
           </th>
@@ -47,7 +47,10 @@
           <td class="py-2 px-4 text-center w-1/6">{{ client.email }}</td>
           <td class="py-2 px-4 text-center w-1/6">{{ client.city }}</td>
           <td class="py-2 px-4 text-center w-1/6">
-            <button class="text-white bg-gradient-to-br from-blue-500 to-cyan-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" >
+            <button
+              class="text-white bg-gradient-to-br from-blue-500 to-cyan-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+              @click="viewClient(client._id)"
+            >
               Voir
             </button>
             <button class="text-gray-900 bg-gradient-to-r from-teal-400 to-lime-400 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" >
@@ -93,7 +96,7 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['sort', 'select-all', 'update-selection'],
+  emits: ['sort', 'select-all', 'update-selection', 'view-client'],
   setup(props, { emit }) {
     const localSelectedClientIds = computed({
       get: () => props.selectedClientIds,
@@ -158,13 +161,18 @@ export default defineComponent({
       emit('update-selection', { clientId, isChecked });
     };
 
+    const viewClient = (clientId: string) => {
+      emit('view-client', clientId);
+    };
+
     return {
       localSelectedClientIds,
       allSelected,
       sortBy,
       exportCsv,
       selectAll,
-      updateSelection
+      updateSelection,
+      viewClient
     };
   }
 });

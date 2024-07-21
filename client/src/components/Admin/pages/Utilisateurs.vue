@@ -7,6 +7,12 @@
       @sort="handleSort"
       @select-all="handleSelectAll"
       @update-selection="handleUpdateSelection"
+      @view-client="handleViewClient"
+    />
+    <DialogUtilisateur
+      v-model="isDialogOpen"
+      :client="selectedClient"
+      :is-edit-mode="false"
     />
     <div class="mt-4 flex items-center justify-center">
       <button
@@ -31,6 +37,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from 'vue';
 import UtilisateurTable from '../UtilisateurTable.vue';
+import DialogUtilisateur from '../DialogUtilisateur.vue';
 import { useUserStore } from '@/stores/user';
 
 interface Client {
@@ -38,16 +45,21 @@ interface Client {
   fullname: string;
   email: string;
   city: string;
+  role: string;
+  addresses: Array<{ city: string }>;
 }
 
 export default defineComponent({
   name: 'Utilisateur',
   components: {
-    UtilisateurTable
+    UtilisateurTable,
+    DialogUtilisateur
   },
   setup() {
     const clients = ref<Client[]>([]);
     const selectedClientIds = ref<string[]>([]);
+    const selectedClient = ref<Client | null>(null);
+    const isDialogOpen = ref(false);
     const allClientIds = ref<string[]>([]);
     const page = ref(1);
     const totalPages = ref(1);
@@ -72,10 +84,37 @@ export default defineComponent({
           fullname: item.fullname,
           email: item.email,
           city: item.addresses[0]?.city || 'N/A',
+          role: item.role,
+          addresses: item.addresses
         }));
         totalPages.value = data.metadata.totalPages;
       } catch (error) {
         console.error('Error fetching clients:', error);
+      }
+    };
+
+    const fetchClientDetails = async (clientId: string) => {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${clientId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        if (response.ok) {
+          const client = await response.json();
+          client.city = client.addresses.length > 0 ? client.addresses[0].city : 'N/A';
+          selectedClient.value = client;
+          isDialogOpen.value = true;
+        } else {
+          console.error('Failed to fetch client details');
+        }
+      } catch (error) {
+        console.error('Error fetching client details:', error);
       }
     };
 
@@ -141,6 +180,10 @@ export default defineComponent({
       }
     };
 
+    const handleViewClient = (clientId: string) => {
+      fetchClientDetails(clientId);
+    };
+
     onMounted(() => {
       fetchClients(page.value, sortField.value, sortOrder.value);
     });
@@ -152,13 +195,16 @@ export default defineComponent({
     return {
       clients,
       selectedClientIds,
+      selectedClient,
+      isDialogOpen,
       page,
       totalPages,
       nextPage,
       previousPage,
       handleSort,
       handleSelectAll,
-      handleUpdateSelection
+      handleUpdateSelection,
+      handleViewClient
     };
   }
 });

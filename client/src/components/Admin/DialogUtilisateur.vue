@@ -11,21 +11,14 @@
         </div>
         <div class="grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">
-            <label for="nom" class="text-right font-medium text-gray-700">Nom</label>
+            <label for="nom" class="text-right font-medium text-gray-700">Nom Complet</label>
             <input
               id="nom"
-              v-model="localClient.nom"
+              v-model="localClient.fullname"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
               :disabled="!isEditMode"
-            />
-          </div>
-          <div class="grid grid-cols-4 items-center gap-4">
-            <label for="prenom" class="text-right font-medium text-gray-700">Prénom</label>
-            <input
-              id="prenom"
-              v-model="localClient.prenom"
-              class="col-span-3 p-2 border border-gray-300 rounded-md"
-              :disabled="!isEditMode"
+              :readonly="!isEditMode"
+              :class="!isEditMode ? 'readonly-input' : ''"
             />
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
@@ -35,15 +28,30 @@
               v-model="localClient.email"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
               :disabled="!isEditMode"
+              :readonly="!isEditMode"
+              :class="!isEditMode ? 'readonly-input' : ''"
             />
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="ville" class="text-right font-medium text-gray-700">Ville</label>
             <input
               id="ville"
-              v-model="localClient.ville"
+              v-model="localClient.city"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
               :disabled="!isEditMode"
+              :readonly="!isEditMode"
+              :class="!isEditMode ? 'readonly-input' : ''"
+            />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4">
+            <label for="role" class="text-right font-medium text-gray-700">Role</label>
+            <input
+              id="role"
+              v-model="localClient.role"
+              class="col-span-3 p-2 border border-gray-300 rounded-md"
+              :disabled="!isEditMode"
+              :readonly="!isEditMode"
+              :class="!isEditMode ? 'readonly-input' : ''"
             />
           </div>
         </div>
@@ -72,11 +80,12 @@ import { defineComponent, watch } from 'vue';
 import type { PropType } from 'vue';
 
 interface Client {
-  id: number;
-  nom: string;
-  prenom: string;
+  id: string;
+  fullname: string;
   email: string;
-  ville: string;
+  city: string;
+  role: string;
+  addresses: Array<{ city: string }>;
 }
 
 export default defineComponent({
@@ -130,4 +139,9 @@ export default defineComponent({
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.readonly-input {
+  pointer-events: none;
+  caret-color: transparent;
+}
+</style>
