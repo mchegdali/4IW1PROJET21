@@ -8,10 +8,6 @@ interface BarChartOptions {
   xaxis: {
     categories: string[];
   };
-  title: {
-    text: string;
-    align: string;
-  };
 }
 
 interface BarChartSeries {

@@ -47,6 +47,7 @@ import AreaChart from '../AreaChart.vue';
 import DonutChart from '../DonutChart.vue';
 import BarChart from '../BarChart.vue';
 import StatisticsBlock from '../StatisticsBlock.vue';
+import { useUserStore } from '@/stores/user';
 
 interface Statistic {
   value: string;
@@ -106,7 +107,12 @@ export default defineComponent({
   methods: {
     async fetchTotalSales() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/total-sales`);
+        const userStore = useUserStore();
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/total-sales`, {
+          headers: {
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
+        });
         const data = await response.json();
         this.statisticsData[0].value = data.totalSales.toString();
       } catch (error) {
@@ -116,7 +122,12 @@ export default defineComponent({
     },
     async fetchCategoryCount() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/count`);
+        const userStore = useUserStore();
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/count`, {
+          headers: {
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
+        });
         const data = await response.json();
         this.statisticsData[1].value = data.count.toString();
       } catch (error) {
@@ -126,7 +137,12 @@ export default defineComponent({
     },
     async fetchProductCount() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/count`);
+        const userStore = useUserStore();
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/count`, {
+          headers: {
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
+        });
         const data = await response.json();
         this.statisticsData[2].value = data.count.toString();
       } catch (error) {
@@ -136,8 +152,14 @@ export default defineComponent({
     },
     async fetchProductDistribution() {
       try {
+        const userStore = useUserStore();
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/products/distribution-by-category`
+          `${import.meta.env.VITE_API_BASE_URL}/products/distribution-by-category`,
+          {
+            headers: {
+              Authorization: `Bearer ${userStore.accessToken}`
+            }
+          }
         );
         const data: DistributionData[] = await response.json();
         this.donutChartSeries = data.map((item: DistributionData) => item.count);
@@ -157,8 +179,14 @@ export default defineComponent({
     },
     async fetchPriceDistribution() {
       try {
+        const userStore = useUserStore();
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/products/price-distribution`
+          `${import.meta.env.VITE_API_BASE_URL}/products/price-distribution`,
+          {
+            headers: {
+              Authorization: `Bearer ${userStore.accessToken}`
+            }
+          }
         );
         const data: PriceDistributionData[] = await response.json();
         this.priceChartSeries = data.map((item: PriceDistributionData) => item.count);

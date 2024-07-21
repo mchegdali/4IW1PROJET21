@@ -28,11 +28,20 @@ import { defineComponent } from 'vue';
 import BarChart from '../BarChart.vue';
 import StatisticsBlock from '../StatisticsBlock.vue';
 import DonutChart from '../DonutChart.vue';
+import { useUserStore } from '@/stores/user';
 
 interface Statistic {
   value: string;
   text: string;
   color: string;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  totalSold: number;
+  price: { $numberDecimal: string } | null;
+  percentage: string;
 }
 
 export default defineComponent({
@@ -53,24 +62,30 @@ export default defineComponent({
         chart: {
           id: 'vuechart-donut-ventes'
         },
-        labels: ['Ventes', 'Clients', 'Produits'],
+        labels: [],
         title: {
-          text: 'Répartition des ventes',
+          text: 'Les produits les plus vendus',
           align: 'left'
         }
-      },
-      donutChartSeries: [10, 20, 30]
+      } as { chart: { id: string }; labels: string[]; title: { text: string; align: string } },
+      donutChartSeries: [] as number[]
     };
   },
   async mounted() {
     await this.fetchTotalSales();
     await this.fetchDistinctCustomerCount();
     await this.fetchTotalProducts();
+    await this.fetchTopProducts();
   },
   methods: {
     async fetchTotalSales() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/total-sales`);
+        const userStore = useUserStore();
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/total-sales`, {
+          headers: {
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
+        });
         const data = await response.json();
         this.statisticsData[0].value = data.totalSales.toString();
       } catch (error) {
@@ -80,8 +95,14 @@ export default defineComponent({
     },
     async fetchDistinctCustomerCount() {
       try {
+        const userStore = useUserStore();
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/orders/distinct-customers`
+          `${import.meta.env.VITE_API_BASE_URL}/orders/distinct-customers`,
+          {
+            headers: {
+              Authorization: `Bearer ${userStore.accessToken}`
+            }
+          }
         );
         const data = await response.json();
         this.statisticsData[1].value = data.distinctCustomerCount.toString();
@@ -92,12 +113,32 @@ export default defineComponent({
     },
     async fetchTotalProducts() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/count`);
+        const userStore = useUserStore();
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/count`, {
+          headers: {
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
+        });
         const data = await response.json();
         this.statisticsData[2].value = data.count.toString();
       } catch (error) {
         console.error('Error fetching total products:', error);
         this.statisticsData[2].value = '-';
+      }
+    },
+    async fetchTopProducts() {
+      try {
+        const userStore = useUserStore();
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/top-products`, {
+          headers: {
+            Authorization: `Bearer ${userStore.accessToken}`
+          }
+        });
+        const data = await response.json();
+        this.donutChartOptions.labels = data.map((item: Product) => item.name);
+        this.donutChartSeries = data.map((item: Product) => item.totalSold);
+      } catch (error) {
+        console.error('Error fetching top products:', error);
       }
     }
   }

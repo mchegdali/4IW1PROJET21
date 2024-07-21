@@ -9,6 +9,7 @@ const {
   getUserCount,
   getUserRegistrations,
   getUserRegistrationsLast12Months,
+  getTopProducts,
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -44,6 +45,14 @@ usersRouter.get(
   checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getUserRegistrations,
+);
+
+// Route pour obtenir le top 5 produits vendus
+usersRouter.get(
+  '/products/top-products',
+  checkAuth(authConfig.accessTokenSecret, false),
+  checkRole(['admin']),
+  getTopProducts,
 );
 
 usersRouter.use(

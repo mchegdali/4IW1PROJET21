@@ -344,6 +344,62 @@ async function getUserRegistrationsLast12Months(req, res, next) {
   }
 }
 
+/**
+ * Récupérer le top 4 des produits les plus vendus et regrouper les autres produits dans "Autres"
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getTopProducts(req, res, next) {
+  try {
+    const topProducts = await UserMongo.aggregate([
+      { $unwind: '$basket' },
+      {
+        $group: {
+          _id: '$basket._id',
+          name: { $first: '$basket.name' },
+          totalSold: { $sum: 1 },
+          price: { $first: '$basket.price' },
+        },
+      },
+      { $sort: { totalSold: -1 } },
+    ]);
+
+    const totalSales = topProducts.reduce(
+      (acc, product) => acc + product.totalSold,
+      0,
+    );
+
+    const topProductsWithPercentage = topProducts.map((product) => ({
+      ...product,
+      percentage: ((product.totalSold / totalSales) * 100).toFixed(2),
+    }));
+
+    const top4Products = topProductsWithPercentage.slice(0, 4);
+    const otherProducts = topProductsWithPercentage.slice(4);
+
+    const othersTotalSold = otherProducts.reduce(
+      (acc, product) => acc + product.totalSold,
+      0,
+    );
+    const othersPercentage = ((othersTotalSold / totalSales) * 100).toFixed(2);
+
+    if (othersTotalSold > 0) {
+      top4Products.push({
+        _id: 'others',
+        name: 'Autres',
+        totalSold: othersTotalSold,
+        price: null,
+        percentage: othersPercentage,
+      });
+    }
+
+    return res.status(200).json(top4Products);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getUserCount,
   createUser,
@@ -355,4 +411,5 @@ module.exports = {
   getUserAddresses,
   getUserRegistrations,
   getUserRegistrationsLast12Months,
+  getTopProducts,
 };
