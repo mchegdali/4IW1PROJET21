@@ -14,7 +14,7 @@ const initialAddressData = ref(null);
 
 const loadAddress = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/users/${userId}/addresses/${addressId}`);
+    const response = await fetch(`http://localhost:3000/users/${userId}/addresses/${addressId}`, {headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}});
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }

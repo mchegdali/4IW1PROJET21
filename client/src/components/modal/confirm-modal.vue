@@ -1,10 +1,47 @@
+<script lang="ts" setup>
+import { ref } from 'vue';
+
+const props = defineProps({
+  show: {
+    type: Boolean,
+    required: true
+  },
+  message: {
+    type: String,
+    default: 'Êtes-vous sûr de vouloir supprimer cet élément ?'
+  }
+});
+
+const emit = defineEmits(['close', 'confirm']);
+
+const isLoading = ref(false);
+const errorMessage = ref<string | null>(null);
+
+const close = () => {
+  emit('close');
+};
+
+const confirm = async () => {
+  isLoading.value = true;
+  errorMessage.value = null;
+
+  try {
+    await emit('confirm');
+  } catch (error) {
+    errorMessage.value = 'Échec de la suppression.';
+  } finally {
+    isLoading.value = false;
+  }
+};
+</script>
+
 <template>
   <div
     class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50"
     @click.self="close"
   >
     <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6 space-y-4">
-      <div class="text-lg font-semibold border-b pb-3">Demamde de confirmation</div>
+      <div class="text-lg font-semibold border-b pb-3">Demande de confirmation</div>
       <div class="text-gray-700">
         <p>{{ message }}</p>
         <p v-if="isLoading" class="text-yellow-600">Suppression en cours...</p>
@@ -29,49 +66,3 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
-
-export default defineComponent({
-  props: {
-    show: {
-      type: Boolean,
-      required: true
-    },
-    message: {
-      type: String,
-      default: 'Êtes-vous sûr de vouloir supprimer cet élément ?'
-    }
-  },
-  emits: ['close', 'confirm'],
-  setup(props, { emit }) {
-    const isLoading = ref(false);
-    const errorMessage = ref<string | null>(null);
-
-    const close = () => {
-      emit('close');
-    };
-
-    const confirm = async () => {
-      isLoading.value = true;
-      errorMessage.value = null;
-
-      try {
-        await emit('confirm');
-      } catch (error) {
-        errorMessage.value = 'Échec de la suppression.';
-      } finally {
-        isLoading.value = false;
-      }
-    };
-
-    return {
-      isLoading,
-      errorMessage,
-      close,
-      confirm
-    };
-  }
-});
-</script>

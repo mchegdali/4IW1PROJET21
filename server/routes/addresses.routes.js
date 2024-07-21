@@ -15,41 +15,30 @@ const addressesRouter = Router({ mergeParams: true });
 
 addressesRouter.post(
   '/',
-  checkAuth(authConfig.accessTokenSecret),
-  isOwnAccount,
   createAddress,
 );
 
 addressesRouter.patch(
   '/:id',
-  checkAuth(authConfig.accessTokenSecret),
-  isOwnAccount,
   updateAddress,
 );
 
 addressesRouter.put(
   '/:id',
-  checkAuth(authConfig.accessTokenSecret),
-  isOwnAccount,
   replaceAddress,
 );
 
 addressesRouter.delete(
   '/:id',
-  checkAuth(authConfig.accessTokenSecret),
   deleteAddress,
 );
 
 addressesRouter.get(
   '/',
-  checkAuth(authConfig.accessTokenSecret),
-  isOwnAccount,
   getAddresses,
 );
 addressesRouter.get(
   '/:id',
-  checkAuth(authConfig.accessTokenSecret),
-  isOwnAccount,
   getAddress,
 );
 

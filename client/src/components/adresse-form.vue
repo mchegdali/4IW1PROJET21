@@ -6,6 +6,7 @@ import Input from './ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { z } from 'zod';
 import { useForm } from '@/composables/form';
+import config from '@/config';
 
 const props = defineProps<{
   isEditing: boolean;
@@ -75,16 +76,17 @@ const [phone, phoneField] = defineField('phone');
 
 const submitHandler = handleSubmit(async (data) => {
   try {
-    const url = props.isEditing
-      ? `http://localhost:3000/users/${userId}/addresses/${addressId}`
-      : `http://localhost:3000/users/${userId}/addresses`;
+    const url = props.isEditing 
+      ? `${config.apiBaseUrl}/users/${userId}/addresses/${addressId}`
+      : `${config.apiBaseUrl}/users/${userId}/addresses`;
 
     const method = props.isEditing ? 'PUT' : 'POST';
 
     const response = await fetch(url, {
       method,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`
       },
       body: JSON.stringify(data)
     });
@@ -111,28 +113,22 @@ const submitHandler = handleSubmit(async (data) => {
   }
 });
 
-watch(
-  () => props.isEditing,
-  async (newVal) => {
-    if (newVal && addressId) {
-      try {
-        const response = await fetch(
-          `http://localhost:3000/users/${userId}/addresses/${addressId}`
-        );
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const addressData = await response.json();
-        Object.assign(formValues.value, addressData);
-      } catch (error) {
-        if (import.meta.env.MODE === 'development') {
-          console.error('Erreur lors du chargement de l’adresse:', error);
-        }
+watch(() => props.isEditing, async (newVal) => {
+  if (newVal && addressId) {
+    try {
+      const response = await fetch(`${config.apiBaseUrl}/users/${userId}/addresses/${addressId}`, {headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}});
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const addressData = await response.json();
+      Object.assign(formValues.value, addressData);
+    } catch (error) {
+      if (import.meta.env.MODE === 'development') {
+        console.error('Erreur lors du chargement de l’adresse:', error);
       }
     }
-  },
-  { immediate: true }
-);
+  }
+}, { immediate: true });
 </script>
 
 <template>

@@ -25,7 +25,7 @@ const customMessage = ref('Êtes-vous sûr de vouloir supprimer cette adresse ?'
 
 const getAddresses = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/users/${userId}/addresses/`);
+    const response = await fetch(`http://localhost:3000/users/${userId}/addresses/`, {headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}});
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -55,7 +55,8 @@ const confirmDeletion = async () => {
     const response = await fetch(
       `http://localhost:3000/users/${userId}/addresses/${addressToDelete.value}`,
       {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}
       }
     );
     if (!response.ok) {
