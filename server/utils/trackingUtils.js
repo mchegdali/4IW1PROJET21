@@ -22,7 +22,7 @@ const generateTrackingEvents = (order) => {
     event_code: "RECEIVED"
   });
 
-  if (order.status.label !== 'Delivered') {
+  if (order.status.label !== 'delivered') {
     events.push({
       occurred_at: shippingDate.toISOString(),
       description: "Colis expédié.",
@@ -32,6 +32,7 @@ const generateTrackingEvents = (order) => {
       event_code: "SHIPPED"
     });
 
+    if (order.status.label == 'Delivered') {
     events.push({
       occurred_at: inTransitDate.toISOString(),
       description: "Colis en transit.",
@@ -41,25 +42,19 @@ const generateTrackingEvents = (order) => {
       event_code: "IN_TRANSIT"
     });
 
-    events.push({
-      occurred_at: deliveryDate.toISOString(),
-      description: "Colis livré.",
-      city_locality: "Aubervilliers",
-      state_province: "Île-de-France",
-      country_code: "FR",
-      event_code: "DELIVERED"
-    });
-  } else {
     // Ajouter la livraison si l'état est 'Delivered'
-    events.push({
-      occurred_at: order.deliveryDate,
-      description: "Colis livré.",
-      city_locality: "Aubervilliers",
-      state_province: "Île-de-France",
-      country_code: "FR",
-      event_code: "DELIVERED"
-    });
-  }
+    // La date de livraison est simulée ici pour la démonstration
+    
+      events.push({
+        occurred_at: new Date(order.deliveryDate).toISOString(),
+        description: "Colis livré.",
+        city_locality: "Aubervilliers",
+        state_province: "Île-de-France",
+        country_code: "FR",
+        event_code: "DELIVERED"
+      });
+    }
+  } 
 
   return {
     tracking_number: order.orderNumber,
