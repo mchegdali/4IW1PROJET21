@@ -56,6 +56,10 @@ const UsersSequelize = (sequelize) => {
         role: this.role,
         addresses: addressesMongo,
         basket: basketItems,
+        newProductAlert: this.newProductAlert,
+        restockAlert: this.restockAlert,
+        priceChangeAlert: this.priceChangeAlert,
+        newsletterAlert: this.newsletterAlert,
         createdAt: this.createdAt,
         updatedAt: this.updatedAt,
         deletedAt: this.deletedAt,
@@ -105,6 +109,26 @@ const UsersSequelize = (sequelize) => {
         type: DataTypes.ENUM('user', 'admin', 'accountant'),
         defaultValue: 'user',
         allowNull: false,
+      },
+      newProductAlert: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      restockAlert: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      priceChangeAlert: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      newsletterAlert: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
     },
     {

@@ -51,6 +51,10 @@ const ProductSchema = new mongoose.Schema(
         return v.toString();
       },
     },
+    newProductAlert: { type: Boolean, default: false },
+    restockAlert: { type: Boolean, default: false },
+    priceChangeAlert: { type: Boolean, default: false },
+    newsletterAlert: { type: Boolean, default: false },
   },
   {
     toObject: {
