@@ -1,23 +1,7 @@
 <template>
   <section class="flex-1 ml-80">
     <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Produits</h1>
-  <section class="flex-1 ml-80">
-    <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Produits</h1>
 
-    <div class="p-5">
-      <div class="flex flex-row space-x-4">
-        <div class="w-3/5 bg-white rounded-xl p-2">
-          <AreaChart />
-        </div>
-        <div class="w-2/5 bg-white rounded-xl">
-          <DonutChart
-            v-if="donutChartOptions && donutChartSeries"
-            :options="donutChartOptions"
-            :series="donutChartSeries"
-          />
-        </div>
-      </div>
-    </div>
     <div class="p-5">
       <div class="flex flex-row space-x-4">
         <div class="w-3/5 bg-white rounded-xl p-2">
