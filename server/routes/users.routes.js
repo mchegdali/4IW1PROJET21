@@ -10,6 +10,7 @@ const {
   getUserRegistrations,
   getUserRegistrationsLast12Months,
   getTopProducts,
+  getUsersIds,
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -22,6 +23,13 @@ const userBasketRouter = require('./basket.routes');
 const { userOrderRouter } = require('./order.routes');
 
 const usersRouter = Router();
+
+usersRouter.get(
+  '/users/ids',
+  checkAuth(authConfig.accessTokenSecret),
+  checkRole(['admin']),
+  getUsersIds,
+);
 
 // Route pour obtenir le nombre total d'utilisateurs
 usersRouter.get(

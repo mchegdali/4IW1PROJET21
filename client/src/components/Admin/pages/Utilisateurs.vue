@@ -3,7 +3,10 @@
     <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Utilisateurs</h1>
     <UtilisateurTable
       :clients="clients"
+      :selected-client-ids="selectedClientIds"
       @sort="handleSort"
+      @select-all="handleSelectAll"
+      @update-selection="handleUpdateSelection"
     />
     <div class="mt-4 flex items-center justify-center">
       <button
@@ -26,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted, watch } from 'vue';
 import UtilisateurTable from '../UtilisateurTable.vue';
 import { useUserStore } from '@/stores/user';
 
@@ -44,35 +47,58 @@ export default defineComponent({
   },
   setup() {
     const clients = ref<Client[]>([]);
+    const selectedClientIds = ref<string[]>([]);
+    const allClientIds = ref<string[]>([]);
     const page = ref(1);
     const totalPages = ref(1);
     const sortField = ref('id');
     const sortOrder = ref<'asc' | 'desc'>('asc');
 
     const fetchClients = async (page: number, sortField: string, sortOrder: 'asc' | 'desc') => {
-    const userStore = useUserStore();
-    await userStore.refreshAccessToken();
-    const accessToken = userStore.accessToken;
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`
-        }
-      });
-      const data = await response.json();
-      clients.value = data.items.map((item: any) => ({
-        _id: item._id,
-        fullname: item.fullname,
-        email: item.email,
-        city: item.addresses[0]?.city || 'N/A',
-      }));
-      totalPages.value = data.metadata.totalPages;
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-    }
-  };
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        const data = await response.json();
+        clients.value = data.items.map((item: any) => ({
+          _id: item._id,
+          fullname: item.fullname,
+          email: item.email,
+          city: item.addresses[0]?.city || 'N/A',
+        }));
+        totalPages.value = data.metadata.totalPages;
+        console.log('Clients fetched:', clients.value);
+      } catch (error) {
+        console.error('Error fetching clients:', error);
+      }
+    };
+
+    const fetchAllClientIds = async () => {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/ids`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        const data = await response.json();
+        allClientIds.value = data.items.map((item: any) => item.id);
+        console.log('All Client IDs fetched:', allClientIds.value);
+      } catch (error) {
+        console.error('Error fetching client ids:', error);
+      }
+    };
 
     const nextPage = () => {
       if (page.value < totalPages.value) {
@@ -98,17 +124,43 @@ export default defineComponent({
       fetchClients(page.value, sortField.value, sortOrder.value);
     };
 
+    const handleSelectAll = async (isChecked: boolean) => {
+      console.log('Handle Select All:', isChecked);
+      if (isChecked) {
+        await fetchAllClientIds();
+        selectedClientIds.value = allClientIds.value;
+      } else {
+        selectedClientIds.value = [];
+      }
+    };
+
+    const handleUpdateSelection = ({ clientId, isChecked }: { clientId: string, isChecked: boolean }) => {
+      if (isChecked) {
+        if (!selectedClientIds.value.includes(clientId)) {
+          selectedClientIds.value.push(clientId);
+        }
+      } else {
+        selectedClientIds.value = selectedClientIds.value.filter(id => id !== clientId);
+      }
+    };
+
     onMounted(() => {
       fetchClients(page.value, sortField.value, sortOrder.value);
     });
 
+    watch(selectedClientIds, (newVal) => {
+    });
+
     return {
       clients,
+      selectedClientIds,
       page,
       totalPages,
       nextPage,
       previousPage,
-      handleSort
+      handleSort,
+      handleSelectAll,
+      handleUpdateSelection
     };
   }
 });

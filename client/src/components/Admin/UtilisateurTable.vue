@@ -16,7 +16,7 @@
       <thead class="bg-gray-100">
         <tr class="h-16">
           <th class="py-2 px-4 w-1/6">
-            <input type="checkbox" @change="selectAll" />
+            <input type="checkbox" @change="selectAll($event)" :checked="allSelected" />
           </th>
           <th @click="sortBy('id')" class="py-2 px-4 cursor-pointer hover:bg-gray-200 w-1/6 bg-red-500">
             ID
@@ -40,7 +40,7 @@
       <tbody>
         <tr v-for="client in clients" :key="client._id" class="border-t hover:bg-gray-50">
           <td class="py-2 px-4 text-center w-1/6">
-            <input type="checkbox" :value="client" v-model="selectedClients" />
+            <input type="checkbox" :value="client._id" v-model="localSelectedClientIds" @change="updateSelection(client._id, $event)" />
           </td>
           <td class="py-2 px-4 text-center w-1/6">{{ client._id }}</td>
           <td class="py-2 px-4 text-center w-1/6">{{ client.fullname }}</td>
@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, computed } from 'vue';
 import type { PropType } from 'vue';
 import DoubleArrow from '../Admin/svg/DoubleArrow.vue';
 import Csv from '../Admin/svg/Csv.vue';
@@ -86,35 +86,51 @@ export default defineComponent({
     clients: {
       type: Array as PropType<Client[]>,
       required: true
+    },
+    selectedClientIds: {
+      type: Array as PropType<string[]>,
+      required: true
     }
   },
-  emits: ['sort'],
+  emits: ['sort', 'select-all', 'update-selection'],
   setup(props, { emit }) {
-    const selectedClients = ref<Client[]>([]);
+    const localSelectedClientIds = computed({
+      get: () => props.selectedClientIds,
+      set: (value: string[]) => emit('update-selection', value)
+    });
+
+    const allSelected = computed(() => {
+      return props.clients.every(client => localSelectedClientIds.value.includes(client._id));
+    });
 
     const sortBy = (field: string) => {
       emit('sort', field);
     };
 
     const exportCsv = () => {
-      const clientNames = selectedClients.value.map(client => client.fullname).join(', ');
-      alert(`Les utilisateurs à exporter sont : ${clientNames}`);
+      console.log('Export CSV IDs:', props.selectedClientIds);
+      alert(`Les utilisateurs à exporter sont : ${props.selectedClientIds.join(', ')}`);
     };
 
     const selectAll = (event: Event) => {
       const isChecked = (event.target as HTMLInputElement).checked;
-      if (isChecked) {
-        selectedClients.value = [...props.clients];
-      } else {
-        selectedClients.value = [];
-      }
+      console.log('Select All:', isChecked);
+      emit('select-all', isChecked);
+    };
+
+    const updateSelection = (clientId: string, event: Event) => {
+      const isChecked = (event.target as HTMLInputElement).checked;
+      console.log('Update Selection:', { clientId, isChecked });
+      emit('update-selection', { clientId, isChecked });
     };
 
     return {
-      selectedClients,
+      localSelectedClientIds,
+      allSelected,
       sortBy,
       exportCsv,
-      selectAll
+      selectAll,
+      updateSelection
     };
   }
 });

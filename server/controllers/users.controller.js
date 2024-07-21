@@ -409,6 +409,21 @@ async function getTopProducts(req, res, next) {
   }
 }
 
+/**
+ * Récupérer les idS des users
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUsersIds(req, res, next) {
+  try {
+    const userIds = await UserMongo.find({}, '_id'); // Récupérer uniquement les identifiants des utilisateurs
+    res.status(200).json({ items: userIds });
+  } catch (error) {
+    next(error); // Gestion des erreurs
+  }
+}
+
 module.exports = {
   getUserCount,
   createUser,
@@ -421,4 +436,5 @@ module.exports = {
   getUserRegistrations,
   getUserRegistrationsLast12Months,
   getTopProducts,
+  getUsersIds
 };
