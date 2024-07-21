@@ -98,10 +98,6 @@ async function getUsers(req, res, next) {
       );
     }
 
-    console.log("req.query", req.query); // Ajout pour vérifier le contenu de req.query
-    console.log("sortField", sortField); // Devrait afficher la valeur de sortField
-    console.log("sortOrder", sortOrder); // Devrait afficher la valeur de sortOrder
-
     if (sortField && sortOrder) {
       const sortStage = {};
       const field = sortField === 'id' ? '_id' : sortField;
