@@ -17,7 +17,9 @@ const statusUpdateSchema = statusCreateSchema.partial().refine((a) => {
   return Object.keys(a).length > 0;
 }, 'Vous devez spécifier au moins un champ');
 
-const statusSchema = statusCreateSchema.merge(entitySchema).merge(timestampsSchema);
+const statusSchema = statusCreateSchema
+  .merge(entitySchema)
+  .merge(timestampsSchema);
 
 /** @typedef { z.infer<typeof statusCreateSchema>} StatusCreateBody */
 /** @typedef { z.infer<typeof statusUpdateSchema>} StatusUpdateBody */

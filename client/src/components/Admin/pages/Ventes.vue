@@ -40,26 +40,26 @@ export default defineComponent({
   components: {
     BarChart,
     StatisticsBlock,
-    DonutChart,
+    DonutChart
   },
   data() {
     return {
       statisticsData: [
         { value: '-', text: 'Ventes', color: 'text-blue-600' },
         { value: '-', text: 'Clients', color: 'text-green-600' },
-        { value: '-', text: 'Produits', color: 'text-red-600' },
+        { value: '-', text: 'Produits', color: 'text-red-600' }
       ] as Statistic[],
       donutChartOptions: {
         chart: {
-          id: 'vuechart-donut-ventes',
+          id: 'vuechart-donut-ventes'
         },
         labels: ['Ventes', 'Clients', 'Produits'],
         title: {
           text: 'Répartition des ventes',
-          align: 'left',
-        },
+          align: 'left'
+        }
       },
-      donutChartSeries: [10, 20, 30],
+      donutChartSeries: [10, 20, 30]
     };
   },
   async mounted() {
@@ -75,17 +75,19 @@ export default defineComponent({
         this.statisticsData[0].value = data.totalSales.toString();
       } catch (error) {
         console.error('Error fetching total sales:', error);
-        this.statisticsData[0].value = "-";
+        this.statisticsData[0].value = '-';
       }
     },
     async fetchDistinctCustomerCount() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/distinct-customers`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/orders/distinct-customers`
+        );
         const data = await response.json();
         this.statisticsData[1].value = data.distinctCustomerCount.toString();
       } catch (error) {
         console.error('Error fetching distinct customer count:', error);
-        this.statisticsData[1].value = "-";
+        this.statisticsData[1].value = '-';
       }
     },
     async fetchTotalProducts() {
@@ -95,12 +97,11 @@ export default defineComponent({
         this.statisticsData[2].value = data.count.toString();
       } catch (error) {
         console.error('Error fetching total products:', error);
-        this.statisticsData[2].value = "-";
+        this.statisticsData[2].value = '-';
       }
-    },
-  },
+    }
+  }
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

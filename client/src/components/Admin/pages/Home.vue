@@ -24,7 +24,11 @@
 
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
-          <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full"/>
+          <img
+            src="https://picsum.photos/500/500"
+            alt="Logo"
+            class="object-contain h-20 rounded-full"
+          />
         </div>
         <div class="text-center mt-4">
           <div class="text-2xl font-bold" id="totalRevenue">{{ totalRevenue }} €</div>
@@ -67,14 +71,25 @@
           <BarChart :series="barChartSeries" :options="barChartOptions" />
         </div>
         <div class="w-2/5 bg-white rounded-xl">
-          <DonutChart v-if="donutChartOptions && orderStatusSeries" :options="donutChartOptions" :series="orderStatusSeries" />
+          <DonutChart
+            v-if="donutChartOptions && orderStatusSeries"
+            :options="donutChartOptions"
+            :series="orderStatusSeries"
+          />
         </div>
       </div>
     </div>
 
     <!-- Cards -->
     <div class="grid grid-cols-3 gap-4 mt-9 p-5">
-      <Card v-for="(card, index) in cards" :key="index" :image="card.image" :title="card.title" :text="card.text" :page="card.page"/>
+      <Card
+        v-for="(card, index) in cards"
+        :key="index"
+        :image="card.image"
+        :title="card.title"
+        :text="card.text"
+        :page="card.page"
+      />
     </div>
   </section>
 </template>
@@ -102,71 +117,75 @@ export default defineComponent({
   components: {
     Card,
     BarChart,
-    DonutChart,
+    DonutChart
   },
   data() {
     return {
-      userCount: "-",
-      orderCount: "-",
-      totalRevenue: "-",
+      userCount: '-',
+      orderCount: '-',
+      totalRevenue: '-',
       orderStatusSeries: null as number[] | null,
-      donutChartOptions: null as { chart: { id: string }; labels: string[]; title: { text: string; align: string } } | null,
+      donutChartOptions: null as {
+        chart: { id: string };
+        labels: string[];
+        title: { text: string; align: string };
+      } | null,
       barChartOptions: {
         chart: {
-          id: 'user-registrations-last-12-months',
+          id: 'user-registrations-last-12-months'
         },
         xaxis: {
-          categories: [] as string[],
+          categories: [] as string[]
         },
         title: {
-          text: 'Évolution du nombre d\'inscriptions sur les 7 derniers mois',
+          text: "Évolution du nombre d'inscriptions sur les 7 derniers mois",
           align: 'center'
         }
       },
       barChartSeries: [
         {
           name: 'Inscriptions',
-          data: [] as number[],
-        },
+          data: [] as number[]
+        }
       ],
       cards: [
         {
           image: 'https://picsum.photos/500/500',
           title: 'Ventes',
           text: 'Explorez les dernières tendances de vente et optimisez votre stratégie commerciale en temps réel. Cliquez ici pour consulter les statistiques de ventes !',
-          page: 'AdminVentes',
+          page: 'AdminVentes'
         },
         {
           image: 'https://picsum.photos/500/500',
           title: 'Utilisateurs',
           text: 'Découvrez les nouvelles inscriptions et analysez le comportement de vos utilisateurs. Cliquez ici pour accéder aux statistiques des utilisateurs !',
-          page: 'AdminUtilisateurs',
+          page: 'AdminUtilisateurs'
         },
         {
           image: 'https://picsum.photos/500/500',
           title: 'Produits',
           text: 'Suivez la performance de vos produits et identifiez les best-sellers. Cliquez ici pour consulter les statistiques détaillées de vos produits !',
-          page: 'AdminProduits',
+          page: 'AdminProduits'
         },
         {
           image: 'https://picsum.photos/500/500',
           title: 'Finances',
           text: 'Obtenez un aperçu complet de vos finances et suivez vos revenus et dépenses. Cliquez ici pour consulter les statistiques financières détaillées !',
-          page: 'AdminFinances',
+          page: 'AdminFinances'
         },
         {
           image: 'https://picsum.photos/500/500',
           title: 'Clients',
           text: 'Analysez les données de vos clients et améliorez votre relation client. Cliquez ici pour accéder aux statistiques détaillées de vos clients !',
-          page: 'AdminClients',
+          page: 'AdminClients'
         },
         {
           image: 'https://picsum.photos/500/500',
           title: 'Tendances et Prévisions',
           text: 'Utilisez des prévisions basées sur des données pour planifier votre stratégie future. Cliquez ici pour explorer les tendances et les prévisions détaillées !',
-          page: 'AdminTendances',
-        },
-      ] as CardData[],
+          page: 'AdminTendances'
+        }
+      ] as CardData[]
     };
   },
   methods: {
@@ -177,7 +196,7 @@ export default defineComponent({
         this.userCount = data.count;
       } catch (error) {
         console.error('Error fetching user count:', error);
-        this.userCount = "-"; 
+        this.userCount = '-';
       }
     },
     async fetchOrderCount() {
@@ -187,7 +206,7 @@ export default defineComponent({
         this.orderCount = data.count;
       } catch (error) {
         console.error('Error fetching order count:', error);
-        this.orderCount = "-"; 
+        this.orderCount = '-';
       }
     },
     async fetchTotalRevenue() {
@@ -197,12 +216,14 @@ export default defineComponent({
         this.totalRevenue = data.totalRevenue.toFixed(2); // Limiter à 2 chiffres après la virgule
       } catch (error) {
         console.error('Error fetching total revenue:', error);
-        this.totalRevenue = "-"; 
+        this.totalRevenue = '-';
       }
     },
     async fetchOrderStatusDistribution() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/status-distribution`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/orders/status-distribution`
+        );
         const data: OrderStatus[] = await response.json();
         this.orderStatusSeries = data.map((item: OrderStatus) => item.count);
         this.donutChartOptions = {
@@ -223,14 +244,16 @@ export default defineComponent({
     },
     async fetchUserRegistrationsLast12Months() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/registrations-last-12-months`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/users/registrations-last-12-months`
+        );
         const data = await response.json();
         this.barChartOptions.xaxis.categories = data.map((item: { date: string }) => item.date);
         this.barChartSeries[0].data = data.map((item: { count: number }) => item.count);
       } catch (error) {
         console.error('Error fetching user registrations last 12 months:', error);
       }
-    },
+    }
   },
   mounted() {
     this.fetchUserCount();
@@ -238,7 +261,7 @@ export default defineComponent({
     this.fetchTotalRevenue();
     this.fetchOrderStatusDistribution();
     this.fetchUserRegistrationsLast12Months();
-  },
+  }
 });
 </script>
 

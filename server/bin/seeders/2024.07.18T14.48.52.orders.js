@@ -31,10 +31,13 @@ const up = async ({ context: { sequelize } }) => {
 
   for (const user of users) {
     for (const status of statuses) {
-      const isShippedOrDelivered = status.label === 'Shipped' || status.label === 'Delivered';
+      const isShippedOrDelivered =
+        status.label === 'Shipped' || status.label === 'Delivered';
       const createdAt = faker.date.past();
-      const shippingDate = isShippedOrDelivered ? new Date(createdAt.getTime() + 2 * 24 * 60 * 60 * 1000) : null;
-  
+      const shippingDate = isShippedOrDelivered
+        ? new Date(createdAt.getTime() + 2 * 24 * 60 * 60 * 1000)
+        : null;
+
       const order = {
         _id: crypto.randomUUID(),
         orderNumber: crypto.randomUUID(),
@@ -43,13 +46,13 @@ const up = async ({ context: { sequelize } }) => {
         paymentType: 'credit_card',
         status: {
           _id: status.id,
-          label: status.label
+          label: status.label,
         },
         items: faker.helpers.arrayElements(products, { min: 4, max: 5 }),
-        user:{
+        user: {
           _id: user.id,
           fullname: user.fullname,
-          email: user.email
+          email: user.email,
         },
         shipping: {
           _id: crypto.randomUUID(),
@@ -65,10 +68,11 @@ const up = async ({ context: { sequelize } }) => {
       orders.push(order);
     }
   }
-  
 
   if (typeof OrderMongo.insertMany !== 'function') {
-    throw new Error('OrderMongo.insertMany is not a function. Make sure OrderMongo is defined correctly and is a valid Mongoose model.');
+    throw new Error(
+      'OrderMongo.insertMany is not a function. Make sure OrderMongo is defined correctly and is a valid Mongoose model.',
+    );
   }
 
   await OrderMongo.insertMany(orders);

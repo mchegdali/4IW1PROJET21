@@ -30,7 +30,7 @@ const getAddresses = async () => {
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
-    console.log("Fetched addresses:", data); // Vérifiez la structure des données
+    console.log('Fetched addresses:', data); // Vérifiez la structure des données
     addresses.value = data;
   } catch (error) {
     console.error('Erreur lors de la récupération des adresses:', error);
@@ -38,18 +38,18 @@ const getAddresses = async () => {
 };
 
 const deleteAddress = (addressId: string) => {
-  console.log("Address ID to delete:", addressId); // Assurez-vous que l'ID est bien défini
+  console.log('Address ID to delete:', addressId); // Assurez-vous que l'ID est bien défini
   showModal.value = true;
   addressToDelete.value = addressId;
 };
 
 const confirmDeletion = async () => {
   if (!addressToDelete.value) {
-    console.error("No address ID provided for deletion");
+    console.error('No address ID provided for deletion');
     return;
   }
 
-  console.log("Deleting address with ID:", addressToDelete.value);
+  console.log('Deleting address with ID:', addressToDelete.value);
 
   try {
     const response = await fetch(
@@ -62,7 +62,7 @@ const confirmDeletion = async () => {
       throw new Error('Network response was not ok');
     }
 
-    addresses.value = addresses.value.filter(address => address._id !== addressToDelete.value);
+    addresses.value = addresses.value.filter((address) => address._id !== addressToDelete.value);
   } catch (error) {
     console.error("Erreur lors de la suppression de l'adresse:", error);
   } finally {

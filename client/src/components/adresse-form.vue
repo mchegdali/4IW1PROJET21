@@ -59,13 +59,7 @@ const initialAddressData = props.initialAddressData || {
   phone: ''
 };
 
-const {
-  handleSubmit,
-  isSubmitting,
-  defineField,
-  errors,
-  formValues
-} = useForm({
+const { handleSubmit, isSubmitting, defineField, errors, formValues } = useForm({
   validationSchema: addressSchema,
   defaultValues: initialAddressData
 });
@@ -81,7 +75,7 @@ const [phone, phoneField] = defineField('phone');
 
 const submitHandler = handleSubmit(async (data) => {
   try {
-    const url = props.isEditing 
+    const url = props.isEditing
       ? `http://localhost:3000/users/${userId}/addresses/${addressId}`
       : `http://localhost:3000/users/${userId}/addresses`;
 
@@ -96,34 +90,49 @@ const submitHandler = handleSubmit(async (data) => {
     });
 
     if (!response.ok) {
-      throw new Error(props.isEditing ? "Erreur lors de la mise à jour de l'adresse" : "Erreur lors de l'ajout de l'adresse");
+      throw new Error(
+        props.isEditing
+          ? "Erreur lors de la mise à jour de l'adresse"
+          : "Erreur lors de l'ajout de l'adresse"
+      );
     }
 
     emit('submitted');
     router.push({ name: 'addresses', params: { userId } });
   } catch (error) {
     if (import.meta.env.MODE === 'development') {
-      console.error(props.isEditing ? "Erreur lors de la mise à jour de l'adresse:" : "Erreur lors de l'ajout de l'adresse:", error);
+      console.error(
+        props.isEditing
+          ? "Erreur lors de la mise à jour de l'adresse:"
+          : "Erreur lors de l'ajout de l'adresse:",
+        error
+      );
     }
   }
 });
 
-watch(() => props.isEditing, async (newVal) => {
-  if (newVal && addressId) {
-    try {
-      const response = await fetch(`http://localhost:3000/users/${userId}/addresses/${addressId}`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const addressData = await response.json();
-      Object.assign(formValues.value, addressData);
-    } catch (error) {
-      if (import.meta.env.MODE === 'development') {
-        console.error('Erreur lors du chargement de l’adresse:', error);
+watch(
+  () => props.isEditing,
+  async (newVal) => {
+    if (newVal && addressId) {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/users/${userId}/addresses/${addressId}`
+        );
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const addressData = await response.json();
+        Object.assign(formValues.value, addressData);
+      } catch (error) {
+        if (import.meta.env.MODE === 'development') {
+          console.error('Erreur lors du chargement de l’adresse:', error);
+        }
       }
     }
-  }
-}, { immediate: true });
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

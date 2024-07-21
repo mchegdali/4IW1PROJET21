@@ -20,7 +20,7 @@ const StatusMongo = require('../../models/mongo/status.mongo');
 const up = async ({ context: { sequelize } }) => {
   const queryInterface = sequelize.getQueryInterface();
   const StatusSequelize = sequelize.model('status');
-  
+
   const statuses = [
     {
       id: crypto.randomUUID(),
@@ -49,10 +49,13 @@ const up = async ({ context: { sequelize } }) => {
   ];
 
   await sequelize.transaction(async (t) => {
-    const createdStatusesSequelize = await StatusSequelize.bulkCreate(statuses, {
-      validate: true,
-      transaction: t,
-    });
+    const createdStatusesSequelize = await StatusSequelize.bulkCreate(
+      statuses,
+      {
+        validate: true,
+        transaction: t,
+      },
+    );
 
     const createdStatusesMongo = createdStatusesSequelize.map((status) => ({
       _id: status.id,
@@ -63,7 +66,6 @@ const up = async ({ context: { sequelize } }) => {
 
     await StatusMongo.insertMany(createdStatusesMongo);
   });
-
 };
 
 /**

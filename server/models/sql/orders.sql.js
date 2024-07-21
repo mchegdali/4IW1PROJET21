@@ -20,7 +20,9 @@ const OrdersSequelize = (sequelize) => {
 
     async toMongo() {
       const user = await this.sequelize.models.users.findByPk(this.userId);
-      const shipping = await this.sequelize.models.shippings.findByPk(this.shippingId);
+      const shipping = await this.sequelize.models.shippings.findByPk(
+        this.shippingId,
+      );
       const status = await this.sequelize.models.status.findByPk(this.statusId);
       return {
         _id: this.id,
