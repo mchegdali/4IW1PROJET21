@@ -1,19 +1,12 @@
+require('dotenv').config();
 const dayjs = require('dayjs');
-import config from '@/config';
+const Order = require('../models/mongo/orders.mongo');
+const StatusMongo = require('../models/mongo/status.mongo');
 
-// URL de l'API
-const API_URL = `${config.apiBaseUrl}/orders`;
-
-// Fonction pour récupérer les commandes
 async function fetchOrders() {
     try {
-        const fetch = (await import('node-fetch')).default;
         console.log('Récupération des commandes...');
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP lors de la récupération des commandes: ${response.status}`);
-        }
-        const orders = await response.json();
+        const orders = await Order.find({});
         console.log(`Nombre de commandes récupérées: ${orders.length}`);
         return orders;
     } catch (error) {
@@ -22,59 +15,64 @@ async function fetchOrders() {
     }
 }
 
-// Fonction pour mettre à jour le statut d'une commande
-async function updateOrderStatus(orderId) {
+async function updateOrderStatus(orderId, statusLabel) {
     try {
-        const fetch = (await import('node-fetch')).default;
-        console.log(`Mise à jour du statut de la commande ${orderId}...`);
-        const response = await fetch(`${API_URL}/${orderId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                status: {
-                    _id: '4443e94f-21df-4737-92d7-f7f637278c4d', // ID du statut "Livrer"
-                    label: 'Livrer'
-                }
-            })
-        });
+        console.log(`Mise à jour du statut de la commande ${orderId} en ${statusLabel}...`);
 
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP lors de la mise à jour de la commande ${orderId}: ${response.status}`);
+        const status = await StatusMongo.findOne({ label: statusLabel }).exec();
+        if (!status) {
+            throw new Error(`Statut '${statusLabel}' introuvable`);
         }
 
-        console.log(`Commande ${orderId} mise à jour en 'Livrer'.`);
+        const result = await Order.updateOne(
+            { _id: orderId },
+            { $set: { status: { _id: status._id, label: statusLabel } } }
+        ).exec();
+
+        if (result.nModified === 0) {
+            throw new Error(`Aucune mise à jour effectuée pour la commande ${orderId}`);
+        }
+
+        console.log(`Commande ${orderId} mise à jour en '${statusLabel}'.`);
     } catch (error) {
         console.error(`Erreur lors de la mise à jour de la commande ${orderId}:`, error);
     }
 }
 
-// Fonction principale pour vérifier et mettre à jour les commandes
 async function checkAndUpdateOrders() {
     console.log('Vérification des commandes...');
     const orders = await fetchOrders();
-    const today = dayjs();
-    
+    const now = dayjs();
+
     for (const order of orders) {
         const createdAt = dayjs(order.createdAt);
-        const daysDifference = today.diff(createdAt, 'day');
+        const minutesDifference = now.diff(createdAt, 'minute');
 
-        if (daysDifference >= 2) {
-            if (order.status.label !== 'Livrer') {
-                console.log(`Commande ${order._id} a besoin d'une mise à jour.`);
-                await updateOrderStatus(order._id);
+        if (order.status.label === 'Cancelled') {
+            console.log(`Commande ${order._id} est annulée. Aucun changement à effectuer.`);
+            continue;
+        }
+
+        if (minutesDifference >= 5) {
+            if (order.status.label !== 'Delivered') {
+                console.log(`Commande ${order._id} passe au statut 'Delivered'.`);
+                await updateOrderStatus(order._id, 'Delivered');
             } else {
-                console.log(`Commande ${order._id} est déjà marquée comme 'Livrer'.`);
+                console.log(`Commande ${order._id} est déjà marquée comme 'Delivered'.`);
+            }
+        } else if (minutesDifference >= 3) {
+            if (order.status.label === 'Pending') {
+                console.log(`Commande ${order._id} passe au statut 'Shipped'.`);
+                await updateOrderStatus(order._id, 'Shipped');
+            } else {
+                console.log(`Commande ${order._id} est déjà marquée comme '${order.status.label}'.`);
             }
         } else {
-            console.log(`Commande ${order._id} ne nécessite pas de mise à jour (écart de ${daysDifference} jours).`);
+            console.log(`Commande ${order._id} ne nécessite pas de mise à jour (écart de ${minutesDifference} minutes).`);
         }
     }
 }
 
-// Exécuter la vérification et la mise à jour toutes les 5 secondes
-setInterval(checkAndUpdateOrders, 5 * 1000);
+setInterval(checkAndUpdateOrders, 25 * 1000);
 
-// Exécuter immédiatement au démarrage
 checkAndUpdateOrders();
