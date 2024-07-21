@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRoute } from 'vue-router';
 import config from '@/config';
+import { Calendar, MapPin, Package2, Truck } from 'lucide-vue-next';
 
 const route = useRoute();
 const trackingId = route.params.id;
@@ -78,17 +79,18 @@ onMounted(async () => {
   <div class="flex flex-col gap-6 p-6">
     <!-- Section Informations de commande -->
     <div class="flex gap-4 text-lg items-center sm:text-lg">
+      <Package2 />
       N° de suivi: <span class="font-bold">{{ orderData.idShip }}</span>
     </div>
 
     <!-- Section Événements de livraison -->
     <div v-if="orderData.event.length > 0" class="">
-      <h3 class="text-xl font-semibold">Événements de livraison</h3>
-      <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-        {{ formatDate(orderData.event[orderData.event.length - 1].date) }}
+      <h3 class="text-xl font-semibold flex gap-4"><Truck />Événements de livraison</h3>
+      <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500 flex gap-2 items-center">
+        <Calendar class="w-4"/>{{ formatDate(orderData.event[orderData.event.length - 1].date) }}
       </time>
-      <p class="text-base font-normal text-gray-500 dark:text-gray-400">
-        {{ orderData.event[orderData.event.length - 1].label }}
+      <p class="text-base font-normal text-gray-500 dark:text-gray-400 flex gap-2 items-center">
+        <MapPin class="w-4"/>{{ orderData.event[orderData.event.length - 1].label }}
       </p>
     </div>
 
@@ -116,14 +118,14 @@ onMounted(async () => {
           <div
             class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
           >
-            <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-              {{ formatDate(item.date) }}
+            <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500 flex gap-2 items-center">
+              <Calendar class="w-4"/> {{ formatDate(item.date) }}
             </time>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ item.shortLabel }}
             </h3>
-            <p class="mb-2 text-base font-normal text-gray-500 dark:text-gray-400">
-              {{ item.longLabel }}
+            <p class="mb-2 text-base font-normal text-gray-500 dark:text-gray-400 flex gap-2 items-center">
+              <MapPin class="w-4"/> {{ item.longLabel }}
             </p>
           </div>
         </div>
