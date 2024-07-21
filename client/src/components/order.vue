@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { RouterLink } from 'vue-router';
-import { Calendar, Package2, Truck } from 'lucide-vue-next';
+import { Calendar, MapPin, Package2, Phone, Truck } from 'lucide-vue-next';
 import config from '@/config';
 
 interface Product {
@@ -78,12 +78,19 @@ onMounted(async () => {
   try {
     const response = await fetch(`${config.apiBaseUrl}/orders/${orderId}`);
     if (!response.ok) throw new Error('Failed to fetch order');
+    
     order.value = await response.json();
-    await fetchProductDetails(order.value.items.map((item) => item.id));
+
+    if (order.value && order.value.items) {
+      await fetchProductDetails(order.value.items.map((item) => item.id));
+    } else {
+      console.warn('Order or order items are not available');
+    }
   } catch (error) {
     console.error('Error fetching order:', error);
   }
 });
+
 </script>
 
 <template>
@@ -120,20 +127,20 @@ onMounted(async () => {
         <div class="p-2 sm:p-4">
           <h1 class="text-xs font-bold text-gray-700 sm:text-sm">ADRESSE DE COLLECTE</h1>
           <div class="text-sm p-2 sm:text-sm border-b">
-            <p>{{ order.shipping.street }}</p>
+            <p class="flex gap-2"> <MapPin class="w-4"/>{{ order.shipping.street }}</p>
             <p>{{ order.shipping.zipCode }} {{ order.shipping.city }}</p>
           </div>
           <h1 class="text-xs font-bold text-gray-700 mt-2 sm:text-sm">VOS COORDONNÉES</h1>
           <div class="text-sm p-2 sm:text-sm">
             <p>{{ order.shipping.fullname }}</p>
-            <p>{{ order.shipping.phone }}</p>
+            <p class="flex gap-2"> <Phone class="w-4"/> {{ order.shipping.phone }}</p>
           </div>
         </div>
 
         <!-- Delivery Status -->
-        <div class="flex flex-col gap-2 p-2 sm:p-4" v-if="!order.deliveryStatus">
+        <div v-if="order.status.label === 'Shipped'" class="flex flex-col gap-2 p-2 sm:p-4">
           <div class="flex justify-between items-center text-xs">
-            <p class="font-bold text-sm sm:text-lg">VOTRE COMMANDE EST EN COURS !</p>
+            <p class="font-bold text-sm sm:text-lg">VOTRE COMMANDE A ÉTÉ EXPÉDIÉE !</p>
             <p class="text-gray-700 sm:text-lg">{{ order.items.length }} <span>Produits</span></p>
           </div>
           <div class="sm:flex w-full items-center justify-between">
@@ -149,11 +156,7 @@ onMounted(async () => {
                 })
               }}
             </p>
-
-            <div
-              class="bg-white py-2 text-sm flex items-center gap-2"
-              v-if="order.status.label == 'Shipped' || order.status.label == 'Delivered'"
-            >
+            <div class="bg-white py-2 text-sm flex items-center gap-2">
               <Truck />
               <RouterLink
                 :to="{ name: 'tracking', params: { id: order.orderNumber } }"
@@ -164,7 +167,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="w-full h-3 bg-gray-200 overflow-hidden rounded-xl">
-            <div class="h-full bg-tea-600" :style="{ width: '45%' }"></div>
+            <div class="h-full bg-tea-600" :style="{ width: '75%' }"></div>
           </div>
           <p class="text-xs sm:text-sm">
             Votre colis est en cours de livraison. Merci de votre patience et nous espérons que vous
@@ -172,21 +175,34 @@ onMounted(async () => {
           </p>
         </div>
 
-        <div class="flex flex-col gap-2 p-2 sm:p-4" v-if="order.deliveryStatus">
+        <div v-else-if="order.status.label === 'Delivered'" class="flex flex-col gap-2 p-2 sm:p-4">
           <div class="flex justify-between items-center text-xs">
             <p class="font-bold text-sm sm:text-lg">VOTRE COMMANDE A ÉTÉ LIVRÉE !</p>
             <p class="text-gray-700 sm:text-lg">{{ order.items.length }} <span>Produits</span></p>
           </div>
-          <p class="text-sm font-bold text-gray-700 sm:text-lg">
-            LIVRAISON LE :
-            {{
-              new Date(order.shippingDate).toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-              })
-            }}
-          </p>
+          <div class="sm:flex w-full items-center justify-between">
+            <p class="text-sm font-bold text-gray-700 sm:text-sm">
+              LIVRAISON LE :
+              {{
+                new Date(
+                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 4)
+                ).toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                })
+              }}
+            </p>
+            <div class="bg-white py-2 text-sm flex items-center gap-2">
+              <Truck />
+              <RouterLink
+                :to="{ name: 'tracking', params: { id: order.orderNumber } }"
+                class="text-tea-600 sm:text-lg"
+              >
+                Infos de la livraison
+              </RouterLink>
+            </div>
+          </div>
           <div class="w-full h-3 bg-tea-600 rounded-xl"></div>
           <p class="text-xs sm:text-sm">
             Ca y est : votre colis a été livré. Nous espérons que vous aimerez votre commande !
