@@ -24,11 +24,11 @@
             ID
             <DoubleArrow class="inline-block ml-2" />
           </th>
-          <th class="py-2 px-4 cursor-pointer hover:bg-gray-200">
+          <th @click="sortBy('fullname')" class="py-2 px-4 cursor-pointer hover:bg-gray-200">
             Nom Complet
             <DoubleArrow class="inline-block ml-2" />
           </th>
-          <th class="py-2 px-4 cursor-pointer hover:bg-gray-200">
+          <th @click="sortBy('email')" class="py-2 px-4 cursor-pointer hover:bg-gray-200">
             Email
             <DoubleArrow class="inline-block ml-2" />
           </th>
