@@ -74,7 +74,6 @@ export default defineComponent({
           city: item.addresses[0]?.city || 'N/A',
         }));
         totalPages.value = data.metadata.totalPages;
-        console.log('Clients fetched:', clients.value);
       } catch (error) {
         console.error('Error fetching clients:', error);
       }
@@ -94,7 +93,6 @@ export default defineComponent({
         });
         const data = await response.json();
         allClientIds.value = data.items.map((item: any) => item.id);
-        console.log('All Client IDs fetched:', allClientIds.value);
       } catch (error) {
         console.error('Error fetching client ids:', error);
       }
@@ -125,7 +123,6 @@ export default defineComponent({
     };
 
     const handleSelectAll = async (isChecked: boolean) => {
-      console.log('Handle Select All:', isChecked);
       if (isChecked) {
         await fetchAllClientIds();
         selectedClientIds.value = allClientIds.value;
@@ -149,6 +146,7 @@ export default defineComponent({
     });
 
     watch(selectedClientIds, (newVal) => {
+
     });
 
     return {

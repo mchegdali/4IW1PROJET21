@@ -40,7 +40,7 @@
       <tbody>
         <tr v-for="client in clients" :key="client._id" class="border-t hover:bg-gray-50">
           <td class="py-2 px-4 text-center w-1/6">
-            <input type="checkbox" :value="client._id" v-model="localSelectedClientIds" @change="updateSelection(client._id, $event)" />
+            <input type="checkbox" :value="client._id" :checked="localSelectedClientIds.includes(client._id)" @change="updateSelection(client._id, $event)" />
           </td>
           <td class="py-2 px-4 text-center w-1/6">{{ client._id }}</td>
           <td class="py-2 px-4 text-center w-1/6">{{ client.fullname }}</td>
@@ -114,13 +114,11 @@ export default defineComponent({
 
     const selectAll = (event: Event) => {
       const isChecked = (event.target as HTMLInputElement).checked;
-      console.log('Select All:', isChecked);
       emit('select-all', isChecked);
     };
 
     const updateSelection = (clientId: string, event: Event) => {
       const isChecked = (event.target as HTMLInputElement).checked;
-      console.log('Update Selection:', { clientId, isChecked });
       emit('update-selection', { clientId, isChecked });
     };
 
