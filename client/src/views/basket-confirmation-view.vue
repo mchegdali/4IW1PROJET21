@@ -7,7 +7,7 @@ import BasketInformation from '@/components/basket/basket-information.vue';
 import { useUserStore } from '@/stores/user';
 import { fetchBasket } from '@/api/basket';
 import BasketList from '@/components/basket/basket-list.vue';
-import { createPayment } from '../../../server/controllers/payment.controller';
+
 const basketStore = useBasketStore();
 const userStore = useUserStore();
 const router = useRouter();
@@ -23,26 +23,39 @@ const goBackToBasket = () => {
   router.push({ name: 'basket' });
 };
 
-const proceedToCheckout = async () => {
-  if (!userStore.isAuthenticated || !userStore.user) {
-    console.error('User is not authenticated');
-    // Optionally, redirect to login page or show an error message
+const  proceedToCheckout = async () => {
+  console.log(userStore)
+  // Implement checkout logic here
+  console.log('Proceeding to checkout');
+  if (basketStore.products.length === 0) {
+    alert('Votre panier est vide');
     return;
   }
 
   try {
-    const response = await createPayment(userStore.user.id, userStore.accessToken!);
-    
-    // The backend is set up to redirect, so we'll handle that here
-    if (response.redirected) {
-      window.location.href = response.url;  
-    } else {
-      console.error("Expected a redirect from the server, but didn't receive one");
+    const response = await fetch('http://localhost:3000/payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ user: userStore.user?.id }),
+      credentials: 'include'
+      
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de la création de la session de paiement');
     }
+
+    const { url } = await response.json();
+    console.log(url)
+    window.location.href = url;
   } catch (error) {
-    console.error('Error creating payment:', error);
-    // Handle the error (e.g., show an error message to the user)
+    console.error('Error creating payment session:', error);
+    alert('Une erreur est survenue lors de la création de la session de paiement');
   }
+  // You might want to redirect to a new route, e.g., '/checkout' or '/livraison'
+  // router.push({ name: 'checkout' });
 };
 </script>
 
