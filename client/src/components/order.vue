@@ -47,9 +47,11 @@ const products = ref<Product[]>([]);
 const fetchProductDetails = async (productIds: string[]) => {
   try {
     const productPromises = productIds.map((id) =>
-      fetch(`${config.apiBaseUrl}/products/${id}`, { headers: {
-        Authorization: `Bearer ${userStore.accessToken}`
-      }}).then((response) => response.json())
+      fetch(`${config.apiBaseUrl}/products/${id}`, {
+        headers: {
+          Authorization: `Bearer ${userStore.accessToken}`
+        }
+      }).then((response) => response.json())
     );
     const productData = await Promise.all(productPromises);
     products.value = productData;
@@ -239,6 +241,34 @@ onMounted(async () => {
           </div>
           <div class="w-full h-3 bg-gray-200 rounded-xl"></div>
           <p class="text-xs sm:text-sm">Votre commande a été annulée.</p>
+        </div>
+
+        <div v-if="order.status.label === 'Pending'" class="flex flex-col gap-2 p-2 sm:p-4">
+          <div class="flex justify-between items-center text-xs">
+            <p class="font-bold text-sm sm:text-lg">VOTRE COMMANDE EST EN COURS DE TRAITEMENT !</p>
+            <p class="text-gray-700 sm:text-lg">{{ order.items.length }} <span>Produits</span></p>
+          </div>
+          <div class="sm:flex w-full items-center justify-between">
+            <p class="text-sm font-bold text-gray-700 sm:text-sm">
+              DATE PRÉVUE DE LIVRAISON :
+              {{
+                new Date(
+                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 3)
+                ).toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                })
+              }}
+            </p>
+          </div>
+          <div class="w-full h-3 bg-gray-200 overflow-hidden rounded-xl">
+            <div class="h-full bg-tea-600" :style="{ width: '15%' }"></div>
+          </div>
+          <p class="text-xs sm:text-sm">
+            Votre colis est en cours de traitement. Merci de votre patience et nous espérons que
+            vous apprécierez votre commande lorsqu'elle arrivera !
+          </p>
         </div>
 
         <!-- Order Items -->
