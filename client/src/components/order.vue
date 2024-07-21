@@ -78,7 +78,7 @@ onMounted(async () => {
   try {
     const response = await fetch(`${config.apiBaseUrl}/orders/${orderId}`);
     if (!response.ok) throw new Error('Failed to fetch order');
-    
+
     order.value = await response.json();
 
     if (order.value && order.value.items) {
@@ -90,7 +90,6 @@ onMounted(async () => {
     console.error('Error fetching order:', error);
   }
 });
-
 </script>
 
 <template>
@@ -127,13 +126,13 @@ onMounted(async () => {
         <div class="p-2 sm:p-4">
           <h1 class="text-xs font-bold text-gray-700 sm:text-sm">ADRESSE DE COLLECTE</h1>
           <div class="text-sm p-2 sm:text-sm border-b">
-            <p class="flex gap-2"> <MapPin class="w-4"/>{{ order.shipping.street }}</p>
+            <p class="flex gap-2"><MapPin class="w-4" />{{ order.shipping.street }}</p>
             <p>{{ order.shipping.zipCode }} {{ order.shipping.city }}</p>
           </div>
           <h1 class="text-xs font-bold text-gray-700 mt-2 sm:text-sm">VOS COORDONNÉES</h1>
           <div class="text-sm p-2 sm:text-sm">
             <p>{{ order.shipping.fullname }}</p>
-            <p class="flex gap-2"> <Phone class="w-4"/> {{ order.shipping.phone }}</p>
+            <p class="flex gap-2"><Phone class="w-4" /> {{ order.shipping.phone }}</p>
           </div>
         </div>
 
@@ -148,7 +147,7 @@ onMounted(async () => {
               DATE PRÉVUE DE LIVRAISON :
               {{
                 new Date(
-                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 4)
+                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 3)
                 ).toLocaleDateString('fr-FR', {
                   day: 'numeric',
                   month: 'short',
@@ -185,7 +184,7 @@ onMounted(async () => {
               LIVRAISON LE :
               {{
                 new Date(
-                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 4)
+                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 3)
                 ).toLocaleDateString('fr-FR', {
                   day: 'numeric',
                   month: 'short',
@@ -206,6 +205,31 @@ onMounted(async () => {
           <div class="w-full h-3 bg-tea-600 rounded-xl"></div>
           <p class="text-xs sm:text-sm">
             Ca y est : votre colis a été livré. Nous espérons que vous aimerez votre commande !
+          </p>
+        </div>
+
+        <div v-if="order.status.label === 'Cancelled'" class="flex flex-col gap-2 p-2 sm:p-4">
+          <div class="flex justify-between items-center text-xs">
+            <p class="font-bold text-sm sm:text-lg">VOTRE COMMANDE A ÉTÉ ANNULÉE !</p>
+            <p class="text-gray-700 sm:text-lg">{{ order.items.length }} <span>Produits</span></p>
+          </div>
+          <div class="sm:flex w-full items-center justify-between">
+            <p class="text-sm font-bold text-gray-700 sm:text-sm">
+              DATE D'ANNULATION :
+              {{
+                new Date(
+                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate())
+                ).toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                })
+              }}
+            </p>
+          </div>
+          <div class="w-full h-3 bg-gray-200 rounded-xl"></div>
+          <p class="text-xs sm:text-sm">
+            Votre commande a été annulée.
           </p>
         </div>
 
