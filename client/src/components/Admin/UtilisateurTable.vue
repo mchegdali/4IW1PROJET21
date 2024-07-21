@@ -7,6 +7,7 @@
           type="text"
           placeholder="Rechercher..."
           class="p-2 border border-gray-300 rounded"
+          @input="handleSearch"
         />
         <Csv class="h-9 cursor-pointer" @click="exportCsv"/>
       </div>
@@ -96,7 +97,7 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['sort', 'select-all', 'update-selection', 'view-client'],
+  emits: ['sort', 'select-all', 'update-selection', 'view-client', 'search'],
   setup(props, { emit }) {
     const localSelectedClientIds = computed({
       get: () => props.selectedClientIds,
@@ -165,6 +166,11 @@ export default defineComponent({
       emit('view-client', clientId);
     };
 
+    const handleSearch = (event: Event) => {
+      const searchText = (event.target as HTMLInputElement).value;
+      emit('search', searchText);
+    };
+
     return {
       localSelectedClientIds,
       allSelected,
@@ -172,7 +178,8 @@ export default defineComponent({
       exportCsv,
       selectAll,
       updateSelection,
-      viewClient
+      viewClient,
+      handleSearch
     };
   }
 });
@@ -184,5 +191,9 @@ export default defineComponent({
 }
 .cursor-pointer {
   cursor: pointer;
+}
+.readonly-input {
+  pointer-events: none;
+  caret-color: transparent;
 }
 </style>

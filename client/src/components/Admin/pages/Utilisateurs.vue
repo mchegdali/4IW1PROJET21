@@ -7,12 +7,8 @@
       @sort="handleSort"
       @select-all="handleSelectAll"
       @update-selection="handleUpdateSelection"
+      @search="handleSearch"
       @view-client="handleViewClient"
-    />
-    <DialogUtilisateur
-      v-model="isDialogOpen"
-      :client="selectedClient"
-      :is-edit-mode="false"
     />
     <div class="mt-4 flex items-center justify-center">
       <button
@@ -65,33 +61,36 @@ export default defineComponent({
     const totalPages = ref(1);
     const sortField = ref('id');
     const sortOrder = ref<'asc' | 'desc'>('asc');
+    const searchText = ref('');
 
-    const fetchClients = async (page: number, sortField: string, sortOrder: 'asc' | 'desc') => {
-      const userStore = useUserStore();
-      await userStore.refreshAccessToken();
-      const accessToken = userStore.accessToken;
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`
-          }
-        });
-        const data = await response.json();
-        clients.value = data.items.map((item: any) => ({
-          _id: item._id,
-          fullname: item.fullname,
-          email: item.email,
-          city: item.addresses[0]?.city || 'N/A',
-          role: item.role,
-          addresses: item.addresses
-        }));
-        totalPages.value = data.metadata.totalPages;
-      } catch (error) {
-        console.error('Error fetching clients:', error);
+    const fetchClients = async (page: number, sortField: string, sortOrder: 'asc' | 'desc', text: string = '') => {
+  const userStore = useUserStore();
+  await userStore.refreshAccessToken();
+  const accessToken = userStore.accessToken;
+  try {
+    const searchParam = text.length >= 3 ? `&text=${text}` : '';
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
       }
-    };
+    });
+    console.log(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`);
+    const data = await response.json();
+    clients.value = data.items.map((item: any) => ({
+      _id: item._id,
+      fullname: item.fullname,
+      email: item.email,
+      city: item.addresses[0]?.city || 'N/A',
+      role: item.role,
+      addresses: item.addresses
+    }));
+    totalPages.value = data.metadata.totalPages;
+  } catch (error) {
+    console.error('Error fetching clients:', error);
+  }
+};
 
     const fetchClientDetails = async (clientId: string) => {
       const userStore = useUserStore();
@@ -140,14 +139,14 @@ export default defineComponent({
     const nextPage = () => {
       if (page.value < totalPages.value) {
         page.value += 1;
-        fetchClients(page.value, sortField.value, sortOrder.value);
+        fetchClients(page.value, sortField.value, sortOrder.value, searchText.value);
       }
     };
 
     const previousPage = () => {
       if (page.value > 1) {
         page.value -= 1;
-        fetchClients(page.value, sortField.value, sortOrder.value);
+        fetchClients(page.value, sortField.value, sortOrder.value, searchText.value);
       }
     };
 
@@ -158,7 +157,7 @@ export default defineComponent({
         sortField.value = field;
         sortOrder.value = 'asc';
       }
-      fetchClients(page.value, sortField.value, sortOrder.value);
+      fetchClients(page.value, sortField.value, sortOrder.value, searchText.value);
     };
 
     const handleSelectAll = async (isChecked: boolean) => {
@@ -178,6 +177,11 @@ export default defineComponent({
       } else {
         selectedClientIds.value = selectedClientIds.value.filter(id => id !== clientId);
       }
+    };
+
+    const handleSearch = (text: string) => {
+      searchText.value = text;
+      fetchClients(page.value, sortField.value, sortOrder.value, searchText.value);
     };
 
     const handleViewClient = (clientId: string) => {
@@ -204,6 +208,7 @@ export default defineComponent({
       handleSort,
       handleSelectAll,
       handleUpdateSelection,
+      handleSearch,
       handleViewClient
     };
   }

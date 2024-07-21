@@ -74,6 +74,7 @@ async function createUser(req, res, next) {
  */
 async function getUsers(req, res, next) {
   try {
+    console.log('Received query:', req.query);
     const { page, text, pageSize, sortField, sortOrder } = userQuerySchema.parse(req.query);
 
     /**
@@ -81,20 +82,18 @@ async function getUsers(req, res, next) {
      */
     const pipelineStages = [];
 
-    if (text) {
+    if (text && text.length >= 3) {
       pipelineStages.push(
         {
           $match: {
-            $text: {
-              $search: text,
-              $diacriticSensitive: false,
-              $caseSensitive: false,
-            },
+            $or: [
+              { _id: { $regex: text, $options: 'i' } },
+              { fullname: { $regex: text, $options: 'i' } },
+              { email: { $regex: text, $options: 'i' } },
+              { 'addresses.city': { $regex: text, $options: 'i' } }
+            ]
           },
-        },
-        {
-          $sort: { score: { $meta: 'textScore' } },
-        },
+        }
       );
     }
 
@@ -134,6 +133,7 @@ async function getUsers(req, res, next) {
 
     return res.json({ metadata, items });
   } catch (error) {
+    console.error('Error in getUsers:', error);
     next(error);
   }
 }

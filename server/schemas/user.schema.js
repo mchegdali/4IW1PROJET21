@@ -6,7 +6,7 @@ const { paginationSchema } = require('./pagination.schema');
 
 const userQuerySchema = z
   .object({
-    text: z.string().min(2).optional(),
+    text: z.string().min(2).nullable().optional(),
     sortField: z.enum(['id', 'fullname', 'email']).optional().default('id'),
     sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
   })
