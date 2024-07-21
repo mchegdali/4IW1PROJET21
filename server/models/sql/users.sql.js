@@ -133,9 +133,6 @@ const UsersSequelize = (sequelize) => {
             {
               $set: userMongo,
             },
-            {
-              upsert: true,
-            },
           );
         },
         afterDestroy: async (user, { force }) => {

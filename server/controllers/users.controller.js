@@ -28,21 +28,12 @@ async function createUser(req, res, next) {
     }
 
     const newUser = await sequelize.transaction(async (t) => {
-      const data = await Users.create(userCreationData, {
+      const user = await Users.create(userCreationData, {
         transaction: t,
         include: ['addresses'],
       });
 
-      const userMongo = data.toMongo();
-
-      const userDoc = await UserMongo.create(userMongo);
-
-      return {
-        id: userDoc.id,
-        fullname: userDoc.fullname,
-        email: userDoc.email,
-        addresses: userDoc.addresses,
-      };
+      return user;
     });
 
     if (req?.user?.role !== 'admin') {
@@ -148,10 +139,6 @@ async function replaceUser(req, res, next) {
   try {
     const userId = req.params.userId;
 
-    if (req.user.role !== 'admin' && req.user.id !== userId) {
-      return res.sendStatus(403);
-    }
-
     const body = userCreateSchema.parse(req.body);
     if (req.user.role !== 'admin') {
       body.role = 'user';
@@ -166,19 +153,6 @@ async function replaceUser(req, res, next) {
           transaction: t,
           include: ['addresses'],
           returning: true,
-        },
-      );
-
-      const userMongo = data.toMongo();
-
-      await UserMongo.updateOne(
-        {
-          _id: userId,
-        },
-        userMongo,
-        {
-          upsert: true,
-          setDefaultsOnInsert: true,
         },
       );
 
@@ -221,24 +195,14 @@ async function updateUser(req, res, next) {
         transaction: t,
         include: ['addresses'],
         returning: true,
+        individualHooks: true,
       });
 
       if (nbUpdated === 0) {
         throw new NotFound();
       }
 
-      const userMongo = users[0].toMongo();
-
-      const updateResult = await UserMongo.updateOne(
-        {
-          _id: userId,
-        },
-        userMongo,
-      );
-
-      if (updateResult.matchedCount === 0) {
-        throw new NotFound();
-      }
+      return users[0];
     });
 
     return res.status(200).json(newUser);
@@ -256,9 +220,8 @@ async function deleteUser(req, res, next) {
   try {
     const userId = req.params.userId;
     const nbDeleted = await Users.destroy({ where: { id: userId } });
-    const { deletedCount } = await UserMongo.deleteOne({ _id: userId });
 
-    if (nbDeleted === 0 || deletedCount === 0) {
+    if (nbDeleted === 0) {
       return res.sendStatus(404);
     }
 
@@ -391,5 +354,5 @@ module.exports = {
   updateUser,
   getUserAddresses,
   getUserRegistrations,
-  getUserRegistrationsLast12Months
+  getUserRegistrationsLast12Months,
 };

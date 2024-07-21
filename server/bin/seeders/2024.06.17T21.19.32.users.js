@@ -264,9 +264,18 @@ const up = async ({ context: { sequelize } }) => {
 const down = async ({ context: { sequelize } }) => {
   const Users = sequelize.model('users');
   const Addresses = sequelize.model('addresses');
-  await Users.destroy({ truncate: true, cascade: true, force: true });
-  await Addresses.destroy({ truncate: true, cascade: true, force: true });
-  await UserMongo.deleteMany({});
+  await Users.destroy({
+    truncate: true,
+    cascade: true,
+    force: true,
+    individualHooks: true,
+  });
+  await Addresses.destroy({
+    truncate: true,
+    cascade: true,
+    force: true,
+    individualHooks: true,
+  });
 };
 
 module.exports = { up, down };
