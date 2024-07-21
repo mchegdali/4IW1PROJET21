@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import Input from './ui/input/Input.vue';
+import Input from '@/components/ui/input/Input.vue';
 import Button from '@/components/ui/button/Button.vue';
+import Label from '@/components/ui/label/Label.vue';
 import { z } from 'zod';
 import { useForm } from '@/composables/form';
 import { onBeforeUnmount } from 'vue';
@@ -16,7 +17,7 @@ const userInfosSchema = z.object({
   })
 });
 
-const { handleSubmit, defineField, errors, cancel } = useForm({
+const { handleSubmit, defineField, errors, cancel, isDirty } = useForm({
   validationSchema: userInfosSchema,
   defaultValues: {
     email: userStore.user?.email || '',
@@ -29,21 +30,7 @@ const [fullname, fullnameField] = defineField('fullname');
 
 const submitHandler = handleSubmit(async (data) => {
   try {
-    const response = await fetch(`${config.apiBaseUrl}/users/${userStore.user?.id!}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userStore.accessToken}`
-      },
-      body: JSON.stringify({
-        email: data.email,
-        fullname: data.fullname
-      })
-    });
-
-    if (!response.ok) {
-      throw response;
-    }
+    await userStore.update(data);
   } catch (error) {
     console.error('Error updating user:', error);
   }
@@ -58,7 +45,7 @@ onBeforeUnmount(() => {
   <div>
     <form class="flex flex-col gap-4" @submit.prevent="submitHandler">
       <div>
-        <label for="name">Nom et Prénom</label>
+        <Label for="name">Nom et Prénom</Label>
         <Input
           id="name"
           type="text"
@@ -69,7 +56,7 @@ onBeforeUnmount(() => {
         <small class="text-destructive" v-if="errors.fullname">{{ errors.fullname }}</small>
       </div>
       <div>
-        <label for="email">Adresse e-mail</label>
+        <Label for="email">Adresse e-mail</Label>
         <Input
           id="email"
           type="email"
@@ -79,7 +66,7 @@ onBeforeUnmount(() => {
         />
         <small class="text-destructive" v-if="errors.email">{{ errors.email }}</small>
       </div>
-      <Button type="submit" class="w-full">Valider les modifications</Button>
+      <Button type="submit" class="w-full" :disabled="!isDirty">Valider les modifications</Button>
     </form>
   </div>
 </template>

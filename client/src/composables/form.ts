@@ -8,7 +8,8 @@ export function useForm<TSchema extends ZodTypeAny>(options: {
 }) {
   const abortController = ref<AbortController>(new AbortController());
   const { validationSchema, defaultValues = null, transform } = options;
-  const formValues = ref<TSchema['_input']>(defaultValues);
+  const formValues = ref<TSchema['_input']>(structuredClone(defaultValues));
+  const initialValues = ref<TSchema['_input']>(structuredClone(defaultValues));
   const status = ref<number | null>(null);
   const fetchErrors = ref<Record<string, string> | null>(null);
 
@@ -19,6 +20,10 @@ export function useForm<TSchema extends ZodTypeAny>(options: {
   const isSubmitting = ref(false);
   const isError = ref(false);
   const isSuccess = ref(false);
+  const dirtyValues = reactive<Map<keyof TSchema['_input'], true>>(new Map());
+  const isDirty = computed(() => {
+    return dirtyValues.size > 0;
+  });
 
   function reset() {
     if (defaultValues) {
@@ -30,20 +35,55 @@ export function useForm<TSchema extends ZodTypeAny>(options: {
   }
 
   function defineField(name: keyof TSchema['_input']) {
-    function onInput(e: Event) {
+    function onInput(e: Event | string | boolean | number) {
       if (formErrors.has(name)) {
         formErrors.delete(name);
       }
 
       isError.value = false;
-      if (e.target instanceof HTMLInputElement) {
-        if (e.target.type === 'checkbox') {
-          formValues.value[name] = e.target.checked;
-        } else {
-          formValues.value[name] = e.target.value;
+      let newValue: any;
+
+      if (e instanceof Event) {
+        const target = e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+        if (target instanceof HTMLInputElement) {
+          switch (target.type) {
+            case 'checkbox':
+              newValue = target.checked;
+              break;
+            case 'number':
+            case 'range':
+              newValue = target.valueAsNumber;
+              break;
+            case 'date':
+            case 'datetime-local':
+              newValue = target.valueAsDate;
+              break;
+            case 'file':
+              newValue = target.files;
+              break;
+            default:
+              newValue = target.value;
+          }
+        } else if (target instanceof HTMLSelectElement) {
+          if (target.multiple) {
+            newValue = Array.from(target.selectedOptions).map((option) => option.value);
+          } else {
+            newValue = target.value;
+          }
+        } else if (target instanceof HTMLTextAreaElement) {
+          newValue = target.value;
         }
-      } else if (e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) {
-        formValues.value[name] = e.target.value;
+      } else {
+        newValue = e;
+      }
+
+      formValues.value[name] = newValue;
+
+      if (JSON.stringify(formValues.value[name]) !== JSON.stringify(initialValues.value[name])) {
+        dirtyValues.set(name, true);
+      } else {
+        dirtyValues.delete(name);
       }
     }
 
@@ -129,6 +169,7 @@ export function useForm<TSchema extends ZodTypeAny>(options: {
     isSubmitting,
     isError,
     isSuccess,
+    isDirty,
     formValues,
     errors,
     defineField,
