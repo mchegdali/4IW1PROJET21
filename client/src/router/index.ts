@@ -179,7 +179,7 @@ router.beforeEach(async (to) => {
 
   if (authRequired && !userStore.user) {
     return {
-      name: 'login',
+      fullname: 'login',
       query: {
         returnUrl: to.path
       }

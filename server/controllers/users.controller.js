@@ -183,10 +183,6 @@ async function updateUser(req, res, next) {
   try {
     const userId = req.params.userId;
 
-    if (req.user.role !== 'admin' && req.user.id !== userId) {
-      return res.sendStatus(403);
-    }
-
     const userUpdateData = userUpdateSchema.parse(req.body);
 
     if (req.user.role !== 'admin') {
