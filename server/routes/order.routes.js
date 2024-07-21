@@ -22,14 +22,14 @@ orderRouter.route('/orders').get(getOrders).post(createOrder);
 
 orderRouter.get(
   '/orders/count',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getOrderCount,
 );
 
 orderRouter.get(
   '/orders/revenue',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getTotalRevenue,
 );
@@ -37,7 +37,7 @@ orderRouter.get(
 // Nombre total de ventes
 orderRouter.get(
   '/orders/total-sales',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getTotalSales,
 );
@@ -45,14 +45,14 @@ orderRouter.get(
 //Nombre d'users distinct
 orderRouter.get(
   '/orders/distinct-customers',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getDistinctCustomerCount,
 );
 
 orderRouter.get(
   '/orders/status-distribution',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getOrderStatusDistribution,
 );

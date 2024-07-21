@@ -12,7 +12,6 @@ const { getProducts } = require('../controllers/products.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
 
-
 const categoriesRouter = Router();
 
 categoriesRouter.param('category', (req, res, next, category) => {
@@ -31,10 +30,10 @@ categoriesRouter.param('category', (req, res, next, category) => {
 });
 
 categoriesRouter.get(
-  '/categories/count', 
-  checkAuth(authConfig.accessTokenSecret, false),
+  '/categories/count',
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
-  getCategoryCount
+  getCategoryCount,
 );
 
 categoriesRouter.get('/categories/:category/products', getProducts);

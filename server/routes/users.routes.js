@@ -22,7 +22,7 @@ const usersRouter = Router();
 // Route pour obtenir le nombre total d'utilisateurs
 usersRouter.get(
   '/users/count',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getUserCount,
 );
@@ -30,7 +30,7 @@ usersRouter.get(
 // Obtient le nombre d'inscriptions des 12 derniers mois
 usersRouter.get(
   '/users/registrations-last-12-months',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getUserRegistrationsLast12Months,
 );
@@ -38,47 +38,49 @@ usersRouter.get(
 // Route pour obtenir le nombre d'inscriptions d'utilisateurs par jour
 usersRouter.get(
   '/users/registrations',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getUserRegistrations,
 );
 
 usersRouter.use(
   '/users/:userId/addresses',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   isOwnAccount,
   addressesRouter,
 );
 
-usersRouter.use('/users/:userId/orders', 
-  checkAuth(authConfig.accessTokenSecret, false), 
-  isOwnAccount, 
-  userOrderRouter);
+usersRouter.use(
+  '/users/:userId/orders',
+  checkAuth(authConfig.accessTokenSecret),
+  isOwnAccount,
+  userOrderRouter,
+);
 
 usersRouter.use(
   '/users/:userId/basket',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   isOwnAccount,
   userBasketRouter,
 );
 
 usersRouter.get(
   '/users/:userId',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   isOwnAccount,
   getUser,
 );
 
 usersRouter.put(
   '/users/:userId',
-  checkAuth(authConfig.accessTokenSecret, true),
+  checkAuth(authConfig.accessTokenSecret),
   isOwnAccount,
   replaceUser,
 );
 
 usersRouter.patch(
   '/users/:userId',
-  checkAuth(authConfig.accessTokenSecret, true),
+  checkAuth(authConfig.accessTokenSecret),
   isOwnAccount,
   updateUser,
 );
@@ -86,20 +88,16 @@ usersRouter.patch(
 // Route pour supprimer un utilisateur
 usersRouter.delete(
   '/users/:userId',
-  checkAuth(authConfig.accessTokenSecret, true),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   deleteUser,
 );
 
-usersRouter.post(
-  '/users',
-  checkAuth(authConfig.accessTokenSecret, true),
-  createUser,
-);
+usersRouter.post('/users', checkAuth(authConfig.accessTokenSecret), createUser);
 
 usersRouter.get(
   '/users',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getUsers,
 );

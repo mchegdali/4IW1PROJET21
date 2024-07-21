@@ -5,47 +5,36 @@ const UserMongo = require('../models/mongo/user.mongo');
  * @description
  * Check if the token is valid.
  *
- * @param {boolean} skipIfNoHeader
  * @returns {import("express").RequestHandler}
  */
-const checkAuth =
-  (secret, skipIfNoHeader = false) =>
-  async (req, res, next) => {
-    try {
-      if (!req.headers.authorization) {
-        if (skipIfNoHeader) {
-          req.user = null;
-          return next();
-        }
-        return res.sendStatus(401);
-      }
-
-      const tokenParts = req.headers.authorization.split(' ');
-      if (tokenParts.length !== 2) {
-        return res.sendStatus(401);
-      }
-
-      const [bearer, token] = tokenParts;
-
-      if (bearer !== 'Bearer' || !token) {
-        return res.sendStatus(401);
-      }
-
-      const decodedToken = await jose.jwtVerify(token, secret);
-      const user = await UserMongo.findById(decodedToken.payload.sub);
-
-      if (!user) {
-        return res.sendStatus(401);
-      }
-
-      res.locals.token = token;
-      req.user = user;
-
-      return next();
-    } catch (error) {
-      return next(error);
+const checkAuth = (secret) => async (req, res, next) => {
+  try {
+    const tokenParts = req.headers.authorization.split(' ');
+    if (tokenParts.length !== 2) {
+      return res.sendStatus(401);
     }
-  };
+
+    const [bearer, token] = tokenParts;
+
+    if (bearer !== 'Bearer' || !token) {
+      return res.sendStatus(401);
+    }
+
+    const decodedToken = await jose.jwtVerify(token, secret);
+    const user = await UserMongo.findById(decodedToken.payload.sub);
+
+    if (!user) {
+      return res.sendStatus(401);
+    }
+
+    res.locals.token = token;
+    req.user = user;
+
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+};
 
 /**
  *

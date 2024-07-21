@@ -17,25 +17,24 @@ const productsRouter = Router({ mergeParams: true });
 
 productsRouter.get(
   '/products/count',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getProductCount,
 );
 
 productsRouter.get(
   '/products/distribution-by-category',
-  checkAuth(authConfig.accessTokenSecret, false),
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
-  getProductDistributionByCategory
+  getProductDistributionByCategory,
 );
 
 productsRouter.get(
-  '/products/price-distribution', 
-  checkAuth(authConfig.accessTokenSecret, false),
+  '/products/price-distribution',
+  checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
-  getPriceDistribution
+  getPriceDistribution,
 );
-
 
 productsRouter.get('/products/:product/related', getRelatedProducts);
 productsRouter
