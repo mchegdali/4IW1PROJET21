@@ -24,9 +24,22 @@ async function updateOrderStatus(orderId, statusLabel) {
             throw new Error(`Statut '${statusLabel}' introuvable`);
         }
 
+        const updateFields = { 
+            status: { _id: status._id, label: statusLabel }
+        };
+
+        if (statusLabel === 'Shipped') {
+            const order = await Order.findById(orderId).exec();
+            if (!order) {
+                throw new Error(`Commande ${orderId} introuvable`);
+            }
+            const createdAt = dayjs(order.createdAt);
+            updateFields.shippingDate = createdAt.add(2, 'day').toDate();
+        }
+
         const result = await Order.updateOne(
             { _id: orderId },
-            { $set: { status: { _id: status._id, label: statusLabel } } }
+            { $set: updateFields }
         ).exec();
 
         if (result.nModified === 0) {
@@ -46,21 +59,21 @@ async function checkAndUpdateOrders() {
 
     for (const order of orders) {
         const createdAt = dayjs(order.createdAt);
-        const minutesDifference = now.diff(createdAt, 'minute');
+        const daysDifference = now.diff(createdAt, 'day');
 
         if (order.status.label === 'Cancelled') {
             console.log(`Commande ${order._id} est annulée. Aucun changement à effectuer.`);
             continue;
         }
 
-        if (minutesDifference >= 5) {
+        if (daysDifference >= 2) {
             if (order.status.label !== 'Delivered') {
                 console.log(`Commande ${order._id} passe au statut 'Delivered'.`);
                 await updateOrderStatus(order._id, 'Delivered');
             } else {
                 console.log(`Commande ${order._id} est déjà marquée comme 'Delivered'.`);
             }
-        } else if (minutesDifference >= 3) {
+        } else if (daysDifference >= 1) {
             if (order.status.label === 'Pending') {
                 console.log(`Commande ${order._id} passe au statut 'Shipped'.`);
                 await updateOrderStatus(order._id, 'Shipped');
@@ -68,11 +81,11 @@ async function checkAndUpdateOrders() {
                 console.log(`Commande ${order._id} est déjà marquée comme '${order.status.label}'.`);
             }
         } else {
-            console.log(`Commande ${order._id} ne nécessite pas de mise à jour (écart de ${minutesDifference} minutes).`);
+            console.log(`Commande ${order._id} ne nécessite pas de mise à jour (écart de ${daysDifference} jours).`);
         }
     }
 }
 
-setInterval(checkAndUpdateOrders, 25 * 1000);
+setInterval(checkAndUpdateOrders, 120 * 1000);
 
 checkAndUpdateOrders();
