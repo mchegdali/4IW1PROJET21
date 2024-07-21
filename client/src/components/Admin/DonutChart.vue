@@ -1,22 +1,22 @@
-<script lang="ts" setup>
-import { ref } from 'vue';
-import { defineProps } from 'vue';
+<script lang="ts">
+import { defineComponent } from 'vue';
+import ApexCharts from 'vue3-apexcharts';
 
-const props = defineProps<{
-  options: object;
-  series: number[];
-}>();
+export default defineComponent({
+  name: 'DonutChart',
+  components: {
+    apexchart: ApexCharts,
+  },
+  props: {
+    options: Object,
+    series: Array,
+  },
+});
 </script>
 
 <template>
   <div class="w-full h-full">
-    <apexchart
-      class="flex items-center w-full h-full"
-      width="100%"
-      type="donut"
-      :options="props.options"
-      :series="props.series"
-    ></apexchart>
+    <apexchart class="flex items-center w-full h-full" width="100%" type="donut" :options="options" :series="series"></apexchart>
   </div>
 </template>
 

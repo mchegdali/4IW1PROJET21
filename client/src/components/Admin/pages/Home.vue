@@ -10,11 +10,7 @@
       <!-- En faire des composants -->
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
-          <img
-            src="https://picsum.photos/500/500"
-            alt="Logo"
-            class="object-contain h-20 rounded-full"
-          />
+          <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full" />
         </div>
         <div class="text-center mt-4">
           <div class="text-2xl font-bold" id="userCount">{{ userCount }}</div>
@@ -38,11 +34,7 @@
 
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
-          <img
-            src="https://picsum.photos/500/500"
-            alt="Logo"
-            class="object-contain h-20 rounded-full"
-          />
+          <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full" />
         </div>
         <div class="text-center mt-4">
           <div class="text-2xl font-bold" id="orderCount">{{ orderCount }}</div>
@@ -52,11 +44,7 @@
 
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
-          <img
-            src="https://picsum.photos/500/500"
-            alt="Logo"
-            class="object-contain h-20 rounded-full"
-          />
+          <img src="https://picsum.photos/500/500" alt="Logo" class="object-contain h-20 rounded-full" />
         </div>
         <div class="text-center mt-4">
           <div class="text-2xl font-bold">75,5 €</div>
@@ -95,7 +83,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted } from 'vue';
+import { useUserStore } from '@/stores/user';
 import Card from '../Card.vue';
 import BarChart from '../BarChart.vue';
 import DonutChart from '../DonutChart.vue';
@@ -190,8 +179,21 @@ export default defineComponent({
   },
   methods: {
     async fetchUserCount() {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/count`);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/count`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         this.userCount = data.count;
       } catch (error) {
@@ -200,8 +202,21 @@ export default defineComponent({
       }
     },
     async fetchOrderCount() {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/count`);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/count`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         this.orderCount = data.count;
       } catch (error) {
@@ -210,8 +225,21 @@ export default defineComponent({
       }
     },
     async fetchTotalRevenue() {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/revenue`);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/revenue`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         this.totalRevenue = data.totalRevenue.toFixed(2); // Limiter à 2 chiffres après la virgule
       } catch (error) {
@@ -220,10 +248,21 @@ export default defineComponent({
       }
     },
     async fetchOrderStatusDistribution() {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/orders/status-distribution`
-        );
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders/status-distribution`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data: OrderStatus[] = await response.json();
         this.orderStatusSeries = data.map((item: OrderStatus) => item.count);
         this.donutChartOptions = {
@@ -243,10 +282,21 @@ export default defineComponent({
       }
     },
     async fetchUserRegistrationsLast12Months() {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/users/registrations-last-12-months`
-        );
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/registrations-last-12-months`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         this.barChartOptions.xaxis.categories = data.map((item: { date: string }) => item.date);
         this.barChartSeries[0].data = data.map((item: { count: number }) => item.count);
