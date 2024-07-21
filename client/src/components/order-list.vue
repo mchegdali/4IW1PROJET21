@@ -280,7 +280,7 @@ window.addEventListener('resize', () => {
         >
           <Truck />
           <router-link
-            :to="{ name: 'tracking', params: { id: order._id } }"
+           :to="{ name: 'tracking', params: { id: order.orderNumber } }"
             class="w-1/2 text-tea-600"
             >Suivre le colis</router-link
           >
