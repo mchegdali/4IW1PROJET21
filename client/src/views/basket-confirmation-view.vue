@@ -7,7 +7,7 @@ import BasketInformation from '@/components/basket/basket-information.vue';
 import { useUserStore } from '@/stores/user';
 import { fetchBasket } from '@/api/basket';
 import BasketList from '@/components/basket/basket-list.vue';
-
+import { createPayment } from '../../../server/controllers/payment.controller';
 const basketStore = useBasketStore();
 const userStore = useUserStore();
 const router = useRouter();
@@ -23,11 +23,26 @@ const goBackToBasket = () => {
   router.push({ name: 'basket' });
 };
 
-const proceedToCheckout = () => {
-  // Implement checkout logic here
-  console.log('Proceeding to checkout');
-  // You might want to redirect to a new route, e.g., '/checkout' or '/livraison'
-  // router.push({ name: 'checkout' });
+const proceedToCheckout = async () => {
+  if (!userStore.isAuthenticated || !userStore.user) {
+    console.error('User is not authenticated');
+    // Optionally, redirect to login page or show an error message
+    return;
+  }
+
+  try {
+    const response = await createPayment(userStore.user.id, userStore.accessToken!);
+    
+    // The backend is set up to redirect, so we'll handle that here
+    if (response.redirected) {
+      window.location.href = response.url;  
+    } else {
+      console.error("Expected a redirect from the server, but didn't receive one");
+    }
+  } catch (error) {
+    console.error('Error creating payment:', error);
+    // Handle the error (e.g., show an error message to the user)
+  }
 };
 </script>
 
