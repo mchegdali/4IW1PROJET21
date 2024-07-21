@@ -50,30 +50,29 @@ export default defineComponent({
     const sortOrder = ref<'asc' | 'desc'>('asc');
 
     const fetchClients = async (page: number, sortField: string, sortOrder: 'asc' | 'desc') => {
-      const userStore = useUserStore();
-      await userStore.refreshAccessToken();
-      const accessToken = userStore.accessToken;
-      try {
-        // const response = await fetch(`/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}`);
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`
-          }
-        });
-        const data = await response.json();
-        clients.value = data.items.map((item: any) => ({
-          _id: item._id,
-          fullname: item.fullname,
-          email: item.email,
-          city: item.addresses[0]?.city || 'N/A', // On utilise la première adresse ou 'N/A' si elle n'existe pas
-        }));
-        totalPages.value = data.metadata.totalPages;
-      } catch (error) {
-        console.error('Error fetching clients:', error);
-      }
-    };
+    const userStore = useUserStore();
+    await userStore.refreshAccessToken();
+    const accessToken = userStore.accessToken;
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`
+        }
+      });
+      const data = await response.json();
+      clients.value = data.items.map((item: any) => ({
+        _id: item._id,
+        fullname: item.fullname,
+        email: item.email,
+        city: item.addresses[0]?.city || 'N/A',
+      }));
+      totalPages.value = data.metadata.totalPages;
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+    }
+  };
 
     const nextPage = () => {
       if (page.value < totalPages.value) {
@@ -116,11 +115,3 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped></style>
-
-
-
-
-
-
-
-
