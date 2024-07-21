@@ -8,7 +8,19 @@ import config from '@/config';
 const route = useRoute();
 const trackingId = route.params.id;
 
-const orderData = ref({
+const orderData = ref<{
+  idShip: string;
+  event: { date: string; label: string; code: string }[];
+  timeline: {
+    id: string;
+    shortLabel: string;
+    longLabel: string;
+    status: boolean;
+    type: number;
+    date: string;
+    country: string;
+  }[];
+}>({
   idShip: '',
   event: [],
   timeline: []
@@ -22,48 +34,45 @@ onMounted(async () => {
   try {
     const response = await fetch(`${config.apiBaseUrl}/v1/tracking?tracking_number=${trackingId}`);
     if (!response.ok) throw new Error('Failed to fetch tracking data');
-    
+
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('La réponse n\'est pas au format JSON');
+      throw new Error("La réponse n'est pas au format JSON");
     }
 
     const data = await response.json();
     orderData.value = {
       idShip: data.tracking_number,
-      timeline: data.events.map(event => ({
+      timeline: data.events.map((event: any) => ({
         id: event.event_code,
         shortLabel: event.description,
-        longLabel: event.event_code === 'DELIVERED'
-          ? `Votre colis a été livré à ${event.city_locality}, ${event.state_province}, ${event.country_code}.`
-          : event.event_code === 'RECEIVED' || event.event_code === 'SHIPPED'
-            ? `${event.city_locality}, ${event.state_province}, ${event.country_code}`
-            : `Votre colis est arrivé à ${event.city_locality}, ${event.state_province}, ${event.country_code}.`,
+        longLabel:
+          event.event_code === 'DELIVERED'
+            ? `Votre colis a été livré à ${event.city_locality}, ${event.state_province}, ${event.country_code}.`
+            : event.event_code === 'RECEIVED' || event.event_code === 'SHIPPED'
+              ? `${event.city_locality}, ${event.state_province}, ${event.country_code}`
+              : `Votre colis est arrivé à ${event.city_locality}, ${event.state_province}, ${event.country_code}.`,
         status: true,
         type: -1,
         date: event.occurred_at,
         country: event.country_code
       })),
-      event: data.events.map(event => ({
+      event: data.events.map((event: any) => ({
         date: event.occurred_at,
-        label: event.event_code === 'DELIVERED'
-          ? 'Votre colis a été livré.'
-          : event.event_code === 'RECEIVED' || event.event_code === 'SHIPPED'
-            ? `${event.city_locality}, ${event.state_province}, ${event.country_code}`
-            : data.status_description,
+        label:
+          event.event_code === 'DELIVERED'
+            ? 'Votre colis a été livré.'
+            : event.event_code === 'RECEIVED' || event.event_code === 'SHIPPED'
+              ? `${event.city_locality}, ${event.state_province}, ${event.country_code}`
+              : data.status_description,
         code: event.event_code
-      })),
-      product: data.carrier_code,
-      entryDate: data.events[0].occurred_at,
-      estimDate: data.events[0].occurred_at,
-      deliveryDate: data.events[data.events.length - 1].occurred_at
+      }))
     };
   } catch (error) {
     console.error('Erreur lors de la récupération des données de suivi:', error.message);
   }
 });
 </script>
-
 
 <template>
   <div class="flex flex-col gap-6 p-6">
@@ -72,7 +81,7 @@ onMounted(async () => {
       N° de suivi: <span class="font-bold">{{ orderData.idShip }}</span>
     </div>
 
-    <!-- Section Evénements de livraison -->
+    <!-- Section Événements de livraison -->
     <div v-if="orderData.event.length > 0" class="">
       <h3 class="text-xl font-semibold">Événements de livraison</h3>
       <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
@@ -110,7 +119,9 @@ onMounted(async () => {
             <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
               {{ formatDate(item.date) }}
             </time>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.shortLabel }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ item.shortLabel }}
+            </h3>
             <p class="mb-2 text-base font-normal text-gray-500 dark:text-gray-400">
               {{ item.longLabel }}
             </p>

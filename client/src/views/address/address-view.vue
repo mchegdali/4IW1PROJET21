@@ -5,7 +5,7 @@ import ConfirmModal from '../../components/modal/confirm-modal.vue';
 import config from '@/config';
 
 interface Address {
-  _id: string; // Assurez-vous que cet ID est bien une chaîne de caractères
+  _id: string;
   firstName: string;
   lastName: string;
   street: string;
@@ -31,7 +31,7 @@ const getAddresses = async () => {
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
-    console.log('Fetched addresses:', data); // Vérifiez la structure des données
+    console.log("Fetched addresses:", data);
     addresses.value = data;
   } catch (error) {
     console.error('Erreur lors de la récupération des adresses:', error);
@@ -39,7 +39,7 @@ const getAddresses = async () => {
 };
 
 const deleteAddress = (addressId: string) => {
-  console.log('Address ID to delete:', addressId); // Assurez-vous que l'ID est bien défini
+  console.log("Address ID to delete:", addressId);
   showModal.value = true;
   addressToDelete.value = addressId;
 };
