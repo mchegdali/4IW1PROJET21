@@ -276,11 +276,11 @@ window.addEventListener('resize', () => {
         </div>
         <div
           class="border-b border-t border-gray-200 py-2 flex gap-3"
-          v-if="order.status.label == 'Shipped'"
+          v-if="order.status.label == 'Shipped' || order.status.label == 'Delivered'"
         >
           <Truck />
           <router-link
-           :to="{ name: 'tracking', params: { id: order.orderNumber } }"
+            :to="{ name: 'tracking', params: { id: order.orderNumber } }"
             class="w-1/2 text-tea-600"
             >Suivre le colis</router-link
           >

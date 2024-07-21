@@ -64,7 +64,7 @@
 
             <div
               class="bg-white py-2 text-sm flex items-center gap-2"
-              v-if="order.status.label === 'Shipped'"
+              v-if="order.status.label == 'Shipped' || order.status.label == 'Delivered'"
             >
               <Truck />
               <RouterLink
@@ -226,7 +226,11 @@ const getProductTitle = (productId: string) => {
 };
 
 const computeOrderTotal = () => {
-  return order.value?.items.reduce((total, item) => total + parseFloat(item.price) * (item.quantity || 1), 0).toFixed(2) || '0.00';
+  return (
+    order.value?.items
+      .reduce((total, item) => total + parseFloat(item.price) * (item.quantity || 1), 0)
+      .toFixed(2) || '0.00'
+  );
 };
 
 onMounted(async () => {
@@ -235,7 +239,7 @@ onMounted(async () => {
     const response = await fetch(`http://localhost:3000/orders/${orderId}`);
     if (!response.ok) throw new Error('Failed to fetch order');
     order.value = await response.json();
-    await fetchProductDetails(order.value.items.map(item => item.id));
+    await fetchProductDetails(order.value.items.map((item) => item.id));
   } catch (error) {
     console.error('Error fetching order:', error);
   }

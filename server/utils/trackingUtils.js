@@ -46,10 +46,10 @@ const generateTrackingEvents = (order) => {
     // La date de livraison est simulée ici pour la démonstration
     
       events.push({
-        occurred_at: new Date(order.deliveryDate).toISOString(),
+        occurred_at: deliveryDate.toISOString(),
         description: "Colis livré.",
-        city_locality: "Aubervilliers",
-        state_province: "Île-de-France",
+        city_locality: order.shipping.city,
+        state_province: order.shipping.zipCode,
         country_code: "FR",
         event_code: "DELIVERED"
       });
