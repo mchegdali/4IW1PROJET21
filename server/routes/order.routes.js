@@ -10,24 +10,28 @@ const {
   getOrderStatusDistribution,
   getTotalSales,
   getDistinctCustomerCount,
+  getUserOrders,
 } = require('../controllers/order.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
 
 const orderRouter = Router();
+const userOrderRouter = Router({ mergeParams: true });
 
 orderRouter.route('/orders').get(getOrders).post(createOrder);
 
-orderRouter.get('/orders/count',
+orderRouter.get(
+  '/orders/count',
   checkAuth(authConfig.accessTokenSecret, false),
   checkRole(['admin']),
-  getOrderCount
+  getOrderCount,
 );
 
-orderRouter.get('/orders/revenue',
+orderRouter.get(
+  '/orders/revenue',
   checkAuth(authConfig.accessTokenSecret, false),
   checkRole(['admin']),
-  getTotalRevenue
+  getTotalRevenue,
 );
 
 // Nombre total de ventes
@@ -35,7 +39,7 @@ orderRouter.get(
   '/orders/total-sales',
   checkAuth(authConfig.accessTokenSecret, false),
   checkRole(['admin']),
-  getTotalSales
+  getTotalSales,
 );
 
 //Nombre d'users distinct
@@ -46,10 +50,11 @@ orderRouter.get(
   getDistinctCustomerCount,
 );
 
-orderRouter.get('/orders/status-distribution',
+orderRouter.get(
+  '/orders/status-distribution',
   checkAuth(authConfig.accessTokenSecret, false),
   checkRole(['admin']),
-  getOrderStatusDistribution
+  getOrderStatusDistribution,
 );
 
 orderRouter
@@ -58,4 +63,6 @@ orderRouter
   .patch(updateOrder)
   .delete(deleteOrder);
 
-module.exports = orderRouter;
+userOrderRouter.get('/', getUserOrders);
+
+module.exports = { orderRouter, userOrderRouter };
