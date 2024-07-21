@@ -14,6 +14,7 @@ const {
 } = require('../controllers/order.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
+const { isOwnOrder } = require('../middlewares/order.middleware');
 
 const orderRouter = Router();
 const userOrderRouter = Router({ mergeParams: true });
@@ -63,6 +64,7 @@ orderRouter.get(
 
 orderRouter
   .route('/orders/:id')
+  .all( checkAuth(authConfig.accessTokenSecret),isOwnOrder)
   .get(getOrder)
   .patch(updateOrder)
   .delete(deleteOrder);

@@ -424,7 +424,8 @@ async function getTopProductsDistribution(req, res, next) {
 const getUserOrders = async (req, res, next) => {
   try {
     const { userId } = req.params;
-
+    console.log(userId);
+    console.log(req.user);
     const orders = await OrdersMongo.find({ 'user._id': userId }).lean();
 
     if (orders.length === 0) {

@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { RouterLink } from 'vue-router';
 import { Calendar, MapPin, Package2, Phone, Truck } from 'lucide-vue-next';
 import config from '@/config';
+import { useUserStore } from '@/stores/user';
 
 interface Product {
   id: string;
@@ -46,7 +47,9 @@ const products = ref<Product[]>([]);
 const fetchProductDetails = async (productIds: string[]) => {
   try {
     const productPromises = productIds.map((id) =>
-      fetch(`${config.apiBaseUrl}/products/${id}`).then((response) => response.json())
+      fetch(`${config.apiBaseUrl}/products/${id}`, { headers: {
+        Authorization: `Bearer ${userStore.accessToken}`
+      }}).then((response) => response.json())
     );
     const productData = await Promise.all(productPromises);
     products.value = productData;
@@ -73,10 +76,17 @@ const computeOrderTotal = () => {
   );
 };
 
+const userStore = useUserStore();
+userStore.accessToken;
+
 onMounted(async () => {
   const orderId = route.params.id as string;
   try {
-    const response = await fetch(`${config.apiBaseUrl}/orders/${orderId}`);
+    const response = await fetch(`${config.apiBaseUrl}/orders/${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${userStore.accessToken}`
+      }
+    });
     if (!response.ok) throw new Error('Failed to fetch order');
 
     order.value = await response.json();
@@ -228,9 +238,7 @@ onMounted(async () => {
             </p>
           </div>
           <div class="w-full h-3 bg-gray-200 rounded-xl"></div>
-          <p class="text-xs sm:text-sm">
-            Votre commande a été annulée.
-          </p>
+          <p class="text-xs sm:text-sm">Votre commande a été annulée.</p>
         </div>
 
         <!-- Order Items -->

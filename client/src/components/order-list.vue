@@ -100,7 +100,11 @@ async function fetchProductDetails(orders: Order[]): Promise<void> {
 
   for (const productId of productIds) {
     try {
-      const response = await fetch(`${config.apiBaseUrl}/products/${productId}`);
+      const response = await fetch(`${config.apiBaseUrl}/products/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${userStore.accessToken}`
+        }
+      });
       if (!response.ok) throw new Error('Network response was not ok');
       const product = await response.json();
       itemDetails.value = { ...itemDetails.value, [product.id]: product };
