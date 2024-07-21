@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Package2, Truck } from 'lucide-vue-next';
 import { useUserStore } from '@/stores/user';
+import config from '@/config';
 
 interface Order {
   _id: string;
@@ -75,7 +76,7 @@ userStore.accessToken;
 
 async function fetchOrders(): Promise<void> {
   try {
-    const response = await fetch(`http://localhost:3000/users/${userId}/orders`, {
+    const response = await fetch(`${config.apiBaseUrl}/users/${userId}/orders`, {
       headers: {
         Authorization: `Bearer ${userStore.accessToken}`
       }
@@ -99,7 +100,7 @@ async function fetchProductDetails(orders: Order[]): Promise<void> {
 
   for (const productId of productIds) {
     try {
-      const response = await fetch(`http://localhost:3000/products/${productId}`);
+      const response = await fetch(`${config.apiBaseUrl}/products/${productId}`);
       if (!response.ok) throw new Error('Network response was not ok');
       const product = await response.json();
       itemDetails.value = { ...itemDetails.value, [product.id]: product };

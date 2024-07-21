@@ -164,6 +164,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { RouterLink } from 'vue-router';
 import { Calendar, Package2, Truck } from 'lucide-vue-next';
+import config from '@/config';
 
 interface Product {
   id: string;
@@ -206,7 +207,7 @@ const products = ref<Product[]>([]);
 const fetchProductDetails = async (productIds: string[]) => {
   try {
     const productPromises = productIds.map((id) =>
-      fetch(`http://localhost:3000/products/${id}`).then((response) => response.json())
+      fetch(`${config.apiBaseUrl}/products/${id}`).then((response) => response.json())
     );
     const productData = await Promise.all(productPromises);
     products.value = productData;
@@ -236,7 +237,7 @@ const computeOrderTotal = () => {
 onMounted(async () => {
   const orderId = route.params.id as string;
   try {
-    const response = await fetch(`http://localhost:3000/orders/${orderId}`);
+    const response = await fetch(`${config.apiBaseUrl}/orders/${orderId}`);
     if (!response.ok) throw new Error('Failed to fetch order');
     order.value = await response.json();
     await fetchProductDetails(order.value.items.map((item) => item.id));

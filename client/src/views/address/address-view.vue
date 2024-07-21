@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { FilePenLine, MoveLeft, Trash } from 'lucide-vue-next';
 import ConfirmModal from '../../components/modal/confirm-modal.vue';
+import config from '@/config';
 
 interface Address {
   _id: string; // Assurez-vous que cet ID est bien une chaîne de caractères
@@ -25,7 +26,7 @@ const customMessage = ref('Êtes-vous sûr de vouloir supprimer cette adresse ?'
 
 const getAddresses = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/users/${userId}/addresses/`, {headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}});
+    const response = await fetch(`${config.apiBaseUrl}/users/${userId}/addresses/`, {headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}});
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -53,7 +54,7 @@ const confirmDeletion = async () => {
 
   try {
     const response = await fetch(
-      `http://localhost:3000/users/${userId}/addresses/${addressToDelete.value}`,
+      `${config.apiBaseUrl}/users/${userId}/addresses/${addressToDelete.value}`,
       {
         method: 'DELETE',
         headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}

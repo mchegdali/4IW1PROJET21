@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRoute } from 'vue-router';
+import config from '@/config';
 
 const route = useRoute();
 const trackingId = route.params.id;
@@ -19,7 +20,7 @@ const formatDate = (dateString: string) => {
 
 onMounted(async () => {
   try {
-    const response = await fetch(`http://localhost:3000/v1/tracking?tracking_number=${trackingId}`);
+    const response = await fetch(`${config.apiBaseUrl}/v1/tracking?tracking_number=${trackingId}`);
     if (!response.ok) throw new Error('Failed to fetch tracking data');
     
     const contentType = response.headers.get('content-type');
