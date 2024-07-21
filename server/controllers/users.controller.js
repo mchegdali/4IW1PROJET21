@@ -424,6 +424,30 @@ async function getUsersIds(req, res, next) {
   }
 }
 
+/**
+ * Récupérer les informations des utilisateurs par leurs identifiants
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUsersByIds(req, res, next) {
+  try {
+    const userIds = req.body.ids;
+
+    if (!userIds || !Array.isArray(userIds)) {
+      return res.status(400).json({ message: 'Invalid request, ids must be an array.' });
+    }
+
+    const users = await UserMongo.find({ _id: { $in: userIds } }, {
+      password: 0,
+    });
+
+    return res.json(users);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getUserCount,
   createUser,
@@ -436,5 +460,6 @@ module.exports = {
   getUserRegistrations,
   getUserRegistrationsLast12Months,
   getTopProducts,
-  getUsersIds
+  getUsersIds,
+  getUsersByIds
 };

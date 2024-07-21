@@ -68,6 +68,7 @@ import { defineComponent, computed } from 'vue';
 import type { PropType } from 'vue';
 import DoubleArrow from '../Admin/svg/DoubleArrow.vue';
 import Csv from '../Admin/svg/Csv.vue';
+import { useUserStore } from '@/stores/user';
 
 interface Client {
   _id: string;
@@ -107,9 +108,44 @@ export default defineComponent({
       emit('sort', field);
     };
 
-    const exportCsv = () => {
-      console.log('Export CSV IDs:', props.selectedClientIds);
-      alert(`Les utilisateurs à exporter sont : ${props.selectedClientIds.join(', ')}`);
+    const exportCsv = async () => {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/selected`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ ids: props.selectedClientIds })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to fetch selected users');
+        return;
+      }
+
+      const selectedClients = await response.json();
+
+      const csvContent = 'ID,Nom Complet,Email,Ville\n'
+        + selectedClients.map(client => {
+          const city = client.addresses.length > 0 ? client.addresses[0].city : 'N/A';
+          return `${client.id},${client.fullname},${client.email},${city}`;
+        }).join('\n');
+
+      const handle = await window.showSaveFilePicker({
+        suggestedName: 'clients_selectionnes.csv',
+        types: [{
+          description: 'CSV file',
+          accept: {'text/csv': ['.csv']},
+        }],
+      });
+
+      const writable = await handle.createWritable();
+      await writable.write(csvContent);
+      await writable.close();
     };
 
     const selectAll = (event: Event) => {

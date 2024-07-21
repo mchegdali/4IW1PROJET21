@@ -11,6 +11,7 @@ const {
   getUserRegistrationsLast12Months,
   getTopProducts,
   getUsersIds,
+  getUsersByIds,
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -124,6 +125,13 @@ usersRouter.get(
   checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getUsers,
+);
+
+usersRouter.post(
+  '/users/selected',
+  checkAuth(authConfig.accessTokenSecret),
+  isOwnAccount,
+  getUsersByIds,
 );
 
 module.exports = usersRouter;
