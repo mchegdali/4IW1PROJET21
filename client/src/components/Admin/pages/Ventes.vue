@@ -35,6 +35,14 @@ interface Statistic {
   color: string;
 }
 
+interface Product {
+  _id: string;
+  name: string;
+  totalSold: number;
+  price: { $numberDecimal: string } | null;
+  percentage: string;
+}
+
 export default defineComponent({
   name: 'Ventes',
   components: {
@@ -53,19 +61,20 @@ export default defineComponent({
         chart: {
           id: 'vuechart-donut-ventes'
         },
-        labels: ['Ventes', 'Clients', 'Produits'],
+        labels: [],
         title: {
-          text: 'Répartition des ventes',
-          align: 'left'
-        }
-      },
-      donutChartSeries: [10, 20, 30]
+          text: 'Les produits les plus vendus',
+          align: 'left',
+        },
+      } as { chart: { id: string }; labels: string[]; title: { text: string; align: string } },
+      donutChartSeries: [] as number[],
     };
   },
   async mounted() {
     await this.fetchTotalSales();
     await this.fetchDistinctCustomerCount();
     await this.fetchTotalProducts();
+    await this.fetchTopProducts();
   },
   methods: {
     async fetchTotalSales() {
@@ -99,8 +108,18 @@ export default defineComponent({
         console.error('Error fetching total products:', error);
         this.statisticsData[2].value = '-';
       }
-    }
-  }
+    },
+    async fetchTopProducts() {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/top-products`);
+        const data = await response.json();
+        this.donutChartOptions.labels = data.map((item: Product) => item.name);
+        this.donutChartSeries = data.map((item: Product) => item.totalSold);
+      } catch (error) {
+        console.error('Error fetching top products:', error);
+      }
+    },
+  },
 });
 </script>
 
