@@ -74,7 +74,7 @@ async function createUser(req, res, next) {
  */
 async function getUsers(req, res, next) {
   try {
-    const { page, text, pageSize } = userQuerySchema.parse(req.query);
+    const { page, text, pageSize, sortField, sortOrder } = userQuerySchema.parse(req.query);
 
     /**
      * @type {import('mongoose').PipelineStage[]  }
@@ -98,37 +98,50 @@ async function getUsers(req, res, next) {
       );
     }
 
-    pipelineStages.push({
-      $facet: {
-        metadata: [
-          { $count: 'total' },
-          {
-            $set: {
-              page,
-              totalPages: { $ceil: { $divide: ['$total', pageSize] } },
-              pageSize,
+    console.log("req.query", req.query); // Ajout pour vérifier le contenu de req.query
+    console.log("sortField", sortField); // Devrait afficher la valeur de sortField
+    console.log("sortOrder", sortOrder); // Devrait afficher la valeur de sortOrder
+
+    if (sortField && sortOrder) {
+      const sortStage = {};
+      const field = sortField === 'id' ? '_id' : sortField;
+      sortStage[field] = sortOrder === 'asc' ? 1 : -1;
+      pipelineStages.push({ $sort: sortStage });
+    }
+
+    pipelineStages.push(
+      {
+        $facet: {
+          metadata: [
+            { $count: 'total' },
+            {
+              $set: {
+                page,
+                totalPages: { $ceil: { $divide: ['$total', pageSize] } },
+                pageSize,
+              },
             },
-          },
-        ],
-        items: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+          ],
+          items: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+        },
       },
-    });
+    );
 
-    const [{ items, metadata }] = await UserMongo.aggregate(pipelineStages);
+    const [result] = await UserMongo.aggregate(pipelineStages);
+    const items = result.items ?? [];
+    const metadata = result.metadata[0] ?? {
+      total: 0,
+      page: 1,
+      totalPages: 0,
+      pageSize,
+    };
 
-    return res.json({
-      metadata: metadata[0] ?? {
-        total: 0,
-        page: 1,
-        totalPages: 0,
-        pageSize,
-      },
-      items: items ?? [],
-    });
+    return res.json({ metadata, items });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 }
+
 
 /**
  *

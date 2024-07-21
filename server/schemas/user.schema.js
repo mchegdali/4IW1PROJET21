@@ -7,6 +7,8 @@ const { paginationSchema } = require('./pagination.schema');
 const userQuerySchema = z
   .object({
     text: z.string().min(2).optional(),
+    sortField: z.string().optional(),
+    sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
   })
   .merge(paginationSchema);
 
