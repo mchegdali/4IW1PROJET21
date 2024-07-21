@@ -63,7 +63,7 @@ const up = async ({ context: { sequelize } }) => {
           phone: faker.phone.number(),
           deliveryChoiceId: crypto.randomUUID(),
         },
-        createdAt: createdAt,
+        createdAt: createdAt, // Date actuelle
       };
       orders.push(order);
     }

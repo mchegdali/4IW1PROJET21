@@ -3,6 +3,7 @@ import AdresseForm from '@/components/adresse-form.vue';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { MoveLeft } from 'lucide-vue-next';
+import config from '@/config';
 
 const route = useRoute();
 const router = useRouter();
@@ -14,7 +15,7 @@ const initialAddressData = ref(null);
 
 const loadAddress = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/users/${userId}/addresses/${addressId}`);
+    const response = await fetch(`${config.apiBaseUrl}/users/${userId}/addresses/${addressId}`, {headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}});
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }

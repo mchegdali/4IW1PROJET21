@@ -2,9 +2,10 @@
 import { ref, onMounted } from 'vue';
 import { FilePenLine, MoveLeft, Trash } from 'lucide-vue-next';
 import ConfirmModal from '../../components/modal/confirm-modal.vue';
+import config from '@/config';
 
 interface Address {
-  _id: string; // Assurez-vous que cet ID est bien une chaîne de caractères
+  _id: string;
   firstName: string;
   lastName: string;
   street: string;
@@ -25,12 +26,12 @@ const customMessage = ref('Êtes-vous sûr de vouloir supprimer cette adresse ?'
 
 const getAddresses = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/users/${userId}/addresses/`);
+    const response = await fetch(`${config.apiBaseUrl}/users/${userId}/addresses/`, {headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}});
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
-    console.log('Fetched addresses:', data); // Vérifiez la structure des données
+    console.log("Fetched addresses:", data);
     addresses.value = data;
   } catch (error) {
     console.error('Erreur lors de la récupération des adresses:', error);
@@ -38,7 +39,7 @@ const getAddresses = async () => {
 };
 
 const deleteAddress = (addressId: string) => {
-  console.log('Address ID to delete:', addressId); // Assurez-vous que l'ID est bien défini
+  console.log("Address ID to delete:", addressId);
   showModal.value = true;
   addressToDelete.value = addressId;
 };
@@ -53,9 +54,10 @@ const confirmDeletion = async () => {
 
   try {
     const response = await fetch(
-      `http://localhost:3000/users/${userId}/addresses/${addressToDelete.value}`,
+      `${config.apiBaseUrl}/users/${userId}/addresses/${addressToDelete.value}`,
       {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}
       }
     );
     if (!response.ok) {

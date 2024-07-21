@@ -57,6 +57,10 @@ usersRouter.get(
 
 usersRouter.use(
   '/users/:userId/addresses',
+  (req, res, next) => {
+    console.log(req.headers);
+    next();
+  },
   checkAuth(authConfig.accessTokenSecret),
   isOwnAccount,
   addressesRouter,
