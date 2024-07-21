@@ -61,6 +61,9 @@ app.use(cors(corsOptions));
 app.use(helmet());
 >>>>>>> 4556f53 (payment2 liaison back front debut page payment confirmation)
 
+// Routes principales
+app.use('/v1/tracking', trackingRouter); // Utilisation de la route de suivi de colis
+
 app.use(authRouter);
 app.use(usersRouter);
 app.use(productsRouter);
