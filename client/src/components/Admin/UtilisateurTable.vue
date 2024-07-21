@@ -8,7 +8,7 @@
           placeholder="Rechercher..."
           class="p-2 border border-gray-300 rounded"
         />
-        <Csv class="h-9 cursor-pointer" />
+        <Csv class="h-9 cursor-pointer" @click="exportCsv"/>
       </div>
     </div>
 
@@ -16,7 +16,7 @@
       <thead class="bg-gray-100">
         <tr class="h-16">
           <th class="py-2 px-4 w-1/6">
-            <input type="checkbox" />
+            <input type="checkbox" @change="selectAll" />
           </th>
           <th @click="sortBy('id')" class="py-2 px-4 cursor-pointer hover:bg-gray-200 w-1/6 bg-red-500">
             ID
@@ -40,7 +40,7 @@
       <tbody>
         <tr v-for="client in clients" :key="client._id" class="border-t hover:bg-gray-50">
           <td class="py-2 px-4 text-center w-1/6">
-            <input type="checkbox" />
+            <input type="checkbox" :value="client" v-model="selectedClients" />
           </td>
           <td class="py-2 px-4 text-center w-1/6">{{ client._id }}</td>
           <td class="py-2 px-4 text-center w-1/6">{{ client.fullname }}</td>
@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import type { PropType } from 'vue';
 import DoubleArrow from '../Admin/svg/DoubleArrow.vue';
 import Csv from '../Admin/svg/Csv.vue';
@@ -89,10 +89,33 @@ export default defineComponent({
     }
   },
   emits: ['sort'],
-  methods: {
-    sortBy(field: string) {
-      this.$emit('sort', field);
-    }
+  setup(props, { emit }) {
+    const selectedClients = ref<Client[]>([]);
+
+    const sortBy = (field: string) => {
+      emit('sort', field);
+    };
+
+    const exportCsv = () => {
+      const clientNames = selectedClients.value.map(client => client.fullname).join(', ');
+      alert(`Les utilisateurs à exporter sont : ${clientNames}`);
+    };
+
+    const selectAll = (event: Event) => {
+      const isChecked = (event.target as HTMLInputElement).checked;
+      if (isChecked) {
+        selectedClients.value = [...props.clients];
+      } else {
+        selectedClients.value = [];
+      }
+    };
+
+    return {
+      selectedClients,
+      sortBy,
+      exportCsv,
+      selectAll
+    };
   }
 });
 </script>
