@@ -12,7 +12,10 @@ const {
 } = require('../controllers/users.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
-const { isOwnAccount } = require('../middlewares/user.middleware');
+const {
+  isOwnAccount,
+  checkCreateUserAuth,
+} = require('../middlewares/user.middleware');
 const addressesRouter = require('./addresses.routes');
 const userBasketRouter = require('./basket.routes');
 const { userOrderRouter } = require('./order.routes');
@@ -93,7 +96,7 @@ usersRouter.delete(
   deleteUser,
 );
 
-usersRouter.post('/users', checkAuth(authConfig.accessTokenSecret), createUser);
+usersRouter.post('/users', checkCreateUserAuth, createUser);
 
 usersRouter.get(
   '/users',

@@ -9,6 +9,10 @@ const UserMongo = require('../models/mongo/user.mongo');
  */
 const checkAuth = (secret) => async (req, res, next) => {
   try {
+    if (typeof req.headers.authorization !== 'string') {
+      return res.sendStatus(401);
+    }
+
     const tokenParts = req.headers.authorization.split(' ');
     if (tokenParts.length !== 2) {
       return res.sendStatus(401);
