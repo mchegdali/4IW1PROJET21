@@ -2,17 +2,26 @@ const generateTrackingEvents = (order) => {
   const events = [];
   const createdAt = new Date(order.createdAt);
 
-  // Calcul des dates des événements
+  const setEventTime = (date, hours, minutes, seconds = 0) => {
+    date.setHours(hours, minutes, seconds);
+  };
+
   const shippingDate = new Date(createdAt);
   shippingDate.setDate(createdAt.getDate() + 1); // Expédition 1 jour après la création
+  setEventTime(shippingDate, 10, 0);
 
   const inTransitDate = new Date(shippingDate);
-  inTransitDate.setDate(shippingDate.getDate() + 2); // En transit 2 jours après l'expédition
+  inTransitDate.setDate(shippingDate.getDate() + 1); // En transit 1 jour après l'expédition
+  setEventTime(inTransitDate, 12, 30);
 
-  const deliveryDate = new Date(inTransitDate);
-  deliveryDate.setDate(inTransitDate.getDate() + 5); // Livraison 5 jours après le transit
+  const outForDeliveryDate = new Date(inTransitDate);
+  outForDeliveryDate.setDate(inTransitDate.getDate() + 1); // En cours de livraison 1 jour après le transit
+  setEventTime(outForDeliveryDate, 14, 45);
 
-  // Ajouter les événements de suivi
+  const deliveryDate = new Date(outForDeliveryDate);
+  deliveryDate.setDate(outForDeliveryDate.getDate());
+  setEventTime(deliveryDate, 16, 0);
+
   events.push({
     occurred_at: createdAt.toISOString(),
     description: "Commande reçue.",
@@ -32,19 +41,25 @@ const generateTrackingEvents = (order) => {
       event_code: "SHIPPED"
     });
 
-    if (order.status.label == 'Delivered') {
-    events.push({
-      occurred_at: inTransitDate.toISOString(),
-      description: "Colis en transit.",
-      city_locality: "Cergy",
-      state_province: "Île-de-France",
-      country_code: "FR",
-      event_code: "IN_TRANSIT"
-    });
+    if (order.status.label === 'Delivered') {
+      events.push({
+        occurred_at: inTransitDate.toISOString(),
+        description: "Colis en transit.",
+        city_locality: "Cergy",
+        state_province: "Île-de-France",
+        country_code: "FR",
+        event_code: "IN_TRANSIT"
+      });
 
-    // Ajouter la livraison si l'état est 'Delivered'
-    // La date de livraison est simulée ici pour la démonstration
-    
+      events.push({
+        occurred_at: outForDeliveryDate.toISOString(),
+        description: "En cours de livraison.",
+        city_locality: order.shipping.city,
+        state_province: order.shipping.zipCode,
+        country_code: "FR",
+        event_code: "OUT_FOR_DELIVERY"
+      });
+
       events.push({
         occurred_at: deliveryDate.toISOString(),
         description: "Colis livré.",
@@ -54,7 +69,7 @@ const generateTrackingEvents = (order) => {
         event_code: "DELIVERED"
       });
     }
-  } 
+  }
 
   return {
     tracking_number: order.orderNumber,
