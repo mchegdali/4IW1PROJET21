@@ -9,6 +9,15 @@
       @update-selection="handleUpdateSelection"
       @search="handleSearch"
       @view-client="handleViewClient"
+      @edit-client="handleEditClient"
+    />
+    <DialogUtilisateur
+      v-if="selectedClient"
+      :client="selectedClient"
+      :model-value="isDialogOpen"
+      :is-edit-mode="isEditMode"
+      @update:model-value="isDialogOpen = $event"
+      @save="handleSave"
     />
     <div class="mt-4 flex items-center justify-center">
       <button
@@ -33,6 +42,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from 'vue';
 import UtilisateurTable from '../UtilisateurTable.vue';
+import DialogUtilisateur from '../DialogUtilisateur.vue';
 import { useUserStore } from '@/stores/user';
 
 interface Client {
@@ -48,12 +58,14 @@ export default defineComponent({
   name: 'Utilisateur',
   components: {
     UtilisateurTable,
+    DialogUtilisateur
   },
   setup() {
     const clients = ref<Client[]>([]);
     const selectedClientIds = ref<string[]>([]);
     const selectedClient = ref<Client | null>(null);
     const isDialogOpen = ref(false);
+    const isEditMode = ref(false);
     const allClientIds = ref<string[]>([]);
     const page = ref(1);
     const totalPages = ref(1);
@@ -62,33 +74,33 @@ export default defineComponent({
     const searchText = ref('');
 
     const fetchClients = async (page: number, sortField: string, sortOrder: 'asc' | 'desc', text: string = '') => {
-  const userStore = useUserStore();
-  await userStore.refreshAccessToken();
-  const accessToken = userStore.accessToken;
-  try {
-    const searchParam = text.length >= 3 ? `&text=${text}` : '';
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+      try {
+        const searchParam = text.length >= 3 ? `&text=${text}` : '';
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        console.log(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`);
+        const data = await response.json();
+        clients.value = data.items.map((item: any) => ({
+          _id: item._id,
+          fullname: item.fullname,
+          email: item.email,
+          city: item.addresses[0]?.city || 'N/A',
+          role: item.role,
+          addresses: item.addresses
+        }));
+        totalPages.value = data.metadata.totalPages;
+      } catch (error) {
+        console.error('Error fetching clients:', error);
       }
-    });
-    console.log(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`);
-    const data = await response.json();
-    clients.value = data.items.map((item: any) => ({
-      _id: item._id,
-      fullname: item.fullname,
-      email: item.email,
-      city: item.addresses[0]?.city || 'N/A',
-      role: item.role,
-      addresses: item.addresses
-    }));
-    totalPages.value = data.metadata.totalPages;
-  } catch (error) {
-    console.error('Error fetching clients:', error);
-  }
-};
+    };
 
     const fetchClientDetails = async (clientId: string) => {
       const userStore = useUserStore();
@@ -186,6 +198,20 @@ export default defineComponent({
       fetchClientDetails(clientId);
     };
 
+    const handleEditClient = (clientId: string) => {
+      isEditMode.value = true;
+      fetchClientDetails(clientId);
+    };
+
+    const handleSave = (updatedClient: Client) => {
+      const index = clients.value.findIndex(client => client._id === updatedClient._id);
+      if (index !== -1) {
+        clients.value[index] = updatedClient;
+      }
+      isDialogOpen.value = false;
+      isEditMode.value = false;
+    };
+
     onMounted(() => {
       fetchClients(page.value, sortField.value, sortOrder.value);
     });
@@ -199,6 +225,7 @@ export default defineComponent({
       selectedClientIds,
       selectedClient,
       isDialogOpen,
+      isEditMode,
       page,
       totalPages,
       nextPage,
@@ -207,7 +234,9 @@ export default defineComponent({
       handleSelectAll,
       handleUpdateSelection,
       handleSearch,
-      handleViewClient
+      handleViewClient,
+      handleEditClient,
+      handleSave
     };
   }
 });

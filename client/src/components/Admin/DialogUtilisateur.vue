@@ -78,6 +78,7 @@
 <script lang="ts">
 import { defineComponent, watch } from 'vue';
 import type { PropType } from 'vue';
+import { useUserStore } from '@/stores/user';
 
 interface Client {
   id: string;
@@ -131,9 +132,28 @@ export default defineComponent({
     closeDialog() {
       this.isOpen = false;
     },
-    saveChanges() {
-      this.$emit('save', this.localClient);
-      this.closeDialog();
+    async saveChanges() {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          },
+          body: JSON.stringify(this.localClient)
+        });
+        if (response.ok) {
+          this.$emit('save', this.localClient);
+          this.closeDialog();
+        } else {
+          console.error('Failed to update client');
+        }
+      } catch (error) {
+        console.error('Error saving changes:', error);
+      }
     }
   }
 });
