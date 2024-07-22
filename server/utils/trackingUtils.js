@@ -3,23 +3,23 @@ const generateTrackingEvents = (order) => {
   const createdAt = new Date(order.createdAt);
 
   const setEventTime = (date, hours, minutes, seconds = 0) => {
-    date.setHours(hours, minutes, seconds);
+    date.setUTCHours(hours, minutes, seconds);
   };
 
   const shippingDate = new Date(createdAt);
-  shippingDate.setDate(createdAt.getDate() + 1); // Expédition 1 jour après la création
+  shippingDate.setUTCDate(createdAt.getUTCDate() + 1); // Expédition 1 jour après la création
   setEventTime(shippingDate, 10, 0);
 
   const inTransitDate = new Date(shippingDate);
-  inTransitDate.setDate(shippingDate.getDate() + 1); // En transit 1 jour après l'expédition
+  inTransitDate.setUTCDate(shippingDate.getUTCDate() + 1); // En transit 1 jour après l'expédition
   setEventTime(inTransitDate, 12, 30);
 
   const outForDeliveryDate = new Date(inTransitDate);
-  outForDeliveryDate.setDate(inTransitDate.getDate() + 1); // En cours de livraison 1 jour après le transit
+  outForDeliveryDate.setUTCDate(inTransitDate.getUTCDate() + 1); // En cours de livraison 1 jour après le transit
   setEventTime(outForDeliveryDate, 14, 45);
 
   const deliveryDate = new Date(outForDeliveryDate);
-  deliveryDate.setDate(outForDeliveryDate.getDate());
+  deliveryDate.setUTCDate(outForDeliveryDate.getUTCDate());
   setEventTime(deliveryDate, 16, 0);
 
   events.push({
@@ -79,6 +79,7 @@ const generateTrackingEvents = (order) => {
     events
   };
 };
+
 
 module.exports = {
   generateTrackingEvents
