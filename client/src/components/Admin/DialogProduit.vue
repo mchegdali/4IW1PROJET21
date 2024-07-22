@@ -61,11 +61,10 @@
         </div>
         <div class="flex justify-end mt-6">
           <button
-            v-if="isEditMode"
             @click="saveChanges"
             class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
           >
-            Enregistrer
+            {{ isEditMode ? 'Enregistrer' : 'Créer' }}
           </button>
           <button
             @click="closeDialog"
@@ -91,12 +90,12 @@ interface Category {
 }
 
 interface Product {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   category: Category;
   price: number;
-  image: string;
+  image?: string;
 }
 
 export default defineComponent({
@@ -136,7 +135,7 @@ export default defineComponent({
   },
   computed: {
     title() {
-      return this.isEditMode ? "Modifier le produit" : "Détails du produit";
+      return this.isEditMode ? "Modifier le produit" : "Créer un produit";
     }
   },
   methods: {
@@ -170,13 +169,17 @@ export default defineComponent({
       const userStore = useUserStore();
       await userStore.refreshAccessToken();
       const accessToken = userStore.accessToken;
+      const url = this.isEditMode 
+        ? `${import.meta.env.VITE_API_BASE_URL}/products/${this.localProduct.id}`
+        : `${import.meta.env.VITE_API_BASE_URL}/products`;
+      const method = this.isEditMode ? 'PATCH' : 'POST';
       try {
         const productUpdateBody = {
           ...this.localProduct,
           categoryId: this.localProduct.category._id
         };
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/${this.localProduct.id}`, {
-          method: 'PATCH',
+        const response = await fetch(url, {
+          method: method,
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`
@@ -184,13 +187,14 @@ export default defineComponent({
           body: JSON.stringify(productUpdateBody)
         });
         if (response.ok) {
-          this.$emit('save', this.localProduct);
+          const result = await response.json();
+          this.$emit('save', result);
           this.closeDialog();
         } else {
-          console.error('Failed to update product');
+          console.error(`Failed to ${this.isEditMode ? 'update' : 'create'} product`);
         }
       } catch (error) {
-        console.error('Error saving changes:', error);
+        console.error(`Error saving changes:`, error);
       }
     }
   },
