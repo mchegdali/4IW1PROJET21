@@ -10,6 +10,8 @@ const paymentQuerySchema = z.object({
 
 const paymentCreateSchema = z.object({
   user: z.string().uuid().optional(),
+  shippingId: z.string().uuid().optional(),
+  paymentType: z.string().optional(),
 });
 
 const paymentUpdateSchema = paymentCreateSchema.partial().refine((a) => {
