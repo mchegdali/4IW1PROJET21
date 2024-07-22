@@ -33,7 +33,6 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from 'vue';
 import UtilisateurTable from '../UtilisateurTable.vue';
-import DialogUtilisateur from '../DialogUtilisateur.vue';
 import { useUserStore } from '@/stores/user';
 
 interface Client {
@@ -49,7 +48,6 @@ export default defineComponent({
   name: 'Utilisateur',
   components: {
     UtilisateurTable,
-    DialogUtilisateur
   },
   setup() {
     const clients = ref<Client[]>([]);
