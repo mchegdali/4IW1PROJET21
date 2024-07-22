@@ -16,9 +16,6 @@
               id="name"
               v-model="localProduct.name"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
-              :disabled="!isEditMode"
-              :readonly="!isEditMode"
-              :class="!isEditMode ? 'readonly-input' : ''"
             />
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
@@ -27,9 +24,6 @@
               id="description"
               v-model="localProduct.description"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
-              :disabled="!isEditMode"
-              :readonly="!isEditMode"
-              :class="!isEditMode ? 'readonly-input' : ''"
             ></textarea>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
@@ -38,8 +32,6 @@
               id="category"
               v-model="localProduct.category._id"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
-              :disabled="!isEditMode"
-              :class="!isEditMode ? 'readonly-input' : ''"
             >
               <option v-for="category in categories" :key="category._id" :value="category._id">
                 {{ category.name }}
@@ -53,9 +45,15 @@
               v-model="localProduct.price"
               type="number"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
-              :disabled="!isEditMode"
-              :readonly="!isEditMode"
-              :class="!isEditMode ? 'readonly-input' : ''"
+            />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4">
+            <label for="image" class="text-right font-medium text-gray-700">Image</label>
+            <input
+              id="image"
+              type="file"
+              @change="handleImageUpload"
+              class="col-span-3 p-2 border border-gray-300 rounded-md"
             />
           </div>
         </div>
@@ -119,7 +117,8 @@ export default defineComponent({
     return {
       isOpen: this.modelValue,
       localProduct: { ...this.product },
-      categories: [] as Category[]
+      categories: [] as Category[],
+      imageFile: null as File | null
     };
   },
   watch: {
@@ -165,6 +164,14 @@ export default defineComponent({
         console.error('Error fetching categories:', error);
       }
     },
+    handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        this.imageFile = file;
+      } else {
+        this.imageFile = null;
+      }
+    },
     async saveChanges() {
       const userStore = useUserStore();
       await userStore.refreshAccessToken();
@@ -174,17 +181,21 @@ export default defineComponent({
         : `${import.meta.env.VITE_API_BASE_URL}/products`;
       const method = this.isEditMode ? 'PATCH' : 'POST';
       try {
-        const productUpdateBody = {
-          ...this.localProduct,
-          categoryId: this.localProduct.category._id
-        };
+        const formData = new FormData();
+        formData.append('name', this.localProduct.name);
+        formData.append('description', this.localProduct.description);
+        formData.append('categoryId', this.localProduct.category._id);
+        formData.append('price', String(this.localProduct.price));
+        if (this.imageFile) {
+          formData.append('image', this.imageFile);
+        }
+        
         const response = await fetch(url, {
           method: method,
           headers: {
-            'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`
           },
-          body: JSON.stringify(productUpdateBody)
+          body: formData
         });
         if (response.ok) {
           const result = await response.json();
