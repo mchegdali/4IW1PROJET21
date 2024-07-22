@@ -74,61 +74,70 @@ async function createUser(req, res, next) {
  */
 async function getUsers(req, res, next) {
   try {
-    const { page, text, pageSize } = userQuerySchema.parse(req.query);
+    console.log('Received query:', req.query);
+    const { page, text, pageSize, sortField, sortOrder } = userQuerySchema.parse(req.query);
 
     /**
      * @type {import('mongoose').PipelineStage[]  }
      */
     const pipelineStages = [];
 
-    if (text) {
+    if (text && text.length >= 3) {
       pipelineStages.push(
         {
           $match: {
-            $text: {
-              $search: text,
-              $diacriticSensitive: false,
-              $caseSensitive: false,
-            },
+            $or: [
+              { _id: { $regex: text, $options: 'i' } },
+              { fullname: { $regex: text, $options: 'i' } },
+              { email: { $regex: text, $options: 'i' } },
+              { 'addresses.city': { $regex: text, $options: 'i' } }
+            ]
           },
-        },
-        {
-          $sort: { score: { $meta: 'textScore' } },
-        },
+        }
       );
     }
 
-    pipelineStages.push({
-      $facet: {
-        metadata: [
-          { $count: 'total' },
-          {
-            $set: {
-              page,
-              totalPages: { $ceil: { $divide: ['$total', pageSize] } },
-              pageSize,
+    if (sortField && sortOrder) {
+      const sortStage = {};
+      const field = sortField === 'id' ? '_id' : sortField;
+      sortStage[field] = sortOrder === 'asc' ? 1 : -1;
+      pipelineStages.push({ $sort: sortStage });
+    }
+
+    pipelineStages.push(
+      {
+        $facet: {
+          metadata: [
+            { $count: 'total' },
+            {
+              $set: {
+                page,
+                totalPages: { $ceil: { $divide: ['$total', pageSize] } },
+                pageSize,
+              },
             },
-          },
-        ],
-        items: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+          ],
+          items: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+        },
       },
-    });
+    );
 
-    const [{ items, metadata }] = await UserMongo.aggregate(pipelineStages);
+    const [result] = await UserMongo.aggregate(pipelineStages);
+    const items = result.items ?? [];
+    const metadata = result.metadata[0] ?? {
+      total: 0,
+      page: 1,
+      totalPages: 0,
+      pageSize,
+    };
 
-    return res.json({
-      metadata: metadata[0] ?? {
-        total: 0,
-        page: 1,
-        totalPages: 0,
-        pageSize,
-      },
-      items: items ?? [],
-    });
+    return res.json({ metadata, items });
   } catch (error) {
-    return next(error);
+    console.error('Error in getUsers:', error);
+    next(error);
   }
 }
+
 
 /**
  *
@@ -400,6 +409,45 @@ async function getTopProducts(req, res, next) {
   }
 }
 
+/**
+ * Récupérer les idS des users
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUsersIds(req, res, next) {
+  try {
+    const userIds = await UserMongo.find({}, '_id'); // Récupérer uniquement les identifiants des utilisateurs
+    res.status(200).json({ items: userIds });
+  } catch (error) {
+    next(error); // Gestion des erreurs
+  }
+}
+
+/**
+ * Récupérer les informations des utilisateurs par leurs identifiants
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getUsersByIds(req, res, next) {
+  try {
+    const userIds = req.body.ids;
+
+    if (!userIds || !Array.isArray(userIds)) {
+      return res.status(400).json({ message: 'Invalid request, ids must be an array.' });
+    }
+
+    const users = await UserMongo.find({ _id: { $in: userIds } }, {
+      password: 0,
+    });
+
+    return res.json(users);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getUserCount,
   createUser,
@@ -412,4 +460,6 @@ module.exports = {
   getUserRegistrations,
   getUserRegistrationsLast12Months,
   getTopProducts,
+  getUsersIds,
+  getUsersByIds
 };
