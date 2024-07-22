@@ -139,18 +139,11 @@ export default defineComponent({
         price: 0,
         image: ''
       };
-      this.isEditMode = true;
+      this.isEditMode = false;
       this.isDialogOpen = true;
     },
-    handleSave(updatedProduct) {
-      if (this.isEditMode) {
-        const index = this.products.findIndex(product => product.id === updatedProduct.id);
-        if (index !== -1) {
-          this.products.splice(index, 1, updatedProduct);
-        }
-      } else {
-        this.products.push(updatedProduct);
-      }
+    async handleSave(updatedProduct) {
+      await this.fetchProducts();  // On rafraichit la page entiere apres avoir soumis l'édit de produit
       this.isDialogOpen = false;
     },
     async deleteProduct(productId) {
