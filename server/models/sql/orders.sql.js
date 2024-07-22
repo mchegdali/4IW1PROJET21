@@ -1,4 +1,5 @@
 const { DataTypes, Model } = require('sequelize');
+const dayjs = require('dayjs');
 
 const OrdersSequelize = (sequelize) => {
   class Orders extends Model {
