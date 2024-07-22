@@ -171,13 +171,17 @@ export default defineComponent({
       await userStore.refreshAccessToken();
       const accessToken = userStore.accessToken;
       try {
+        const productUpdateBody = {
+          ...this.localProduct,
+          categoryId: this.localProduct.category._id
+        };
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/${this.localProduct.id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`
           },
-          body: JSON.stringify(this.localProduct)
+          body: JSON.stringify(productUpdateBody)
         });
         if (response.ok) {
           this.$emit('save', this.localProduct);
