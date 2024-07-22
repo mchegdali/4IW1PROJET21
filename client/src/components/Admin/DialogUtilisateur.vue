@@ -80,7 +80,7 @@ import { defineComponent, watch } from 'vue';
 import type { PropType } from 'vue';
 
 interface Client {
-  id: string;
+  _id: string;
   fullname: string;
   email: string;
   city: string;

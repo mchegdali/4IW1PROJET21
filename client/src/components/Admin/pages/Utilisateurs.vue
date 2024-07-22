@@ -10,6 +10,13 @@
       @search="handleSearch"
       @view-client="handleViewClient"
     />
+    <DialogUtilisateur
+      v-if="isDialogOpen"
+      :client="selectedClient"
+      :modelValue="isDialogOpen"
+      @update:modelValue="isDialogOpen = $event"
+      @save="saveClient"
+    />
     <div class="mt-4 flex items-center justify-center">
       <button
         @click="previousPage"
@@ -33,6 +40,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from 'vue';
 import UtilisateurTable from '../UtilisateurTable.vue';
+import DialogUtilisateur from '../DialogUtilisateur.vue';
 import { useUserStore } from '@/stores/user';
 
 interface Client {
@@ -48,6 +56,7 @@ export default defineComponent({
   name: 'Utilisateur',
   components: {
     UtilisateurTable,
+    DialogUtilisateur
   },
   setup() {
     const clients = ref<Client[]>([]);
@@ -62,33 +71,32 @@ export default defineComponent({
     const searchText = ref('');
 
     const fetchClients = async (page: number, sortField: string, sortOrder: 'asc' | 'desc', text: string = '') => {
-  const userStore = useUserStore();
-  await userStore.refreshAccessToken();
-  const accessToken = userStore.accessToken;
-  try {
-    const searchParam = text.length >= 3 ? `&text=${text}` : '';
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+      try {
+        const searchParam = text.length >= 3 ? `&text=${text}` : '';
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        const data = await response.json();
+        clients.value = data.items.map((item: any) => ({
+          _id: item._id,
+          fullname: item.fullname,
+          email: item.email,
+          city: item.addresses[0]?.city || 'N/A',
+          role: item.role,
+          addresses: item.addresses
+        }));
+        totalPages.value = data.metadata.totalPages;
+      } catch (error) {
+        console.error('Error fetching clients:', error);
       }
-    });
-    console.log(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`);
-    const data = await response.json();
-    clients.value = data.items.map((item: any) => ({
-      _id: item._id,
-      fullname: item.fullname,
-      email: item.email,
-      city: item.addresses[0]?.city || 'N/A',
-      role: item.role,
-      addresses: item.addresses
-    }));
-    totalPages.value = data.metadata.totalPages;
-  } catch (error) {
-    console.error('Error fetching clients:', error);
-  }
-};
+    };
 
     const fetchClientDetails = async (clientId: string) => {
       const userStore = useUserStore();
@@ -186,6 +194,11 @@ export default defineComponent({
       fetchClientDetails(clientId);
     };
 
+    const saveClient = (client: Client) => {
+      // Logique pour enregistrer le client modifié
+      console.log('Saving client:', client);
+    };
+
     onMounted(() => {
       fetchClients(page.value, sortField.value, sortOrder.value);
     });
@@ -207,7 +220,8 @@ export default defineComponent({
       handleSelectAll,
       handleUpdateSelection,
       handleSearch,
-      handleViewClient
+      handleViewClient,
+      saveClient
     };
   }
 });
