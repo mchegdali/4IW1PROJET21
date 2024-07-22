@@ -45,6 +45,7 @@ productsRouter
   .get(getProduct)
   .patch(updateProduct)
   .delete(deleteProduct);
+
 productsRouter.route('/products').get(getProducts).post(createProduct);
 
 module.exports = productsRouter;
