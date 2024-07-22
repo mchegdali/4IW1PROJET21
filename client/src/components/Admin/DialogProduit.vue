@@ -17,6 +17,7 @@
               v-model="localProduct.name"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
             />
+            <div v-if="errors.name" class="col-span-4 text-red-600">{{ errors.name }}</div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="description" class="text-right font-medium text-gray-700">Description</label>
@@ -25,6 +26,7 @@
               v-model="localProduct.description"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
             ></textarea>
+            <div v-if="errors.description" class="col-span-4 text-red-600">{{ errors.description }}</div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="category" class="text-right font-medium text-gray-700">Catégorie</label>
@@ -37,6 +39,7 @@
                 {{ category.name }}
               </option>
             </select>
+            <div v-if="errors.category" class="col-span-4 text-red-600">{{ errors.category }}</div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="price" class="text-right font-medium text-gray-700">Prix</label>
@@ -46,6 +49,7 @@
               type="number"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
             />
+            <div v-if="errors.price" class="col-span-4 text-red-600">{{ errors.price }}</div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="image" class="text-right font-medium text-gray-700">Image</label>
@@ -55,6 +59,7 @@
               @change="handleImageUpload"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
             />
+            <div v-if="errors.image" class="col-span-4 text-red-600">{{ errors.image }}</div>
           </div>
         </div>
         <div class="flex justify-end mt-6">
@@ -118,7 +123,8 @@ export default defineComponent({
       isOpen: this.modelValue,
       localProduct: { ...this.product },
       categories: [] as Category[],
-      imageFile: null as File | null
+      imageFile: null as File | null,
+      errors: {} as Record<string, string>
     };
   },
   watch: {
@@ -189,7 +195,7 @@ export default defineComponent({
         if (this.imageFile) {
           formData.append('image', this.imageFile);
         }
-        
+
         const response = await fetch(url, {
           method: method,
           headers: {
@@ -197,15 +203,26 @@ export default defineComponent({
           },
           body: formData
         });
-        if (response.ok) {
-          const result = await response.json();
-          this.$emit('save', result);
-          this.closeDialog();
-        } else {
-          console.error(`Failed to ${this.isEditMode ? 'update' : 'create'} product`);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          this.handleErrors(errorData);
+          return;
         }
+
+        const result = await response.json();
+        this.$emit('save', result);
+        this.closeDialog();
       } catch (error) {
         console.error(`Error saving changes:`, error);
+      }
+    },
+    handleErrors(errorData) {
+      this.errors = {};
+      for (const key in errorData) {
+        if (errorData.hasOwnProperty(key)) {
+          this.errors[key] = errorData[key];
+        }
       }
     }
   },
