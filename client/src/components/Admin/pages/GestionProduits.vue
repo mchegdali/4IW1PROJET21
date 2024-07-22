@@ -7,8 +7,6 @@
         <button class="text-black bg-gradient-to-r from-blue-300 to-blue-400 hover:bg-gradient-to-l hover:from-blue-400 hover:to-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-200 font-semibold rounded-lg text-sm px-5 py-2.5 text-center">Créer un produit</button>
       </div>
     </div>
-
-
     <table class="min-w-full bg-white border border-gray-300">
       <thead class="bg-gray-100">
         <tr class="h-16">
@@ -31,8 +29,8 @@
           </td>
           <td class="py-2 px-4 text-center w-1/6">
             <button
-              class="text-gray-900 bg-gradient-to-r from-teal-400 to-lime-400 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-              @click="editProduct(product)"
+              class="text-white bg-gradient-to-br from-blue-500 to-cyan-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+              @click="openEditDialog(product)"
             >
               Éditer
             </button>
@@ -64,6 +62,14 @@
         Suivant
       </button>
     </div>
+
+    <DialogProduct
+      v-if="selectedProduct"
+      :product="selectedProduct"
+      v-model:modelValue="isDialogOpen"
+      :isEditMode="isEditMode"
+      @save="handleSave"
+    />
   </div>
 </section>
 </template>
@@ -71,13 +77,20 @@
 <script>
 import { defineComponent, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user';
+import DialogProduct from '../DialogProduit.vue';
 
 export default defineComponent({
+  components: {
+    DialogProduct
+  },
   data() {
     return {
       products: [],
       page: 1,
       totalPages: 1,
+      isDialogOpen: false,
+      selectedProduct: null,
+      isEditMode: false
     };
   },
   async mounted() {
@@ -108,8 +121,17 @@ export default defineComponent({
         this.products = [];
       }
     },
-    editProduct(product) {
-      // todo: logique pour modifier le produit
+    openEditDialog(product) {
+      this.selectedProduct = product;
+      this.isEditMode = true;
+      this.isDialogOpen = true;
+    },
+    handleSave(updatedProduct) {
+      const index = this.products.findIndex(product => product.id === updatedProduct.id);
+      if (index !== -1) {
+        this.products.splice(index, 1, updatedProduct);
+      }
+      this.isDialogOpen = false;
     },
     async deleteProduct(productId) {
       const userStore = useUserStore();
