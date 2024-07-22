@@ -34,14 +34,17 @@
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="category" class="text-right font-medium text-gray-700">Catégorie</label>
-            <input
+            <select
               id="category"
-              v-model="localProduct.category.name"
+              v-model="localProduct.category._id"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
               :disabled="!isEditMode"
-              :readonly="!isEditMode"
               :class="!isEditMode ? 'readonly-input' : ''"
-            />
+            >
+              <option v-for="category in categories" :key="category._id" :value="category._id">
+                {{ category.name }}
+              </option>
+            </select>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="price" class="text-right font-medium text-gray-700">Prix</label>
@@ -77,7 +80,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from 'vue';
+import { defineComponent, watch, onMounted } from 'vue';
 import type { PropType } from 'vue';
 import { useUserStore } from '@/stores/user';
 
@@ -116,7 +119,8 @@ export default defineComponent({
   data() {
     return {
       isOpen: this.modelValue,
-      localProduct: { ...this.product }
+      localProduct: { ...this.product },
+      categories: [] as Category[]
     };
   },
   watch: {
@@ -138,6 +142,29 @@ export default defineComponent({
   methods: {
     closeDialog() {
       this.isOpen = false;
+    },
+    async fetchCategories() {
+      const userStore = useUserStore();
+      await userStore.refreshAccessToken();
+      const accessToken = userStore.accessToken;
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.categories = data;
+        } else {
+          console.error('Failed to fetch categories');
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
     },
     async saveChanges() {
       const userStore = useUserStore();
@@ -162,6 +189,9 @@ export default defineComponent({
         console.error('Error saving changes:', error);
       }
     }
+  },
+  mounted() {
+    this.fetchCategories();
   }
 });
 </script>
