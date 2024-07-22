@@ -433,10 +433,7 @@ onMounted(async () => {
         </div>
 
         <div class="p-4">
-          <button
-            @click="generateInvoice"
-            class="bg-tea-600 text-white py-2 px-4 rounded flex gap-2 w-full"
-          >
+          <button @click="generateInvoice" class="bg-tea-600 text-white py-2 px-4 rounded flex gap-2 w-full">
             Télécharger la facture <FileText />
           </button>
         </div>
