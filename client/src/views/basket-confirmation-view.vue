@@ -17,32 +17,39 @@ const message = ref('');
 
 onBeforeMount(async () => {
   if (userStore.isAuthenticated) {
+    
     const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
     basketStore.products = await response.json();
   }
-  stripe.value = await loadStripe(`${config.STRIPE_KEY}`); // Replace with your actual Stripe public key
+  stripe.value = await loadStripe('pk_test_51PeDeeId99a4h4TCLqm4w85nDdjK25k5H7667JNgbrkhPwCQ04JsEWtZAuQ6EM47nyE3H79XonnUy4eQH3HEaJW000eWWBhyPr'); 
 });
 
 const goBackToBasket = () => {
   router.push({ name: 'basket' });
 };
-
 const proceedToCheckout = async () => {
-  console.log(userStore);
-  console.log('Proceeding to checkout');
-  
   if (basketStore.products.length === 0) {
     alert('Votre panier est vide');
     return;
   }
 
   try {
-    const response = await fetch(`${config.apiBaseUrl}/payment/`, {
+    
+    const shippingId = ref('03de8070-af31-4ad6-a2aa-a4261e66d94b').value;  //je dois rendre dynam
+    
+    const paymentData = {
+      user: userStore.user?.id,
+      shippingId: shippingId,
+      paymentType: 'credit-card' // rendre dynam
+    };
+
+    const response = await fetch('http://localhost:3000/payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userStore.accessToken}`
       },
-      body: JSON.stringify({ user: userStore.user?.id }),
+      body: JSON.stringify(paymentData),
       credentials: 'include'
     });
 
@@ -51,12 +58,12 @@ const proceedToCheckout = async () => {
     }
 
     const session = await response.json();
-    
+
     if (session.id) {
       const { error } = await stripe.value.redirectToCheckout({
         sessionId: session.id,
       });
-      
+
       if (error) {
         message.value = error.message;
       }
