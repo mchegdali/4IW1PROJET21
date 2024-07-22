@@ -4,7 +4,7 @@ import { ZodError, type ZodTypeAny } from 'zod';
 export function useForm<TSchema extends ZodTypeAny>(options: {
   validationSchema: TSchema;
   defaultValues: TSchema['_input'];
-  transform?: TSchema['transform'];
+  transform?: Parameters<TSchema['transform']>[0];
 }) {
   const abortController = ref<AbortController>(new AbortController());
   const { validationSchema, defaultValues = null, transform } = options;

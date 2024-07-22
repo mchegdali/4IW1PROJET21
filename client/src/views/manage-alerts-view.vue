@@ -19,10 +19,10 @@ const alertSchema = z.object({
 const { handleSubmit, defineField, isDirty } = useForm({
   validationSchema: alertSchema,
   defaultValues: {
-    newProductAlert: false,
-    restockAlert: false,
-    priceChangeAlert: false,
-    newsletterAlert: false
+    newProductAlert: !!userStore.user?.newProductAlert,
+    restockAlert: !!userStore.user?.restockAlert,
+    priceChangeAlert: !!userStore.user?.priceChangeAlert,
+    newsletterAlert: !!userStore.user?.newsletterAlert
   }
 });
 
@@ -34,7 +34,7 @@ const [newsletterAlert, newsletterAlertField] = defineField('newsletterAlert');
 const submitHandler = handleSubmit(async (data) => {
   try {
     // Ici, vous devrez implémenter la logique pour sauvegarder les préférences d'alerte de l'utilisateur
-    console.log('Alertes mises à jour:', data);
+    await userStore.updateAlertPreferences(data);
     // Exemple : await userStore.updateAlertPreferences(data);
   } catch (error) {
     console.error('Erreur lors de la mise à jour des alertes:', error);

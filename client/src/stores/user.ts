@@ -6,12 +6,24 @@ import { useBasketStore } from './basket';
 import config from '@/config';
 import router from '@/router';
 
-type User = {
+type UserAlerts = {
+  newProductAlert: boolean;
+  restockAlert: boolean;
+  priceChangeAlert: boolean;
+  newsletterAlert: boolean;
+};
+
+type UserData = {
   fullname: string;
   email: string;
+};
+
+type UserIdentity = {
   role: 'user' | 'admin' | 'accountant';
   id: string;
 };
+
+type User = UserData & UserIdentity & UserAlerts;
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -31,7 +43,7 @@ export const useUserStore = defineStore('user', {
       if (!decodedAccessToken.exp) {
         return false;
       }
-      return decodedAccessToken.exp * 1000 > Date.now();
+      return dayjs.unix(decodedAccessToken.exp).isAfter(dayjs());
     }
   },
   actions: {
@@ -73,17 +85,14 @@ export const useUserStore = defineStore('user', {
         user: data.user
       };
     },
-    async update(user: Partial<{ fullname: string; email: string }>) {
+    async update(user: Partial<UserData>) {
       const response = await fetch(`${config.apiBaseUrl}/users/${this.user?.id!}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.accessToken}`
         },
-        body: JSON.stringify({
-          email: user.email,
-          fullname: user.fullname
-        })
+        body: JSON.stringify(user)
       });
 
       if (!response.ok) {
@@ -93,7 +102,33 @@ export const useUserStore = defineStore('user', {
       const data = await response.json();
 
       //@ts-ignore
-      this.user = { ...this.user, fullname: data.fullname, email: data.email };
+      this.user = {
+        ...this.user,
+        fullname: data.fullname,
+        email: data.email
+      };
+    },
+    async updateAlertPreferences(user: Partial<UserAlerts>) {
+      const response = await fetch(`${config.apiBaseUrl}/users/${this.user?.id}/alerts`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.accessToken}`
+        },
+        body: JSON.stringify(user)
+      });
+
+      if (!response.ok) {
+        throw response;
+      }
+
+      const data = await response.json();
+
+      //@ts-ignore
+      this.user = {
+        ...this.user,
+        ...data
+      };
     },
     async refreshAccessToken() {
       const { data } = useAuthFetch('/auth/refresh-token', {

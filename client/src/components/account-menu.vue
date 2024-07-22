@@ -27,17 +27,6 @@ import { Package2, ChevronRight, Undo2, Home, SquareUser, MailCheck } from 'luci
     </RouterLink>
 
     <RouterLink
-      to="#"
-      class="w-full bg-white flex border-b border-gray-200 p-4 pl-10 justify-between"
-    >
-      <div class="flex gap-4">
-        <p class="text-slate-500"><Undo2 /></p>
-        <p>Vos retours</p>
-      </div>
-      <span><ChevronRight /></span>
-    </RouterLink>
-
-    <RouterLink
       :to="{ name: 'addresses' }"
       class="w-full bg-white flex border-b border-gray-200 p-4 pl-10 justify-between"
     >
