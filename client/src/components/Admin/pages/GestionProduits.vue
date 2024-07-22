@@ -30,7 +30,7 @@
             <td class="py-2 px-4 text-center w-1/6">{{ product.category.name }}</td>
             <td class="py-2 px-4 text-center w-1/6">{{ product.price }} €</td>
             <td class="py-2 px-4 text-center w-1/6">
-              <img :src="product.image" alt="Image du produit" class="w-16 h-16 object-cover mx-auto">
+              <img :src="fullImageUrl(product.image)" crossorigin="anonymous" alt="Image du produit" class="w-16 h-16 object-cover mx-auto">
             </td>
             <td class="py-2 px-4 text-center w-1/6">
               <button
@@ -175,8 +175,12 @@ export default defineComponent({
         this.page++;
         this.fetchProducts();
       }
+    },
+    fullImageUrl(imagePath) {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL;
+      return `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
     }
-  },
+  }
 });
 </script>
 
