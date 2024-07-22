@@ -19,35 +19,69 @@ const OrderSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    paymentType: {
+      type: String,
+      enum: ['credit_card', 'paypal', 'bank_transfer', 'other'],
+      required: true,
+    },
     shipping: {
       type: {
         _id: {
           type: mongoose.Schema.Types.UUID,
           required: true,
         },
-        fullname: {
-          type: String,
-          required: true,
+        address: {
+          type: {
+            _id: {
+              type: mongoose.Schema.Types.UUID,
+              required: true,
+            },
+            firstName: {
+              type: String,
+              required: true,
+            },
+            lastName: {
+              type: String,
+              required: true,
+            },
+
+            region: {
+              type: String,
+              required: true,
+            },
+            country: {
+              type: String,
+              required: true,
+            },
+            street: {
+              type: String,
+              required: true,
+            },
+            zipCode: {
+              type: String,
+              required: true,
+            },
+            city: {
+              type: String,
+              required: true,
+            },
+            phone: {
+              type: String,
+              required: true,
+            },
+          },
         },
-        street: {
-          type: String,
-          required: true,
-        },
-        zipCode: {
-          type: String,
-          required: true,
-        },
-        city: {
-          type: String,
-          required: true,
-        },
-        phone: {
-          type: String,
-          required: true,
-        },
-        deliveryChoiceId: {
-          type: String,
-          required: true,
+        deliveryChoice: {
+          type: {
+            _id: {
+              type: mongoose.Schema.Types.UUID,
+              required: true,
+            },
+            name: {
+              type: String,
+              required: true,
+            },
+          },
         },
       },
     },
@@ -79,6 +113,10 @@ const OrderSchema = new mongoose.Schema(
         },
       },
     },
+    totalPrice: {
+      type: mongoose.Schema.Types.Decimal128,
+      required: true,
+    },
     items: [
       {
         type: {
@@ -89,6 +127,10 @@ const OrderSchema = new mongoose.Schema(
           name: {
             type: String,
             required: true,
+          },
+          quantity: {
+            type: mongoose.Schema.Types.Number,
+            require: true,
           },
           category: {
             type: {

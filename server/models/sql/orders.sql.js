@@ -44,7 +44,7 @@ const OrdersSequelize = (sequelize) => {
       },
       statusId: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
       },
       items: {
         type: DataTypes.JSON,
