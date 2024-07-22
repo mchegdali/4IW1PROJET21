@@ -54,10 +54,15 @@
             >
               Voir
             </button>
-            <button class="text-gray-900 bg-gradient-to-r from-teal-400 to-lime-400 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" >
+            <button
+              class="text-gray-900 bg-gradient-to-r from-teal-400 to-lime-400 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+              @click="editClient(client._id)"
+            >
               Éditer
             </button>
-            <button class="text-gray-900 bg-gradient-to-r from-red-400 via-red-300 to-orange-300 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" >
+            <button
+              class="text-gray-900 bg-gradient-to-r from-red-400 via-red-300 to-orange-300 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+            >
               Supprimer
             </button>
           </td>
@@ -97,7 +102,7 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['sort', 'select-all', 'update-selection', 'view-client', 'search'],
+  emits: ['sort', 'select-all', 'update-selection', 'view-client', 'edit-client', 'search'],
   setup(props, { emit }) {
     const localSelectedClientIds = computed({
       get: () => props.selectedClientIds,
@@ -166,6 +171,10 @@ export default defineComponent({
       emit('view-client', clientId);
     };
 
+    const editClient = (clientId: string) => {
+      emit('edit-client', clientId);
+    };
+
     const handleSearch = (event: Event) => {
       const searchText = (event.target as HTMLInputElement).value;
       emit('search', searchText);
@@ -179,6 +188,7 @@ export default defineComponent({
       selectAll,
       updateSelection,
       viewClient,
+      editClient,
       handleSearch
     };
   }

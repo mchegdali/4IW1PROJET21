@@ -9,13 +9,15 @@
       @update-selection="handleUpdateSelection"
       @search="handleSearch"
       @view-client="handleViewClient"
+      @edit-client="handleEditClient"
     />
     <DialogUtilisateur
-      v-if="isDialogOpen"
+      v-if="selectedClient"
       :client="selectedClient"
-      :modelValue="isDialogOpen"
-      @update:modelValue="isDialogOpen = $event"
-      @save="saveClient"
+      :model-value="isDialogOpen"
+      :is-edit-mode="isEditMode"
+      @update:model-value="isDialogOpen = $event"
+      @save="handleSave"
     />
     <div class="mt-4 flex items-center justify-center">
       <button
@@ -63,6 +65,7 @@ export default defineComponent({
     const selectedClientIds = ref<string[]>([]);
     const selectedClient = ref<Client | null>(null);
     const isDialogOpen = ref(false);
+    const isEditMode = ref(false);
     const allClientIds = ref<string[]>([]);
     const page = ref(1);
     const totalPages = ref(1);
@@ -83,6 +86,7 @@ export default defineComponent({
             Authorization: `Bearer ${accessToken}`
           }
         });
+        console.log(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`);
         const data = await response.json();
         clients.value = data.items.map((item: any) => ({
           _id: item._id,
@@ -194,9 +198,18 @@ export default defineComponent({
       fetchClientDetails(clientId);
     };
 
-    const saveClient = (client: Client) => {
-      // Logique pour enregistrer le client modifié
-      console.log('Saving client:', client);
+    const handleEditClient = (clientId: string) => {
+      isEditMode.value = true;
+      fetchClientDetails(clientId);
+    };
+
+    const handleSave = (updatedClient: Client) => {
+      const index = clients.value.findIndex(client => client._id === updatedClient._id);
+      if (index !== -1) {
+        clients.value[index] = updatedClient;
+      }
+      isDialogOpen.value = false;
+      isEditMode.value = false;
     };
 
     onMounted(() => {
@@ -212,6 +225,7 @@ export default defineComponent({
       selectedClientIds,
       selectedClient,
       isDialogOpen,
+      isEditMode,
       page,
       totalPages,
       nextPage,
@@ -221,7 +235,8 @@ export default defineComponent({
       handleUpdateSelection,
       handleSearch,
       handleViewClient,
-      saveClient
+      handleEditClient,
+      handleSave
     };
   }
 });
