@@ -2,6 +2,7 @@
 const { z } = require('zod');
 const entitySchema = require('./entity.schema');
 const timestampsSchema = require('./timestamps.schema');
+const { Order } = require('@getbrevo/brevo');
 
 const paymentQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -9,9 +10,7 @@ const paymentQuerySchema = z.object({
 });
 
 const paymentCreateSchema = z.object({
-  user: z.string().uuid().optional(),
-  shippingId: z.string().uuid().optional(),
-  paymentType: z.string().optional(),
+  order: z.string().uuid(),
 });
 
 const paymentUpdateSchema = paymentCreateSchema.partial().refine((a) => {

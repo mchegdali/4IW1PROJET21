@@ -24,6 +24,7 @@ const userOrderRouter = Router({ mergeParams: true });
 //   '/orders',
 //   checkAuth(authConfig.accessTokenSecret, false),
 // );
+<<<<<<< HEAD
 orderRouter.route(
   '/orders')
   .get(getOrders,
@@ -34,6 +35,8 @@ orderRouter.route(
     checkAuth(authConfig.accessTokenSecret),
     checkRole(['admin']),
   );
+=======
+>>>>>>> fad4ea3 (stripe front presque dyn)
 
 orderRouter.get(
   '/orders/count',
@@ -81,10 +84,19 @@ orderRouter.get(
 
 orderRouter
   .route('/orders/:id')
-  .all( checkAuth(authConfig.accessTokenSecret),isOwnOrder)
+  .all(checkAuth(authConfig.accessTokenSecret), isOwnOrder)
   .get(getOrder)
   .patch(updateOrder)
   .delete(deleteOrder);
+
+orderRouter
+  .route('/orders')
+  .get(
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin', 'accountant']),
+    getOrders,
+  )
+  .post(checkAuth(authConfig.accessTokenSecret), createOrder);
 
 userOrderRouter.get('/', getUserOrders);
 

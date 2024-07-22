@@ -16,71 +16,66 @@ const uuidSchema = require('../schemas/uuid.schema');
 
 const { v4: uuidv4 } = require('uuid');
 
-
 function generateOrderNumber() {
   return `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 }
 
 async function createOrder(req, res, next) {
   try {
-    const orderCreateBody = await orderCreateSchema.parseAsync(req.body);
-    console.log('Validated orderCreateBody:', orderCreateBody);
-
     const result = await sequelize.transaction(async (t) => {
-      const user = await UsersMongo.findById(orderCreateBody.user);
-      console.log('User found:', user);
-      
-      if (!user) {
-        throw new NotFound('User not found');
-      }
+      console.log('req :', req.body.shipping);
+      const user = req.user;
 
+      console.log('user basket :', user.basket);
       if (!user.basket || user.basket.length === 0) {
         throw new Error('User basket is empty');
       }
 
-      const items = user.basket.map(item => ({
+      const items = user.basket.map((item) => ({
         _id: uuidv4(),
         name: item.name,
         category: item.category,
         price: parseFloat(item.price),
-        quantity: item.quantity || 1
+        quantity: item.quantity || 1,
       }));
       console.log('Items mapped from basket:', items);
 
-      const totalPrice = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+      const totalPrice = items.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0,
+      );
       console.log('Total price calculated:', totalPrice);
 
       const status = await StatusMongo.findOne({ label: 'Pending' });
       console.log('Status found:', status);
-      
+
       if (!status) {
         throw new NotFound('Status not found');
       }
 
       // Find the shipping information
-      const shipping = await ShippingsMongo.findById(orderCreateBody.shipping);
+      const shipping = await ShippingsMongo.findById(req.body.shipping);
       console.log('Shipping found:', shipping);
-      
+
       if (!shipping) {
         throw new NotFound('Shipping information not found');
       }
 
       const order = await Orders.create(
         {
-
           userId: user._id,
           statusId: status._id,
           items: JSON.stringify(items),
           totalPrice: totalPrice,
         },
-        { transaction: t }
+        { transaction: t },
       );
       console.log('Order created:', order);
 
       const orderMongo = {
         _id: order.id,
         orderNumber: generateOrderNumber(),
-        paymentType: orderCreateBody.paymentType,
+        paymentType: req.body.paymentType,
         status: {
           _id: status._id,
           label: status.label,
@@ -103,23 +98,24 @@ async function createOrder(req, res, next) {
             street: shipping.address.street,
             zipCode: shipping.address.zipCode,
             city: shipping.address.city,
-            phone:shipping.address.phone,
+            phone: shipping.address.phone,
           },
           deliveryChoice: {
             _id: shipping.deliveryChoice._id,
             name: shipping.deliveryChoice.name,
           },
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
       console.log('Order Mongo object:', orderMongo);
 
       const orderDoc = await OrdersMongo.create(orderMongo);
       console.log('Order MongoDB document created:', orderDoc);
 
+      await UsersMongo.updateOne(
+        { _id: req.user.id },
+        { $set: { basket: [] } },
+      );
       console.log('User basket cleared:', user.basket);
-      
 
       return orderDoc;
     });
@@ -130,6 +126,7 @@ async function createOrder(req, res, next) {
     return next(error);
   }
 }
+
 /**
  *
  * @type {import('express').RequestHandler}

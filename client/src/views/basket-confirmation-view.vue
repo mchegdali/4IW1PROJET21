@@ -21,12 +21,13 @@ onBeforeMount(async () => {
     const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
     basketStore.products = await response.json();
   }
-  stripe.value = await loadStripe('pk_test_51PeDeeId99a4h4TCLqm4w85nDdjK25k5H7667JNgbrkhPwCQ04JsEWtZAuQ6EM47nyE3H79XonnUy4eQH3HEaJW000eWWBhyPr'); 
+  stripe.value = await loadStripe(`${config.STRIPE_KEY}`); 
 });
 
 const goBackToBasket = () => {
   router.push({ name: 'basket' });
 };
+
 const proceedToCheckout = async () => {
   if (basketStore.products.length === 0) {
     alert('Votre panier est vide');
@@ -34,30 +35,52 @@ const proceedToCheckout = async () => {
   }
 
   try {
-    
-    const shippingId = ref('03de8070-af31-4ad6-a2aa-a4261e66d94b').value;  //je dois rendre dynam
-    
-    const paymentData = {
-      user: userStore.user?.id,
-      shippingId: shippingId,
-      paymentType: 'credit-card' // rendre dynam
+    const shippingId = ref('03de8070-af31-4ad6-a2aa-a4261e66d94b').value;  // Make this dynamic
+
+    // Create the order
+    const orderData = {
+      shipping: shippingId,
+      paymentType: 'credit-card' // Make this dynamic if needed
     };
 
-    const response = await fetch('http://localhost:3000/payment', {
+    const orderResponse = await fetch(`${config.apiBaseUrl}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${userStore.accessToken}`
       },
-      body: JSON.stringify(paymentData),
+      body: JSON.stringify(orderData),
       credentials: 'include'
     });
 
-    if (!response.ok) {
+    if (!orderResponse.ok) {
+      throw new Error('Erreur lors de la création de la commande');
+    }
+
+    const orderResult = await orderResponse.json();
+    console.log('Order created:', orderResult);
+
+    // If order creation was successful, create Stripe session
+    const stripeData = {
+      order: orderResult.id  // Use the ID of the newly created order
+    };
+    console.log('Stripe data:', stripeData);
+
+    const stripeResponse = await fetch(`${config.apiBaseUrl}/stripe`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userStore.accessToken}`
+      },
+      body: JSON.stringify(stripeData),
+      credentials: 'include'
+    });
+
+    if (!stripeResponse.ok) {
       throw new Error('Erreur lors de la création de la session de paiement');
     }
 
-    const session = await response.json();
+    const session = await stripeResponse.json();
 
     if (session.id) {
       const { error } = await stripe.value.redirectToCheckout({
@@ -71,13 +94,12 @@ const proceedToCheckout = async () => {
       throw new Error('No session ID returned from server');
     }
   } catch (error) {
-    console.error('Error creating payment session:', error);
+    console.error('Error in checkout process:', error);
     message.value = error.message;
-    alert('Une erreur est survenue lors de la création de la session de paiement');
+    alert('Une erreur est survenue lors du processus de paiement');
   }
 };
 </script>
-
 <template>
   <main class="grow">
     <h1 class="text-3xl font-bold m-2">Récapitulatif de votre panier</h1>

@@ -31,7 +31,7 @@ const goBackHome = () => {
 
 <template>
   <main class="grow">
-    <h1 class="text-3xl font-bold m-2">Récapitulatif de vos achat</h1>
+    <h1 class="text-3xl font-bold m-2">Récapitulatif de vos achats</h1>
     <BasketInformation />
     <BasketList readonly />
     <div class="flex flex-col gap-4 m-4 items-center w-full">
