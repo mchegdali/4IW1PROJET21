@@ -2,9 +2,14 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { RouterLink } from 'vue-router';
-import { Calendar, MapPin, Package2, Phone, Truck } from 'lucide-vue-next';
+import { Calendar, FileText, MapPin, Package2, Phone, Truck } from 'lucide-vue-next';
 import config from '@/config';
 import { useUserStore } from '@/stores/user';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
+const userStore = useUserStore();
+userStore.accessToken;
 
 interface Product {
   id: string;
@@ -78,8 +83,103 @@ const computeOrderTotal = () => {
   );
 };
 
-const userStore = useUserStore();
-userStore.accessToken;
+const getImageBase64 = async (url: string): Promise<string> => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result);
+      } else {
+        reject('Failed to convert image to base64');
+      }
+    };
+    reader.onerror = () => reject('Error reading image file');
+    reader.readAsDataURL(blob);
+  });
+};
+
+const generateInvoice = async () => {
+  if (!order.value) return;
+
+  const doc = new jsPDF();
+
+  const imageUrl = 'https://i.ibb.co/6XykWVr/Pe-SVn-TQQru-YYlk-X9-XEYAg.jpg';
+  const imageBase64 = await getImageBase64(imageUrl);
+
+  doc.setFontSize(18);
+  doc.setTextColor(40, 40, 40);
+  doc.addImage(imageBase64, 'JPEG', 14, 15, 50, 20);
+  doc.text('Facture', 14, 55);
+
+  doc.setFontSize(12);
+  doc.setTextColor(60, 60, 60);
+  doc.text(`N° de commande: ${order.value.orderNumber}`, 14, 65);
+  doc.text(
+    `Date de commande: ${new Date(order.value.createdAt).toLocaleDateString('fr-FR')}`,
+    14,
+    71
+  );
+
+  doc.setFontSize(12);
+  doc.setTextColor(40, 40, 40);
+  doc.text('Fanthesie', 14, 90);
+  doc.text('18 rue de la Victoire', 14, 100);
+  doc.text('75001 Paris', 14, 110);
+  doc.text('01 43 25 67 67', 14, 120);
+  doc.text('fanthesie@gmail.com', 14, 130);
+
+  doc.setFontSize(12);
+  doc.setTextColor(40, 40, 40);
+  doc.setFontSize(12);
+  doc.setTextColor(60, 60, 60);
+  doc.text(`${order.value.shipping.fullname}`, 113, 140);
+  doc.text(
+    `${order.value.shipping.street}, ${order.value.shipping.zipCode} ${order.value.shipping.city}`,
+    113,
+    150
+  );
+  doc.text(`${order.value.shipping.phone}`, 113, 160);
+
+  const itemRows = order.value.items.map((item) => {
+    const product = products.value.find((p) => p.id === item.id);
+    return [product?.name || 'Unknown Product', item.quantity || 1, `${item.price} €`];
+  });
+
+  autoTable(doc, {
+    startY: 175,
+    head: [['Produit', 'Quantité', 'Prix']],
+    body: itemRows,
+    theme: 'striped',
+    headStyles: {
+      fillColor: [56, 101, 74],
+      textColor: 255,
+      fontSize: 12
+    },
+    bodyStyles: {
+      fillColor: [245, 245, 245],
+      textColor: [50, 50, 50],
+      fontSize: 10
+    },
+    alternateRowStyles: {
+      fillColor: [255, 255, 255]
+    },
+    styles: {
+      lineWidth: 0.1,
+      lineColor: [200, 200, 200]
+    }
+  });
+
+  doc.setFontSize(12);
+  const finalY = doc.lastAutoTable.finalY || 120 + order.value.items.length * 6;
+  doc.text(`Sous-total: ${computeOrderTotal()} €`, 143, finalY + 10);
+  doc.text(`Livraison: gratuite`, 143, finalY + 18);
+  doc.text(`Remise: 0€`, 143, finalY + 26);
+  doc.text(`Total: ${computeOrderTotal()} €`, 143, finalY + 34);
+
+  doc.save(`Invoice_${order.value.orderNumber}.pdf`);
+};
 
 onMounted(async () => {
   const orderId = route.params.id as string;
@@ -319,6 +419,12 @@ onMounted(async () => {
           <p class="font-bold flex justify-between text-sm sm:text-lg">
             Total: <span class="font-bold">{{ computeOrderTotal() }} €</span>
           </p>
+        </div>
+
+        <div class="p-4">
+          <button @click="generateInvoice" class="bg-tea-600 text-white py-2 px-4 rounded flex gap-2 w-full">
+            Télécharger la facture <FileText />
+          </button>
         </div>
       </div>
     </div>
