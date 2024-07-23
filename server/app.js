@@ -22,13 +22,13 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-// app.use(express.json());
+app.use(express.json());
 // app.use(cors()); // Middleware CORS global pour toutes les routes
-// app.use(
-//   helmet({
-//     crossOriginResourcePolicy: false, // Désactiver la politique de ressource cross-origin
-//   }),
-// );
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false, // Désactiver la politique de ressource cross-origin
+  }),
+);
 
 // Configurer les en-têtes CORS pour toutes les réponses
 // app.use((req, res, next) => {

@@ -35,7 +35,7 @@ const proceedToCheckout = async () => {
   }
 
   try {
-    const addressId = ref('03de8070-af31-4ad6-a2aa-a4261e66d94b').value;  // Make this dynamic
+    const addressId = ref("bde4a27e-e382-4239-ac66-c114fb40b421").value;  // Make this dynamic
 
     // Create the order
     const orderData = {

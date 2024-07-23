@@ -96,7 +96,7 @@ async function createStripeSession(req, res, next) {
         product_data: {
           name: item.name,
         },
-        unit_amount: Math.round(parseFloat(item.price) * 100),
+        unit_amount: Math.round(parseFloat(item.price) * 100) + 200,
       },
       quantity: item.quantity || 1,
     }));
@@ -109,9 +109,6 @@ async function createStripeSession(req, res, next) {
       mode: 'payment',
       success_url: `${url.toString()}payment/confirmation`,
       cancel_url: `${url.toString()}/cancel`,
-      shipping_address_collection: {
-        allowed_countries: ['US', 'BR', 'FR'],
-      },
       metadata: {
         orderId: order._id.toString(),
       },
