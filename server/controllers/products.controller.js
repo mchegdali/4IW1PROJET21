@@ -20,10 +20,13 @@ const Products = sequelize.model('products');
  */
 async function createProduct(req, res, next) {
   try {
-    const productCreateBody = await productCreateSchema.parseAsync(req.body);
+    const productCreateBody = await productCreateSchema.parseAsync({
+      ...req.body,
+      price: Number(req.body.price), // Conversion de string à number
+    });
 
     if (req.file) {
-      productCreateBody.image = req.file.path; // on ajoute le chemin de l'image au corps de la requête
+      productCreateBody.image = req.file.path;
     }
 
     const result = await sequelize.transaction(async (t) => {
@@ -42,11 +45,10 @@ async function createProduct(req, res, next) {
         include: ['category'],
       });
 
-      const productMongo = await data.toMongo();
+      // La création dans Mongo est déja gérée dans le hook afterCreate
+      console.log("donnée renvoyée", data);
+      return data;
 
-      const productDoc = await ProductMongo.create(productMongo);
-
-      return productDoc;
     });
 
     return res.status(201).json(result);
