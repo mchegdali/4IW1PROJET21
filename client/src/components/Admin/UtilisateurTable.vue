@@ -31,8 +31,8 @@
             Email
             <DoubleArrow class="inline-block ml-2" />
           </th>
-          <th class="py-2 px-4 cursor-pointer hover:bg-gray-200 w-1/6">
-            Ville
+          <th @click="sortBy('role')" class="py-2 px-4 cursor-pointer hover:bg-gray-200 w-1/6">
+            Role
             <DoubleArrow class="inline-block ml-2" />
           </th>
           <th class="py-2 px-4">Actions</th>
@@ -46,7 +46,7 @@
           <td class="py-2 px-4 text-center w-1/6">{{ client._id }}</td>
           <td class="py-2 px-4 text-center w-1/6">{{ client.fullname }}</td>
           <td class="py-2 px-4 text-center w-1/6">{{ client.email }}</td>
-          <td class="py-2 px-4 text-center w-1/6">{{ client.city }}</td>
+          <td class="py-2 px-4 text-center w-1/6">{{ client.role }}</td>
           <td class="py-2 px-4 text-center w-1/6">
             <button
               class="text-white bg-gradient-to-br from-blue-500 to-cyan-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
@@ -83,7 +83,7 @@ interface Client {
   _id: string;
   fullname: string;
   email: string;
-  city: string;
+  role: string;
 }
 
 export default defineComponent({

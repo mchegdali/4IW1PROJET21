@@ -16,9 +16,9 @@
               id="nom"
               v-model="localClient.fullname"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
-              :disabled="!isEditMode"
-              :readonly="!isEditMode"
-              :class="!isEditMode ? 'readonly-input' : ''"
+              :disabled="!isEditMode || isReadOnly"
+              :readonly="!isEditMode || isReadOnly"
+              :class="(!isEditMode || isReadOnly) ? 'readonly-input' : ''"
             />
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
@@ -27,20 +27,9 @@
               id="email"
               v-model="localClient.email"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
-              :disabled="!isEditMode"
-              :readonly="!isEditMode"
-              :class="!isEditMode ? 'readonly-input' : ''"
-            />
-          </div>
-          <div class="grid grid-cols-4 items-center gap-4">
-            <label for="ville" class="text-right font-medium text-gray-700">Ville</label>
-            <input
-              id="ville"
-              v-model="localClient.city"
-              class="col-span-3 p-2 border border-gray-300 rounded-md"
-              :disabled="!isEditMode"
-              :readonly="!isEditMode"
-              :class="!isEditMode ? 'readonly-input' : ''"
+              :disabled="!isEditMode || isReadOnly"
+              :readonly="!isEditMode || isReadOnly"
+              :class="(!isEditMode || isReadOnly) ? 'readonly-input' : ''"
             />
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
@@ -49,15 +38,15 @@
               id="role"
               v-model="localClient.role"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
-              :disabled="!isEditMode"
-              :readonly="!isEditMode"
-              :class="!isEditMode ? 'readonly-input' : ''"
+              :disabled="!isEditMode || isReadOnly"
+              :readonly="!isEditMode || isReadOnly"
+              :class="(!isEditMode || isReadOnly) ? 'readonly-input' : ''"
             />
           </div>
           <div v-for="(address, index) in localClient.addresses" :key="index">
-            <Adresse :address="address" :is-edit-mode="isEditMode" @delete-address="handleDeleteAddress" @update:address="updateAddress(index, $event)" />
+            <Adresse :address="address" :is-edit-mode="isEditMode && !isReadOnly" @delete-address="handleDeleteAddress" @update:address="updateAddress(index, $event)" />
           </div>
-          <div v-if="isEditMode" class="flex justify-end mt-4">
+          <div v-if="isEditMode && !isReadOnly" class="flex justify-end mt-4">
             <button @click="addAddress" class="bg-blue-500 text-white px-4 py-2 rounded">
               Ajouter une adresse
             </button>
@@ -65,7 +54,7 @@
         </div>
         <div class="flex justify-end mt-6">
           <button
-            v-if="isEditMode"
+            v-if="isEditMode && !isReadOnly"
             @click="saveChanges"
             class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
           >
@@ -105,7 +94,6 @@ interface Client {
   id: string;
   fullname: string;
   email: string;
-  city: string;
   role: string;
   addresses: Address[];
 }
@@ -123,6 +111,10 @@ export default defineComponent({
       required: true
     },
     isEditMode: {
+      type: Boolean,
+      default: false
+    },
+    isReadOnly: {
       type: Boolean,
       default: false
     }
@@ -171,6 +163,29 @@ export default defineComponent({
           });
         }
 
+        // Mise à jour des adresses
+        for (const address of this.localClient.addresses) {
+          if (address.status === 'create') {
+            await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}/addresses`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+              },
+              body: JSON.stringify(address)
+            });
+          } else if (address.status === 'update') {
+            await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}/addresses/${address.id}`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+              },
+              body: JSON.stringify(address)
+            });
+          }
+        }
+
         // Mise à jour des informations de l'utilisateur
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}`, {
           method: 'PATCH',
@@ -199,7 +214,8 @@ export default defineComponent({
         region: '',
         zipCode: '',
         country: '',
-        phone: ''
+        phone: '',
+        status: 'create'
       });
     },
     handleDeleteAddress(address: Address) {
@@ -212,6 +228,9 @@ export default defineComponent({
       }
     },
     updateAddress(index: number, updatedAddress: Address) {
+      if (updatedAddress.id) {
+        updatedAddress.status = 'update';
+      }
       this.localClient.addresses.splice(index, 1, updatedAddress);
     }
   }
