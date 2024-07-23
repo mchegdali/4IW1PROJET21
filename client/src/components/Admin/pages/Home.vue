@@ -179,12 +179,6 @@ export default defineComponent({
           title: 'Clients',
           text: 'Analysez les données de vos clients et améliorez votre relation client. Cliquez ici pour accéder aux statistiques détaillées de vos clients !',
           page: 'AdminClients'
-        },
-        {
-          image: 'https://picsum.photos/500/500',
-          title: 'Tendances et Prévisions',
-          text: 'Utilisez des prévisions basées sur des données pour planifier votre stratégie future. Cliquez ici pour explorer les tendances et les prévisions détaillées !',
-          page: 'AdminTendances'
         }
       ] as CardData[]
     };
