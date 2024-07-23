@@ -64,7 +64,7 @@
         </div>
         <div class="flex justify-end mt-6">
           <button
-            @click="saveChanges"
+            @click="validateAndSave"
             class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
           >
             {{ isEditMode ? 'Enregistrer' : 'Créer' }}
@@ -176,6 +176,26 @@ export default defineComponent({
         this.imageFile = file;
       } else {
         this.imageFile = null;
+      }
+    },
+    validateAndSave() {
+      this.errors = {};
+      
+      if (!this.localProduct.name || this.localProduct.name.length < 2) {
+        this.errors.name = 'La chaîne de caractères doit contenir au moins 2 caractère(s)';
+      }
+      if (!this.localProduct.description || this.localProduct.description.length < 2) {
+        this.errors.description = 'La chaîne de caractères doit contenir au moins 2 caractère(s)';
+      }
+      if (!this.localProduct.price || this.localProduct.price < 0.01) {
+        this.errors.price = 'Le nombre doit être supérieur ou égal à 0.01';
+      }
+      if (!this.localProduct.category._id) {
+        this.errors.category = 'Vous devez choisir une catégorie';
+      }
+
+      if (Object.keys(this.errors).length === 0) {
+        this.saveChanges();
       }
     },
     async saveChanges() {
