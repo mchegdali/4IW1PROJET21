@@ -35,7 +35,7 @@ const handleInput = useDebounceFn((event: InputEvent) => {
   if (target.value.length >= 0) {
     searchStore.text = target.value;
   }
-}, 300);
+}, 150);
 </script>
 
 <template>

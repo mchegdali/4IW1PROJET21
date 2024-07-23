@@ -107,7 +107,7 @@ const debouncedUpdateMinPrice = useDebounceFn((value: number) => {
       minPrice: valueString
     }
   });
-}, 300);
+}, 150);
 
 const debouncedUpdateMaxPrice = useDebounceFn((value: number) => {
   router.push({
@@ -117,7 +117,7 @@ const debouncedUpdateMaxPrice = useDebounceFn((value: number) => {
       maxPrice: value === 0 || Number.isNaN(value) ? undefined : value.toString()
     }
   });
-}, 300);
+}, 150);
 
 function onUpdateMinPrice(value: number) {
   debouncedUpdateMinPrice(value);
@@ -214,7 +214,8 @@ searchStore.$subscribe((mutation, state) => {
 <template>
   <main class="grow">
     <div
-      class="border-b border-gray-200 h-fit py-2 px-4 hidden lg:flex lg:items-center lg:sticky lg:top-0 lg:z-10 bg-background">
+      class="border-b border-gray-200 h-fit py-2 px-4 hidden lg:flex lg:items-center lg:sticky lg:top-0 lg:z-10 bg-background"
+    >
       <p>
         {{ firstElementIndexInCurrentPage }} - {{ currentPageCount }} sur {{ metadata.total }}
         <template v-if="searchStore.isSearching">
@@ -230,42 +231,60 @@ searchStore.$subscribe((mutation, state) => {
       </p>
     </div>
     <div class="flex flex-col lg:flex-row gap-4 w-full">
-      <aside class="w-full lg:block lg:w-2/12 border border-gray-200 p-2 space-y-2"
-        :class="{ hidden: !isFilterMenuOpen }">
+      <aside
+        class="w-full lg:block lg:w-2/12 border border-gray-200 p-2 space-y-2"
+        :class="{ hidden: !isFilterMenuOpen }"
+      >
         <header class="flex justify-between items-center pt-2">
           <h2 class="text-xl lg:text-lg font-black">Filtrer</h2>
-          <Button variant="outline" @click="handleOpenFilterMenu" class="w-fit flex items-center gap-2 lg:hidden">
-            <template v-if="!isFilterMenuOpen">
-              <FilterIcon class="w-4 h-4" />Filtrer
-            </template>
-            <template v-else>
-              <XIcon class="w-4 h-4" /> Fermer
-            </template>
+          <Button
+            variant="outline"
+            @click="handleOpenFilterMenu"
+            class="w-fit flex items-center gap-2 lg:hidden"
+          >
+            <template v-if="!isFilterMenuOpen"> <FilterIcon class="w-4 h-4" />Filtrer </template>
+            <template v-else> <XIcon class="w-4 h-4" /> Fermer </template>
           </Button>
         </header>
         <fieldset>
           <Label for="category">Catégorie</Label>
-          <Select v-if="!Array.isArray(router.currentRoute.value.query.category)" id="category" default-value="all"
-            :model-value="router.currentRoute.value.query.category?.toString()" @update:model-value="onUpdateCategory">
+          <Select
+            v-if="!Array.isArray(router.currentRoute.value.query.category)"
+            id="category"
+            default-value="all"
+            :model-value="router.currentRoute.value.query.category?.toString()"
+            @update:model-value="onUpdateCategory"
+          >
             <SelectTrigger>
               <SelectValue placeholder="Toutes" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Toutes</SelectItem>
-              <SelectItem v-for="category in categories" :key="category.slug" :value="category.slug">
+              <SelectItem
+                v-for="category in categories"
+                :key="category.slug"
+                :value="category.slug"
+              >
                 {{ category.name }}
               </SelectItem>
             </SelectContent>
           </Select>
         </fieldset>
         <fieldset>
-          <NumberField id="minPrice" :min="0" :default-value="0" :step="1" :model-value="minPrice"
-            @update:model-value="onUpdateMinPrice" :format-options="{
+          <NumberField
+            id="minPrice"
+            :min="0"
+            :default-value="0"
+            :step="1"
+            :model-value="minPrice"
+            @update:model-value="onUpdateMinPrice"
+            :format-options="{
               style: 'currency',
               currency: 'EUR',
               currencyDisplay: 'symbol',
               currencySign: 'accounting'
-            }">
+            }"
+          >
             <Label for="minPrice">Prix minimum</Label>
             <NumberFieldContent>
               <NumberFieldDecrement />
@@ -275,13 +294,20 @@ searchStore.$subscribe((mutation, state) => {
           </NumberField>
         </fieldset>
         <fieldset>
-          <NumberField id="maxPrice" :min="0" :default-value="0" :step="1" :model-value="maxPrice || 0"
-            @update:model-value="onUpdateMaxPrice" :format-options="{
+          <NumberField
+            id="maxPrice"
+            :min="0"
+            :default-value="0"
+            :step="1"
+            :model-value="maxPrice || 0"
+            @update:model-value="onUpdateMaxPrice"
+            :format-options="{
               style: 'currency',
               currency: 'EUR',
               currencyDisplay: 'symbol',
-              currencySign: 'accounting',
-            }">
+              currencySign: 'accounting'
+            }"
+          >
             <Label for="maxPrice">Prix maximum</Label>
             <NumberFieldContent>
               <NumberFieldDecrement />
@@ -290,31 +316,56 @@ searchStore.$subscribe((mutation, state) => {
             </NumberFieldContent>
           </NumberField>
         </fieldset>
-        <Button variant="outline" @click="resetSearch" class="w-fit">Réinitialiser les filtres</Button>
+        <Button variant="outline" @click="resetSearch" class="w-fit"
+          >Réinitialiser les filtres</Button
+        >
       </aside>
       <div class="w-full lg:w-10/12 p-2" :class="{ hidden: isFilterMenuOpen }">
         <header class="w-full flex justify-between items-center pt-2">
           <h1 class="text-xl lg:text-2xl font-black">Résultats</h1>
-          <Button variant="outline" @click="handleOpenFilterMenu" class="w-fit flex items-center gap-2 lg:hidden">
-            <template v-if="!isFilterMenuOpen">
-              <FilterIcon class="w-4 h-4" />Filtrer
-            </template>
-            <template v-else>
-              <XIcon class="w-4 h-4" /> Fermer
-            </template>
+          <Button
+            variant="outline"
+            @click="handleOpenFilterMenu"
+            class="w-fit flex items-center gap-2 lg:hidden"
+          >
+            <template v-if="!isFilterMenuOpen"> <FilterIcon class="w-4 h-4" />Filtrer </template>
+            <template v-else> <XIcon class="w-4 h-4" /> Fermer </template>
           </Button>
         </header>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-2">
-          <ProductCard v-for="product in products" :key="product._id" :product="product" class="col-span-1" />
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-2"
+        >
+          <ProductCard
+            v-for="product in products"
+            :key="product._id"
+            :product="product"
+            class="col-span-1"
+          />
         </div>
         <div class="col-span-12 flex justify-center py-2 w-full">
-          <Pagination v-slot="{ page }" :total="metadata.total" :sibling-count="1" show-edges :default-page="1"
-            :page="page" :items-per-page="pageSize" @update:page="onUpdatePage">
+          <Pagination
+            v-slot="{ page }"
+            :total="metadata.total"
+            :sibling-count="1"
+            show-edges
+            :default-page="1"
+            :page="page"
+            :items-per-page="pageSize"
+            @update:page="onUpdatePage"
+          >
             <PaginationList v-slot="{ items }" class="flex items-center gap-1">
               <PaginationPrev />
               <template v-for="(item, index) in items">
-                <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-                  <Button class="w-10 h-10 p-0" :variant="item.value === page ? 'default' : 'outline'">
+                <PaginationListItem
+                  v-if="item.type === 'page'"
+                  :key="index"
+                  :value="item.value"
+                  as-child
+                >
+                  <Button
+                    class="w-10 h-10 p-0"
+                    :variant="item.value === page ? 'default' : 'outline'"
+                  >
                     {{ item.value }}
                   </Button>
                 </PaginationListItem>
