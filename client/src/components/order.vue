@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { RouterLink } from 'vue-router';
 import { Calendar, FileText, MapPin, Package2, Phone, Truck } from 'lucide-vue-next';
 import config from '@/config';
@@ -46,6 +46,7 @@ interface Order {
 }
 
 const route = useRoute();
+const router = useRouter();
 const order = ref<Order | null>(null);
 const products = ref<Product[]>([]);
 
@@ -124,6 +125,8 @@ const generateInvoice = async () => {
 
   doc.setFontSize(12);
   doc.setTextColor(40, 40, 40);
+  doc.setFontSize(12);
+  doc.setTextColor(60, 60, 60);
   doc.text('Fanthesie', 14, 90);
   doc.text('18 rue de la Victoire', 14, 100);
   doc.text('75001 Paris', 14, 110);
@@ -178,7 +181,6 @@ const generateInvoice = async () => {
   doc.text(`Remise: 0 €`, 143, finalY + 26);
   doc.text(`Total TTC: ${(parseFloat(computeOrderTotal()) + 2).toFixed(2)} €`, 143, finalY + 34);
 
-
   doc.save(`Invoice_${order.value.orderNumber}.pdf`);
 };
 
@@ -190,7 +192,12 @@ onMounted(async () => {
         Authorization: `Bearer ${userStore.accessToken}`
       }
     });
-    if (!response.ok) throw new Error('Failed to fetch order');
+
+    if (!response.ok) {
+      // Redirect to 404 page if the order is not found
+      router.push({ name: 'not-found' });
+      return;
+    }
 
     order.value = await response.json();
 
@@ -201,6 +208,8 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Error fetching order:', error);
+    // Redirect to 404 page in case of any error
+    router.push({ name: 'not-found' });
   }
 });
 </script>
