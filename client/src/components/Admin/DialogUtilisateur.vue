@@ -11,15 +11,16 @@
         </div>
         <div class="dialog-content grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">
-            <label for="nom" class="text-right font-medium text-gray-700">Nom Complet</label>
+            <label for="fullname" class="text-right font-medium text-gray-700">Nom Complet</label>
             <input
-              id="nom"
+              id="fullname"
               v-model="localClient.fullname"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
               :disabled="!isEditMode || isReadOnly"
               :readonly="!isEditMode || isReadOnly"
               :class="(!isEditMode || isReadOnly) ? 'readonly-input' : ''"
             />
+            <div v-if="errors.fullname" class="col-span-4 text-red-600">{{ errors.fullname }}</div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="email" class="text-right font-medium text-gray-700">Email</label>
@@ -31,6 +32,7 @@
               :readonly="!isEditMode || isReadOnly"
               :class="(!isEditMode || isReadOnly) ? 'readonly-input' : ''"
             />
+            <div v-if="errors.email" class="col-span-4 text-red-600">{{ errors.email }}</div>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="role" class="text-right font-medium text-gray-700">Role</label>
@@ -42,6 +44,7 @@
               :readonly="!isEditMode || isReadOnly"
               :class="(!isEditMode || isReadOnly) ? 'readonly-input' : ''"
             />
+            <div v-if="errors.role" class="col-span-4 text-red-600">{{ errors.role }}</div>
           </div>
           <div v-for="(address, index) in localClient.addresses" :key="address.id || index">
             <Adresse
@@ -49,6 +52,7 @@
               :is-edit-mode="isEditMode && !isReadOnly"
               @delete-address="handleDeleteAddress(index, address)"
               @update:address="updateAddress(index, $event)"
+              :errors="addressErrors[index]"
             />
           </div>
           <div v-if="isEditMode && !isReadOnly" class="flex justify-end mt-4">
@@ -60,7 +64,7 @@
         <div class="flex justify-end mt-6">
           <button
             v-if="isEditMode && !isReadOnly"
-            @click="saveChanges"
+            @click="validateAndSave"
             class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
           >
             Enregistrer
@@ -77,8 +81,9 @@
   </div>
 </template>
 
+
 <script lang="ts">
-import { defineComponent, watch } from 'vue';
+import { defineComponent, reactive, watch } from 'vue';
 import type { PropType } from 'vue';
 import { useUserStore } from '@/stores/user';
 import Adresse from './Adresse.vue';
@@ -129,13 +134,14 @@ export default defineComponent({
       default: false
     }
   },
-  emits: ['update:modelValue', 'save'],
+  emits: ['update:modelValue', 'save', 'refresh'],
   data() {
     return {
       isOpen: this.modelValue,
       localClient: deepClone(this.client),
       addressesToDelete: [] as string[],
-      addressesToCreate: [] as Address[]
+      errors: {} as Record<string, string>,
+      addressErrors: [] as Record<string, string>[]
     };
   },
   watch: {
@@ -159,6 +165,61 @@ export default defineComponent({
   methods: {
     closeDialog() {
       this.isOpen = false;
+    },
+    validateUser() {
+      this.errors = {};
+
+      if (!this.localClient.fullname || this.localClient.fullname.length < 2) {
+        this.errors.fullname = 'Le nom doit contenir au moins 2 caractères';
+      }
+      if (!this.localClient.email || !this.localClient.email.includes('@')) {
+        this.errors.email = 'Adresse email invalide';
+      }
+      if (!this.localClient.role) {
+        this.errors.role = 'Le rôle est requis';
+      }
+
+      return Object.keys(this.errors).length === 0;
+    },
+    validateAddresses() {
+      this.addressErrors = this.localClient.addresses.map(address => {
+        const errors: Record<string, string> = {};
+        if (!address.firstName || address.firstName.length < 2) {
+          errors.firstName = 'Prénom invalide';
+        }
+        if (!address.lastName || address.lastName.length < 2) {
+          errors.lastName = 'Nom de famille invalide';
+        }
+        if (!address.street || address.street.length < 2) {
+          errors.street = 'Adresse invalide';
+        }
+        if (!address.city || address.city.length < 2) {
+          errors.city = 'Ville invalide';
+        }
+        if (!address.region || address.region.length < 2) {
+          errors.region = 'Région invalide';
+        }
+        if (!address.zipCode || !/^[0-9]{5}$/.test(address.zipCode)) {
+          errors.zipCode = 'Code postal invalide';
+        }
+        if (!address.country || address.country.length < 2) {
+          errors.country = 'Pays invalide';
+        }
+        if (!address.phone || !/^[0-9]{10}$/.test(address.phone)) {
+          errors.phone = 'Numéro de téléphone invalide';
+        }
+        return errors;
+      });
+
+      return this.addressErrors.every(errors => Object.keys(errors).length === 0);
+    },
+    validateAndSave() {
+      const isUserValid = this.validateUser();
+      const areAddressesValid = this.validateAddresses();
+
+      if (isUserValid && areAddressesValid) {
+        this.saveChanges();
+      }
     },
     async saveChanges() {
       const userStore = useUserStore();
@@ -188,7 +249,7 @@ export default defineComponent({
               body: JSON.stringify(address)
             });
           } else if (address.status === 'update') {
-            await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}/addresses/${address.id}`, {
+            await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${address.id}`, {
               method: 'PATCH',
               headers: {
                 'Content-Type': 'application/json',
@@ -211,7 +272,7 @@ export default defineComponent({
         if (response.ok) {
           this.$emit('save', this.localClient);
           this.addressesToDelete = [];
-          this.addressesToCreate = [];
+          this.$emit('refresh');
           this.closeDialog();
         } else {
           console.error('Failed to update client');
@@ -233,7 +294,6 @@ export default defineComponent({
         status: 'create'
       };
       this.localClient.addresses.push(newAddress);
-      this.addressesToCreate.push(newAddress);
     },
     handleDeleteAddress(index: number, address: Address) {
       if (address.id) {

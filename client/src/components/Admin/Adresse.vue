@@ -4,81 +4,81 @@
       <label for="firstName" class="text-right font-medium text-gray-700">Prénom</label>
       <input
         id="firstName"
-        :value="address.firstName"
-        @input="updateField('firstName', $event.target.value)"
+        v-model="address.firstName"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
+      <div v-if="errors && errors.firstName" class="col-span-4 text-red-600">{{ errors.firstName }}</div>
     </div>
     <div class="grid grid-cols-4 items-center gap-4 mb-4">
       <label for="lastName" class="text-right font-medium text-gray-700">Nom</label>
       <input
         id="lastName"
-        :value="address.lastName"
-        @input="updateField('lastName', $event.target.value)"
+        v-model="address.lastName"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
+      <div v-if="errors && errors.lastName" class="col-span-4 text-red-600">{{ errors.lastName }}</div>
     </div>
     <div class="grid grid-cols-4 items-center gap-4 mb-4">
       <label for="street" class="text-right font-medium text-gray-700">Rue</label>
       <input
         id="street"
-        :value="address.street"
-        @input="updateField('street', $event.target.value)"
+        v-model="address.street"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
+      <div v-if="errors && errors.street" class="col-span-4 text-red-600">{{ errors.street }}</div>
     </div>
     <div class="grid grid-cols-4 items-center gap-4 mb-4">
       <label for="city" class="text-right font-medium text-gray-700">Ville</label>
       <input
         id="city"
-        :value="address.city"
-        @input="updateField('city', $event.target.value)"
+        v-model="address.city"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
+      <div v-if="errors && errors.city" class="col-span-4 text-red-600">{{ errors.city }}</div>
     </div>
     <div class="grid grid-cols-4 items-center gap-4 mb-4">
       <label for="region" class="text-right font-medium text-gray-700">Région</label>
       <input
         id="region"
-        :value="address.region"
-        @input="updateField('region', $event.target.value)"
+        v-model="address.region"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
+      <div v-if="errors && errors.region" class="col-span-4 text-red-600">{{ errors.region }}</div>
     </div>
     <div class="grid grid-cols-4 items-center gap-4 mb-4">
       <label for="zipCode" class="text-right font-medium text-gray-700">Code Postal</label>
       <input
         id="zipCode"
-        :value="address.zipCode"
-        @input="updateField('zipCode', $event.target.value)"
+        v-model="address.zipCode"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
+      <div v-if="errors && errors.zipCode" class="col-span-4 text-red-600">{{ errors.zipCode }}</div>
     </div>
     <div class="grid grid-cols-4 items-center gap-4 mb-4">
       <label for="country" class="text-right font-medium text-gray-700">Pays</label>
       <input
         id="country"
-        :value="address.country"
-        @input="updateField('country', $event.target.value)"
+        v-model="address.country"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
+      <div v-if="errors && errors.country" class="col-span-4 text-red-600">{{ errors.country }}</div>
     </div>
     <div class="grid grid-cols-4 items-center gap-4 mb-4">
       <label for="phone" class="text-right font-medium text-gray-700">Téléphone</label>
       <input
         id="phone"
-        :value="address.phone"
-        @input="updateField('phone', $event.target.value)"
+        v-model="address.phone"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
+      <div v-if="errors && errors.phone" class="col-span-4 text-red-600">{{ errors.phone }}</div>
     </div>
     <div class="flex justify-end">
       <button 
@@ -105,7 +105,6 @@ interface Address {
   zipCode: string;
   country: string;
   phone: string;
-  status?: string;
 }
 
 export default defineComponent({
@@ -118,13 +117,14 @@ export default defineComponent({
     isEditMode: {
       type: Boolean,
       required: true
+    },
+    errors: {
+      type: Object as PropType<Record<string, string>>,
+      required: false,
+      default: () => ({})
     }
   },
   methods: {
-    updateField(field: keyof Address, value: string) {
-      const updatedAddress = { ...this.address, [field]: value };
-      this.$emit('update:address', updatedAddress);
-    },
     deleteAddress() {
       this.$emit('delete-address', this.address);
     }
