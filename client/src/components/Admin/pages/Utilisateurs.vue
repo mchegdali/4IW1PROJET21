@@ -19,7 +19,7 @@
       @update:model-value="isDialogOpen = $event"
       @save="handleSave"
     />
-    <div class="mt-4 flex items-center justify-center">
+    <div class="mt-4 flex items-center justify-center mb-10">
       <button
         @click="previousPage"
         :disabled="page === 1"

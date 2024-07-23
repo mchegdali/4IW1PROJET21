@@ -53,8 +53,9 @@
               :readonly="!isEditMode"
               :class="!isEditMode ? 'readonly-input' : ''"
             />
-          </div><div v-for="(address, index) in localClient.addresses" :key="index">
-            <Adresse :address="address" :is-edit-mode="isEditMode" />
+          </div>
+          <div v-for="(address, index) in localClient.addresses" :key="index">
+            <Adresse :address="address" :is-edit-mode="isEditMode" @delete-address="handleDeleteAddress" />
           </div>
           <div v-if="isEditMode" class="flex justify-end mt-4">
             <button @click="addAddress" class="bg-blue-500 text-white px-4 py-2 rounded">
@@ -89,6 +90,9 @@ import { useUserStore } from '@/stores/user';
 import Adresse from './Adresse.vue';
 
 interface Address {
+  id?: string;
+  firstName: string;
+  lastName: string;
   street: string;
   city: string;
   region: string;
@@ -127,7 +131,8 @@ export default defineComponent({
   data() {
     return {
       isOpen: this.modelValue,
-      localClient: { ...this.client }
+      localClient: { ...this.client },
+      addressesToDelete: [] as string[]
     };
   },
   watch: {
@@ -155,6 +160,17 @@ export default defineComponent({
       await userStore.refreshAccessToken();
       const accessToken = userStore.accessToken;
       try {
+        // Suppression des adresses
+        for (const addressId of this.addressesToDelete) {
+          await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}/addresses/${addressId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`
+            }
+          });
+        }
+
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}`, {
           method: 'PATCH',
           headers: {
@@ -175,6 +191,8 @@ export default defineComponent({
     },
     addAddress() {
       this.localClient.addresses.push({
+        firstName: '',
+        lastName: '',
         street: '',
         city: '',
         region: '',
@@ -182,6 +200,15 @@ export default defineComponent({
         country: '',
         phone: ''
       });
+    },
+    handleDeleteAddress(address: Address) {
+      if (address.id) {
+        this.addressesToDelete.push(address.id);
+      }
+      const index = this.localClient.addresses.indexOf(address);
+      if (index !== -1) {
+        this.localClient.addresses.splice(index, 1);
+      }
     }
   }
 });
@@ -192,9 +219,8 @@ export default defineComponent({
   pointer-events: none;
   caret-color: transparent;
 }
-
 .dialog-content {
-  max-height: 80vh; 
+  max-height: 80vh;
   overflow-y: auto;
   padding-right: 1rem;
 }
