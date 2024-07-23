@@ -5,9 +5,6 @@
     >
       <div class="flex items-center justify-center space-x-4 py-4">
         <div>
-          <img :src="image" alt="" class="object-contain h-10 rounded-full" />
-        </div>
-        <div>
           <h2 class="font-bold group-hover:text-green-500">{{ title }}</h2>
         </div>
       </div>

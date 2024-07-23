@@ -2,7 +2,7 @@
   <section class="flex-1 ml-80">
     <div class="flex items-center justify-between mb-12 p-5">
       <h1 class="text-2xl font-bold text-green-900">Dashboard Fanthésie</h1>
-      <img src="/images/fanthesie2.png" alt="Image" class="rounded-md" />
+      <img src="/images/fanthesie2.png" alt="Logo" class="rounded-md" />
     </div>
 
     <!-- Stats globales -->
@@ -67,11 +67,10 @@
     </div>
 
     <!-- Cards -->
-    <div class="grid grid-cols-3 gap-4 mt-9 p-5">
+    <div class="grid grid-cols-4 gap-4 mt-9 p-5">
       <Card
         v-for="(card, index) in cards"
         :key="index"
-        :image="card.image"
         :title="card.title"
         :text="card.text"
         :page="card.page"
@@ -88,7 +87,6 @@ import BarChart from '../BarChart.vue';
 import DonutChart from '../DonutChart.vue';
 
 interface CardData {
-  image: string;
   title: string;
   text: string;
   page: string;
@@ -137,21 +135,23 @@ export default defineComponent({
       ],
       cards: [
         {
-          image: 'https://picsum.photos/500/500',
           title: 'Ventes',
-          text: 'Explorez les dernières tendances de vente et optimisez votre stratégie commerciale en temps réel. Cliquez ici pour consulter les statistiques de ventes !',
+          text: 'Découvez-en plus sur vos ventes',
           page: 'AdminVentes'
         },
         {
-          image: 'https://picsum.photos/500/500',
           title: 'Utilisateurs',
-          text: 'Découvrez les nouvelles inscriptions et analysez le comportement de vos utilisateurs. Cliquez ici pour accéder aux statistiques des utilisateurs !',
+          text: 'Gérez les utilisateurs de votre site',
           page: 'AdminUtilisateurs'
         },
         {
-          image: 'https://picsum.photos/500/500',
           title: 'Produits',
-          text: 'Suivez la performance de vos produits et identifiez les best-sellers. Cliquez ici pour consulter les statistiques détaillées de vos produits !',
+          text: 'Parcourez vos produits',
+          page: 'AdminProduits'
+        },
+        {
+          title: 'Commandes',
+          text: 'Analysez vos commandes',
           page: 'AdminProduits'
         }
       ] as CardData[]
