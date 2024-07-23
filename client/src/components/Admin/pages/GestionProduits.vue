@@ -6,7 +6,7 @@
         <div class="flex items-center space-x-2">
           <button
             @click="openCreateDialog"
-            class="text-black bg-gradient-to-r from-blue-300 to-blue-400 hover:bg-gradient-to-l hover:from-blue-400 hover:to-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-200 font-semibold rounded-lg text-sm px-5 py-2.5 text-center"
+            class="text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center"
           >
             Créer un produit
           </button>
@@ -34,13 +34,13 @@
             </td>
             <td class="py-2 px-4 text-center w-1/6">
               <button
-                class="text-white bg-gradient-to-br from-blue-500 to-cyan-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                class="mb-2 text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center"
                 @click="openEditDialog(product)"
               >
                 Éditer
               </button>
               <button
-                class="text-gray-900 bg-gradient-to-r from-red-400 via-red-300 to-orange-300 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                class="text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center"
                 @click="deleteProduct(product.id)"
               >
                 Supprimer
@@ -83,6 +83,7 @@
 import { defineComponent, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user';
 import DialogProduct from '../DialogProduit.vue';
+import { toast } from '../../ui/toast';
 
 export default defineComponent({
   components: {
@@ -145,6 +146,13 @@ export default defineComponent({
     async handleSave(updatedProduct) {
       await this.fetchProducts();  // On rafraichit la page entiere apres avoir soumis l'édit de produit
       this.isDialogOpen = false;
+      toast({
+          title: 'Produit mis à jour',
+          description: 'Le produit a bien été mis à jour',
+          type: 'foreground',
+          duration: 2500,
+          variant: 'success'
+        });
     },
     async deleteProduct(productId) {
       const userStore = useUserStore();
@@ -160,8 +168,22 @@ export default defineComponent({
           }
         });
         this.fetchProducts();
+        toast({
+          title: 'Produit supprimé',
+          description: 'Le produit a bien été supprimé',
+          type: 'foreground',
+          duration: 2500,
+          variant: 'success'
+        });
       } catch (error) {
         console.error('Error deleting product:', error);
+        toast({
+          title: 'Erreur',
+          description: 'Le produit n\'a pas pu être supprimé',
+          type: 'foreground',
+          duration: 2500,
+          variant: 'danger'
+        });
       }
     },
     previousPage() {

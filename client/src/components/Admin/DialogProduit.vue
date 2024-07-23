@@ -66,13 +66,13 @@
         <div class="flex justify-end mt-6">
           <button
             @click="validateAndSave"
-            class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
+            class="text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center mr-2"
           >
             {{ isEditMode ? 'Enregistrer' : 'Créer' }}
           </button>
           <button
             @click="closeDialog"
-            class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
+            class="text-white rounded-lg text-sm px-5 py-2 bg-gray-500 border border-gray-300 transition-colors duration-300 hover:text-black hover:bg-white text-center"
           >
             Fermer
           </button>
