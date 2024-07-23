@@ -4,7 +4,8 @@
       <label for="firstName" class="text-right font-medium text-gray-700">Prénom</label>
       <input
         id="firstName"
-        v-model="localAddress.firstName"
+        :value="address.firstName"
+        @input="updateField('firstName', $event.target.value)"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -13,7 +14,8 @@
       <label for="lastName" class="text-right font-medium text-gray-700">Nom</label>
       <input
         id="lastName"
-        v-model="localAddress.lastName"
+        :value="address.lastName"
+        @input="updateField('lastName', $event.target.value)"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -22,7 +24,8 @@
       <label for="street" class="text-right font-medium text-gray-700">Rue</label>
       <input
         id="street"
-        v-model="localAddress.street"
+        :value="address.street"
+        @input="updateField('street', $event.target.value)"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -31,7 +34,8 @@
       <label for="city" class="text-right font-medium text-gray-700">Ville</label>
       <input
         id="city"
-        v-model="localAddress.city"
+        :value="address.city"
+        @input="updateField('city', $event.target.value)"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -40,7 +44,8 @@
       <label for="region" class="text-right font-medium text-gray-700">Région</label>
       <input
         id="region"
-        v-model="localAddress.region"
+        :value="address.region"
+        @input="updateField('region', $event.target.value)"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -49,7 +54,8 @@
       <label for="zipCode" class="text-right font-medium text-gray-700">Code Postal</label>
       <input
         id="zipCode"
-        v-model="localAddress.zipCode"
+        :value="address.zipCode"
+        @input="updateField('zipCode', $event.target.value)"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -58,7 +64,8 @@
       <label for="country" class="text-right font-medium text-gray-700">Pays</label>
       <input
         id="country"
-        v-model="localAddress.country"
+        :value="address.country"
+        @input="updateField('country', $event.target.value)"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -67,7 +74,8 @@
       <label for="phone" class="text-right font-medium text-gray-700">Téléphone</label>
       <input
         id="phone"
-        v-model="localAddress.phone"
+        :value="address.phone"
+        @input="updateField('phone', $event.target.value)"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -85,7 +93,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, watch } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 interface Address {
   id?: string;
@@ -97,6 +105,7 @@ interface Address {
   zipCode: string;
   country: string;
   phone: string;
+  status?: string;
 }
 
 export default defineComponent({
@@ -111,28 +120,13 @@ export default defineComponent({
       required: true
     }
   },
-  data() {
-    return {
-      localAddress: { ...this.address }
-    };
-  },
-  watch: {
-    address: {
-      handler(newVal) {
-        this.localAddress = { ...newVal };
-      },
-      deep: true
-    },
-    localAddress: {
-      handler(newVal) {
-        this.$emit('update:address', newVal);
-      },
-      deep: true
-    }
-  },
   methods: {
+    updateField(field: keyof Address, value: string) {
+      const updatedAddress = { ...this.address, [field]: value };
+      this.$emit('update:address', updatedAddress);
+    },
     deleteAddress() {
-      this.$emit('delete-address', this.localAddress);
+      this.$emit('delete-address', this.address);
     }
   }
 });

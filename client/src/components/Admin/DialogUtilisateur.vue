@@ -104,6 +104,10 @@ interface Client {
   addresses: Address[];
 }
 
+function deepClone<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 export default defineComponent({
   name: 'DialogUtilisateur',
   components: { Adresse },
@@ -129,8 +133,9 @@ export default defineComponent({
   data() {
     return {
       isOpen: this.modelValue,
-      localClient: { ...this.client },
-      addressesToDelete: [] as string[]
+      localClient: deepClone(this.client),
+      addressesToDelete: [] as string[],
+      addressesToCreate: [] as Address[]
     };
   },
   watch: {
@@ -138,10 +143,12 @@ export default defineComponent({
       this.isOpen = newVal;
     },
     isOpen(newVal) {
-      this.$emit('update:modelValue', newVal);
+      if (newVal !== this.modelValue) {
+        this.$emit('update:modelValue', newVal);
+      }
     },
     client(newVal) {
-      this.localClient = { ...newVal };
+      this.localClient = deepClone(newVal);
     }
   },
   computed: {
@@ -169,7 +176,7 @@ export default defineComponent({
           });
         }
 
-        // Mise à jour des adresses
+        // Création des nouvelles adresses
         for (const address of this.localClient.addresses) {
           if (address.status === 'create') {
             await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}/addresses`, {
@@ -212,7 +219,7 @@ export default defineComponent({
       }
     },
     addAddress() {
-      this.localClient.addresses.push({
+      const newAddress: Address = {
         firstName: '',
         lastName: '',
         street: '',
@@ -222,7 +229,9 @@ export default defineComponent({
         country: '',
         phone: '',
         status: 'create'
-      });
+      };
+      this.localClient.addresses.push(newAddress);
+      this.addressesToCreate.push(newAddress);
     },
     handleDeleteAddress(index: number, address: Address) {
       if (address.id) {
