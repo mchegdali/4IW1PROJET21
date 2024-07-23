@@ -51,8 +51,7 @@
         </p>
         <h3 class="text-xl font-semibold mt-2">Paiement</h3>
         <p>
-          Le paiement est exigible immédiatement à la commande. Les paiements peuvent être effectués
-          par carte bancaire, PayPal ou tout autre moyen indiqué sur le site.
+          Le paiement est exigible immédiatement à la commande, et s'effectue uniquement par Stripe.
         </p>
       </section>
       <section>

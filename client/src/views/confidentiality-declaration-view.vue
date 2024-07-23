@@ -47,6 +47,13 @@
           aident à exploiter notre Site, à mener nos affaires, ou à vous servir, tant que ces
           parties conviennent de garder ces informations confidentielles.
         </p>
+        <p>
+          Nous soustraitons les envois de courriels à Brevo, une plateforme de communication qui
+          s'engage à respecter les normes de confidentialité et de sécurité des données.
+        </p>
+        <p>
+          Nous soustraitons les paiements à Stripe, une plateforme de paiement sécurisée qui respecte les normes de confidentialité et de sécurité des données.
+        </p>
       </section>
       <section>
         <h2 class="text-xl font-semibold mt-4">Sécurité des informations</h2>
