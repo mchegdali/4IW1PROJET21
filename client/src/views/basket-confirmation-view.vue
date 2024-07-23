@@ -15,7 +15,7 @@ const userStore = useUserStore();
 const router = useRouter();
 const stripe = ref(null);
 const message = ref('');
-const selectedAddress = ref(null);
+const selectedAddress = ref('');
 
 onBeforeMount(async () => {
   if (userStore.isAuthenticated) {
@@ -26,6 +26,7 @@ onBeforeMount(async () => {
   
   // Récupérer l'adresse sélectionnée du localStorage
   const savedAddress = localStorage.getItem('selectedAddress');
+  console.log("adresse : ",savedAddress)
   if (savedAddress) {
     selectedAddress.value = JSON.parse(savedAddress);
   } else {
@@ -50,7 +51,7 @@ const proceedToCheckout = async () => {
 
   try {
     const addressId = selectedAddress.value._id;
-
+    console.log("addressId in front : ", addressId)
     // Create the order
     const orderData = {
       address: addressId,
