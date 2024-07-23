@@ -19,11 +19,6 @@ const OrderSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    paymentType: {
-      type: String,
-      enum: ['credit_card', 'paypal', 'bank_transfer', 'other'],
-      required: true,
-    },
     address: {
       type: {
         _id: {

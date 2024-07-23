@@ -23,7 +23,7 @@ function generateOrderNumber() {
 async function createOrder(req, res, next) {
   try {
     const result = await sequelize.transaction(async (t) => {
-      console.log('req :', req.body.shipping);
+      console.log('req :', req.body.address);
       const user = req.user;
 
       console.log('user basket :', user.basket);
@@ -54,11 +54,11 @@ async function createOrder(req, res, next) {
       }
 
       // Find the shipping information
-      const shipping = await AddressMongo.findById(req.body.shipping);
-      console.log('Shipping found:', shipping);
+      const address = await AddressMongo.findById(req.body.address);
+      console.log('address found:', address);
 
-      if (!shipping) {
-        throw new NotFound('Shipping information not found');
+      if (!address) {
+        throw new NotFound('adrresse information not found');
       }
 
       const order = await Orders.create(
@@ -75,7 +75,6 @@ async function createOrder(req, res, next) {
       const orderMongo = {
         _id: order.id,
         orderNumber: generateOrderNumber(),
-        paymentType: req.body.paymentType,
         status: {
           _id: status._id,
           label: status.label,
@@ -88,15 +87,15 @@ async function createOrder(req, res, next) {
           email: user.email,
         },
         address: {
-          _id: shipping.address._id,
-          firstName: shipping.address.firstName,
-          lastName: shipping.address.lastName,
-          region: shipping.address.region,
-          country: shipping.address.country,
-          street: shipping.address.street,
-          zipCode: shipping.address.zipCode,
-          city: shipping.address.city,
-          phone: shipping.address.phone,
+          _id: address._id,
+          firstName: address.firstName,
+          lastName: address.lastName,
+          region: address.region,
+          country: address.country,
+          street: address.street,
+          zipCode: address.zipCode,
+          city: address.city,
+          phone: address.phone,
         },
       };
       console.log('Order Mongo object:', orderMongo);

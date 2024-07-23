@@ -11,7 +11,6 @@ const orderQuerySchema = z.object({
 const orderCreateSchema = z.object({
   user: z.string().uuid(),
   address: z.string().uuid(),
-  paymentType: z.string(),
   status: z.string().uuid().optional(),
   items: z
     .array(
@@ -32,7 +31,6 @@ const orderCreateSchema = z.object({
   totalPrice: z.number().optional(),
 });
 
-// Créez un schéma de mise à jour partiel basé sur le schéma de création
 const orderUpdateSchema = orderCreateSchema.partial().refine((data) => {
   return Object.keys(data).length > 0;
 }, 'Vous devez spécifier au moins un champ');

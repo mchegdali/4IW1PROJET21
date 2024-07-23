@@ -45,26 +45,20 @@ const up = async ({ context: { sequelize } }) => {
       }, 0);
 
       const order = {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
         id: crypto.randomUUID(),
         statusId: status.id,
-        items: faker.helpers.arrayElements(products, { min: 1, max: 10 }),
+        items,
         userId: user.id,
         shippingId: null, // Pas de livraison initiale
-=======
->>>>>>> ae22eeb (Iw1 s2 g21 77 (#46))
         _id: crypto.randomUUID(),
         orderNumber: crypto.randomUUID(),
         deliveryDate: faker.datatype.boolean() ? faker.date.future() : null,
         shippingDate: shippingDate,
+        totalPrice,
         status: {
           _id: status.id,
           label: status.label,
         },
-        items,
-        totalPrice,
         user: {
           _id: user.id,
           fullname: user.fullname,
@@ -80,10 +74,6 @@ const up = async ({ context: { sequelize } }) => {
           deliveryChoiceId: crypto.randomUUID(),
         },
         createdAt: createdAt, // Date actuelle
-<<<<<<< HEAD
-=======
->>>>>>> eb4da41 (Iw1 s2 g21 77 (#46))
->>>>>>> ae22eeb (Iw1 s2 g21 77 (#46))
       };
       orders.push(order);
     }

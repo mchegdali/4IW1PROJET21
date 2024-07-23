@@ -35,12 +35,11 @@ const proceedToCheckout = async () => {
   }
 
   try {
-    const shippingId = ref('03de8070-af31-4ad6-a2aa-a4261e66d94b').value;  // Make this dynamic
+    const addressId = ref('03de8070-af31-4ad6-a2aa-a4261e66d94b').value;  // Make this dynamic
 
     // Create the order
     const orderData = {
-      shipping: shippingId,
-      paymentType: 'credit-card' // Make this dynamic if needed
+      address: addressId,
     };
 
     const orderResponse = await fetch(`${config.apiBaseUrl}/orders`, {
@@ -60,7 +59,6 @@ const proceedToCheckout = async () => {
     const orderResult = await orderResponse.json();
     console.log('Order created:', orderResult);
 
-    // If order creation was successful, create Stripe session
     const stripeData = {
       order: orderResult.id  // Use the ID of the newly created order
     };
