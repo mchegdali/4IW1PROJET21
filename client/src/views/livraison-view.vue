@@ -46,17 +46,25 @@ const selectAddress = (address) => {
 
 const validateSelection = () => {
   if (selectedAddress.value) {
-    // Save the selected address to the router's state
-    router.push({
-      name: 'basket-confirmation',
-      state: { selectedAddress: selectedAddress.value }
-    });
+    // Enregistrer l'adresse sélectionnée dans le localStorage
+    localStorage.setItem('selectedAddress', JSON.stringify(selectedAddress.value));
+    
+    // Rediriger vers la page de confirmation du panier
+    router.push({ name: 'basket-confirmation' });
   } else {
     error.value = "Veuillez sélectionner une adresse avant de continuer.";
   }
 };
 
-onMounted(fetchAddresses);
+onMounted(() => {
+  fetchAddresses();
+  
+  // Vérifier s'il y a une adresse enregistrée dans le localStorage
+  const savedAddress = localStorage.getItem('selectedAddress');
+  if (savedAddress) {
+    selectedAddress.value = JSON.parse(savedAddress);
+  }
+});
 </script>
 
 <template>

@@ -9,19 +9,28 @@ import Button from '@/components/ui/button/Button.vue';
 import BasketInformation from '@/components/basket/basket-information.vue';
 import BasketList from '@/components/basket/basket-list.vue';
 import config from '@/config';
+
 const basketStore = useBasketStore();
 const userStore = useUserStore();
 const router = useRouter();
 const stripe = ref(null);
 const message = ref('');
+const selectedAddress = ref(null);
 
 onBeforeMount(async () => {
   if (userStore.isAuthenticated) {
-    
     const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
     basketStore.products = await response.json();
   }
-  stripe.value = await loadStripe(`${config.STRIPE_KEY}`); 
+  stripe.value = await loadStripe(`${config.STRIPE_KEY}`);
+  
+  // Récupérer l'adresse sélectionnée du localStorage
+  const savedAddress = localStorage.getItem('selectedAddress');
+  if (savedAddress) {
+    selectedAddress.value = JSON.parse(savedAddress);
+  } else {
+    message.value = "Aucune adresse sélectionnée. Veuillez choisir une adresse de livraison.";
+  }
 });
 
 const goBackToBasket = () => {
@@ -34,8 +43,13 @@ const proceedToCheckout = async () => {
     return;
   }
 
+  if (!selectedAddress.value) {
+    alert('Veuillez sélectionner une adresse de livraison');
+    return;
+  }
+
   try {
-    const addressId = ref("bde4a27e-e382-4239-ac66-c114fb40b421").value;  // Make this dynamic
+    const addressId = selectedAddress.value._id;
 
     // Create the order
     const orderData = {
@@ -60,7 +74,7 @@ const proceedToCheckout = async () => {
     console.log('Order created:', orderResult);
 
     const stripeData = {
-      order: orderResult.id  // Use the ID of the newly created order
+      order: orderResult.id
     };
     console.log('Stripe data:', stripeData);
 
@@ -79,7 +93,7 @@ const proceedToCheckout = async () => {
     }
 
     const session = await stripeResponse.json();
-if (session.id) {
+    if (session.id) {
       const { error } = await stripe.value.redirectToCheckout({
         sessionId: session.id,
       });
@@ -88,10 +102,9 @@ if (session.id) {
         message.value = error.message;
         return;
       }
-      
       // After successful redirect, we need to verify the payment
       // This part should be handled on the server-side, but we'll simulate it here
-      const verifyPaymentResponse = await fetch(`${config.apiBaseUrl}/verify-payment`, {
+      const verifyPaymentResponse = await fetch(`${config.apiBaseUrl}/webhook`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,6 +162,16 @@ if (session.id) {
     <h1 class="text-3xl font-bold m-2">Récapitulatif de votre panier</h1>
     <BasketInformation />
     <BasketList readonly />
+    
+    <div v-if="selectedAddress" class="m-4 p-4 bg-whiterounded">
+      <h2 class="text-xl font-semibold mb-2">Adresse de livraison</h2>
+      <p>{{ selectedAddress.firstName }} {{ selectedAddress.lastName }}</p>
+      <p>{{ selectedAddress.street }}</p>
+      <p>{{ selectedAddress.zipCode }} {{ selectedAddress.city }}</p>
+      <p>{{ selectedAddress.country }}</p>
+      <p>Téléphone : {{ selectedAddress.phone }}</p>
+    </div>
+    
     <div class="flex flex-col gap-4 m-4 items-center w-full">
       <div class="flex w-full justify-center gap-4">
         <Button @click="goBackToBasket" class="w-fit" variant="outline">Retour au panier</Button>
