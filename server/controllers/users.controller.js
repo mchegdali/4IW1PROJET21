@@ -183,10 +183,6 @@ async function updateUser(req, res, next) {
   try {
     const userId = req.params.userId;
 
-    if (req.user.role !== 'admin' && req.user.id !== userId) {
-      return res.sendStatus(403);
-    }
-
     const userUpdateData = userUpdateSchema.parse(req.body);
 
     if (req.user.role !== 'admin') {
@@ -195,7 +191,7 @@ async function updateUser(req, res, next) {
     }
 
     const newUser = await sequelize.transaction(async (t) => {
-      const [nbUpdated, users] = await Users.update(userUpdateData, {
+      const [, users] = await Users.update(userUpdateData, {
         where: {
           id: userId,
         },
@@ -207,14 +203,15 @@ async function updateUser(req, res, next) {
         individualHooks: true,
       });
 
-      if (nbUpdated === 0) {
-        throw new NotFound();
-      }
-
       return users[0];
     });
 
-    return res.status(200).json(newUser);
+    // eslint-disable-next-line no-unused-vars
+    const { password, ...newUserWithoutPassword } = newUser.get({
+      plain: true,
+    });
+
+    return res.status(200).json(newUserWithoutPassword);
   } catch (error) {
     return next(error);
   }

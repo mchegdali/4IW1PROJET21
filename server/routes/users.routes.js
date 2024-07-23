@@ -22,6 +22,7 @@ const {
 const addressesRouter = require('./addresses.routes');
 const userBasketRouter = require('./basket.routes');
 const { userOrderRouter } = require('./order.routes');
+const alertsRouter = require('./alerts.routes');
 
 const usersRouter = Router();
 
@@ -65,11 +66,14 @@ usersRouter.get(
 );
 
 usersRouter.use(
+  '/users/:userId/alerts',
+  checkAuth(authConfig.accessTokenSecret),
+  isOwnAccount,
+  alertsRouter,
+);
+
+usersRouter.use(
   '/users/:userId/addresses',
-  (req, res, next) => {
-    console.log(req.headers);
-    next();
-  },
   checkAuth(authConfig.accessTokenSecret),
   isOwnAccount,
   addressesRouter,

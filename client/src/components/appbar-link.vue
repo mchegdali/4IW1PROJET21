@@ -6,7 +6,7 @@ const { to } = defineProps<{ to: RouteLocationRaw }>();
 </script>
 
 <template>
-  <Button as-child size="icon" variant="ghost" class="text-slate-800">
+  <Button as-child size="icon" variant="ghost" class="text-tea-600 hover:bg-tea-50 hover:text-tea-700">
     <RouterLink :to="to" class="p-2 bg-transparent">
       <slot name="icon"></slot>
     </RouterLink>

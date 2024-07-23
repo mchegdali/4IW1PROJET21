@@ -158,6 +158,10 @@ const UserSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    newProductAlert: { type: Boolean, default: false },
+    restockAlert: { type: Boolean, default: false },
+    priceChangeAlert: { type: Boolean, default: false },
+    newsletterAlert: { type: Boolean, default: false },
     deletedAt: {
       type: Date,
       required: false,

@@ -15,9 +15,8 @@ const badgeClass = ref(
 
 <template>
   <div class="relative">
-    <ShoppingBasket class="size-8" :class="basketClass" />
+    <ShoppingBasket class="size-8 text-inherit" :class="basketClass" />
     <Badge variant="circle" :class="badgeClass" v-if="nbItems > 0">
-      {{ nbItems <= 9 ? nbItems : '9+' }}
-    </Badge>
+      {{ nbItems <= 9 ? nbItems : '9+' }} </Badge>
   </div>
 </template>

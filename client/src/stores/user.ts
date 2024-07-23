@@ -4,13 +4,26 @@ import useAuthFetch from '@/composables/use-auth-fetch';
 import dayjs from 'dayjs';
 import { useBasketStore } from './basket';
 import config from '@/config';
+import router from '@/router';
 
-type User = {
+type UserAlerts = {
+  newProductAlert: boolean;
+  restockAlert: boolean;
+  priceChangeAlert: boolean;
+  newsletterAlert: boolean;
+};
+
+type UserData = {
   fullname: string;
   email: string;
+};
+
+type UserIdentity = {
   role: 'user' | 'admin' | 'accountant';
   id: string;
 };
+
+type User = UserData & UserIdentity & UserAlerts;
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -30,7 +43,7 @@ export const useUserStore = defineStore('user', {
       if (!decodedAccessToken.exp) {
         return false;
       }
-      return decodedAccessToken.exp * 1000 > Date.now();
+      return dayjs.unix(decodedAccessToken.exp).isAfter(dayjs());
     }
   },
   actions: {
@@ -64,31 +77,61 @@ export const useUserStore = defineStore('user', {
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.user));
 
+      this.startRefreshTokenTimer();
+
       return {
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         user: data.user
       };
     },
+    async update(user: Partial<UserData>) {
+      const response = await fetch(`${config.apiBaseUrl}/users/${this.user?.id!}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.accessToken}`
+        },
+        body: JSON.stringify(user)
+      });
+
+      if (!response.ok) {
+        throw response;
+      }
+
+      const data = await response.json();
+
+      //@ts-ignore
+      this.user = {
+        ...this.user,
+        fullname: data.fullname,
+        email: data.email
+      };
+    },
+    async updateAlertPreferences(user: Partial<UserAlerts>) {
+      const response = await fetch(`${config.apiBaseUrl}/users/${this.user?.id}/alerts`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.accessToken}`
+        },
+        body: JSON.stringify(user)
+      });
+
+      if (!response.ok) {
+        throw response;
+      }
+
+      const data = await response.json();
+
+      //@ts-ignore
+      this.user = {
+        ...this.user,
+        ...data
+      };
+    },
     async refreshAccessToken() {
-      if (!this.refreshToken) {
-        return;
-      }
-
-      const decodedRefreshToken = jwtDecode(this.refreshToken);
-      if (!decodedRefreshToken.exp) {
-        return;
-      }
-
-      const fiveMinutesBeforeExpiration = dayjs(decodedRefreshToken.exp * 1000).subtract(
-        5,
-        'minutes'
-      );
-      if (dayjs().isBefore(fiveMinutesBeforeExpiration)) {
-        return;
-      }
-
-      const { data } = useAuthFetch('/refresh-token', {
+      const response = await fetch(`${config.apiBaseUrl}/auth/refresh-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -96,35 +139,43 @@ export const useUserStore = defineStore('user', {
         body: JSON.stringify({
           refreshToken: this.refreshToken
         })
-      } as RequestInit).text();
+      } as RequestInit);
 
-      if (!data.value) {
+      if (!response.ok) {
+        router.push({ name: 'login' });
+        this.stopRefreshTokenTimer();
         return;
       }
 
-      this.accessToken = data.value;
-      localStorage.setItem('accessToken', data.value);
+      const accessToken = await response.text();
 
-      return true;
+      this.accessToken = accessToken;
+      localStorage.setItem('accessToken', accessToken);
+
+      this.startRefreshTokenTimer();
     },
     startRefreshTokenTimer() {
       const decodedAccessToken = jwtDecode(this.accessToken!);
 
       if (decodedAccessToken.exp) {
-        const accessTokenExpiration = dayjs(decodedAccessToken.exp * 1000);
-        const oneMinuteBeforeExpiration = accessTokenExpiration.subtract(1, 'minute');
-        const accessTokenTimeout = oneMinuteBeforeExpiration.diff(dayjs());
-        this.refreshAccessTokenTimeout = setTimeout(this.refreshAccessToken, accessTokenTimeout);
+        const expires = dayjs.unix(decodedAccessToken.exp);
+
+        const timeout = expires.subtract(2, 'minute').diff(dayjs());
+
+        this.refreshAccessTokenTimeout = setTimeout(this.refreshAccessToken, timeout);
       }
     },
     logout() {
       const basketStore = useBasketStore();
-      basketStore.$reset();
+      basketStore.products = [];
 
       this.accessToken = null;
       this.refreshToken = null;
       this.user = null;
 
+      this.stopRefreshTokenTimer();
+    },
+    stopRefreshTokenTimer() {
       if (this.refreshAccessTokenTimeout) {
         clearTimeout(this.refreshAccessTokenTimeout);
       }

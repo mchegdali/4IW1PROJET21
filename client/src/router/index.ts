@@ -3,6 +3,7 @@ import { useUserStore } from '@/stores/user';
 import HomeView from '../views/home-view.vue';
 import Layout from '../layouts/layout.vue';
 import adminRoutes from './admin';
+import config from '@/config';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,6 +41,22 @@ const router = createRouter({
           name: 'account',
           path: '/account',
           component: () => import('../views/account-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          name: 'edit-account',
+          path: '/edit-account',
+          component: () => import('../views/edit-account-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          name: 'manage-alerts',
+          path: 'manage-alerts',
+          component: () => import('../views/manage-alerts-view.vue'),
           meta: {
             requiresAuth: true
           }
@@ -98,7 +115,7 @@ const router = createRouter({
             if (!to.query.token) {
               return next({ name: 'home', replace: true });
             }
-            fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/confirm`, {
+            fetch(`${config.apiBaseUrl}/auth/confirm`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -120,17 +137,26 @@ const router = createRouter({
         {
           name: 'orders',
           path: '/orders',
-          component: () => import('../views/order-view.vue')
+          component: () => import('../views/order-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
         },
         {
           name: 'order',
           path: '/orders/:id',
-          component: () => import('../views/order-details-view.vue')
+          component: () => import('../views/order-details-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
         },
         {
           name: 'tracking',
           path: '/tracking/:id',
-          component: () => import('../views/order-tracking-view.vue')
+          component: () => import('../views/order-tracking-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
         },
         {
           name: 'conditions',
@@ -150,22 +176,34 @@ const router = createRouter({
         {
           name: 'my-informations',
           path: '/my-informations',
-          component: () => import('../views/my-informations-view.vue')
+          component: () => import('../views/my-informations-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
         },
         {
           name: 'addresses',
           path: '/addresses',
-          component: () => import('../views/address/address-view.vue')
+          component: () => import('../views/address/address-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
         },
         {
           name: 'add-addresse',
           path: '/add-addresse',
-          component: () => import('../views/address/add-address-view.vue')
+          component: () => import('../views/address/add-address-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
         },
         {
           name: 'edit-addresse',
           path: '/edit-addresse/:id',
-          component: () => import('../views/address/edit-address-view.vue')
+          component: () => import('../views/address/edit-address-view.vue'),
+          meta: {
+            requiresAuth: true
+          }
         }
       ]
     },
@@ -177,7 +215,7 @@ router.beforeEach(async (to) => {
   const userStore = useUserStore();
   const authRequired = to.meta?.requiresAuth === true;
 
-  if (authRequired && !userStore.user) {
+  if (authRequired && !userStore.isAuthenticated) {
     return {
       name: 'login',
       query: {
