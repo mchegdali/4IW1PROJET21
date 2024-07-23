@@ -16,6 +16,7 @@
       :client="selectedClient"
       :model-value="isDialogOpen"
       :is-edit-mode="isEditMode"
+      :is-read-only="!isEditMode"
       @update:model-value="isDialogOpen = $event"
       @save="handleSave"
     />
@@ -49,7 +50,6 @@ interface Client {
   _id: string;
   fullname: string;
   email: string;
-  city: string;
   role: string;
   addresses: Array<{ city: string }>;
 }
@@ -86,13 +86,11 @@ export default defineComponent({
             Authorization: `Bearer ${accessToken}`
           }
         });
-        console.log(`${import.meta.env.VITE_API_BASE_URL}/users?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`);
         const data = await response.json();
         clients.value = data.items.map((item: any) => ({
           _id: item._id,
           fullname: item.fullname,
           email: item.email,
-          city: item.addresses[0]?.city || 'N/A',
           role: item.role,
           addresses: item.addresses
         }));
@@ -116,7 +114,6 @@ export default defineComponent({
         });
         if (response.ok) {
           const client = await response.json();
-          client.city = client.addresses.length > 0 ? client.addresses[0].city : 'N/A';
           selectedClient.value = client;
           isDialogOpen.value = true;
         } else {
@@ -195,6 +192,7 @@ export default defineComponent({
     };
 
     const handleViewClient = (clientId: string) => {
+      isEditMode.value = false;
       fetchClientDetails(clientId);
     };
 
