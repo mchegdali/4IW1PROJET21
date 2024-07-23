@@ -115,39 +115,40 @@ export default defineComponent({
       }
     },
     async saveChanges() {
-      const userStore = useUserStore();
-      await userStore.refreshAccessToken();
-      const accessToken = userStore.accessToken;
-      const url = this.isEditMode 
-        ? `${import.meta.env.VITE_API_BASE_URL}/categories/${this.localCategory.id}`
-        : `${import.meta.env.VITE_API_BASE_URL}/categories`;
-      const method = this.isEditMode ? 'PATCH' : 'POST';
-      try {
-        const formData = new FormData();
-        formData.append('name', this.localCategory.name);
-        formData.append('description', this.localCategory.description);
+  const userStore = useUserStore();
+  await userStore.refreshAccessToken();
+  const accessToken = userStore.accessToken;
+  const url = this.isEditMode 
+    ? `${import.meta.env.VITE_API_BASE_URL}/categories/${this.localCategory._id}`
+    : `${import.meta.env.VITE_API_BASE_URL}/categories`;
+  const method = this.isEditMode ? 'PATCH' : 'POST';
+  
+  try {
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        name: this.localCategory.name,
+        description: this.localCategory.description
+      })
+    });
 
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          },
-          body: formData
-        });
+    if (!response.ok) {
+      const errorData = await response.json();
+      this.handleErrors(errorData);
+      return;
+    }
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          this.handleErrors(errorData);
-          return;
-        }
-
-        const result = await response.json();
-        this.$emit('save', result); // Émettre l'événement 'save' avec le produit mis à jour
-        this.closeDialog();
-      } catch (error) {
-        console.error(`Error saving changes:`, error);
-      }
-    },
+    const result = await response.json();
+    this.$emit('save', result); // Émettre l'événement 'save' avec le produit mis à jour
+    this.closeDialog();
+  } catch (error) {
+    console.error(`Error saving changes:`, error);
+  }
+},
     handleErrors(errorData) {
       this.errors = {};
       for (const key in errorData) {

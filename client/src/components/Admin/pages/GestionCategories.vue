@@ -25,7 +25,7 @@
           <tr v-for="category in categories" :key="category.id" class="border-t hover:bg-gray-50">
             <td class="py-2 px-4 text-center w-1/6">{{ category._id }}</td>
             <td class="py-2 px-4 text-center w-1/6">{{ category.name }}</td>
-            <td class="py-2 px-4 text-center w-1/6">{{ category.name }}</td>
+            <td class="py-2 px-4 text-center w-1/6">{{ category.description }}</td>
             <td class="py-2 px-4 text-center w-1/6">
               <button
                 class="text-white bg-gradient-to-br from-blue-500 to-cyan-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
