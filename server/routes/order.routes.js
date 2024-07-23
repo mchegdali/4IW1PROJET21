@@ -27,8 +27,8 @@ const userOrderRouter = Router({ mergeParams: true });
 orderRouter.route(
   '/orders')
   .get(getOrders,
-    // checkAuth(authConfig.accessTokenSecret),
-    // checkRole(['admin']),
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin']),
   )
   .post(createOrder,
     checkAuth(authConfig.accessTokenSecret),
