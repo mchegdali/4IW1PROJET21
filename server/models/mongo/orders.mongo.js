@@ -7,6 +7,10 @@ const OrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.UUID,
       required: true,
     },
+    orderNumber: {
+      type: String,
+      required: true,
+    },
     deliveryDate: {
       type: Date,
       default: null,
