@@ -46,7 +46,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import AreaChart from '../AreaChart.vue';
 import DonutChart from '../DonutChart.vue';
 import StatisticsBlock from '../StatisticsBlock.vue';
 import { useUserStore } from '@/stores/user';
@@ -81,7 +80,6 @@ interface ChartOptions {
 export default defineComponent({
   name: 'Produits',
   components: {
-    AreaChart,
     DonutChart,
     StatisticsBlock
   },
