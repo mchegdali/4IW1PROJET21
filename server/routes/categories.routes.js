@@ -44,6 +44,13 @@ categoriesRouter
   .patch(updateCategory)
   .delete(deleteCategory);
 
-categoriesRouter.route('/categories').get(getCategories).post(createCategory);
+categoriesRouter
+  .route('/categories')
+  .get(getCategories)
+  .post(
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin']),
+    createCategory,
+  );
 
 module.exports = categoriesRouter;

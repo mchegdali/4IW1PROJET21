@@ -1,5 +1,14 @@
 # 4IW1PROJET21
 
+## Présentation
+
+Composition du groupe:
+
+- Arthur BOUAKI (jabsraighs)
+- Lucas AGUESSE (LucasGitB)
+- Antonin CAVANNE (37anton)
+- Moustapha CHEGDALI (mchegdali)
+
 ## Mise en place
 
 - Installer Node.js. Il est conseillé d'utiliser [nvm](https://github.com/nvm-sh/nvm).
