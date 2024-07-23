@@ -10,6 +10,7 @@
       @search="handleSearch"
       @view-client="handleViewClient"
       @edit-client="handleEditClient"
+      @delete-client="handleDeleteClient"
     />
     <DialogUtilisateur
       v-if="selectedClient"
@@ -201,6 +202,11 @@ export default defineComponent({
       fetchClientDetails(clientId);
     };
 
+    const handleDeleteClient = (clientId: string) => {
+      isEditMode.value = true;
+      fetchClientDetails(clientId);
+    };
+
     const handleSave = (updatedClient: Client) => {
       const index = clients.value.findIndex(client => client._id === updatedClient._id);
       if (index !== -1) {
@@ -234,7 +240,8 @@ export default defineComponent({
       handleSearch,
       handleViewClient,
       handleEditClient,
-      handleSave
+      handleSave,
+      handleDeleteClient,
     };
   }
 });

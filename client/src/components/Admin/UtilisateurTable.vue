@@ -49,19 +49,20 @@
           <td class="py-2 px-4 text-center w-1/6">{{ client.role }}</td>
           <td class="py-2 px-4 text-center w-1/6">
             <button
-              class="text-white bg-gradient-to-br from-blue-500 to-cyan-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+              class="mr-2 text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center mb-2"
               @click="viewClient(client._id)"
             >
               Voir
             </button>
             <button
-              class="text-gray-900 bg-gradient-to-r from-teal-400 to-lime-400 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+              class="text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center mb-2"
               @click="editClient(client._id)"
             >
               Éditer
             </button>
             <button
-              class="text-gray-900 bg-gradient-to-r from-red-400 via-red-300 to-orange-300 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+              class="text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center mb-2"
+              @click="deleteClient(client._id)"
             >
               Supprimer
             </button>
@@ -78,6 +79,7 @@ import type { PropType } from 'vue';
 import DoubleArrow from '../Admin/svg/DoubleArrow.vue';
 import Csv from '../Admin/svg/Csv.vue';
 import { useUserStore } from '@/stores/user';
+import { toast } from '../ui/toast';
 
 interface Client {
   _id: string;
@@ -154,6 +156,14 @@ export default defineComponent({
       const writable = await handle.createWritable();
       await writable.write(csvContent);
       await writable.close();
+
+      toast({
+        title: 'Téléchargement',
+        description: 'Le CSV a bien été téléchargé',
+        type: 'foreground',
+        duration: 2500,
+        variant: 'success'
+      });
     };
 
     const selectAll = (event: Event) => {
@@ -174,6 +184,10 @@ export default defineComponent({
       emit('edit-client', clientId);
     };
 
+    const deleteClient = (clientId: string) => {
+      emit('delete-client', clientId);
+    };
+
     const handleSearch = (event: Event) => {
       const searchText = (event.target as HTMLInputElement).value;
       emit('search', searchText);
@@ -188,7 +202,8 @@ export default defineComponent({
       updateSelection,
       viewClient,
       editClient,
-      handleSearch
+      handleSearch,
+      deleteClient,
     };
   }
 });

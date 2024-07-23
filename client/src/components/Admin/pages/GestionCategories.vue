@@ -1,12 +1,12 @@
 <template>
   <section class="flex-1 ml-80">
     <div class="container mx-auto mb-16 mt-12">
-      <div class="flex justify-between items-center w-full bg-gray-100 p-3 border-t border-l border-r border-gray-300">
+      <div class="flex justify-between items-center w-full bg-gray-100 p-4 border-t border-l border-r border-gray-300">
         <h2 class="text-xl font-bold">Gestion des catégories</h2>
         <div class="flex items-center space-x-2">
           <button
             @click="openCreateDialog"
-            class="text-black bg-gradient-to-r from-blue-300 to-blue-400 hover:bg-gradient-to-l hover:from-blue-400 hover:to-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-200 font-semibold rounded-lg text-sm px-5 py-2.5 text-center"
+            class="text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center"
           >
             Créer une catégorie
           </button>
@@ -28,14 +28,14 @@
             <td class="py-2 px-4 text-center w-1/6">{{ category.description }}</td>
             <td class="py-2 px-4 text-center w-1/6">
               <button
-                class="text-white bg-gradient-to-br from-blue-500 to-cyan-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                class="text-black rounded-lg mr-3 text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center"
                 @click="openEditDialog(category)"
               >
                 Éditer
               </button>
               <button
-                class="text-gray-900 bg-gradient-to-r from-red-400 via-red-300 to-orange-300 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-                @click="deleteCategory(category.id)"
+                class="text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center"
+                @click="deleteCategory(category._id)"
               >
                 Supprimer
               </button>
@@ -59,6 +59,7 @@
 import { defineComponent, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user';
 import DialogCategory from '../DialogCategory.vue';
+import { toast } from '../../ui/toast';
 
 export default defineComponent({
   components: {
@@ -115,6 +116,24 @@ export default defineComponent({
     async handleSave(updatedCategory) {
       await this.fetchCategories();  // On rafraichit la page entiere apres avoir soumis l'édit de category
       this.isDialogOpen = false;
+      if(this.isEditMode == false){
+        toast({
+          title: 'Catégorie créée',
+          description: 'La catégorie a bien été créée',
+          type: 'foreground',
+          duration: 2500,
+          variant: 'success'
+        });
+      }else{
+        toast({
+          title: 'Catégorie modifié',
+          description: 'La catégorie a bien été modifiée',
+          type: 'foreground',
+          duration: 2500,
+          variant: 'success'
+        });
+      }
+      
     },
     async deleteCategory(categoryId) {
       const userStore = useUserStore();
@@ -130,8 +149,22 @@ export default defineComponent({
           }
         });
         this.fetchCategories();
+        toast({
+          title: 'Catégorie supprimée',
+          description: 'La catégorie a bien été supprimée',
+          type: 'foreground',
+          duration: 2500,
+          variant: 'success'
+        });
       } catch (error) {
         console.error('Error deleting category:', error);
+        toast({
+          title: 'Erreur',
+          description: 'Erreur dans la suppression de la catégorie',
+          type: 'foreground',
+          duration: 2500,
+          variant: 'danger'
+        });
       }
     },
   }

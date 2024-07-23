@@ -443,6 +443,37 @@ const getUserOrders = async (req, res, next) => {
   }
 };
 
+/**
+ * Récupérer le nombre de commandes par mois dans MongoDB
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getMonthlyOrderCount(req, res, next) {
+  try {
+    const orders = await OrdersMongo.find({});
+
+    const orderCounts = new Map();
+
+    orders.forEach(order => {
+      const date = new Date(order.createdAt);
+      const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      if (orderCounts.has(month)) {
+        orderCounts.set(month, orderCounts.get(month) + 1);
+      } else {
+        orderCounts.set(month, 1);
+      }
+    });
+
+    const sortedMonths = Array.from(orderCounts.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    const counts = sortedMonths.map(month => orderCounts.get(month));
+
+    return res.json({ months: sortedMonths, counts });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createOrder,
   getOrder,
@@ -456,4 +487,5 @@ module.exports = {
   getDistinctCustomerCount,
   getUserOrders,
   getTopProductsDistribution,
+  getMonthlyOrderCount,
 };
