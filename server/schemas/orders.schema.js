@@ -12,9 +12,9 @@ const orderQuerySchema = z
   .merge(paginationSchema);
 
 const orderCreateSchema = z.object({
-  user: z.string().uuid().optional(),
-  shipping: z.string().uuid().optional(),
-  status: z.string().uuid().optional(), // Référence à la collection de statuts
+  user: z.string().uuid(),
+  address: z.string().uuid(),
+  status: z.string().uuid().optional(),
   items: z
     .array(
       z.object({
@@ -34,7 +34,6 @@ const orderCreateSchema = z.object({
   totalPrice: z.number().optional(),
 });
 
-// Créez un schéma de mise à jour partiel basé sur le schéma de création
 const orderUpdateSchema = orderCreateSchema.partial().refine((data) => {
   return Object.keys(data).length > 0;
 }, 'Vous devez spécifier au moins un champ');

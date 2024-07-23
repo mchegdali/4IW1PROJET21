@@ -20,7 +20,7 @@ onBeforeMount(async () => {
 });
 
 const goToConfirmation = () => {
-  router.push({ name: 'basket-confirmation' });
+  router.push({ name: 'livraison' });
 };
 </script>
 

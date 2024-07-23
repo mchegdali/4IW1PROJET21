@@ -41,11 +41,30 @@ const fetchAddresses = async () => {
 
 const selectAddress = (address) => {
   selectedAddress.value = address;
-  // Ici, vous pouvez ajouter la logique pour utiliser l'adresse sélectionnée
   console.log('Adresse sélectionnée:', address);
 };
 
-onMounted(fetchAddresses);
+const validateSelection = () => {
+  if (selectedAddress.value) {
+    // Enregistrer l'adresse sélectionnée dans le localStorage
+    localStorage.setItem('selectedAddress', JSON.stringify(selectedAddress.value));
+    
+    // Rediriger vers la page de confirmation du panier
+    router.push({ name: 'basket-confirmation' });
+  } else {
+    error.value = "Veuillez sélectionner une adresse avant de continuer.";
+  }
+};
+
+onMounted(() => {
+  fetchAddresses();
+  
+  // Vérifier s'il y a une adresse enregistrée dans le localStorage
+  const savedAddress = localStorage.getItem('selectedAddress');
+  if (savedAddress) {
+    selectedAddress.value = JSON.parse(savedAddress);
+  }
+});
 </script>
 
 <template>
@@ -111,6 +130,16 @@ onMounted(fetchAddresses);
       <RouterLink :to="{ name: 'add-addresse' }" class="text-blue-500 hover:underline">
         Ajouter une nouvelle adresse
       </RouterLink>
+    </div>
+
+    <div class="mt-4">
+      <button 
+        @click="validateSelection" 
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        :disabled="!selectedAddress"
+      >
+        Valider la sélection
+      </button>
     </div>
   </main>
 </template>

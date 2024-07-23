@@ -7,41 +7,66 @@ const {
 } = require('../schemas/orders.schema');
 const { NotFound } = httpErrors;
 const Orders = sequelize.model('orders');
-const Shippings = sequelize.model('shippings');
+const Address = sequelize.model('addresses');
 const OrdersMongo = require('../models/mongo/orders.mongo');
 const UsersMongo = require('../models/mongo/user.mongo');
-const ShippingsMongo = require('../models/mongo/shipping.mongo');
+const AddressMongo = require('../models/mongo/addresses.mongo');
 const StatusMongo = require('../models/mongo/status.mongo');
 const uuidSchema = require('../schemas/uuid.schema');
 
-/**
- * @type {import('express').RequestHandler}
- */
+const { v4: uuidv4 } = require('uuid');
+
+function generateOrderNumber() {
+  return `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+
 async function createOrder(req, res, next) {
   try {
-    const orderCreateBody = await orderCreateSchema.parseAsync(req.body);
-
     const result = await sequelize.transaction(async (t) => {
-      const user = await UsersMongo.findById(orderCreateBody.user);
-      if (!user) {
-        throw new NotFound();
+      console.log('user', req.body.user);
+      console.log('req :', req.body.address);
+      const user = req.user;
+      const userId = await UsersMongo.findById(req.body.user);
+      console.log('user found:', userId);
+
+      if (!userId) {
+        console.log('user not found');
+        throw new NotFound('utilisateur information not found');
+      }
+      console.log('user basket :', user.basket);
+      if (!user.basket || user.basket.length === 0) {
+        throw new Error('User basket is empty');
       }
 
-      const shipping = await ShippingsMongo.findById(orderCreateBody.shipping);
-      if (!shipping) {
-        throw new NotFound();
-      }
+      const items = user.basket.map((item) => ({
+        _id: uuidv4(),
+        name: item.name,
+        category: item.category,
+        price: parseFloat(item.price),
+        quantity: item.quantity || 1,
+      }));
+      console.log('Items mapped from basket:', items);
 
-      const basket = user.basket;
-
-      if (!basket) {
-        throw new NotFound();
-      }
-      const { items, totalPrice } = basket;
+      const totalPrice = items.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0,
+      );
+      console.log('Total price calculated:', totalPrice);
 
       const status = await StatusMongo.findOne({ label: 'Pending' });
+      console.log('Status found:', status);
+
       if (!status) {
         throw new NotFound('Status not found');
+      }
+
+      // Find the shipping information
+      const address = user.addresses.id(req.body.address);
+
+      console.log('address found:', address);
+
+      if (!address) {
+        throw new NotFound('adrresse information not found');
       }
 
       const order = await Orders.create(
@@ -49,55 +74,57 @@ async function createOrder(req, res, next) {
           userId: user._id,
           statusId: status._id,
           items: JSON.stringify(items),
-          totalPrice: totalPrice,
+          totalPrice: totalPrice + 2,
         },
         { transaction: t },
       );
-
-      await Shippings.update(
-        { order: order.id },
-        { where: { id: shipping.id }, transaction: t },
-      );
+      console.log('Order created:', order);
 
       const orderMongo = {
         _id: order.id,
+        orderNumber: generateOrderNumber(),
         status: {
           _id: status._id,
           label: status.label,
         },
-        items: items.map((item) => ({
-          _id: item._id.toString(),
-          name: item.name,
-          category: item.category,
-          image: item.image,
-          price: item.price,
-          quantity: item.quantity || 1,
-        })),
+        items: items,
         totalPrice: totalPrice.toString(),
         user: {
           _id: user._id,
           fullname: user.fullname,
           email: user.email,
         },
-        shipping: {
-          _id: shipping.id,
-          fullname: shipping.fullname,
-          street: shipping.street,
-          zipCode: shipping.zipCode,
-          city: shipping.city,
-          phone: shipping.phone,
-          deliveryChoiceId: shipping.deliveryChoiceId,
+        address: {
+          _id: address._id,
+          firstName: address.firstName,
+          lastName: address.lastName,
+          region: address.region,
+          country: address.country,
+          street: address.street,
+          zipCode: address.zipCode,
+          city: address.city,
+          phone: address.phone,
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
+      console.log('Order Mongo object:', orderMongo);
 
       const orderDoc = await OrdersMongo.create(orderMongo);
+      console.log('Order MongoDB document created:', orderDoc);
+
+      await UsersMongo.updateOne(
+        { _id: req.user.id },
+        { $set: { basket: [] } },
+      );
+      console.log('User basket cleared:', user.basket);
+
       return orderDoc;
     });
 
-    return res.status(201).json(result);
+    return res.status(200).json({
+      id: result.id,
+    });
   } catch (error) {
+    console.error('Error creating order:', error);
     return next(error);
   }
 }
@@ -512,9 +539,12 @@ async function getMonthlyOrderCount(req, res, next) {
 
     const orderCounts = new Map();
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       const date = new Date(order.createdAt);
-      const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      const month = date.toLocaleString('default', {
+        month: 'short',
+        year: 'numeric',
+      });
       if (orderCounts.has(month)) {
         orderCounts.set(month, orderCounts.get(month) + 1);
       } else {
@@ -522,8 +552,10 @@ async function getMonthlyOrderCount(req, res, next) {
       }
     });
 
-    const sortedMonths = Array.from(orderCounts.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-    const counts = sortedMonths.map(month => orderCounts.get(month));
+    const sortedMonths = Array.from(orderCounts.keys()).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+    const counts = sortedMonths.map((month) => orderCounts.get(month));
 
     return res.json({ months: sortedMonths, counts });
   } catch (error) {

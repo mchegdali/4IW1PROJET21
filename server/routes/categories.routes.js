@@ -40,10 +40,18 @@ categoriesRouter.get('/categories/:category/products', getProducts);
 
 categoriesRouter
   .route('/categories/:category')
+  .all(checkAuth(authConfig.accessTokenSecret), checkRole(['admin']))
   .get(getCategory)
   .patch(updateCategory)
   .delete(deleteCategory);
 
-categoriesRouter.route('/categories').get(getCategories).post(createCategory);
+categoriesRouter
+  .route('/categories')
+  .get(getCategories)
+  .post(
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin']),
+    createCategory,
+  );
 
 module.exports = categoriesRouter;

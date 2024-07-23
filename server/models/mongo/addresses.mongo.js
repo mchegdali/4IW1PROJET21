@@ -1,16 +1,28 @@
 const mongoose = require('mongoose');
 const connection = require('./db');
-const shippingSchema = new mongoose.Schema(
+const addressesSchema = new mongoose.Schema(
   {
     _id: {
       type: mongoose.Schema.Types.UUID,
       required: true,
     },
-    fullname: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
       type: String,
       required: true,
     },
 
+    region: {
+      type: String,
+      required: true,
+    },
+    country: {
+      type: String,
+      required: true,
+    },
     street: {
       type: String,
       required: true,
@@ -27,19 +39,24 @@ const shippingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    deliveryChoiceId: {
+    user: {
       type: {
         _id: {
           type: mongoose.Schema.Types.UUID,
           required: true,
         },
-        name: {
+        fullname: {
+          type: String,
+          required: true,
+        },
+        email: {
           type: String,
           required: true,
         },
       },
     },
   },
+
   {
     toObject: {
       getters: true,
@@ -50,5 +67,5 @@ const shippingSchema = new mongoose.Schema(
   },
 );
 
-const shipping = connection.model('shippings', shippingSchema);
-module.exports = shipping;
+const adresseses = connection.model('addresses', addressesSchema);
+module.exports = adresseses;
