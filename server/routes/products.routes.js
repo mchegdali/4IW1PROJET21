@@ -13,6 +13,7 @@ const {
 } = require('../controllers/products.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
+const upload = require('../config/multerConfig');
 
 const productsRouter = Router({ mergeParams: true });
 
@@ -43,8 +44,26 @@ productsRouter.get('/products/recent', getRecentProducts);
 productsRouter
   .route('/products/:product')
   .get(getProduct)
-  .patch(updateProduct)
-  .delete(deleteProduct);
-productsRouter.route('/products').get(getProducts).post(createProduct);
+  .patch(
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin']),
+    upload.single('image'), // Utilisation de Multer pour gérer l'upload d'une image
+    updateProduct
+  )
+  .delete(
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin']),
+    deleteProduct
+  );
+
+  productsRouter.route('/products')
+  .get(getProducts)
+  .post(
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin']),
+    upload.single('image'), // Utilisation de Multer pour gérer l'upload d'une image
+    createProduct
+  );
+
 
 module.exports = productsRouter;

@@ -1,6 +1,18 @@
 <template>
   <section class="flex-1 ml-80">
-    <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Produits</h1>
+    <div class="flex items-center justify-between mb-10 p-5">
+      <h1 class="text-2xl font-bold text-green-900">
+        Produits
+      </h1>
+
+      <router-link
+        to="/admin/produits/gestion"
+        class="focus:outline-none text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-blue-800"
+        >
+        Gestion Produits
+      </router-link>
+    </div>
+
 
     <div class="p-5">
       <div class="flex flex-row space-x-4">

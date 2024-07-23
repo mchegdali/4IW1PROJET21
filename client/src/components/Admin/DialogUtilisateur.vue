@@ -9,7 +9,7 @@
         <div class="mb-4">
           <h3 class="text-2xl font-semibold text-gray-800">{{ title }}</h3>
         </div>
-        <div class="grid gap-4 py-4">
+        <div class="dialog-content grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="nom" class="text-right font-medium text-gray-700">Nom Complet</label>
             <input
@@ -54,6 +54,14 @@
               :class="!isEditMode ? 'readonly-input' : ''"
             />
           </div>
+          <div v-for="(address, index) in localClient.addresses" :key="index">
+            <Adresse :address="address" :is-edit-mode="isEditMode" @delete-address="handleDeleteAddress" @update:address="updateAddress(index, $event)" />
+          </div>
+          <div v-if="isEditMode" class="flex justify-end mt-4">
+            <button @click="addAddress" class="bg-blue-500 text-white px-4 py-2 rounded">
+              Ajouter une adresse
+            </button>
+          </div>
         </div>
         <div class="flex justify-end mt-6">
           <button
@@ -79,6 +87,19 @@
 import { defineComponent, watch } from 'vue';
 import type { PropType } from 'vue';
 import { useUserStore } from '@/stores/user';
+import Adresse from './Adresse.vue';
+
+interface Address {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  street: string;
+  city: string;
+  region: string;
+  zipCode: string;
+  country: string;
+  phone: string;
+}
 
 interface Client {
   id: string;
@@ -86,11 +107,12 @@ interface Client {
   email: string;
   city: string;
   role: string;
-  addresses: Array<{ city: string }>;
+  addresses: Address[];
 }
 
 export default defineComponent({
   name: 'DialogUtilisateur',
+  components: { Adresse },
   props: {
     client: {
       type: Object as PropType<Client>,
@@ -109,7 +131,8 @@ export default defineComponent({
   data() {
     return {
       isOpen: this.modelValue,
-      localClient: { ...this.client }
+      localClient: { ...this.client },
+      addressesToDelete: [] as string[]
     };
   },
   watch: {
@@ -137,6 +160,18 @@ export default defineComponent({
       await userStore.refreshAccessToken();
       const accessToken = userStore.accessToken;
       try {
+        // Suppression des adresses
+        for (const addressId of this.addressesToDelete) {
+          await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}/addresses/${addressId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`
+            }
+          });
+        }
+
+        // Mise à jour des informations de l'utilisateur
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}`, {
           method: 'PATCH',
           headers: {
@@ -154,6 +189,30 @@ export default defineComponent({
       } catch (error) {
         console.error('Error saving changes:', error);
       }
+    },
+    addAddress() {
+      this.localClient.addresses.push({
+        firstName: '',
+        lastName: '',
+        street: '',
+        city: '',
+        region: '',
+        zipCode: '',
+        country: '',
+        phone: ''
+      });
+    },
+    handleDeleteAddress(address: Address) {
+      if (address.id) {
+        this.addressesToDelete.push(address.id);
+      }
+      const index = this.localClient.addresses.indexOf(address);
+      if (index !== -1) {
+        this.localClient.addresses.splice(index, 1);
+      }
+    },
+    updateAddress(index: number, updatedAddress: Address) {
+      this.localClient.addresses.splice(index, 1, updatedAddress);
     }
   }
 });
@@ -163,5 +222,10 @@ export default defineComponent({
 .readonly-input {
   pointer-events: none;
   caret-color: transparent;
+}
+.dialog-content {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-right: 1rem;
 }
 </style>

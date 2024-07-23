@@ -20,7 +20,14 @@ const Products = sequelize.model('products');
  */
 async function createProduct(req, res, next) {
   try {
-    const productCreateBody = await productCreateSchema.parseAsync(req.body);
+    const productCreateBody = await productCreateSchema.parseAsync({
+      ...req.body,
+      price: Number(req.body.price), // Conversion de string à number
+    });
+
+    if (req.file) {
+      productCreateBody.image = req.file.path;
+    }
 
     const result = await sequelize.transaction(async (t) => {
       if (productCreateBody.categoryId) {
@@ -38,11 +45,10 @@ async function createProduct(req, res, next) {
         include: ['category'],
       });
 
-      const productMongo = await data.toMongo();
+      // La création dans Mongo est déja gérée dans le hook afterCreate
+      console.log("donnée renvoyée", data);
+      return data;
 
-      const productDoc = await ProductMongo.create(productMongo);
-
-      return productDoc;
     });
 
     return res.status(201).json(result);
@@ -241,9 +247,16 @@ async function getRelatedProducts(req, res, next) {
  */
 async function updateProduct(req, res, next) {
   try {
-    const productUpdateBody = productUpdateSchema.parse(req.body);
+    const productUpdateBody = productUpdateSchema.parse({
+      ...req.body,
+      price: Number(req.body.price),
+    });
 
-    await Products.update(productUpdateBody, {
+    if (req.file) {
+      productUpdateBody.image = req.file.path;
+    }
+
+    const [updated, updatedProducts] = await Products.update(productUpdateBody, {
       where: {
         [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
       },
@@ -252,9 +265,16 @@ async function updateProduct(req, res, next) {
       individualHooks: true,
     });
 
-    return res.sendStatus(204);
+    if (updated) {
+      const updatedProduct = await updatedProducts[0].toMongo();
+      console.log("updatedProduct renvoyé au front", updatedProduct);
+      return res.status(200).json(updatedProduct);
+    }
+
+    throw new NotFound('Produit non trouvé');
   } catch (error) {
-    return next(error);
+    console.error('Erreur lors de la mise à jour du produit:', error); // Journalisation des erreurs
+    next(error);
   }
 }
 
