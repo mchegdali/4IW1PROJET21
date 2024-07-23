@@ -13,6 +13,7 @@ const UsersMongo = require('../models/mongo/user.mongo');
 const AddressMongo = require('../models/mongo/addresses.mongo');
 const StatusMongo = require('../models/mongo/status.mongo');
 const uuidSchema = require('../schemas/uuid.schema');
+const StockItemMongo = require('../models/mongo/stock.mongo');
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -38,26 +39,41 @@ async function createOrder(req, res, next) {
         throw new Error('User basket is empty');
       }
 
-      const items = user.basket.map((item) => ({
-        _id: uuidv4(),
-        name: item.name,
-        category: item.category,
-        price: parseFloat(item.price),
-        quantity: item.quantity || 1,
-      }));
-      console.log('Items mapped from basket:', items);
+      const shipping = await ShippingsMongo.findById(orderCreateBody.shipping);
+      if (!shipping) {
+        throw new NotFound("Informations d'expédition non trouvées");
+      }
 
-      const totalPrice = items.reduce(
-        (total, item) => total + item.price * item.quantity,
+      const basket = user.basket;
+      if (!basket || basket.length === 0) {
+        throw new NotFound();
+      }
+
+      const totalPrice = basket.reduce(
+        (total, item) => total + Number(item.price) * item.quantity,
         0,
       );
-      console.log('Total price calculated:', totalPrice);
 
       const status = await StatusMongo.findOne({ label: 'Pending' });
       console.log('Status found:', status);
 
       if (!status) {
-        throw new NotFound('Status not found');
+        throw new NotFound('Statut non trouvé');
+      }
+
+      for (const item of basket) {
+        const stockItems = await StockItemMongo.find({
+          'product._id': item._id,
+          expirationDate: { $gt: new Date() },
+        }).limit(item.quantity);
+
+        if (stockItems.length < item.quantity) {
+          throw new Error(`Stock insuffisant pour le produit ${item.name}`);
+        }
+
+        await StockItemMongo.deleteMany({
+          _id: { $in: stockItems.map((si) => si._id) },
+        });
       }
 
       // Find the shipping information
@@ -73,7 +89,7 @@ async function createOrder(req, res, next) {
         {
           userId: user._id,
           statusId: status._id,
-          items: JSON.stringify(items),
+          items: JSON.stringify(basket),
           totalPrice: totalPrice + 2,
         },
         { transaction: t },
@@ -87,7 +103,14 @@ async function createOrder(req, res, next) {
           _id: status._id,
           label: status.label,
         },
-        items: items,
+        items: basket.map((item) => ({
+          _id: item._id.toString(),
+          name: item.name,
+          category: item.category,
+          image: item.image,
+          price: item.price,
+          quantity: item.quantity || 1,
+        })),
         totalPrice: totalPrice.toString(),
         user: {
           _id: user._id,
@@ -109,13 +132,11 @@ async function createOrder(req, res, next) {
       console.log('Order Mongo object:', orderMongo);
 
       const orderDoc = await OrdersMongo.create(orderMongo);
-      console.log('Order MongoDB document created:', orderDoc);
 
       await UsersMongo.updateOne(
         { _id: req.user.id },
         { $set: { basket: [] } },
       );
-      console.log('User basket cleared:', user.basket);
 
       return orderDoc;
     });

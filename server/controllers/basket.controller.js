@@ -1,6 +1,7 @@
 const { z } = require('zod');
 const sequelize = require('../models/sql');
 const UserMongo = require('../models/mongo/user.mongo');
+const StockItemMongo = require('../models/mongo/stock.mongo');
 
 const Products = sequelize.model('products');
 const Basket = sequelize.model('baskets');
@@ -47,6 +48,15 @@ const addItemToBasket = async (req, res, next) => {
 
     if (!user || !product) {
       return res.sendStatus(404);
+    }
+
+    const availableStock = await StockItemMongo.countDocuments({
+      'product._id': productId,
+      expirationDate: { $gt: new Date() },
+    });
+
+    if (availableStock < quantity) {
+      return res.sendStatus(400);
     }
 
     let basket = await user.getBasket();

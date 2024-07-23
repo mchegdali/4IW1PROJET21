@@ -89,7 +89,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       default: 'user',
-      enum: ['user', 'admin', 'accountant'],
+      enum: ['user', 'admin', 'accountant', 'stock_keeper'],
       trim: true,
     },
     passwordValidUntil: {
