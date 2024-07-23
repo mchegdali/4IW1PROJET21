@@ -35,6 +35,7 @@
               v-model="localProduct.category._id"
               class="col-span-3 p-2 border border-gray-300 rounded-md"
             >
+              <option value="">Sélectionnez une catégorie</option>
               <option v-for="category in categories" :key="category._id" :value="category._id">
                 {{ category.name }}
               </option>
@@ -182,16 +183,19 @@ export default defineComponent({
       this.errors = {};
       
       if (!this.localProduct.name || this.localProduct.name.length < 2) {
-        this.errors.name = 'La chaîne de caractères doit contenir au moins 2 caractère(s)';
+        this.errors.name = 'Le nom doit contenir au moins 2 caractères';
       }
       if (!this.localProduct.description || this.localProduct.description.length < 2) {
-        this.errors.description = 'La chaîne de caractères doit contenir au moins 2 caractère(s)';
+        this.errors.description = 'La description doit contenir au moins 2 caractères';
       }
       if (!this.localProduct.price || this.localProduct.price < 0.01) {
-        this.errors.price = 'Le nombre doit être supérieur ou égal à 0.01';
+        this.errors.price = 'Le prix doit être supérieur ou égal à 0.01';
       }
       if (!this.localProduct.category._id) {
         this.errors.category = 'Vous devez choisir une catégorie';
+      }
+      if (!this.isEditMode && !this.imageFile) {
+        this.errors.image = "L'image est obligatoire";
       }
 
       if (Object.keys(this.errors).length === 0) {
