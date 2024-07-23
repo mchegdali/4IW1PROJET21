@@ -12,6 +12,7 @@ const OrdersMongo = require('../models/mongo/orders.mongo');
 const UsersMongo = require('../models/mongo/user.mongo');
 const ShippingsMongo = require('../models/mongo/shipping.mongo');
 const StatusMongo = require('../models/mongo/status.mongo');
+const uuidSchema = require('../schemas/uuid.schema');
 
 /**
  * @type {import('express').RequestHandler}
@@ -108,7 +109,11 @@ async function createOrder(req, res, next) {
  */
 async function getOrder(req, res, next) {
   try {
-    const id = req.params.id;
+    const { data: id, success } = uuidSchema.safeParse(req.params.id);
+
+    if (!success) {
+      return res.sendStatus(404);
+    }
 
     const filter = {
       _id: id,
