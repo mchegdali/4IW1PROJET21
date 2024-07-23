@@ -210,6 +210,8 @@ export default defineComponent({
         });
         if (response.ok) {
           this.$emit('save', this.localClient);
+          this.addressesToDelete = [];
+          this.addressesToCreate = [];
           this.closeDialog();
         } else {
           console.error('Failed to update client');
