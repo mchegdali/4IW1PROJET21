@@ -4,31 +4,32 @@
       <h1 class="text-2xl font-bold text-green-900">
         Produits
       </h1>
-
       <div class="flex space-x-2">
         <router-link
           to="/admin/categories/gestion"
-          class="focus:outline-none text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:focus:ring-blue-800"
+          class="mr-2 text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center mb-2"
         >
           Gestion Catégories
         </router-link>
 
         <router-link
           to="/admin/produits/gestion"
-          class="focus:outline-none text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:focus:ring-blue-800"
+          class="mr-2 text-black rounded-lg text-sm px-5 py-2 bg-white border border-gray-300 transition-colors duration-300 hover:bg-gray-500 hover:text-white text-center mb-2"
         >
           Gestion Produits
         </router-link>
       </div>
     </div>
-
-
     <div class="p-5">
-      <div class="flex flex-row space-x-4">
-        <div class="w-3/5 bg-white rounded-xl p-2">
-          <AreaChart />
+      <div class="flex flex-row">
+        <div class="w-1/2 flex flex-col">
+          <DonutChart
+            v-if="priceChartOptions && priceChartSeries"
+            :options="priceChartOptions"
+            :series="priceChartSeries"
+          />
         </div>
-        <div class="w-2/5 bg-white rounded-xl">
+        <div class="w-1/2 flex flex-col-xl">
           <DonutChart
             v-if="donutChartOptions && donutChartSeries"
             :options="donutChartOptions"
@@ -37,28 +38,9 @@
         </div>
       </div>
     </div>
-
-    <div class="p-5">
-      <div class="flex flex-row space-x-4">
-        <!-- Colonne de gauche -->
-        <div class="w-1/3 flex flex-col">
-          <div class="mb-4">
-            <StatisticsBlock :stats="statisticsData" />
-          </div>
-          <div class="bg-white rounded-xl p-2 flex-grow">
-            <DonutChart
-              v-if="priceChartOptions && priceChartSeries"
-              :options="priceChartOptions"
-              :series="priceChartSeries"
-            />
-          </div>
-        </div>
-        <!-- Colonne de droite -->
-        <div class="w-full md:w-2/3 bg-white rounded-xl p-2 md:h-auto overflow-auto">
-          <BarChart />
-        </div>
+    <div class="mb-4 mt-10">
+        <StatisticsBlock :stats="statisticsData" />
       </div>
-    </div>
   </section>
 </template>
 
@@ -66,7 +48,6 @@
 import { defineComponent } from 'vue';
 import AreaChart from '../AreaChart.vue';
 import DonutChart from '../DonutChart.vue';
-import BarChart from '../BarChart.vue';
 import StatisticsBlock from '../StatisticsBlock.vue';
 import { useUserStore } from '@/stores/user';
 
@@ -102,7 +83,6 @@ export default defineComponent({
   components: {
     AreaChart,
     DonutChart,
-    BarChart,
     StatisticsBlock
   },
   data() {

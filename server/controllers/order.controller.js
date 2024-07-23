@@ -136,10 +136,67 @@ async function getOrder(req, res, next) {
  */
 async function getOrders(req, res, next) {
   try {
-    const basket = await OrdersMongo.find({}).lean({});
-    return res.json(basket);
+    console.log('Received query:', req.query);
+    const { page, text, pageSize, sortField, sortOrder } = orderQuerySchema.parse(req.query);
+
+    /**
+     * @type {import('mongoose').PipelineStage[]  }
+     */
+    const pipelineStages = [];
+
+    if (text && text.length >= 3) {
+      pipelineStages.push(
+        {
+          $match: {
+            $or: [
+              { _id: { $regex: text, $options: 'i' } },
+              { customerName: { $regex: text, $options: 'i' } },
+              { customerEmail: { $regex: text, $options: 'i' } },
+              { 'items.productName': { $regex: text, $options: 'i' } }
+            ]
+          },
+        }
+      );
+    }
+
+    if (sortField && sortOrder) {
+      const sortStage = {};
+      const field = sortField === 'id' ? '_id' : sortField;
+      sortStage[field] = sortOrder === 'asc' ? 1 : -1;
+      pipelineStages.push({ $sort: sortStage });
+    }
+
+    pipelineStages.push(
+      {
+        $facet: {
+          metadata: [
+            { $count: 'total' },
+            {
+              $set: {
+                page,
+                totalPages: { $ceil: { $divide: ['$total', pageSize] } },
+                pageSize,
+              },
+            },
+          ],
+          items: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+        },
+      },
+    );
+
+    const [result] = await OrdersMongo.aggregate(pipelineStages);
+    const items = result.items ?? [];
+    const metadata = result.metadata[0] ?? {
+      total: 0,
+      page: 1,
+      totalPages: 0,
+      pageSize,
+    };
+
+    return res.json({ metadata, items });
   } catch (error) {
-    return next(error);
+    console.error('Error in getOrders:', error);
+    next(error);
   }
 }
 

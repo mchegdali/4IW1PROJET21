@@ -2,11 +2,14 @@
 const { z } = require('zod');
 const entitySchema = require('./entity.schema');
 const timestampsSchema = require('./timestamps.schema');
+const { paginationSchema } = require('./pagination.schema');
 
-const orderQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  text: z.string().min(2).optional(),
-});
+const orderQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    text: z.string().min(2).optional(),
+  })
+  .merge(paginationSchema);
 
 const orderCreateSchema = z.object({
   user: z.string().uuid().optional(),
