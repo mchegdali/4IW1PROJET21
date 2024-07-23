@@ -3,8 +3,9 @@ const cors = require('cors');
 const logger = require('pino-http');
 const helmet = require('helmet');
 const path = require('path'); // Ajouté pour le chemin du dossier
+
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: process.env.APP_URL,
   optionsSuccessStatus: 200,
   credentials: true,
 };
