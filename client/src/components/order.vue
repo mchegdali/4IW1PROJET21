@@ -193,7 +193,7 @@ onMounted(async () => {
       }
     });
 
-    if (!response.ok) {
+    if (!response.ok || response.status === 404) {
       // Redirect to 404 page if the order is not found
       router.push({ name: 'not-found' });
       return;
