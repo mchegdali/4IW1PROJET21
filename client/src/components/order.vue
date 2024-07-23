@@ -76,11 +76,11 @@ const getProductTitle = (productId: string) => {
 };
 
 const computeOrderTotal = () => {
-  return (
-    order.value?.items
-      .reduce((total, item) => total + parseFloat(item.price) * (item.quantity || 1), 0)
-      .toFixed(2) || '0.00'
-  );
+  const total = order.value?.items
+    .reduce((total, item) => total + parseFloat(item.price) * (item.quantity || 1), 0)
+    .toFixed(2);
+
+  return total || '0.00';
 };
 
 const getImageBase64 = async (url: string): Promise<string> => {
@@ -128,7 +128,7 @@ const generateInvoice = async () => {
   doc.text('18 rue de la Victoire', 14, 100);
   doc.text('75001 Paris', 14, 110);
   doc.text('01 43 25 67 67', 14, 120);
-  doc.text('fanthesie@gmail.com', 14, 130);
+  doc.text('contact@fanthesie.fr', 14, 130);
 
   doc.setFontSize(12);
   doc.setTextColor(40, 40, 40);
@@ -174,9 +174,10 @@ const generateInvoice = async () => {
   doc.setFontSize(12);
   const finalY = doc.lastAutoTable.finalY || 120 + order.value.items.length * 6;
   doc.text(`Sous-total: ${computeOrderTotal()} €`, 143, finalY + 10);
-  doc.text(`Livraison: gratuite`, 143, finalY + 18);
-  doc.text(`Remise: 0€`, 143, finalY + 26);
-  doc.text(`Total: ${computeOrderTotal()} €`, 143, finalY + 34);
+  doc.text(`Livraison: 2 €`, 143, finalY + 18);
+  doc.text(`Remise: 0 €`, 143, finalY + 26);
+  doc.text(`Total TTC: ${(parseFloat(computeOrderTotal()) + 2).toFixed(2)} €`, 143, finalY + 34);
+
 
   doc.save(`Invoice_${order.value.orderNumber}.pdf`);
 };
@@ -412,17 +413,21 @@ onMounted(async () => {
             Sous-total <span>{{ computeOrderTotal() }} €</span>
           </p>
           <p class="flex justify-between text-sm py-1 sm:text-lg">
-            Livraison: <span>GRATUIT</span>
+            Livraison: <span>2 €</span>
           </p>
           <p class="flex justify-between text-sm py-1 sm:text-lg">Remise: <span>0 €</span></p>
 
           <p class="font-bold flex justify-between text-sm sm:text-lg">
-            Total: <span class="font-bold">{{ computeOrderTotal() }} €</span>
+            Total:
+            <span class="font-bold">{{ (parseFloat(computeOrderTotal()) + 2).toFixed(2) }} €</span>
           </p>
         </div>
 
         <div class="p-4">
-          <button @click="generateInvoice" class="bg-tea-600 text-white py-2 px-4 rounded flex gap-2 w-full">
+          <button
+            @click="generateInvoice"
+            class="bg-tea-600 text-white py-2 px-4 rounded flex gap-2 w-full"
+          >
             Télécharger la facture <FileText />
           </button>
         </div>
