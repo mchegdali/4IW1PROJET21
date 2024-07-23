@@ -91,10 +91,10 @@
     <div class="flex justify-end">
       <button 
         @click="deleteAddress" 
-        class="bg-red-500 text-white px-4 py-2 rounded"
+        class="bg-red-500 text-white px-4 py-2 rounded text-sm mt-2"
         v-if="isEditMode"
       >
-        Supprimer
+        Supprimer l'adresse
       </button>
     </div>
   </div>

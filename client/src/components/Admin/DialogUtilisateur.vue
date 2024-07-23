@@ -56,22 +56,22 @@
             />
           </div>
           <div v-if="isEditMode && !isReadOnly" class="flex justify-end mt-4">
-            <button @click="addAddress" class="bg-blue-500 text-white px-4 py-2 rounded">
+            <button @click="addAddress" class="bg-blue-500 text-white px-4 py-2 rounded text-sm">
               Ajouter une adresse
             </button>
           </div>
         </div>
-        <div class="flex justify-end mt-6">
+        <div class="flex justify-end mt-2">
           <button
             v-if="isEditMode && !isReadOnly"
             @click="validateAndSave"
-            class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
+            class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
           >
             Enregistrer
           </button>
           <button
             @click="closeDialog"
-            class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
+            class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-150"
           >
             Fermer
           </button>
@@ -87,6 +87,7 @@ import { defineComponent, reactive, watch } from 'vue';
 import type { PropType } from 'vue';
 import { useUserStore } from '@/stores/user';
 import Adresse from './Adresse.vue';
+import { toast } from '../ui/toast';
 
 interface Address {
   id?: string;
@@ -274,11 +275,31 @@ export default defineComponent({
           this.addressesToDelete = [];
           this.$emit('refresh');
           this.closeDialog();
+          toast({
+            title: 'Utilisateur modifié',
+            description: 'L\'utilisateur a bien été modifié',
+            type: 'foreground',
+            duration: 2500,
+            variant: 'success'
+          });
         } else {
-          console.error('Failed to update client');
+          toast({
+            title: 'Erreur',
+            description: 'Erreur de mise à jour du client',
+            type: 'foreground',
+            duration: 2500,
+            variant: 'danger'
+          });
         }
       } catch (error) {
         console.error('Error saving changes:', error);
+        toast({
+          title: 'Erreur',
+          description: 'Erreur de mise à jour du client',
+          type: 'foreground',
+          duration: 2500,
+          variant: 'danger'
+        });
       }
     },
     addAddress() {

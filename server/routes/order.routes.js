@@ -11,6 +11,7 @@ const {
   getTotalSales,
   getDistinctCustomerCount,
   getUserOrders,
+  getMonthlyOrderCount
 } = require('../controllers/order.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -23,13 +24,29 @@ const userOrderRouter = Router({ mergeParams: true });
 //   '/orders',
 //   checkAuth(authConfig.accessTokenSecret, false),
 // );
-orderRouter.route('/orders').get(getOrders).post(createOrder);
+orderRouter.route(
+  '/orders')
+  .get(getOrders,
+    // checkAuth(authConfig.accessTokenSecret),
+    // checkRole(['admin']),
+  )
+  .post(createOrder,
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin']),
+  );
 
 orderRouter.get(
   '/orders/count',
   checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getOrderCount,
+);
+
+orderRouter.get(
+  '/orders/monthly-count',
+  checkAuth(authConfig.accessTokenSecret),
+  checkRole(['admin']),
+  getMonthlyOrderCount,
 );
 
 orderRouter.get(

@@ -1,27 +1,24 @@
-<script lang="ts" setup>
-import { ref } from 'vue';
+<script lang="ts">
+import { defineComponent } from 'vue';
+import ApexCharts from 'vue3-apexcharts';
 
-const options = ref({
-  chart: {
-    id: 'vuechart-area-example'
+export default defineComponent({
+  name: 'AreaChart',
+  components: {
+    apexchart: ApexCharts,
   },
-  xaxis: {
-    categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
-  }
+  props: {
+    options: Object,
+    series: Array,
+  },
 });
 
-const series = ref<Array<{ name: string; data: number[] }>>([
-  {
-    name: 'series-1',
-    data: [30, 40, 45, 50, 49, 60, 70, 91]
-  }
-]);
 </script>
 
+<style scoped></style>
+
 <template>
-  <div class="w-full">
-    <apexchart width="100%" type="area" :options="options" :series="series"></apexchart>
+  <div class="w-full h-full">
+    <apexchart class="flex items-center w-full h-full" width="100%" type="area" :options="options" :series="series"></apexchart>
   </div>
 </template>
-
-<style scoped></style>

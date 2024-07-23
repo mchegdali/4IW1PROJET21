@@ -6,14 +6,14 @@
     </div>
 
     <!-- Stats globales -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 h-100 p-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 h-100 p-5">
       <!-- En faire des composants -->
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
           <img
-            src="https://picsum.photos/500/500"
+            src="/images/users.svg"
             alt="Logo"
-            class="object-contain h-20 rounded-full"
+            class="object-contain h-20"
           />
         </div>
         <div class="text-center mt-4">
@@ -25,9 +25,9 @@
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
           <img
-            src="https://picsum.photos/500/500"
+            src="/images/revenue.svg"
             alt="Logo"
-            class="object-contain h-20 rounded-full"
+            class="object-contain h-20"
           />
         </div>
         <div class="text-center mt-4">
@@ -39,28 +39,14 @@
       <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
         <div class="flex items-center justify-center py-4">
           <img
-            src="https://picsum.photos/500/500"
+            src="/images/plane.svg"
             alt="Logo"
-            class="object-contain h-20 rounded-full"
+            class="object-contain h-20"
           />
         </div>
         <div class="text-center mt-4">
           <div class="text-2xl font-bold" id="orderCount">{{ orderCount }}</div>
           <div class="text-sm text-gray-500 mt-2">Nombre de commandes total</div>
-        </div>
-      </div>
-
-      <div class="p-4 rounded-lg mb-8 bg-white shadow-lg">
-        <div class="flex items-center justify-center py-4">
-          <img
-            src="https://picsum.photos/500/500"
-            alt="Logo"
-            class="object-contain h-20 rounded-full"
-          />
-        </div>
-        <div class="text-center mt-4">
-          <div class="text-2xl font-bold">75,5 €</div>
-          <div class="text-sm text-gray-500 mt-2">TODO Panier moyen</div>
         </div>
       </div>
     </div>
@@ -281,7 +267,7 @@ export default defineComponent({
           labels: data.map((item: OrderStatus) => item.label),
           title: {
             text: 'Répartition des commandes par statut',
-            align: 'left'
+            align: 'center'
           }
         };
       } catch (error) {
