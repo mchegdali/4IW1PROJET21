@@ -9,6 +9,7 @@ const {
   getProductCount,
   getProductDistributionByCategory,
   getPriceDistribution,
+  getRecentProducts,
 } = require('../controllers/products.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -38,6 +39,7 @@ productsRouter.get(
 );
 
 productsRouter.get('/products/:product/related', getRelatedProducts);
+productsRouter.get('/products/recent', getRecentProducts);
 productsRouter
   .route('/products/:product')
   .get(getProduct)

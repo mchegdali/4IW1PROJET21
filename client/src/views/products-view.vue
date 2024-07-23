@@ -5,6 +5,7 @@ import Label from '@/components/ui/label/Label.vue';
 import config from '@/config';
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useDebounceFn } from '@vueuse/core';
 import {
   Select,
   SelectContent,
@@ -96,7 +97,7 @@ function onUpdateCategory(value: string) {
   });
 }
 
-function onUpdateMinPrice(value: number) {
+const debouncedUpdateMinPrice = useDebounceFn((value: number) => {
   const valueString = value === 0 || Number.isNaN(value) ? '0' : value.toString();
 
   router.push({
@@ -106,9 +107,9 @@ function onUpdateMinPrice(value: number) {
       minPrice: valueString
     }
   });
-}
+}, 150);
 
-function onUpdateMaxPrice(value: number) {
+const debouncedUpdateMaxPrice = useDebounceFn((value: number) => {
   router.push({
     name: 'products',
     query: {
@@ -116,6 +117,14 @@ function onUpdateMaxPrice(value: number) {
       maxPrice: value === 0 || Number.isNaN(value) ? undefined : value.toString()
     }
   });
+}, 150);
+
+function onUpdateMinPrice(value: number) {
+  debouncedUpdateMinPrice(value);
+}
+
+function onUpdateMaxPrice(value: number) {
+  debouncedUpdateMaxPrice(value);
 }
 
 function onUpdatePage(page: number) {
@@ -205,7 +214,7 @@ searchStore.$subscribe((mutation, state) => {
 <template>
   <main class="grow">
     <div
-      class="border-b border-gray-200 h-fit py-2 px-4 hidden md:flex md:items-center md:sticky md:top-0 md:z-10 bg-background"
+      class="border-b border-gray-200 h-fit py-2 px-4 hidden lg:flex lg:items-center lg:sticky lg:top-0 lg:z-10 bg-background"
     >
       <p>
         {{ firstElementIndexInCurrentPage }} - {{ currentPageCount }} sur {{ metadata.total }}
@@ -221,11 +230,22 @@ searchStore.$subscribe((mutation, state) => {
         </template>
       </p>
     </div>
-    <div class="flex gap-4 relative">
+    <div class="flex flex-col lg:flex-row gap-4 w-full">
       <aside
-        class="col-span-12 border border-gray-200 p-2 space-y-2 md:block md:col-span-2"
+        class="w-full lg:block lg:w-2/12 border border-gray-200 p-2 space-y-2"
         :class="{ hidden: !isFilterMenuOpen }"
       >
+        <header class="flex justify-between items-center pt-2">
+          <h2 class="text-xl lg:text-lg font-black">Filtrer</h2>
+          <Button
+            variant="outline"
+            @click="handleOpenFilterMenu"
+            class="w-fit flex items-center gap-2 lg:hidden"
+          >
+            <template v-if="!isFilterMenuOpen"> <FilterIcon class="w-4 h-4" />Filtrer </template>
+            <template v-else> <XIcon class="w-4 h-4" /> Fermer </template>
+          </Button>
+        </header>
         <fieldset>
           <Label for="category">Catégorie</Label>
           <Select
@@ -240,7 +260,11 @@ searchStore.$subscribe((mutation, state) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Toutes</SelectItem>
-              <SelectItem v-for="category in categories" :key="category._id" :value="category.slug">
+              <SelectItem
+                v-for="category in categories"
+                :key="category.slug"
+                :value="category.slug"
+              >
                 {{ category.name }}
               </SelectItem>
             </SelectContent>
@@ -251,7 +275,7 @@ searchStore.$subscribe((mutation, state) => {
             id="minPrice"
             :min="0"
             :default-value="0"
-            :step="0.01"
+            :step="1"
             :model-value="minPrice"
             @update:model-value="onUpdateMinPrice"
             :format-options="{
@@ -274,14 +298,14 @@ searchStore.$subscribe((mutation, state) => {
             id="maxPrice"
             :min="0"
             :default-value="0"
-            :model-value="maxPrice"
+            :step="1"
+            :model-value="maxPrice || 0"
             @update:model-value="onUpdateMaxPrice"
             :format-options="{
               style: 'currency',
               currency: 'EUR',
               currencyDisplay: 'symbol',
-              currencySign: 'accounting',
-              maximumFractionDigits: 2
+              currencySign: 'accounting'
             }"
           >
             <Label for="maxPrice">Prix maximum</Label>
@@ -296,24 +320,28 @@ searchStore.$subscribe((mutation, state) => {
           >Réinitialiser les filtres</Button
         >
       </aside>
-      <div class="col-span-12 md:col-span-10 grid grid-cols-12 gap-4 p-2" v-if="!isFilterMenuOpen">
-        <header class="col-span-12 flex justify-between items-center pt-2">
-          <h1 class="text-xl md:text-2xl font-black">Résultats</h1>
+      <div class="w-full lg:w-10/12 p-2" :class="{ hidden: isFilterMenuOpen }">
+        <header class="w-full flex justify-between items-center pt-2">
+          <h1 class="text-xl lg:text-2xl font-black">Résultats</h1>
           <Button
             variant="outline"
             @click="handleOpenFilterMenu"
-            class="w-fit flex items-center gap-2 md:hidden"
+            class="w-fit flex items-center gap-2 lg:hidden"
           >
-            <template v-if="!isFilterMenuOpen"> <FilterIcon class="w-4 h-4" />Filtrer</template>
+            <template v-if="!isFilterMenuOpen"> <FilterIcon class="w-4 h-4" />Filtrer </template>
             <template v-else> <XIcon class="w-4 h-4" /> Fermer </template>
           </Button>
         </header>
-        <ProductCard
-          v-for="product in products"
-          :key="product._id"
-          :product="product"
-          class="col-span-6 md:col-span-3 xl:col-span-2"
-        />
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-2"
+        >
+          <ProductCard
+            v-for="product in products"
+            :key="product._id"
+            :product="product"
+            class="col-span-1"
+          />
+        </div>
         <div class="col-span-12 flex justify-center py-2 w-full">
           <Pagination
             v-slot="{ page }"

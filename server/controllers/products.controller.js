@@ -61,7 +61,7 @@ async function getProducts(req, res, next) {
     const category = req.params.category;
 
     const { page, text, pageSize, minPrice, maxPrice } =
-      await productQuerySchema.parseAsync(req.query);
+      productQuerySchema.parse(req.query);
 
     /**
      * @type {import('mongoose').PipelineStage[]  }
@@ -160,6 +160,24 @@ async function getProducts(req, res, next) {
         id: product._id.toString(),
       })),
     });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getRecentProducts(req, res, next) {
+  try {
+    const recentProducts = await ProductMongo.find()
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .exec();
+
+    return res.status(200).json(recentProducts);
   } catch (error) {
     return next(error);
   }
@@ -350,6 +368,7 @@ async function getPriceDistribution(req, res, next) {
 module.exports = {
   createProduct,
   getProducts,
+  getRecentProducts,
   getProduct,
   getRelatedProducts,
   updateProduct,
