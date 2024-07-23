@@ -30,6 +30,7 @@ async function createOrder(req, res, next) {
       console.log('user found:', userId);
 
       if (!userId) {
+        console.log('user not found');
         throw new NotFound('utilisateur information not found');
       }
       console.log('user basket :', user.basket);
@@ -60,7 +61,8 @@ async function createOrder(req, res, next) {
       }
 
       // Find the shipping information
-      const address = await AddressMongo.findById(req.body.address);
+      const address = user.addresses.id(req.body.address);
+
       console.log('address found:', address);
 
       if (!address) {
@@ -118,7 +120,9 @@ async function createOrder(req, res, next) {
       return orderDoc;
     });
 
-    return res.sendStatus(201);
+    return res.status(200).json({
+      id: result.id,
+    });
   } catch (error) {
     console.error('Error creating order:', error);
     return next(error);
