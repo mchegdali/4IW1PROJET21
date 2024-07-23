@@ -174,6 +174,11 @@ export const useUserStore = defineStore('user', {
       this.user = null;
 
       this.stopRefreshTokenTimer();
+
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('basket');
     },
     stopRefreshTokenTimer() {
       if (this.refreshAccessTokenTimeout) {
