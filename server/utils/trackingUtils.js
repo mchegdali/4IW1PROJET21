@@ -54,8 +54,8 @@ const generateTrackingEvents = (order) => {
       events.push({
         occurred_at: outForDeliveryDate.toISOString(),
         description: "En cours de livraison.",
-        city_locality: order.shipping.city,
-        state_province: order.shipping.zipCode,
+        city_locality: order.address.city,
+        state_province: order.address.zipCode,
         country_code: "FR",
         event_code: "OUT_FOR_DELIVERY"
       });
@@ -63,8 +63,8 @@ const generateTrackingEvents = (order) => {
       events.push({
         occurred_at: deliveryDate.toISOString(),
         description: "Colis livré.",
-        city_locality: order.shipping.city,
-        state_province: order.shipping.zipCode,
+        city_locality: order.address.city,
+        state_province: order.address.zipCode,
         country_code: "FR",
         event_code: "DELIVERED"
       });

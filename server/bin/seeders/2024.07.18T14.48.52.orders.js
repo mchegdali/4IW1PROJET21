@@ -1,7 +1,7 @@
 const OrderMongo = require('../../models/mongo/orders.mongo');
 const { ProductMongo } = require('../../models/mongo/products.mongo');
-const crypto = require('node:crypto');
-const { fakerFR: faker } = require('@faker-js/faker');
+const { v4: uuidv4 } = require('uuid'); // Utilisation de uuid pour générer des UUID
+const { faker } = require('@faker-js/faker');
 
 /**
  * @typedef { Object } MigrationParams
@@ -18,7 +18,7 @@ const { fakerFR: faker } = require('@faker-js/faker');
 const up = async ({ context: { sequelize } }) => {
   const Users = sequelize.model('users');
   const Status = sequelize.model('status');
-  const products = await ProductMongo.find({}).lean({});
+  const products = await ProductMongo.find({}).lean();
 
   const users = await Users.findAll();
   const statuses = await Status.findAll();
@@ -31,32 +31,35 @@ const up = async ({ context: { sequelize } }) => {
 
   for (const user of users) {
     for (const status of statuses) {
-      const isShippedOrDelivered =
-        status.label === 'Shipped' || status.label === 'Delivered';
+      const isShippedOrDelivered = status.label === 'Shipped' || status.label === 'Delivered';
       const createdAt = faker.date.past();
       const shippingDate = isShippedOrDelivered
         ? new Date(createdAt.getTime() + 2 * 24 * 60 * 60 * 1000)
         : null;
 
-      const items = faker.helpers.arrayElements(products, { min: 1, max: 10 });
+      const items = faker.helpers.arrayElements(products, { min: 1, max: 10 }).map(item => ({
+        _id: uuidv4(),
+        name: item.name,
+        quantity: faker.number.int({ min: 1, max: 5 }), // Utilisation de faker.number.int pour obtenir un entier
+        category: item.category ? {
+          _id: item.category._id,
+          name: item.category.name,
+          slug: item.category.slug,
+        } : null,
+        price: item.price,
+      }));
 
       const totalPrice = items.reduce(
-        (total, item) => total + item.price * item.quantity,
+        (total, item) => total + parseFloat(item.price) * item.quantity,
         0,
       );
 
       const order = {
-        id: crypto.randomUUID(),
-        statusId: status.id,
-        items,
-        userId: user.id,
-        shippingId: null, // Pas de livraison initiale
-        _id: crypto.randomUUID(),
-        orderNumber: crypto.randomUUID(),
+        _id: uuidv4(),
+        orderNumber: uuidv4(),
         deliveryDate: faker.datatype.boolean() ? faker.date.future() : null,
         shippingDate: shippingDate,
-        totalPrice,
-        paymentType: 'credit_card',
+        totalPrice: totalPrice.toFixed(2), // Assurez-vous que c'est une chaîne de caractères pour Decimal128
         status: {
           _id: status.id,
           label: status.label,
@@ -66,25 +69,27 @@ const up = async ({ context: { sequelize } }) => {
           fullname: user.fullname,
           email: user.email,
         },
-        shipping: {
-          _id: crypto.randomUUID(),
-          fullname: faker.person.fullName(),
+        address: {
+          _id: uuidv4(),
+          firstName: faker.person.firstName(),
+          lastName: faker.person.lastName(),
+          region: faker.location.state(),
+          country: faker.location.country(),
           street: faker.location.streetAddress(),
           zipCode: faker.location.zipCode(),
           city: faker.location.city(),
           phone: faker.phone.number(),
-          deliveryChoiceId: crypto.randomUUID(),
         },
-        createdAt: createdAt, // Date actuelle
+        items: items,
+        createdAt: createdAt,
+        updatedAt: createdAt,
       };
       orders.push(order);
     }
   }
 
   if (typeof OrderMongo.insertMany !== 'function') {
-    throw new Error(
-      'OrderMongo.insertMany is not a function. Make sure OrderMongo is defined correctly and is a valid Mongoose model.',
-    );
+    throw new Error('OrderMongo.insertMany is not a function. Make sure OrderMongo is defined correctly and is a valid Mongoose model.');
   }
 
   await OrderMongo.insertMany(orders);

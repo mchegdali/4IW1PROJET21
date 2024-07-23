@@ -18,31 +18,33 @@ interface Product {
   image: string;
 }
 
-interface Shipping {
-  fullname: string;
+interface Address {
+  firstName: string;
+  lastName: string;
   street: string;
   zipCode: string;
   city: string;
+  region: string;
+  country: string;
   phone: string;
-  deliveryChoiceId: string;
 }
 
 interface OrderItem {
-  id: string;
-  price: string;
-  quantity?: number;
+  _id: { $binary: { base64: string; subType: string } };
+  name: string;
+  quantity: number;
+  price: { $numberDecimal: string };
 }
 
 interface Order {
-  _id: string;
+  _id: { $binary: { base64: string; subType: string } };
   orderNumber: string;
-  createdAt: string;
-  shippingDate: string;
-  deliveryStatus?: boolean;
-  shipping: Shipping;
-  items: OrderItem[];
-  paymentType: string;
+  deliveryDate: string;
+  address: Address;
   status: { label: string };
+  totalPrice: { $numberDecimal: string };
+  items: OrderItem[];
+  createdAt: string;
 }
 
 const route = useRoute();
@@ -78,7 +80,7 @@ const getProductTitle = (productId: string) => {
 
 const computeOrderTotal = () => {
   const total = order.value?.items
-    .reduce((total, item) => total + parseFloat(item.price) * (item.quantity || 1), 0)
+    .reduce((total, item) => total + parseFloat(item.price.$numberDecimal) * item.quantity, 0)
     .toFixed(2);
 
   return total || '0.00';
@@ -137,17 +139,16 @@ const generateInvoice = async () => {
   doc.setTextColor(40, 40, 40);
   doc.setFontSize(12);
   doc.setTextColor(60, 60, 60);
-  doc.text(`${order.value.shipping.fullname}`, 113, 140);
+  doc.text(`${order.value.address.firstName} ${order.value.address.lastName}`, 113, 140);
   doc.text(
-    `${order.value.shipping.street}, ${order.value.shipping.zipCode} ${order.value.shipping.city}`,
+    `${order.value.address.street}, ${order.value.address.zipCode} ${order.value.address.city}`,
     113,
     150
   );
-  doc.text(`${order.value.shipping.phone}`, 113, 160);
+  doc.text(`${order.value.address.phone}`, 113, 160);
 
   const itemRows = order.value.items.map((item) => {
-    const product = products.value.find((p) => p.id === item.id);
-    return [product?.name || 'Unknown Product', item.quantity || 1, `${item.price} €`];
+    return [item.name, item.quantity, `${item.price.$numberDecimal} €`];
   });
 
   autoTable(doc, {
@@ -194,7 +195,6 @@ onMounted(async () => {
     });
 
     if (!response.ok || response.status === 404) {
-
       router.push({ name: 'not-found' });
       return;
     }
@@ -202,13 +202,12 @@ onMounted(async () => {
     order.value = await response.json();
 
     if (order.value && order.value.items) {
-      await fetchProductDetails(order.value.items.map((item) => item.id));
+      await fetchProductDetails(order.value.items.map((item) => item._id.base64));
     } else {
       console.warn('Order or order items are not available');
     }
   } catch (error) {
     console.error('Error fetching order:', error);
-    // Redirect to 404 page in case of any error
     router.push({ name: 'not-found' });
   }
 });
@@ -248,13 +247,13 @@ onMounted(async () => {
         <div class="p-2 sm:p-4">
           <h1 class="text-xs font-bold text-gray-700 sm:text-sm">ADRESSE DE COLLECTE</h1>
           <div class="text-sm p-2 sm:text-sm border-b">
-            <p class="flex gap-2"><MapPin class="w-4" />{{ order.shipping.street }}</p>
-            <p>{{ order.shipping.zipCode }} {{ order.shipping.city }}</p>
+            <p class="flex gap-2"><MapPin class="w-4" />{{ order.address.street }}</p>
+            <p>{{ order.address.zipCode }} {{ order.address.city }}</p>
           </div>
           <h1 class="text-xs font-bold text-gray-700 mt-2 sm:text-sm">VOS COORDONNÉES</h1>
           <div class="text-sm p-2 sm:text-sm">
-            <p>{{ order.shipping.fullname }}</p>
-            <p class="flex gap-2"><Phone class="w-4" /> {{ order.shipping.phone }}</p>
+            <p>{{ order.address.firstName }} {{ order.address.lastName }}</p>
+            <p class="flex gap-2"><Phone class="w-4" /> {{ order.address.phone }}</p>
           </div>
         </div>
 
