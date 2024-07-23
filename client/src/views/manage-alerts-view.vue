@@ -6,6 +6,8 @@ import Button from '@/components/ui/button/Button.vue';
 import Checkbox from '@/components/ui/checkbox/Checkbox.vue';
 import Label from '@/components/ui/label/Label.vue';
 import { useUserStore } from '@/stores/user';
+import { computed, onBeforeMount, reactive, ref } from 'vue';
+import useAuthFetch from '@/composables/use-auth-fetch';
 
 const userStore = useUserStore();
 
@@ -16,14 +18,16 @@ const alertSchema = z.object({
   newsletterAlert: z.boolean()
 });
 
+const defaultValues = ref({
+  newProductAlert: !!userStore.user?.newProductAlert,
+  restockAlert: !!userStore.user?.restockAlert,
+  priceChangeAlert: !!userStore.user?.priceChangeAlert,
+  newsletterAlert: !!userStore.user?.newsletterAlert
+});
+
 const { handleSubmit, defineField, isDirty } = useForm({
   validationSchema: alertSchema,
-  defaultValues: {
-    newProductAlert: !!userStore.user?.newProductAlert,
-    restockAlert: !!userStore.user?.restockAlert,
-    priceChangeAlert: !!userStore.user?.priceChangeAlert,
-    newsletterAlert: !!userStore.user?.newsletterAlert
-  }
+  defaultValues
 });
 
 const [newProductAlert, newProductAlertField] = defineField('newProductAlert');
@@ -40,48 +44,49 @@ const submitHandler = handleSubmit(async (data) => {
     console.error('Erreur lors de la mise à jour des alertes:', error);
   }
 });
+
+
+onBeforeMount(async () => {
+  const { data } = await useAuthFetch(`/users/${userStore.user?.id}/alerts`).json<{ newProductAlert: boolean, restockAlert: boolean, priceChangeAlert: boolean, newsletterAlert: boolean }>();
+  if (data.value && userStore.user) {
+    defaultValues.value = data.value
+  }
+})
+
+userStore.$subscribe((mutation, state) => {
+
+});
 </script>
 
 <template>
   <main class="grow lg:container">
     <header class="flex items-center w-full relative align mb-6">
       <div class="block lg:hidden">
-        <RouterLink :to="{ name: 'account' }"><ArrowLeftIcon /></RouterLink>
+        <RouterLink :to="{ name: 'account' }">
+          <ArrowLeftIcon />
+        </RouterLink>
       </div>
       <h1 class="font-bold text-lg text-center w-full sm:text-3xl">Gérer vos alertes</h1>
     </header>
     <form @submit.prevent="submitHandler" class="px-2 mt-6 space-y-6">
       <div class="space-y-2">
         <div class="flex items-center space-x-2">
-          <Checkbox
-            id="newProductAlert"
-            v-model="newProductAlert"
-            @update:checked="newProductAlertField.onInput"
-          />
+          <Checkbox id="newProductAlert" :default-checked="newProductAlert"
+            @update:checked="newProductAlertField.onInput" />
           <Label for="newProductAlert">Nouveaux produits d'une catégorie</Label>
         </div>
         <div class="flex items-center space-x-2">
-          <Checkbox
-            id="restockAlert"
-            v-model="restockAlert"
-            @update:checked="restockAlertField.onInput"
-          />
+          <Checkbox id="restockAlert" :default-checked="restockAlert" @update:checked="restockAlertField.onInput" />
           <Label for="restockAlert">Réapprovisionnement d'un produit</Label>
         </div>
         <div class="flex items-center space-x-2">
-          <Checkbox
-            id="priceChangeAlert"
-            v-model="priceChangeAlert"
-            @update:checked="priceChangeAlertField.onInput"
-          />
+          <Checkbox id="priceChangeAlert" :default-checked="priceChangeAlert"
+            @update:checked="priceChangeAlertField.onInput" />
           <Label for="priceChangeAlert">Changements de prix</Label>
         </div>
         <div class="flex items-center space-x-2">
-          <Checkbox
-            id="newsletterAlert"
-            v-model="newsletterAlert"
-            @update:checked="newsletterAlertField.onInput"
-          />
+          <Checkbox id="newsletterAlert" :default-checked="newsletterAlert"
+            @update:checked="newsletterAlertField.onInput" />
           <Label for="newsletterAlert">Inscription à la newsletter</Label>
         </div>
       </div>

@@ -7,6 +7,6 @@ const alertsRouter = Router({ mergeParams: true });
 
 alertsRouter.get('/', checkAuth(authConfig.accessTokenSecret), getAlerts);
 
-alertsRouter.patch('/', checkAuth(authConfig.accessTokenSecret), updateAlerts);
+alertsRouter.put('/', checkAuth(authConfig.accessTokenSecret), updateAlerts);
 
 module.exports = alertsRouter;

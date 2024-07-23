@@ -13,6 +13,13 @@ const userQuerySchema = z
   .merge(paginationSchema);
 
 const userAlertsSchema = z.object({
+  newProductAlert: z.boolean(),
+  restockAlert: z.boolean(),
+  priceChangeAlert: z.boolean(),
+  newsletterAlert: z.boolean(),
+});
+
+const userAlertsCreateSchema = z.object({
   newProductAlert: z.boolean().default(false),
   restockAlert: z.boolean().default(false),
   priceChangeAlert: z.boolean().default(false),
@@ -31,7 +38,7 @@ const userCreateSchema = z
     isVerified: z.boolean().default(false),
     role: z.enum(['user', 'admin', 'accountant']).default('user'),
   })
-  .merge(userAlertsSchema);
+  .merge(userAlertsCreateSchema);
 
 const userUpdateSchema = userCreateSchema.partial().refine((a) => {
   return Object.keys(a).length > 0;
@@ -49,6 +56,5 @@ module.exports = {
   userUpdateSchema,
   userSchema,
   userQuerySchema,
-  userAlertsSchema,
   userAlertsUpdateSchema,
 };

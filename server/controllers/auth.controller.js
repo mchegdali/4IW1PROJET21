@@ -50,6 +50,8 @@ const login = async (req, res, next) => {
 
     const refreshToken = await generateRefreshToken(user, issuedAt);
 
+    console.log('login', user);
+
     return res.json({
       user: {
         id: user.id,
@@ -75,13 +77,15 @@ const login = async (req, res, next) => {
  */
 const refreshToken = async (req, res, next) => {
   try {
-    const { data, success } = refreshTokenSchema.safeParse(req.body);
-    const { refreshToken } = data;
+    console.log(req.body);
+    const { data, success, error } = refreshTokenSchema.safeParse(req.body);
 
     if (!success) {
+      console.log('refreshTokenSchema.safeParse', error);
       return res.sendStatus(401);
     }
 
+    const { refreshToken } = data;
     const decodedToken = await jose.jwtVerify(
       refreshToken,
       authConfig.refreshTokenSecret,
@@ -111,6 +115,7 @@ const refreshToken = async (req, res, next) => {
 
     return res.send(accessToken);
   } catch (error) {
+    console.error('Error in refreshToken:', error);
     return next(error);
   }
 };

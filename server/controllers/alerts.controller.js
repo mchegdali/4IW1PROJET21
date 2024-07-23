@@ -26,15 +26,11 @@ const listIds = {
  */
 const getAlerts = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.userId);
-    if (!user) {
-      return res.sendStatus(404);
-    }
     return res.json({
-      newProductAlert: user.newProductAlert,
-      restockAlert: user.restockAlert,
-      priceChangeAlert: user.priceChangeAlert,
-      newsletterAlert: user.newsletterAlert,
+      newProductAlert: req.user.newProductAlert,
+      restockAlert: req.user.restockAlert,
+      priceChangeAlert: req.user.priceChangeAlert,
+      newsletterAlert: req.user.newsletterAlert,
     });
   } catch (error) {
     return next(error);
@@ -47,74 +43,113 @@ const getAlerts = async (req, res, next) => {
  */
 const updateAlerts = async (req, res, next) => {
   try {
-    const responseBody = await sequelize.transaction(async (transaction) => {
-      const user = await Users.findByPk(req.params.userId, { transaction });
-      if (!user) {
-        throw new NotFound();
+    const userId = req.user.id;
+
+    const { newProductAlert, restockAlert, priceChangeAlert, newsletterAlert } =
+      userAlertsUpdateSchema.parse(req.body);
+
+    const user = await Users.findByPk(userId);
+    const alertValues = {
+      newProductAlert: user.getDataValue('newProductAlert'),
+      restockAlert: user.getDataValue('restockAlert'),
+      priceChangeAlert: user.getDataValue('priceChangeAlert'),
+      newsletterAlert: user.getDataValue('newsletterAlert'),
+    };
+
+    if (!user) {
+      return res.sendStatus(404);
+    }
+
+    const changedMap = new Map();
+    if (newProductAlert !== alertValues.newProductAlert) {
+      user.newProductAlert = newProductAlert;
+      changedMap.set('newProductAlert', newProductAlert);
+    }
+
+    if (restockAlert !== alertValues.restockAlert) {
+      user.restockAlert = restockAlert;
+      changedMap.set('restockAlert', restockAlert);
+    }
+
+    if (priceChangeAlert !== alertValues.priceChangeAlert) {
+      user.priceChangeAlert = priceChangeAlert;
+      changedMap.set('priceChangeAlert', priceChangeAlert);
+    }
+
+    if (newsletterAlert !== alertValues.newsletterAlert) {
+      user.newsletterAlert = newsletterAlert;
+      changedMap.set('newsletterAlert', newsletterAlert);
+    }
+
+    if (changedMap.size === 0) {
+      return res.sendStatus(204);
+    }
+
+    await user.save();
+
+    let brevoContactResponse;
+
+    try {
+      brevoContactResponse = await apiInstance.getContactInfo(req.user.email);
+    } catch (error) {
+      if (error instanceof brevo.HttpError && error.statusCode === 404) {
+        brevoContactResponse = await apiInstance.createContact({
+          email: req.user.email,
+        });
+      } else {
+        throw error;
       }
+    }
 
-      const {
-        newProductAlert,
-        restockAlert,
-        priceChangeAlert,
-        newsletterAlert,
-      } = userAlertsUpdateSchema.parse(req.body);
+    /**
+     * @type {import('@getbrevo/brevo').GetExtendedContactDetails | import('@getbrevo/brevo').CreateUpdateContactModel}
+     */
+    const body = brevoContactResponse.body;
 
-      user.newProductAlert = newProductAlert ?? user.newProductAlert;
-      user.restockAlert = restockAlert ?? user.restockAlert;
-      user.priceChangeAlert = priceChangeAlert ?? user.priceChangeAlert;
-      user.newsletterAlert = newsletterAlert ?? user.newsletterAlert;
+    console.log(req.user.email, 'body.id', body.id);
 
-      const savedUser = await user.save({ transaction });
+    const listUpdatePromises = [];
 
-      let brevocontact;
+    for (const alertType in listIds) {
+      const hasChanged = changedMap.has(alertType);
 
-      try {
-        brevocontact = await apiInstance.getContactInfo(user.email);
-      } catch (error) {
-        if (error instanceof brevo.HttpError && error.statusCode === 404) {
-          brevocontact = await apiInstance.createContact({
-            email: user.email,
-          });
+      if (hasChanged) {
+        const listId = listIds[alertType];
+        const isAdded = !!user.getDataValue(alertType);
+
+        if (isAdded) {
+          let contactEmails = new brevo.AddContactToList();
+          contactEmails.ids = [body.id];
+          listUpdatePromises.push(
+            apiInstance.addContactToList(listId, contactEmails),
+          );
         } else {
-          throw error;
+          let contactEmails = new brevo.RemoveContactFromList();
+          contactEmails.ids = [body.id];
+          listUpdatePromises.push(
+            apiInstance.removeContactFromList(listId, contactEmails),
+          );
         }
       }
+    }
 
-      const listUpdatePromises = [];
+    const listUpdateResponses = await Promise.all(listUpdatePromises);
 
-      for (const alertType in listIds) {
-        const hasChanged = savedUser.changed(alertType);
-        console.log(alertType, hasChanged);
-        if (hasChanged) {
-          const listId = listIds[alertType];
-          if (savedUser[alertType]) {
-            listUpdatePromises.push(
-              apiInstance.addContactToList(listId, {
-                emails: [user.email],
-              }),
-            );
-          } else {
-            listUpdatePromises.push(
-              apiInstance.removeContactFromList(listId, {
-                emails: [user.email],
-              }),
-            );
-          }
-        }
+    for (const { response, body } of listUpdateResponses) {
+      console.table(body);
+      if (response.statusCode === 200) {
+        console.log('Successfully updated list');
+      } else {
+        console.log('Failed to update list');
       }
+    }
 
-      await Promise.allSettled(listUpdatePromises);
-
-      return {
-        newProductAlert: savedUser.newProductAlert,
-        restockAlert: savedUser.restockAlert,
-        priceChangeAlert: savedUser.priceChangeAlert,
-        newsletterAlert: savedUser.newsletterAlert,
-      };
+    return res.json({
+      newProductAlert: user.newProductAlert,
+      restockAlert: user.restockAlert,
+      priceChangeAlert: user.priceChangeAlert,
+      newsletterAlert: user.newsletterAlert,
     });
-
-    return res.json(responseBody);
   } catch (error) {
     return next(error);
   }

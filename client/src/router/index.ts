@@ -3,8 +3,6 @@ import { useUserStore } from '@/stores/user';
 import HomeView from '../views/home-view.vue';
 import Layout from '../layouts/layout.vue';
 import adminRoutes from './admin';
-import { jwtDecode } from 'jwt-decode';
-import dayjs from 'dayjs';
 import config from '@/config';
 
 const router = createRouter({
@@ -213,7 +211,7 @@ const router = createRouter({
   ]
 });
 
-router.beforeResolve(async (to) => {
+router.beforeEach(async (to) => {
   const userStore = useUserStore();
   const authRequired = to.meta?.requiresAuth === true;
 

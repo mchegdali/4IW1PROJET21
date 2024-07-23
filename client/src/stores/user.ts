@@ -110,7 +110,7 @@ export const useUserStore = defineStore('user', {
     },
     async updateAlertPreferences(user: Partial<UserAlerts>) {
       const response = await fetch(`${config.apiBaseUrl}/users/${this.user?.id}/alerts`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.accessToken}`
@@ -131,7 +131,7 @@ export const useUserStore = defineStore('user', {
       };
     },
     async refreshAccessToken() {
-      const { data } = useAuthFetch('/auth/refresh-token', {
+      const response = await fetch(`${config.apiBaseUrl}/auth/refresh-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -139,16 +139,18 @@ export const useUserStore = defineStore('user', {
         body: JSON.stringify({
           refreshToken: this.refreshToken
         })
-      } as RequestInit).text();
+      } as RequestInit);
 
-      if (!data.value) {
+      if (!response.ok) {
         router.push({ name: 'login' });
         this.stopRefreshTokenTimer();
         return;
       }
 
-      this.accessToken = data.value;
-      localStorage.setItem('accessToken', data.value);
+      const accessToken = await response.text();
+
+      this.accessToken = accessToken;
+      localStorage.setItem('accessToken', accessToken);
 
       this.startRefreshTokenTimer();
     },
@@ -158,24 +160,25 @@ export const useUserStore = defineStore('user', {
       if (decodedAccessToken.exp) {
         const expires = dayjs.unix(decodedAccessToken.exp);
 
-        const timeout = expires.subtract(1, 'minute').diff(dayjs());
+        const timeout = expires.subtract(2, 'minute').diff(dayjs());
+
         this.refreshAccessTokenTimeout = setTimeout(this.refreshAccessToken, timeout);
       }
     },
     logout() {
       const basketStore = useBasketStore();
-      basketStore.$reset();
+      basketStore.products = [];
 
       this.accessToken = null;
       this.refreshToken = null;
       this.user = null;
 
+      this.stopRefreshTokenTimer();
+    },
+    stopRefreshTokenTimer() {
       if (this.refreshAccessTokenTimeout) {
         clearTimeout(this.refreshAccessTokenTimeout);
       }
-    },
-    stopRefreshTokenTimer() {
-      clearTimeout(this.refreshAccessTokenTimeout!);
     }
   }
 });

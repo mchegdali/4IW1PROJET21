@@ -1,15 +1,20 @@
-import { computed, reactive, ref } from 'vue';
+import { computed, isRef, reactive, ref, type Ref } from 'vue';
 import { ZodError, type ZodTypeAny } from 'zod';
+import deepEqual from 'deep-eql';
 
 export function useForm<TSchema extends ZodTypeAny>(options: {
   validationSchema: TSchema;
-  defaultValues: TSchema['_input'];
+  defaultValues: TSchema['_input'] | Ref<TSchema['_input']>;
   transform?: Parameters<TSchema['transform']>[0];
 }) {
   const abortController = ref<AbortController>(new AbortController());
   const { validationSchema, defaultValues = null, transform } = options;
-  const formValues = ref<TSchema['_input']>(structuredClone(defaultValues));
-  const initialValues = ref<TSchema['_input']>(structuredClone(defaultValues));
+  const formValues = ref<TSchema['_input']>(
+    isRef(defaultValues) ? { ...defaultValues.value } : defaultValues
+  );
+  const initialValues = ref<TSchema['_input']>(
+    isRef(defaultValues) ? { ...defaultValues.value } : defaultValues
+  );
   const status = ref<number | null>(null);
   const fetchErrors = ref<Record<string, string> | null>(null);
 
@@ -27,7 +32,7 @@ export function useForm<TSchema extends ZodTypeAny>(options: {
 
   function reset() {
     if (defaultValues) {
-      formValues.value = defaultValues;
+      formValues.value = isRef(defaultValues) ? defaultValues.value : defaultValues;
     }
     formErrors.clear();
     isSubmitting.value = false;
@@ -80,7 +85,7 @@ export function useForm<TSchema extends ZodTypeAny>(options: {
 
       formValues.value[name] = newValue;
 
-      if (JSON.stringify(formValues.value[name]) !== JSON.stringify(initialValues.value[name])) {
+      if (!deepEqual(formValues.value[name], initialValues.value[name])) {
         dirtyValues.set(name, true);
       } else {
         dirtyValues.delete(name);
