@@ -25,7 +25,7 @@ basketStore.$subscribe((mutation, state) => {
 
 <template>
   <nav
-    class="bg-gradient-to-r from-tea-600 to-tea-400 via-tea-500 via-75% flex justify-between items-center h-14 px-4 py-2">
+    class="bg-tea-600 flex justify-between items-center h-14 px-4 py-2">
     <RouterLink :to="{ name: 'home' }" class="hidden lg:inline lg:justify-self-start h-full my-auto">
       <img :src="logo" alt="Fanthesie" class="w-[120px] h-[40px] object-center" width="120" height="40" />
     </RouterLink>
