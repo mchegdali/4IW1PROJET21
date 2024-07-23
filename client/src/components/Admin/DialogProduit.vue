@@ -235,7 +235,7 @@ export default defineComponent({
         }
 
         const result = await response.json();
-        this.$emit('save', result);
+        this.$emit('save', result); // Émettre l'événement 'save' avec le produit mis à jour
         this.closeDialog();
       } catch (error) {
         console.error(`Error saving changes:`, error);
@@ -244,7 +244,7 @@ export default defineComponent({
     handleErrors(errorData) {
       this.errors = {};
       for (const key in errorData) {
-        if (errorData.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(errorData, key)) {
           this.errors[key] = errorData[key];
         }
       }

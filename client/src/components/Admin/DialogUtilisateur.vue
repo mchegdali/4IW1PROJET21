@@ -55,7 +55,7 @@
             />
           </div>
           <div v-for="(address, index) in localClient.addresses" :key="index">
-            <Adresse :address="address" :is-edit-mode="isEditMode" @delete-address="handleDeleteAddress" />
+            <Adresse :address="address" :is-edit-mode="isEditMode" @delete-address="handleDeleteAddress" @update:address="updateAddress(index, $event)" />
           </div>
           <div v-if="isEditMode" class="flex justify-end mt-4">
             <button @click="addAddress" class="bg-blue-500 text-white px-4 py-2 rounded">
@@ -171,6 +171,7 @@ export default defineComponent({
           });
         }
 
+        // Mise à jour des informations de l'utilisateur
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}`, {
           method: 'PATCH',
           headers: {
@@ -209,6 +210,9 @@ export default defineComponent({
       if (index !== -1) {
         this.localClient.addresses.splice(index, 1);
       }
+    },
+    updateAddress(index: number, updatedAddress: Address) {
+      this.localClient.addresses.splice(index, 1, updatedAddress);
     }
   }
 });
