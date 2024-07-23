@@ -9,10 +9,10 @@ const orderQuerySchema = z.object({
 });
 
 const orderCreateSchema = z.object({
-  user: z.string().uuid().optional(),
-  shipping: z.string().uuid().optional(),
-  paymentType:  z.string().optional(),
-  status: z.string().uuid().optional(), // Référence à la collection de statuts
+  user: z.string().uuid(),
+  address: z.string().uuid(),
+  paymentType: z.string(),
+  status: z.string().uuid().optional(),
   items: z
     .array(
       z.object({

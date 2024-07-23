@@ -7,10 +7,10 @@ const {
 } = require('../schemas/orders.schema');
 const { NotFound } = httpErrors;
 const Orders = sequelize.model('orders');
-const Shippings = sequelize.model('shippings');
+const Address = sequelize.model('addresses');
 const OrdersMongo = require('../models/mongo/orders.mongo');
 const UsersMongo = require('../models/mongo/user.mongo');
-const ShippingsMongo = require('../models/mongo/shipping.mongo');
+const AddressMongo = require('../models/mongo/addresses.mongo');
 const StatusMongo = require('../models/mongo/status.mongo');
 const uuidSchema = require('../schemas/uuid.schema');
 
@@ -54,7 +54,7 @@ async function createOrder(req, res, next) {
       }
 
       // Find the shipping information
-      const shipping = await ShippingsMongo.findById(req.body.shipping);
+      const shipping = await AddressMongo.findById(req.body.shipping);
       console.log('Shipping found:', shipping);
 
       if (!shipping) {
@@ -87,23 +87,16 @@ async function createOrder(req, res, next) {
           fullname: user.fullname,
           email: user.email,
         },
-        shipping: {
-          _id: shipping._id,
-          address: {
-            _id: shipping.address._id,
-            firstName: shipping.address.firstName,
-            lastName: shipping.address.lastName,
-            region: shipping.address.region,
-            country: shipping.address.country,
-            street: shipping.address.street,
-            zipCode: shipping.address.zipCode,
-            city: shipping.address.city,
-            phone: shipping.address.phone,
-          },
-          deliveryChoice: {
-            _id: shipping.deliveryChoice._id,
-            name: shipping.deliveryChoice.name,
-          },
+        address: {
+          _id: shipping.address._id,
+          firstName: shipping.address.firstName,
+          lastName: shipping.address.lastName,
+          region: shipping.address.region,
+          country: shipping.address.country,
+          street: shipping.address.street,
+          zipCode: shipping.address.zipCode,
+          city: shipping.address.city,
+          phone: shipping.address.phone,
         },
       };
       console.log('Order Mongo object:', orderMongo);
