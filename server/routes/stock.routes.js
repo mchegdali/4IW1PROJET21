@@ -1,51 +1,28 @@
 const { Router } = require('express');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const stockItemsController = require('../controllers/stock.controller');
+const authConfig = require('../config/auth.config');
 
 const stockRouter = Router();
 
-stockRouter.use(checkAuth(process.env.ACCESS_TOKEN_SECRET));
+stockRouter.use(
+  checkAuth(authConfig.accessTokenSecret),
+  checkRole(['stock_keeper', 'admin']),
+);
+
+stockRouter.get('/stock/:stockItemId', stockItemsController.getStockItem);
+
+stockRouter.patch('/stock/:stockItemId', stockItemsController.updateStockItem);
+
+stockRouter.delete('/stock/:stockItemId', stockItemsController.deleteStockItem);
 
 stockRouter.get(
-  '/:stockItemId',
-  checkRole(['stock_keeper', 'admin']),
-  stockItemsController.getStockItem,
-);
-
-stockRouter.put(
-  '/:stockItemId',
-  checkRole(['stock_keeper', 'admin']),
-  stockItemsController.updateStockItem,
-);
-
-stockRouter.delete(
-  '/:stockItemId',
-  checkRole(['admin']),
-  stockItemsController.deleteStockItem,
-);
-
-stockRouter.get(
-  '/count',
-  checkRole(['stock_keeper', 'admin']),
-  stockItemsController.getStockItemCount,
-);
-
-stockRouter.get(
-  '/distribution/product',
-  checkRole(['stock_keeper', 'admin']),
+  '/stock/distribution/product',
   stockItemsController.getStockItemDistributionByProduct,
 );
 
-stockRouter.post(
-  '/',
-  checkRole(['stock_keeper', 'admin']),
-  stockItemsController.createStockItem,
-);
+stockRouter.post('/stock', stockItemsController.createStockItem);
 
-stockRouter.get(
-  '/',
-  checkRole(['stock_keeper', 'admin']),
-  stockItemsController.getStockItems,
-);
+stockRouter.get('/stock', stockItemsController.getStockItems);
 
 module.exports = stockRouter;

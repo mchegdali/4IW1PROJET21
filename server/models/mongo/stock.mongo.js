@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const connection = require('./db');
+const crypto = require('node:crypto');
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -51,6 +52,9 @@ const StockItemSchema = new mongoose.Schema(
     _id: {
       type: mongoose.Schema.Types.UUID,
       required: true,
+      default: () => {
+        return crypto.randomUUID();
+      },
     },
     product: {
       type: ProductSchema,
@@ -59,7 +63,7 @@ const StockItemSchema = new mongoose.Schema(
     expirationDate: {
       type: Date,
       required: true,
-      index: { expires: '0s' }, // TTL index
+      index: { expires: 0 }, // TTL index
     },
   },
   {
@@ -72,8 +76,6 @@ const StockItemSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
-StockItemSchema.index({ productId: 1, batchNumber: 1, expirationDate: 1 });
 
 const StockItemMongo = connection.model('StockItem', StockItemSchema);
 

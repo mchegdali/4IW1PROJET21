@@ -6,7 +6,7 @@ const {
   stockItemCreateSchema,
   stockItemQuerySchema,
   stockItemUpdateSchema,
-} = require('../schemas/stockItems.schema');
+} = require('../schemas/stock.schema');
 
 const { NotFound } = httpErrors;
 
@@ -110,11 +110,7 @@ async function getStockItem(req, res, next) {
       return res.sendStatus(404);
     }
 
-    const filter = {
-      _id: req.params.stockItemId,
-    };
-
-    const stockItem = await StockItemMongo.findById(filter);
+    const stockItem = await StockItemMongo.findById(req.params.stockItemId);
 
     if (!stockItem) {
       return res.sendStatus(404);
@@ -170,18 +166,6 @@ async function deleteStockItem(req, res, next) {
 /**
  * @type {import('express').RequestHandler}
  */
-async function getStockItemCount(req, res, next) {
-  try {
-    const count = await StockItemMongo.countDocuments();
-    return res.status(200).json({ count });
-  } catch (error) {
-    return next(error);
-  }
-}
-
-/**
- * @type {import('express').RequestHandler}
- */
 async function getStockItemDistributionByProduct(req, res, next) {
   try {
     const distribution = await StockItemMongo.aggregate([
@@ -204,6 +188,5 @@ module.exports = {
   getStockItem,
   updateStockItem,
   deleteStockItem,
-  getStockItemCount,
   getStockItemDistributionByProduct,
 };
