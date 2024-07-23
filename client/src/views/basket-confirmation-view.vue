@@ -54,6 +54,7 @@ const proceedToCheckout = async () => {
     console.log("addressId in front : ", addressId)
     // Create the order
     const orderData = {
+      user: userStore.user?.id,
       address: addressId,
     };
 
