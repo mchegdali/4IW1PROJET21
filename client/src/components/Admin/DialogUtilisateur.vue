@@ -9,7 +9,7 @@
         <div class="mb-4">
           <h3 class="text-2xl font-semibold text-gray-800">{{ title }}</h3>
         </div>
-        <div class="grid gap-4 py-4">
+        <div class="dialog-content grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">
             <label for="nom" class="text-right font-medium text-gray-700">Nom Complet</label>
             <input
@@ -53,6 +53,13 @@
               :readonly="!isEditMode"
               :class="!isEditMode ? 'readonly-input' : ''"
             />
+          </div><div v-for="(address, index) in localClient.addresses" :key="index">
+            <Adresse :address="address" :is-edit-mode="isEditMode" />
+          </div>
+          <div v-if="isEditMode" class="flex justify-end mt-4">
+            <button @click="addAddress" class="bg-blue-500 text-white px-4 py-2 rounded">
+              Ajouter une adresse
+            </button>
           </div>
         </div>
         <div class="flex justify-end mt-6">
@@ -79,6 +86,16 @@
 import { defineComponent, watch } from 'vue';
 import type { PropType } from 'vue';
 import { useUserStore } from '@/stores/user';
+import Adresse from './Adresse.vue';
+
+interface Address {
+  street: string;
+  city: string;
+  region: string;
+  zipCode: string;
+  country: string;
+  phone: string;
+}
 
 interface Client {
   id: string;
@@ -86,11 +103,12 @@ interface Client {
   email: string;
   city: string;
   role: string;
-  addresses: Array<{ city: string }>;
+  addresses: Address[];
 }
 
 export default defineComponent({
   name: 'DialogUtilisateur',
+  components: { Adresse },
   props: {
     client: {
       type: Object as PropType<Client>,
@@ -154,6 +172,16 @@ export default defineComponent({
       } catch (error) {
         console.error('Error saving changes:', error);
       }
+    },
+    addAddress() {
+      this.localClient.addresses.push({
+        street: '',
+        city: '',
+        region: '',
+        zipCode: '',
+        country: '',
+        phone: ''
+      });
     }
   }
 });
@@ -163,5 +191,11 @@ export default defineComponent({
 .readonly-input {
   pointer-events: none;
   caret-color: transparent;
+}
+
+.dialog-content {
+  max-height: 80vh; 
+  overflow-y: auto;
+  padding-right: 1rem;
 }
 </style>
