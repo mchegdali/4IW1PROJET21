@@ -5,12 +5,21 @@
         Produits
       </h1>
 
-      <router-link
-        to="/admin/produits/gestion"
-        class="focus:outline-none text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-blue-800"
+      <div class="flex space-x-2">
+        <router-link
+          to="/admin/categories/gestion"
+          class="focus:outline-none text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:focus:ring-blue-800"
         >
-        Gestion Produits
-      </router-link>
+          Gestion Catégories
+        </router-link>
+
+        <router-link
+          to="/admin/produits/gestion"
+          class="focus:outline-none text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:focus:ring-blue-800"
+        >
+          Gestion Produits
+        </router-link>
+      </div>
     </div>
 
 

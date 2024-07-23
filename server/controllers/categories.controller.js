@@ -1,8 +1,10 @@
-const CategoriesSequelize = require('../models/sql/categories.sql');
+
 const CategoriesMongo = require('../models/mongo/categories.mongo');
-const sequelize = require('../models/sql/db');
+const sequelize = require('../models/sql');
 const { NotFound } = require('http-errors');
 const { ProductMongo } = require('../models/mongo/products.mongo');
+
+const CategoriesSequelize = sequelize.model('categories');
 
 const {
   categoryCreateSchema,
@@ -25,6 +27,7 @@ async function createCategory(req, res, next) {
       const categoryDoc = await CategoriesMongo.create({
         _id: product.id,
         name: product.name,
+        description: product.description,
         slug: product.slug,
       });
 

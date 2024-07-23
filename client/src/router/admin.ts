@@ -37,6 +37,12 @@ const adminRoutes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true }
       },
       {
+        path: 'categories/gestion',
+        name: 'AdminGestionCategories',
+        component: () => import('../components/Admin/pages/GestionCategories.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: 'finances',
         name: 'AdminFinances',
         component: () => import('../components/Admin/pages/Finances.vue'),
@@ -46,12 +52,6 @@ const adminRoutes: Array<RouteRecordRaw> = [
         path: 'clients',
         name: 'AdminClients',
         component: () => import('../components/Admin/pages/Clients.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
-        path: 'tendances',
-        name: 'AdminTendances',
-        component: () => import('../components/Admin/pages/Tendances.vue'),
         meta: { requiresAuth: true }
       }
     ]
