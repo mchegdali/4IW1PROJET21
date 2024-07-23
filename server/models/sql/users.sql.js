@@ -106,7 +106,7 @@ const UsersSequelize = (sequelize) => {
         defaultValue: false,
       },
       role: {
-        type: DataTypes.ENUM('user', 'admin', 'accountant'),
+        type: DataTypes.ENUM('user', 'admin', 'accountant', 'stock_keeper'),
         defaultValue: 'user',
         allowNull: false,
       },

@@ -42,7 +42,7 @@ const checkAuth = (secret) => async (req, res, next) => {
 
 /**
  *
- * @param {("admin"|"accountant"|"user")[]} allowedRoles
+ * @param {("admin"|"accountant"|"user"|"stock_keeper")[]} allowedRoles
  * @returns {import("express").RequestHandler}
  */
 const checkRole =
@@ -54,7 +54,8 @@ const checkRole =
 
     const isAdmin = req.user.role === 'admin';
     const isAccountant = req.user.role === 'accountant' || isAdmin;
-    const isUser = req.user.role === 'user' || isAccountant;
+    const isStockKeeper = req.user.role === 'stock_keeper' || isAdmin;
+    const isUser = req.user.role === 'user' || isAccountant || isStockKeeper;
 
     if (!isAdmin && !isAccountant && !isUser) {
       return res.sendStatus(403);
@@ -63,6 +64,8 @@ const checkRole =
     if (allowedRoles.includes('user') && !isUser) {
       return res.sendStatus(403);
     } else if (allowedRoles.includes('accountant') && !isAccountant) {
+      return res.sendStatus(403);
+    } else if (allowedRoles.includes('stock_keeper') && !isStockKeeper) {
       return res.sendStatus(403);
     } else if (allowedRoles.includes('admin') && !isAdmin) {
       return res.sendStatus(403);
