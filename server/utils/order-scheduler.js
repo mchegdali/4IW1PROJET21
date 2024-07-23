@@ -86,6 +86,6 @@ async function checkAndUpdateOrders() {
     }
 }
 
-setInterval(checkAndUpdateOrders, 60 * 1000); 
+setInterval(checkAndUpdateOrders, 25 * 1000); 
 
 checkAndUpdateOrders();
