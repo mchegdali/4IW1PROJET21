@@ -177,9 +177,9 @@ const generateInvoice = async () => {
   doc.setFontSize(12);
   const finalY = doc.lastAutoTable.finalY || 120 + order.value.items.length * 6;
   doc.text(`Sous-total: ${computeOrderTotal()} €`, 143, finalY + 10);
-  doc.text(`Livraison: 2 €`, 143, finalY + 18);
+  doc.text(`Livraison: 8 €`, 143, finalY + 18);
   doc.text(`Remise: 0 €`, 143, finalY + 26);
-  doc.text(`Total TTC: ${(parseFloat(computeOrderTotal()) + 2).toFixed(2)} €`, 143, finalY + 34);
+  doc.text(`Total TTC: ${(parseFloat(computeOrderTotal()) + 8).toFixed(2)} €`, 143, finalY + 34);
 
   doc.save(`Invoice_${order.value.orderNumber}.pdf`);
 };
@@ -407,7 +407,7 @@ onMounted(async () => {
           INFORMATION DE PAIEMENT
         </h6>
         <div class="flex gap-4 items-center p-2 sm:p-4 text-xs">
-          <span v-if="order.paymentType === 'credit_card'" class="flex gap-4 items-center">
+          <span class="flex gap-4 items-center">
             <img
               class="w-9 px-2 py-1 sm:w-12"
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/300px-MasterCard_Logo.svg.png"
@@ -422,13 +422,13 @@ onMounted(async () => {
             Sous-total <span>{{ computeOrderTotal() }} €</span>
           </p>
           <p class="flex justify-between text-sm py-1 sm:text-lg">
-            Livraison: <span>2 €</span>
+            Livraison: <span>8 €</span>
           </p>
           <p class="flex justify-between text-sm py-1 sm:text-lg">Remise: <span>0 €</span></p>
 
           <p class="font-bold flex justify-between text-sm sm:text-lg">
             Total:
-            <span class="font-bold">{{ (parseFloat(computeOrderTotal()) + 2).toFixed(2) }} €</span>
+            <span class="font-bold">{{ (parseFloat(computeOrderTotal()) + 8).toFixed(2) }} €</span>
           </p>
         </div>
 
