@@ -124,55 +124,51 @@ async function createStripeSession(req, res, next) {
   }
 }
 
-async function handleStripeWebhook(req, res) {
+const handleStripeWebhook = async (req, res) => {
   const sig = req.headers['stripe-signature'];
+  const endpointSecret = process.env.STRIPE_SECRET_KEY;
 
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET,
-    );
+    event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
   } catch (err) {
+    console.error(`Webhook Error: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
+  // Handle the event
+  try {
+    switch (event.type) {
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object;
+        const email = paymentIntent.receipt_email; // contains the email that will receive the receipt for the payment (user's email usually)
+        console.log(`PaymentIntent was successful for ${email}!`);
 
-    const order = await OrdersMongo.findById(session.metadata.orderId);
+        // Ici, vous pouvez ajouter la logique pour mettre à jour votre base de données
+        // Par exemple, marquer une commande comme payée, envoyer un email de confirmation, etc.
+        await handleSuccessfulPayment(paymentIntent);
 
-    if (!order) {
-      return res.status(404).send('Order not found');
+        break;
+      }
+      // Vous pouvez ajouter d'autres cas pour gérer différents types d'événements
+      default:
+        console.log(`Unhandled event type ${event.type}`);
     }
 
-    const paidStatus = await StatusMongo.findOne({ label: 'Paid' });
-    if (paidStatus) {
-      order.status = { _id: paidStatus._id, label: paidStatus.label };
-      await order.save();
-    }
-
-    await Payments.create({
-      userId: order.user._id,
-      orderId: order._id,
-      paymentStatus: 'Completed',
-      totalPrice: order.totalPrice,
-    });
-
-    await PaymentsMongo.create({
-      _id: session.id,
-      user: order.user,
-      order: order._id,
-      paymentStatus: 'Completed',
-      totalPrice: order.totalPrice,
-    });
+    // Return a 200 response to acknowledge receipt of the event
+    res.json({ received: true });
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    res.status(500).send('Error processing webhook');
   }
+};
 
-  res.json({ received: true });
-}
-
+const handleSuccessfulPayment = async (paymentIntent) => {
+  //si le payement est un succès createPayment en bdd
+  console.log('Handling successful payment:', paymentIntent.id);
+  // Ajoutez votre logique ici
+};
 module.exports = {
   createPayment,
   createStripeSession,

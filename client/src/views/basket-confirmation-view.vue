@@ -81,14 +81,60 @@ const proceedToCheckout = async () => {
     }
 
     const session = await stripeResponse.json();
-
-    if (session.id) {
+if (session.id) {
       const { error } = await stripe.value.redirectToCheckout({
         sessionId: session.id,
       });
-
+      
       if (error) {
         message.value = error.message;
+        return;
+      }
+      
+      // After successful redirect, we need to verify the payment
+      // This part should be handled on the server-side, but we'll simulate it here
+      const verifyPaymentResponse = await fetch(`${config.apiBaseUrl}/verify-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userStore.accessToken}`
+        },
+        body: JSON.stringify({ sessionId: session.id }),
+        credentials: 'include'
+      });
+      
+      if (!verifyPaymentResponse.ok) {
+        throw new Error('Erreur lors de la vérification du paiement');
+      }
+      
+      const verificationResult = await verifyPaymentResponse.json();
+      
+      if (verificationResult.paymentStatus === 'succeeded') {
+        // Create payment record
+        const paymentData = {
+          orderId: orderResult.id,
+          amount: verificationResult.amount,
+          paymentMethod: 'credit-card',
+          transactionId: verificationResult.transactionId
+        };
+        
+        const paymentResponse = await fetch(`${config.apiBaseUrl}/payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userStore.accessToken}`
+          },
+          body: JSON.stringify(paymentData),
+          credentials: 'include'
+        });
+        
+        if (!paymentResponse.ok) {
+          throw new Error('Erreur lors de l\'enregistrement du paiement');
+        }
+        
+        alert('Paiement réussi et enregistré');
+      } else {
+        throw new Error('Le paiement n\'a pas été validé par la banque');
       }
     } else {
       throw new Error('No session ID returned from server');

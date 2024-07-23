@@ -15,6 +15,10 @@ router.post(
   createStripeSession,
 );
 
-router.post('/webhook', handleStripeWebhook);
+router.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  handleStripeWebhook,
+);
 
 module.exports = router;
