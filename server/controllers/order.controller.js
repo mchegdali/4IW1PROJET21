@@ -113,7 +113,7 @@ async function createOrder(req, res, next) {
       return orderDoc;
     });
 
-    return res.status(201).json(result);
+    return res.status(201);
   } catch (error) {
     console.error('Error creating order:', error);
     return next(error);
@@ -473,9 +473,12 @@ async function getMonthlyOrderCount(req, res, next) {
 
     const orderCounts = new Map();
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       const date = new Date(order.createdAt);
-      const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      const month = date.toLocaleString('default', {
+        month: 'short',
+        year: 'numeric',
+      });
       if (orderCounts.has(month)) {
         orderCounts.set(month, orderCounts.get(month) + 1);
       } else {
@@ -483,8 +486,10 @@ async function getMonthlyOrderCount(req, res, next) {
       }
     });
 
-    const sortedMonths = Array.from(orderCounts.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-    const counts = sortedMonths.map(month => orderCounts.get(month));
+    const sortedMonths = Array.from(orderCounts.keys()).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+    const counts = sortedMonths.map((month) => orderCounts.get(month));
 
     return res.json({ months: sortedMonths, counts });
   } catch (error) {

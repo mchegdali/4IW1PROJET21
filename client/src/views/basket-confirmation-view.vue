@@ -20,13 +20,16 @@ const selectedAddress = ref('');
 onBeforeMount(async () => {
   if (userStore.isAuthenticated) {
     const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
-    basketStore.products = await response.json();
+    if (response.ok) {
+      basketStore.products = await response.json();
+    } else {
+      message.value = 'Erreur lors de la récupération du panier';
+      return;
+    }
   }
   stripe.value = await loadStripe(`${config.STRIPE_KEY}`);
   
-  // Récupérer l'adresse sélectionnée du localStorage
   const savedAddress = localStorage.getItem('selectedAddress');
-  console.log("adresse : ",savedAddress)
   if (savedAddress) {
     selectedAddress.value = JSON.parse(savedAddress);
   } else {
@@ -51,8 +54,6 @@ const proceedToCheckout = async () => {
 
   try {
     const addressId = selectedAddress.value._id;
-    console.log("addressId in front : ", addressId)
-    // Create the order
     const orderData = {
       user: userStore.user?.id,
       address: addressId,
@@ -73,12 +74,10 @@ const proceedToCheckout = async () => {
     }
 
     const orderResult = await orderResponse.json();
-    console.log('Order created:', orderResult);
 
     const stripeData = {
       order: orderResult.id
     };
-    console.log('Stripe data:', stripeData);
 
     const stripeResponse = await fetch(`${config.apiBaseUrl}/stripe`, {
       method: 'POST',
@@ -104,51 +103,6 @@ const proceedToCheckout = async () => {
         message.value = error.message;
         return;
       }
-      // After successful redirect, we need to verify the payment
-      // This part should be handled on the server-side, but we'll simulate it here
-      const verifyPaymentResponse = await fetch(`${config.apiBaseUrl}/webhook`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userStore.accessToken}`
-        },
-        body: JSON.stringify({ sessionId: session.id }),
-        credentials: 'include'
-      });
-      
-      if (!verifyPaymentResponse.ok) {
-        throw new Error('Erreur lors de la vérification du paiement');
-      }
-      
-      const verificationResult = await verifyPaymentResponse.json();
-      
-      if (verificationResult.paymentStatus === 'succeeded') {
-        // Create payment record
-        const paymentData = {
-          orderId: orderResult.id,
-          amount: verificationResult.amount,
-          paymentMethod: 'credit-card',
-          transactionId: verificationResult.transactionId
-        };
-        
-        const paymentResponse = await fetch(`${config.apiBaseUrl}/payment`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userStore.accessToken}`
-          },
-          body: JSON.stringify(paymentData),
-          credentials: 'include'
-        });
-        
-        if (!paymentResponse.ok) {
-          throw new Error('Erreur lors de l\'enregistrement du paiement');
-        }
-        
-        alert('Paiement réussi et enregistré');
-      } else {
-        throw new Error('Le paiement n\'a pas été validé par la banque');
-      }
     } else {
       throw new Error('No session ID returned from server');
     }
@@ -159,13 +113,14 @@ const proceedToCheckout = async () => {
   }
 };
 </script>
+
 <template>
   <main class="grow">
     <h1 class="text-3xl font-bold m-2">Récapitulatif de votre panier</h1>
     <BasketInformation />
     <BasketList readonly />
-    
-    <div v-if="selectedAddress" class="m-4 p-4 bg-whiterounded">
+
+    <div v-if="selectedAddress" class="m-4 p-4 bg-white rounded">
       <h2 class="text-xl font-semibold mb-2">Adresse de livraison</h2>
       <p>{{ selectedAddress.firstName }} {{ selectedAddress.lastName }}</p>
       <p>{{ selectedAddress.street }}</p>
