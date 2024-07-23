@@ -153,18 +153,6 @@ export default defineComponent({
           title: 'Produits',
           text: 'Suivez la performance de vos produits et identifiez les best-sellers. Cliquez ici pour consulter les statistiques détaillées de vos produits !',
           page: 'AdminProduits'
-        },
-        {
-          image: 'https://picsum.photos/500/500',
-          title: 'Finances',
-          text: 'Obtenez un aperçu complet de vos finances et suivez vos revenus et dépenses. Cliquez ici pour consulter les statistiques financières détaillées !',
-          page: 'AdminFinances'
-        },
-        {
-          image: 'https://picsum.photos/500/500',
-          title: 'Clients',
-          text: 'Analysez les données de vos clients et améliorez votre relation client. Cliquez ici pour accéder aux statistiques détaillées de vos clients !',
-          page: 'AdminClients'
         }
       ] as CardData[]
     };
