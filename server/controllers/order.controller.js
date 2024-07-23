@@ -89,7 +89,7 @@ async function createOrder(req, res, next) {
         {
           userId: user._id,
           statusId: status._id,
-          items: JSON.stringify(items),
+          items: JSON.stringify(basket),
           totalPrice: totalPrice + 2,
         },
         { transaction: t },
