@@ -43,8 +43,13 @@
               :class="(!isEditMode || isReadOnly) ? 'readonly-input' : ''"
             />
           </div>
-          <div v-for="(address, index) in localClient.addresses" :key="index">
-            <Adresse :address="address" :is-edit-mode="isEditMode && !isReadOnly" @delete-address="handleDeleteAddress" @update:address="updateAddress(index, $event)" />
+          <div v-for="(address, index) in localClient.addresses" :key="address.id || index">
+            <Adresse
+              :address="address"
+              :is-edit-mode="isEditMode && !isReadOnly"
+              @delete-address="handleDeleteAddress(index, address)"
+              @update:address="updateAddress(index, $event)"
+            />
           </div>
           <div v-if="isEditMode && !isReadOnly" class="flex justify-end mt-4">
             <button @click="addAddress" class="bg-blue-500 text-white px-4 py-2 rounded">
@@ -88,6 +93,7 @@ interface Address {
   zipCode: string;
   country: string;
   phone: string;
+  status?: string;
 }
 
 interface Client {
@@ -218,14 +224,11 @@ export default defineComponent({
         status: 'create'
       });
     },
-    handleDeleteAddress(address: Address) {
+    handleDeleteAddress(index: number, address: Address) {
       if (address.id) {
         this.addressesToDelete.push(address.id);
       }
-      const index = this.localClient.addresses.indexOf(address);
-      if (index !== -1) {
-        this.localClient.addresses.splice(index, 1);
-      }
+      this.localClient.addresses.splice(index, 1);
     },
     updateAddress(index: number, updatedAddress: Address) {
       if (updatedAddress.id) {
