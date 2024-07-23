@@ -20,11 +20,6 @@ const { isOwnOrder } = require('../middlewares/order.middleware');
 const orderRouter = Router();
 const userOrderRouter = Router({ mergeParams: true });
 
-// orderRouter.use(
-//   '/orders',
-//   checkAuth(authConfig.accessTokenSecret, false),
-// );
-
 orderRouter.get(
   '/orders/count',
   checkAuth(authConfig.accessTokenSecret),
