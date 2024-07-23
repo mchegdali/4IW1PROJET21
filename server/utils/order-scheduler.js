@@ -34,7 +34,7 @@ async function updateOrderStatus(orderId, statusLabel) {
                 throw new Error(`Commande ${orderId} introuvable`);
             }
             const createdAt = dayjs(order.createdAt);
-            updateFields.shippingDate = createdAt.add(2, 'day').toDate();
+            updateFields.shippingDate = createdAt.add(1, 'minute').toDate();
         }
 
         const result = await Order.updateOne(
@@ -59,21 +59,21 @@ async function checkAndUpdateOrders() {
 
     for (const order of orders) {
         const createdAt = dayjs(order.createdAt);
-        const daysDifference = now.diff(createdAt, 'day');
+        const minutesDifference = now.diff(createdAt, 'minute');
 
         if (order.status.label === 'Cancelled') {
             console.log(`Commande ${order._id} est annulée. Aucun changement à effectuer.`);
             continue;
         }
 
-        if (daysDifference >= 2) {
+        if (minutesDifference >= 2) {
             if (order.status.label !== 'Delivered') {
                 console.log(`Commande ${order._id} passe au statut 'Delivered'.`);
                 await updateOrderStatus(order._id, 'Delivered');
             } else {
                 console.log(`Commande ${order._id} est déjà marquée comme 'Delivered'.`);
             }
-        } else if (daysDifference >= 1) {
+        } else if (minutesDifference >= 1) {
             if (order.status.label === 'Pending') {
                 console.log(`Commande ${order._id} passe au statut 'Shipped'.`);
                 await updateOrderStatus(order._id, 'Shipped');
@@ -81,11 +81,11 @@ async function checkAndUpdateOrders() {
                 console.log(`Commande ${order._id} est déjà marquée comme '${order.status.label}'.`);
             }
         } else {
-            console.log(`Commande ${order._id} ne nécessite pas de mise à jour (écart de ${daysDifference} jours).`);
+            console.log(`Commande ${order._id} ne nécessite pas de mise à jour (écart de ${minutesDifference} minutes).`);
         }
     }
 }
 
-setInterval(checkAndUpdateOrders, 120 * 1000);
+setInterval(checkAndUpdateOrders, 25 * 1000); 
 
 checkAndUpdateOrders();
