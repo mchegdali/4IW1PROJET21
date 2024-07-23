@@ -41,8 +41,19 @@ const fetchAddresses = async () => {
 
 const selectAddress = (address) => {
   selectedAddress.value = address;
-  
   console.log('Adresse sélectionnée:', address);
+};
+
+const validateSelection = () => {
+  if (selectedAddress.value) {
+    // Save the selected address to the router's state
+    router.push({
+      name: 'basket-confirmation',
+      state: { selectedAddress: selectedAddress.value }
+    });
+  } else {
+    error.value = "Veuillez sélectionner une adresse avant de continuer.";
+  }
 };
 
 onMounted(fetchAddresses);
@@ -111,6 +122,16 @@ onMounted(fetchAddresses);
       <RouterLink :to="{ name: 'add-addresse' }" class="text-blue-500 hover:underline">
         Ajouter une nouvelle adresse
       </RouterLink>
+    </div>
+
+    <div class="mt-4">
+      <button 
+        @click="validateSelection" 
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        :disabled="!selectedAddress"
+      >
+        Valider la sélection
+      </button>
     </div>
   </main>
 </template>

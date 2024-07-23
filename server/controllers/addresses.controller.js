@@ -23,7 +23,7 @@ async function createAddress(req, res, next) {
     }
 
     const addressCreateBody = await addressCreateSchema.parseAsync(addressData);
-
+    console.log('ryio', addressCreateBody);
     const createdAddress = await Addresses.create({
       ...addressCreateBody,
       userId: userId,
