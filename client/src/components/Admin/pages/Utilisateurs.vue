@@ -46,6 +46,7 @@ import { defineComponent, ref, onMounted, watch } from 'vue';
 import UtilisateurTable from '../UtilisateurTable.vue';
 import DialogUtilisateur from '../DialogUtilisateur.vue';
 import { useUserStore } from '@/stores/user';
+import { toast } from '../../ui/toast';
 
 interface Client {
   _id: string;
@@ -53,6 +54,7 @@ interface Client {
   email: string;
   role: string;
   addresses: Array<{ city: string }>;
+  deletedAt: string | null;
 }
 
 export default defineComponent({
@@ -93,7 +95,8 @@ export default defineComponent({
           fullname: item.fullname,
           email: item.email,
           role: item.role,
-          addresses: item.addresses
+          addresses: item.addresses,
+          deletedAt: item.deletedAt
         }));
         totalPages.value = data.metadata.totalPages;
       } catch (error) {
@@ -203,8 +206,13 @@ export default defineComponent({
     };
 
     const handleDeleteClient = (clientId: string) => {
-      isEditMode.value = true;
-      fetchClientDetails(clientId);
+      toast({
+          title: 'Erreur',
+          description: 'L\'utilisateur n\'a pas pu être supprimé',
+          type: 'foreground',
+          duration: 2500,
+          variant: 'danger'
+        });
     };
 
     const handleSave = (updatedClient: Client) => {

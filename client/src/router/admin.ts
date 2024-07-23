@@ -43,15 +43,9 @@ const adminRoutes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true }
       },
       {
-        path: 'finances',
-        name: 'AdminFinances',
-        component: () => import('../components/Admin/pages/Finances.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
-        path: 'clients',
-        name: 'AdminClients',
-        component: () => import('../components/Admin/pages/Clients.vue'),
+        path: 'Commandes',
+        name: 'AdminCommandes',
+        component: () => import('../components/Admin/pages/Commandes.vue'),
         meta: { requiresAuth: true }
       }
     ]

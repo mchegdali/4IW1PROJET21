@@ -20,7 +20,7 @@ const productsRouter = Router({ mergeParams: true });
 productsRouter.get(
   '/products/count',
   checkAuth(authConfig.accessTokenSecret),
-  checkRole(['admin']),
+  checkRole(['accountant']),
   getProductCount,
 );
 

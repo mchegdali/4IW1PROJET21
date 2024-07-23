@@ -24,6 +24,16 @@ const userOrderRouter = Router({ mergeParams: true });
 //   '/orders',
 //   checkAuth(authConfig.accessTokenSecret, false),
 // );
+orderRouter.route(
+  '/orders')
+  .get(getOrders,
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin']),
+  )
+  .post(createOrder,
+    checkAuth(authConfig.accessTokenSecret),
+    checkRole(['admin']),
+  );
 
 orderRouter.get(
   '/orders/count',
@@ -35,7 +45,7 @@ orderRouter.get(
 orderRouter.get(
   '/orders/monthly-count',
   checkAuth(authConfig.accessTokenSecret),
-  checkRole(['admin']),
+  checkRole(['accountant']),
   getMonthlyOrderCount,
 );
 
@@ -50,7 +60,7 @@ orderRouter.get(
 orderRouter.get(
   '/orders/total-sales',
   checkAuth(authConfig.accessTokenSecret),
-  checkRole(['admin']),
+  checkRole(['accountant']),
   getTotalSales,
 );
 
@@ -58,7 +68,7 @@ orderRouter.get(
 orderRouter.get(
   '/orders/distinct-customers',
   checkAuth(authConfig.accessTokenSecret),
-  checkRole(['admin']),
+  checkRole(['accountant']),
   getDistinctCustomerCount,
 );
 

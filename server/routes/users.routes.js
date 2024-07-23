@@ -61,7 +61,7 @@ usersRouter.get(
 usersRouter.get(
   '/products/top-products',
   checkAuth(authConfig.accessTokenSecret, false),
-  checkRole(['admin']),
+  checkRole(['accountant']),
   getTopProducts,
 );
 
