@@ -172,7 +172,7 @@ export default defineComponent({
       if (!this.localClient.fullname || this.localClient.fullname.length < 2) {
         this.errors.fullname = 'Le nom doit contenir au moins 2 caractères';
       }
-      if (!this.localClient.email || !this.localClient.email.includes('@')) {
+      if (!this.localClient.email || !/\S+@\S+\.\S+/.test(this.localClient.email)) {
         this.errors.email = 'Adresse email invalide';
       }
       if (!this.localClient.role) {
@@ -199,13 +199,13 @@ export default defineComponent({
         if (!address.region || address.region.length < 2) {
           errors.region = 'Région invalide';
         }
-        if (!address.zipCode || !/^[0-9]{5}$/.test(address.zipCode)) {
+        if (!address.zipCode || !/^\d{5}$/.test(address.zipCode)) {
           errors.zipCode = 'Code postal invalide';
         }
         if (!address.country || address.country.length < 2) {
           errors.country = 'Pays invalide';
         }
-        if (!address.phone || !/^[0-9]{10}$/.test(address.phone)) {
+        if (!address.phone || !/^\d{10}$/.test(address.phone)) {
           errors.phone = 'Numéro de téléphone invalide';
         }
         return errors;
@@ -213,12 +213,12 @@ export default defineComponent({
 
       return this.addressErrors.every(errors => Object.keys(errors).length === 0);
     },
-    validateAndSave() {
+    async validateAndSave() {
       const isUserValid = this.validateUser();
       const areAddressesValid = this.validateAddresses();
 
       if (isUserValid && areAddressesValid) {
-        this.saveChanges();
+        await this.saveChanges();
       }
     },
     async saveChanges() {
@@ -249,7 +249,7 @@ export default defineComponent({
               body: JSON.stringify(address)
             });
           } else if (address.status === 'update') {
-            await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${address.id}`, {
+            await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${this.localClient.id}/addresses/${address.id}`, {
               method: 'PATCH',
               headers: {
                 'Content-Type': 'application/json',
@@ -294,12 +294,14 @@ export default defineComponent({
         status: 'create'
       };
       this.localClient.addresses.push(newAddress);
+      this.addressErrors.push({});
     },
     handleDeleteAddress(index: number, address: Address) {
       if (address.id) {
         this.addressesToDelete.push(address.id);
       }
       this.localClient.addresses.splice(index, 1);
+      this.addressErrors.splice(index, 1);
     },
     updateAddress(index: number, updatedAddress: Address) {
       if (updatedAddress.id) {

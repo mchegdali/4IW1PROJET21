@@ -4,7 +4,8 @@
       <label for="firstName" class="text-right font-medium text-gray-700">Prénom</label>
       <input
         id="firstName"
-        v-model="address.firstName"
+        v-model="localAddress.firstName"
+        @input="updateAddress"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -14,7 +15,8 @@
       <label for="lastName" class="text-right font-medium text-gray-700">Nom</label>
       <input
         id="lastName"
-        v-model="address.lastName"
+        v-model="localAddress.lastName"
+        @input="updateAddress"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -24,7 +26,8 @@
       <label for="street" class="text-right font-medium text-gray-700">Rue</label>
       <input
         id="street"
-        v-model="address.street"
+        v-model="localAddress.street"
+        @input="updateAddress"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -34,7 +37,8 @@
       <label for="city" class="text-right font-medium text-gray-700">Ville</label>
       <input
         id="city"
-        v-model="address.city"
+        v-model="localAddress.city"
+        @input="updateAddress"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -44,7 +48,8 @@
       <label for="region" class="text-right font-medium text-gray-700">Région</label>
       <input
         id="region"
-        v-model="address.region"
+        v-model="localAddress.region"
+        @input="updateAddress"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -54,7 +59,8 @@
       <label for="zipCode" class="text-right font-medium text-gray-700">Code Postal</label>
       <input
         id="zipCode"
-        v-model="address.zipCode"
+        v-model="localAddress.zipCode"
+        @input="updateAddress"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -64,7 +70,8 @@
       <label for="country" class="text-right font-medium text-gray-700">Pays</label>
       <input
         id="country"
-        v-model="address.country"
+        v-model="localAddress.country"
+        @input="updateAddress"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -74,7 +81,8 @@
       <label for="phone" class="text-right font-medium text-gray-700">Téléphone</label>
       <input
         id="phone"
-        v-model="address.phone"
+        v-model="localAddress.phone"
+        @input="updateAddress"
         class="col-span-3 p-2 border border-gray-300 rounded-md"
         :disabled="!isEditMode"
       />
@@ -93,7 +101,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, watch, reactive } from 'vue';
 
 interface Address {
   id?: string;
@@ -123,6 +131,22 @@ export default defineComponent({
       required: false,
       default: () => ({})
     }
+  },
+  setup(props, { emit }) {
+    const localAddress = reactive({ ...props.address });
+
+    watch(() => props.address, (newAddress) => {
+      Object.assign(localAddress, newAddress);
+    });
+
+    const updateAddress = () => {
+      emit('update:address', localAddress);
+    };
+
+    return {
+      localAddress,
+      updateAddress
+    };
   },
   methods: {
     deleteAddress() {
