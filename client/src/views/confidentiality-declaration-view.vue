@@ -52,7 +52,8 @@
           s'engage à respecter les normes de confidentialité et de sécurité des données.
         </p>
         <p>
-          Nous soustraitons les paiements à Stripe, une plateforme de paiement sécurisée qui respecte les normes de confidentialité et de sécurité des données.
+          Nous soustraitons les paiements à Stripe, une plateforme de paiement sécurisée qui
+          s'engage à respecter les normes de confidentialité et de sécurité des données.
         </p>
       </section>
       <section>
