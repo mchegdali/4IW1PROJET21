@@ -40,6 +40,7 @@ categoriesRouter.get('/categories/:category/products', getProducts);
 
 categoriesRouter
   .route('/categories/:category')
+  .all(checkAuth(authConfig.accessTokenSecret), checkRole(['admin']))
   .get(getCategory)
   .patch(updateCategory)
   .delete(deleteCategory);
