@@ -9,6 +9,7 @@ const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
 
 router.post('/payment', checkAuth(authConfig.accessTokenSecret), createPayment);
+
 router.post(
   '/stripe',
   checkAuth(authConfig.accessTokenSecret),
