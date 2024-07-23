@@ -23,6 +23,7 @@ function generateOrderNumber() {
 async function createOrder(req, res, next) {
   try {
     const result = await sequelize.transaction(async (t) => {
+      console.log('user', req.body.user);
       console.log('req :', req.body.address);
       const user = req.user;
 
