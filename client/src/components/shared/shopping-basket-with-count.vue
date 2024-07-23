@@ -9,7 +9,7 @@ const { size } = withDefaults(defineProps<{ size?: 'small' | 'default' }>(), { s
 
 const basketClass = ref(size === 'small' ? 'size-6' : 'size-8');
 const badgeClass = ref(
-  size === 'small' ? 'absolute -top-1 -right-1 size-4' : 'absolute -top-2 -right-2 size-5'
+  size === 'small' ? 'absolute -top-1 -right-1 size-4' : 'absolute -top-2 -right-2 size-5 bg-tea-400'
 );
 </script>
 

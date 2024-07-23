@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Product } from '@/api/products.api';
 import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useFetch } from '@vueuse/core';
 import ProductDescription from '@/components/products/product-description.vue';
 import ProductsSection from '@/components/products/products-section.vue';
@@ -18,13 +18,41 @@ import { useUserStore } from '@/stores/user';
 import { addProductToBasket, fetchBasket } from '@/api/basket';
 
 const route = useRoute();
+const router = useRouter();
 const basketStore = useBasketStore();
 
 const productId = route.params.id;
 const productUrl = ref(`${import.meta.env.VITE_API_BASE_URL}/products/${productId}`);
 const relatedProductsUrl = computed(() => `${productUrl.value}/related`);
-const { data: product } = useFetch(productUrl, { refetch: true }).json<Product>();
-const { data: relatedProducts } = useFetch(relatedProductsUrl, { refetch: true }).json<Product[]>();
+
+const product = ref<Product | null>(null);
+const relatedProducts = ref<Product[]>([]);
+const isLoading = ref(true);
+const hasError = ref(false);
+
+async function fetchProduct() {
+  try {
+    const response = await fetch(productUrl.value);
+    if (response.status === 404) {
+      router.push('/not-found');
+      return;
+    }
+    product.value = await response.json();
+  } catch (error) {
+    hasError.value = true;
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+async function fetchRelatedProducts() {
+  try {
+    const response = await fetch(relatedProductsUrl.value);
+    relatedProducts.value = await response.json();
+  } catch (error) {
+    hasError.value = true;
+  }
+}
 
 const count = ref(0);
 
@@ -63,12 +91,15 @@ watch(
   () => route.params.id,
   (id) => {
     productUrl.value = `${import.meta.env.VITE_API_BASE_URL}/products/${id}`;
+    fetchProduct();
+    fetchRelatedProducts();
   },
   {
     immediate: true
   }
 );
 </script>
+
 
 <template>
   <main class="grow p-4">
