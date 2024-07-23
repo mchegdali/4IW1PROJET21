@@ -138,10 +138,9 @@ export default defineComponent({
 
       const selectedClients = await response.json();
 
-      const csvContent = 'ID,Nom Complet,Email,Ville\n'
+      const csvContent = 'ID,Nom Complet,Email,Role\n'
         + selectedClients.map(client => {
-          const city = client.addresses.length > 0 ? client.addresses[0].city : 'N/A';
-          return `${client.id},${client.fullname},${client.email},${city}`;
+          return `${client.id},${client.fullname},${client.email},${client.role}`;
         }).join('\n');
 
       const handle = await window.showSaveFilePicker({
