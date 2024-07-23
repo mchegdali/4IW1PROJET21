@@ -5,6 +5,7 @@ import Input from '@/components/ui/input/Input.vue';
 import { useForm } from '@/composables/form';
 import { z } from 'zod';
 import { useRouter } from 'vue-router';
+import { useDebounceFn } from '@vueuse/core';
 
 const searchSchema = z.object({
   text: z.string().optional()
@@ -27,14 +28,14 @@ const submitHandler = handleSubmit((data) => {
   }
 });
 
-function handleInput(event: InputEvent) {
+const handleInput = useDebounceFn((event: InputEvent) => {
   const target = event.target as HTMLInputElement;
   textField.onInput(event);
 
   if (target.value.length >= 0) {
     searchStore.text = target.value;
   }
-}
+}, 300);
 </script>
 
 <template>
