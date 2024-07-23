@@ -162,9 +162,84 @@ const handleStripeWebhook = async (req, res) => {
 };
 
 const handleSuccessfulPayment = async (paymentIntent) => {
-  //si le payement est un succès createPayment en bdd
   console.log('Handling successful payment:', paymentIntent.id);
-  // Ajoutez votre logique ici
+
+  try {
+    // Récupérer la session Stripe associée au PaymentIntent
+    const session = await stripe.checkout.sessions.retrieve(
+      paymentIntent.payment_intent,
+    );
+    const orderId = session.metadata.orderId;
+
+    // Récupérer l'ordre et l'utilisateur
+    const order = await OrdersMongo.findById(orderId);
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    const user = await UsersMongo.findById(order.user);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Calculer le prix total
+    const totalPrice = order.items.reduce((total, item) => {
+      return total + parseFloat(item.price.toString()) * (item.quantity || 1);
+    }, 0);
+
+    // Créer le paiement dans les deux bases de données
+    const result = await sequelize.transaction(async (t) => {
+      // Créer le paiement dans la base de données SQL
+      const payment = await Payments.create(
+        {
+          userId: user._id,
+          orderId: order._id,
+          paymentStatus: 'Completed',
+          totalPrice: totalPrice.toFixed(2),
+          stripePaymentIntentId: paymentIntent.id,
+        },
+        { transaction: t },
+      );
+
+      // Créer le paiement dans MongoDB
+      const paymentMongo = {
+        _id: payment.id,
+        user: {
+          _id: user._id,
+          fullname: user.fullname,
+          email: user.email,
+        },
+        order: order.items.map((item) => ({
+          _id: item._id,
+          name: item.name,
+          category: {
+            _id: item.category._id,
+            name: item.category.name,
+            slug: item.category.slug,
+          },
+          price: item.price,
+          quantity: item.quantity || 1,
+        })),
+        paymentStatus: 'Completed',
+        totalPrice: totalPrice.toFixed(2),
+        stripePaymentIntentId: paymentIntent.id,
+      };
+
+      const paymentDoc = await PaymentsMongo.create(paymentMongo);
+
+      // Mettre à jour le statut de la commande
+      await OrdersMongo.findByIdAndUpdate(orderId, { status: 'Paid' });
+
+      return { payment, paymentDoc };
+    });
+
+    console.log('Payment created successfully:', result);
+
+    // Vous pouvez ajouter ici d'autres actions, comme envoyer un e-mail de confirmation
+  } catch (error) {
+    console.error('Error creating payment:', error);
+    // Gérer l'erreur de manière appropriée, peut-être en la signalant à un service de suivi des erreurs
+  }
 };
 module.exports = {
   createPayment,

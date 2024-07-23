@@ -26,7 +26,12 @@ async function createOrder(req, res, next) {
       console.log('user', req.body.user);
       console.log('req :', req.body.address);
       const user = req.user;
+      const userId = await UsersMongo.findById(req.body.user);
+      console.log('user found:', userId);
 
+      if (!userId) {
+        throw new NotFound('utilisateur information not found');
+      }
       console.log('user basket :', user.basket);
       if (!user.basket || user.basket.length === 0) {
         throw new Error('User basket is empty');
@@ -113,7 +118,7 @@ async function createOrder(req, res, next) {
       return orderDoc;
     });
 
-    return res.status(201);
+    return res.sendStatus(201);
   } catch (error) {
     console.error('Error creating order:', error);
     return next(error);
