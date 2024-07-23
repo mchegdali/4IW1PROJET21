@@ -127,11 +127,11 @@ const generateInvoice = async () => {
   doc.setTextColor(40, 40, 40);
   doc.setFontSize(12);
   doc.setTextColor(60, 60, 60);
-  doc.text('Fanthesie', 14, 90);
-  doc.text('18 rue de la Victoire', 14, 100);
-  doc.text('75001 Paris', 14, 110);
-  doc.text('01 43 25 67 67', 14, 120);
-  doc.text('contact@fanthesie.fr', 14, 130);
+  doc.text('Fanthésie', 14, 90);
+  doc.text('123 Rue du Thé, 75001 Paris', 14, 100);
+  doc.text('France', 14, 110);
+  doc.text('contact@fanthesie.fr', 14, 120);
+  doc.text('01 23 45 67 89', 14, 130);
 
   doc.setFontSize(12);
   doc.setTextColor(40, 40, 40);
@@ -194,7 +194,7 @@ onMounted(async () => {
     });
 
     if (!response.ok || response.status === 404) {
-      // Redirect to 404 page if the order is not found
+
       router.push({ name: 'not-found' });
       return;
     }
