@@ -38,6 +38,11 @@ const router = createRouter({
           component: () => import('../views/basket-confirmation-view.vue')
         },
         {
+          name: 'payment-confirmation',
+          path: '/payment/confirmation',
+          component: () => import('../views/payment-confirmation-view.vue')
+        },
+        {
           name: 'account',
           path: '/account',
           component: () => import('../views/account-view.vue'),

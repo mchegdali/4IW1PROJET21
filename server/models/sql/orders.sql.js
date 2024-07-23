@@ -8,7 +8,7 @@ const OrdersSequelize = (sequelize) => {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
-      Orders.hasOne(models.shippings, {
+      Orders.hasOne(models.addresses, {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
@@ -21,15 +21,15 @@ const OrdersSequelize = (sequelize) => {
 
     async toMongo() {
       const user = await this.sequelize.models.users.findByPk(this.userId);
-      const shipping = await this.sequelize.models.shippings.findByPk(
-        this.shippingId,
+      const address = await this.sequelize.models.shippings.findByPk(
+        this.addressesId,
       );
       const status = await this.sequelize.models.status.findByPk(this.statusId);
       return {
         _id: this.id,
         items: this.items,
         user: user ? user.toMongo() : null,
-        shipping: shipping ? shipping.toMongo() : null,
+        address: address ? address.toMongo() : null,
         status: status ? status.toMongo() : null,
       };
     }
@@ -44,7 +44,7 @@ const OrdersSequelize = (sequelize) => {
       },
       statusId: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
       },
       items: {
         type: DataTypes.JSON,

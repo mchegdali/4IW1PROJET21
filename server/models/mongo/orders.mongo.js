@@ -19,13 +19,26 @@ const OrderSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    shipping: {
+    address: {
       type: {
         _id: {
           type: mongoose.Schema.Types.UUID,
           required: true,
         },
-        fullname: {
+        firstName: {
+          type: String,
+          required: true,
+        },
+        lastName: {
+          type: String,
+          required: true,
+        },
+
+        region: {
+          type: String,
+          required: true,
+        },
+        country: {
           type: String,
           required: true,
         },
@@ -42,10 +55,6 @@ const OrderSchema = new mongoose.Schema(
           required: true,
         },
         phone: {
-          type: String,
-          required: true,
-        },
-        deliveryChoiceId: {
           type: String,
           required: true,
         },
@@ -79,6 +88,10 @@ const OrderSchema = new mongoose.Schema(
         },
       },
     },
+    totalPrice: {
+      type: mongoose.Schema.Types.Decimal128,
+      required: true,
+    },
     items: [
       {
         type: {
@@ -89,6 +102,10 @@ const OrderSchema = new mongoose.Schema(
           name: {
             type: String,
             required: true,
+          },
+          quantity: {
+            type: mongoose.Schema.Types.Number,
+            require: true,
           },
           category: {
             type: {

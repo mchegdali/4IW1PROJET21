@@ -38,23 +38,29 @@ const up = async ({ context: { sequelize } }) => {
         ? new Date(createdAt.getTime() + 2 * 24 * 60 * 60 * 1000)
         : null;
 
-      const items = faker.helpers.arrayElements(products, { min: 4, max: 5 });
+      const items = faker.helpers.arrayElements(products, { min: 1, max: 10 });
 
-      const totalPrice = items.reduce((total, item) => {
-        return total + parseFloat(item.price.toString()) * (item.quantity || 1);
-      }, 0);
+      const totalPrice = items.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0,
+      );
 
       const order = {
+        id: crypto.randomUUID(),
+        statusId: status.id,
+        items,
+        userId: user.id,
+        shippingId: null, // Pas de livraison initiale
         _id: crypto.randomUUID(),
         orderNumber: crypto.randomUUID(),
         deliveryDate: faker.datatype.boolean() ? faker.date.future() : null,
         shippingDate: shippingDate,
+        totalPrice,
+        paymentType: 'credit_card',
         status: {
           _id: status.id,
           label: status.label,
         },
-        items,
-        totalPrice,
         user: {
           _id: user.id,
           fullname: user.fullname,
