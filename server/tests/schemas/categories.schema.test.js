@@ -1,4 +1,4 @@
-const { categoryCreateSchema } = require('../../../schemas/categories.schema.js');
+const { categoryCreateSchema } = require('../../schemas/categories.schema.js');
 
 describe('Category Schema Validation', () => {
   describe('CategoryCreateSchema', () => {
