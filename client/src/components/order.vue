@@ -30,12 +30,13 @@ interface Address {
 
 interface OrderItem {
   id: string;
+  name: string;
+  quantity: number;
   price: string;
-  quantity?: number;
 }
 
 interface Order {
-  _id: string;
+  id: string;
   orderNumber: string;
   createdAt: string;
   shippingDate: string;
@@ -176,6 +177,7 @@ const generateInvoice = async () => {
   });
 
   doc.setFontSize(12);
+  //@ts-ignore
   const finalY = doc.lastAutoTable.finalY || 120 + order.value.items.length * 6;
   doc.text(`Sous-total: ${computeOrderTotal()} €`, 143, finalY + 10);
   doc.text(`Livraison: 8 €`, 143, finalY + 18);
@@ -200,6 +202,8 @@ onMounted(async () => {
     }
 
     order.value = await response.json();
+
+    console.log(order.value);
 
     if (order.value && order.value.items) {
       await fetchProductDetails(order.value.items.map((item) => item.id));
