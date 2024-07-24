@@ -22,18 +22,23 @@ function generateOrderNumber() {
 
 async function createOrder(req, res, next) {
   try {
+    const userId = req.user.id;
+    const userBodyId = req.body.user;
+
+    const isAuthorized = userId === userBodyId || req.user.role === 'admin';
+
+    if (!isAuthorized) {
+      return res.sendStatus(403);
+    }
+
     const result = await sequelize.transaction(async (t) => {
-      console.log('user', req.body.user);
-      console.log('req :', req.body.address);
       const user = req.user;
       const userId = await UsersMongo.findById(req.body.user);
       console.log('user found:', userId);
 
       if (!userId) {
-        console.log('user not found');
         throw new NotFound('utilisateur information not found');
       }
-      console.log('user basket :', user.basket);
       if (!user.basket || user.basket.length === 0) {
         throw new Error('User basket is empty');
       }
@@ -43,18 +48,11 @@ async function createOrder(req, res, next) {
         name: item.name,
         category: item.category,
         price: parseFloat(item.price),
-        quantity: item.quantity || 1,
       }));
-      console.log('Items mapped from basket:', items);
 
-      const totalPrice = items.reduce(
-        (total, item) => total + item.price * item.quantity,
-        0,
-      );
-      console.log('Total price calculated:', totalPrice);
+      const totalPrice = items.reduce((total, item) => total + item.price, 0);
 
       const status = await StatusMongo.findOne({ label: 'Pending' });
-      console.log('Status found:', status);
 
       if (!status) {
         throw new NotFound('Status not found');
@@ -62,8 +60,6 @@ async function createOrder(req, res, next) {
 
       // Find the shipping information
       const address = user.addresses.id(req.body.address);
-
-      console.log('address found:', address);
 
       if (!address) {
         throw new NotFound('adrresse information not found');
@@ -78,7 +74,6 @@ async function createOrder(req, res, next) {
         },
         { transaction: t },
       );
-      console.log('Order created:', order);
 
       const orderMongo = {
         _id: order.id,
@@ -106,16 +101,13 @@ async function createOrder(req, res, next) {
           phone: address.phone,
         },
       };
-      console.log('Order Mongo object:', orderMongo);
 
       const orderDoc = await OrdersMongo.create(orderMongo);
-      console.log('Order MongoDB document created:', orderDoc);
 
       await UsersMongo.updateOne(
         { _id: req.user.id },
         { $set: { basket: [] } },
       );
-      console.log('User basket cleared:', user.basket);
 
       return orderDoc;
     });
@@ -164,7 +156,8 @@ async function getOrder(req, res, next) {
 async function getOrders(req, res, next) {
   try {
     console.log('Received query:', req.query);
-    const { page, text, pageSize, sortField, sortOrder } = orderQuerySchema.parse(req.query);
+    const { page, text, pageSize, sortField, sortOrder } =
+      orderQuerySchema.parse(req.query);
 
     /**
      * @type {import('mongoose').PipelineStage[]  }
@@ -172,18 +165,16 @@ async function getOrders(req, res, next) {
     const pipelineStages = [];
 
     if (text && text.length >= 3) {
-      pipelineStages.push(
-        {
-          $match: {
-            $or: [
-              { _id: { $regex: text, $options: 'i' } },
-              { customerName: { $regex: text, $options: 'i' } },
-              { customerEmail: { $regex: text, $options: 'i' } },
-              { 'items.productName': { $regex: text, $options: 'i' } }
-            ]
-          },
-        }
-      );
+      pipelineStages.push({
+        $match: {
+          $or: [
+            { _id: { $regex: text, $options: 'i' } },
+            { customerName: { $regex: text, $options: 'i' } },
+            { customerEmail: { $regex: text, $options: 'i' } },
+            { 'items.productName': { $regex: text, $options: 'i' } },
+          ],
+        },
+      });
     }
 
     if (sortField && sortOrder) {
@@ -193,23 +184,21 @@ async function getOrders(req, res, next) {
       pipelineStages.push({ $sort: sortStage });
     }
 
-    pipelineStages.push(
-      {
-        $facet: {
-          metadata: [
-            { $count: 'total' },
-            {
-              $set: {
-                page,
-                totalPages: { $ceil: { $divide: ['$total', pageSize] } },
-                pageSize,
-              },
+    pipelineStages.push({
+      $facet: {
+        metadata: [
+          { $count: 'total' },
+          {
+            $set: {
+              page,
+              totalPages: { $ceil: { $divide: ['$total', pageSize] } },
+              pageSize,
             },
-          ],
-          items: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
-        },
+          },
+        ],
+        items: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
       },
-    );
+    });
 
     const [result] = await OrdersMongo.aggregate(pipelineStages);
     const items = result.items ?? [];
