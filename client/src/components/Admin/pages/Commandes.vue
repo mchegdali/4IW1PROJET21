@@ -73,7 +73,9 @@ export default defineComponent({
           customerEmail: item.user.email,
           createdAt: item.createdAt,
           status: item.status.label,
-          shippingAddress: `${item.shipping.street}, ${item.shipping.city}, ${item.shipping.zipCode}`,
+          shippingAddress: item.shipping 
+            ? `${item.shipping.street ?? 'N/A'}, ${item.shipping.city ?? 'N/A'}, ${item.shipping.zipCode ?? 'N/A'}` 
+            : 'N/A',
           items: item.items.map((orderItem: any) => orderItem.name).join(', '),
           totalPrice: item.items.reduce((total: number, orderItem: any) => total + parseFloat(orderItem.price.$numberDecimal), 0).toFixed(2)
         }));
