@@ -2,7 +2,7 @@
   <section class="flex-1 ml-80">
     <h1 class="text-2xl font-bold text-green-900 mb-10 p-5">Commandes</h1>
     <OrderTable :orders="orders" @sort="handleSort" />
-    
+
     <div class="mt-4 flex items-center justify-center mb-10">
       <button
         @click="previousPage"
@@ -42,7 +42,7 @@ interface Order {
 export default defineComponent({
   name: 'Commandes',
   components: {
-    OrderTable,
+    OrderTable
   },
   setup() {
     const orders = ref<Order[]>([]);
@@ -52,20 +52,28 @@ export default defineComponent({
     const sortOrder = ref<'asc' | 'desc'>('asc');
     const searchText = ref('');
 
-    const fetchOrders = async (page: number, sortField: string, sortOrder: 'asc' | 'desc', text: string = '') => {
+    const fetchOrders = async (
+      page: number,
+      sortField: string,
+      sortOrder: 'asc' | 'desc',
+      text: string = ''
+    ) => {
       const userStore = useUserStore();
       await userStore.refreshAccessToken();
       const accessToken = userStore.accessToken;
-      
+
       try {
         const searchParam = text.length >= 3 ? `&text=${text}` : '';
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/orders?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}${searchParam}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`
+            }
           }
-        });
+        );
         const data = await response.json();
         orders.value = data.items.map((item: any) => ({
           _id: item._id,
@@ -73,9 +81,14 @@ export default defineComponent({
           customerEmail: item.user.email,
           createdAt: item.createdAt,
           status: item.status.label,
-          shippingAddress: `${item.shipping.street}, ${item.shipping.city}, ${item.shipping.zipCode}`,
+          shippingAddress: `${item.address.street}, ${item.address.city}, ${item.address.zipCode}`,
           items: item.items.map((orderItem: any) => orderItem.name).join(', '),
-          totalPrice: item.items.reduce((total: number, orderItem: any) => total + parseFloat(orderItem.price.$numberDecimal), 0).toFixed(2)
+          totalPrice: item.items
+            .reduce(
+              (total: number, orderItem: any) => total + parseFloat(orderItem.price.$numberDecimal),
+              0
+            )
+            .toFixed(2)
         }));
         totalPages.value = data.metadata.totalPages;
       } catch (error) {
@@ -117,7 +130,7 @@ export default defineComponent({
       totalPages,
       nextPage,
       previousPage,
-      handleSort,
+      handleSort
     };
   }
 });

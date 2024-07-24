@@ -16,6 +16,7 @@ const categoriesRouter = require('./routes/categories.routes');
 const usersRouter = require('./routes/users.routes');
 const errorMiddleware = require('./middlewares/error.middleware');
 const paymentRouter = require('./routes/payment.routes');
+const trackingRouter = require('./routes/tracking.routes');
 const { orderRouter } = require('./routes/order.routes');
 const statusRouter = require('./routes/status.routes'); // Importez le routeur de status
 
@@ -34,6 +35,7 @@ app.use(
 // Utiliser le middleware CORS uniquement pour les routes de fichiers statiques
 const staticFileMiddleware = express.static(path.join(__dirname, 'uploads'));
 
+app.use('/v1/tracking', trackingRouter);
 app.use('/uploads', staticFileMiddleware);
 app.use(helmet());
 
@@ -41,7 +43,14 @@ app.use(authRouter);
 app.use(usersRouter);
 app.use(productsRouter);
 app.use(categoriesRouter);
-app.use(paymentRouter);
+app.use(
+  cors({
+    origin: '*',
+    optionsSuccessStatus: 200,
+    credentials: true,
+  }),
+  paymentRouter,
+);
 app.use(orderRouter);
 app.use(statusRouter); // Ajoutez le routeur de status
 app.use(errorMiddleware);

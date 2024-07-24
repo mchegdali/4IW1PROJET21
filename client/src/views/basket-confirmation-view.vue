@@ -28,12 +28,12 @@ onBeforeMount(async () => {
     }
   }
   stripe.value = await loadStripe(`${config.STRIPE_KEY}`);
-  
+
   const savedAddress = localStorage.getItem('selectedAddress');
   if (savedAddress) {
     selectedAddress.value = JSON.parse(savedAddress);
   } else {
-    message.value = "Aucune adresse sélectionnée. Veuillez choisir une adresse de livraison.";
+    message.value = 'Aucune adresse sélectionnée. Veuillez choisir une adresse de livraison.';
   }
 });
 
@@ -56,17 +56,17 @@ const proceedToCheckout = async () => {
     const addressId = selectedAddress.value._id;
     const orderData = {
       user: userStore.user?.id,
-      address: addressId,
+      address: addressId
     };
 
     const orderResponse = await fetch(`${config.apiBaseUrl}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userStore.accessToken}`
+        Authorization: `Bearer ${userStore.accessToken}`
       },
-      body: JSON.stringify(orderData),
-      credentials: 'include'
+      body: JSON.stringify(orderData)
+      // credentials: 'include'
     });
 
     if (!orderResponse.ok) {
@@ -83,10 +83,10 @@ const proceedToCheckout = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userStore.accessToken}`
+        Authorization: `Bearer ${userStore.accessToken}`
       },
-      body: JSON.stringify(stripeData),
-      credentials: 'include'
+      body: JSON.stringify(stripeData)
+      // credentials: 'include'
     });
 
     if (!stripeResponse.ok) {
@@ -96,9 +96,9 @@ const proceedToCheckout = async () => {
     const session = await stripeResponse.json();
     if (session.id) {
       const { error } = await stripe.value.redirectToCheckout({
-        sessionId: session.id,
+        sessionId: session.id
       });
-      
+
       if (error) {
         message.value = error.message;
         return;
@@ -128,7 +128,7 @@ const proceedToCheckout = async () => {
       <p>{{ selectedAddress.country }}</p>
       <p>Téléphone : {{ selectedAddress.phone }}</p>
     </div>
-    
+
     <div class="flex flex-col gap-4 m-4 items-center w-full">
       <div class="flex w-full justify-center gap-4">
         <Button @click="goBackToBasket" class="w-fit" variant="outline">Retour au panier</Button>
@@ -137,9 +137,13 @@ const proceedToCheckout = async () => {
       <p v-if="message" class="text-red-500">{{ message }}</p>
       <p class="text-sm text-gray-600 m-4">
         En cliquant sur "Procéder au paiement", vous acceptez nos
-        <RouterLink :to="{ name: 'conditions' }" class="text-tea-800 underline">conditions générales de vente</RouterLink>
+        <RouterLink :to="{ name: 'conditions' }" class="text-tea-800 underline"
+          >conditions générales de vente</RouterLink
+        >
         et notre
-        <RouterLink :to="{ name: 'confidentiality-declaration' }" class="text-tea-800 underline">politique de confidentialité</RouterLink>.
+        <RouterLink :to="{ name: 'confidentiality-declaration' }" class="text-tea-800 underline"
+          >politique de confidentialité</RouterLink
+        >.
       </p>
     </div>
   </main>

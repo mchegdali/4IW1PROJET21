@@ -20,21 +20,6 @@ const { isOwnOrder } = require('../middlewares/order.middleware');
 const orderRouter = Router();
 const userOrderRouter = Router({ mergeParams: true });
 
-// orderRouter.use(
-//   '/orders',
-//   checkAuth(authConfig.accessTokenSecret, false),
-// );
-orderRouter.route(
-  '/orders')
-  .get(getOrders,
-    checkAuth(authConfig.accessTokenSecret),
-    checkRole(['admin']),
-  )
-  .post(createOrder,
-    checkAuth(authConfig.accessTokenSecret),
-    checkRole(['admin']),
-  );
-
 orderRouter.get(
   '/orders/count',
   checkAuth(authConfig.accessTokenSecret),
@@ -81,19 +66,22 @@ orderRouter.get(
 
 orderRouter
   .route('/orders/:id')
-  .all(checkAuth(authConfig.accessTokenSecret), isOwnOrder)
-  .get(getOrder)
-  .patch(updateOrder)
-  .delete(deleteOrder);
+  .get(checkAuth(authConfig.accessTokenSecret), isOwnOrder, getOrder)
+  .patch(checkAuth(authConfig.accessTokenSecret), isOwnOrder, updateOrder)
+  .delete(checkAuth(authConfig.accessTokenSecret), isOwnOrder, deleteOrder);
 
-orderRouter
-  .route('/orders')
-  .get(
-    checkAuth(authConfig.accessTokenSecret),
-    checkRole(['admin', 'accountant']),
-    getOrders,
-  )
-  .post(checkAuth(authConfig.accessTokenSecret), createOrder);
+orderRouter.get(
+  '/orders',
+  checkAuth(authConfig.accessTokenSecret),
+  checkRole(['admin', 'accountant']),
+  getOrders,
+);
+
+orderRouter.post(
+  '/orders',
+  checkAuth(authConfig.accessTokenSecret),
+  createOrder,
+);
 
 userOrderRouter.get('/', getUserOrders);
 

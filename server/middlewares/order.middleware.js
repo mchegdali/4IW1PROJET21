@@ -14,15 +14,17 @@ const isOwnOrder = async (req, res, next) => {
 
   const order = await OrderMongo.findById(id);
   if (!order) {
+    console.log('order not found');
     return res.sendStatus(404);
   }
   const isAuthorized =
     req.user._id.toString() === order.user._id.toString() ||
     req.user.role === 'admin';
+
   if (!isAuthorized) {
     return res.sendStatus(403);
   }
-  req.order = order;
+
   next();
 };
 

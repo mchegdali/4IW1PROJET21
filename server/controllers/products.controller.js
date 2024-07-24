@@ -46,9 +46,8 @@ async function createProduct(req, res, next) {
       });
 
       // La création dans Mongo est déja gérée dans le hook afterCreate
-      console.log("donnée renvoyée", data);
+      console.log('donnée renvoyée', data);
       return data;
-
     });
 
     return res.status(201).json(result);
@@ -256,18 +255,21 @@ async function updateProduct(req, res, next) {
       productUpdateBody.image = req.file.path;
     }
 
-    const [updated, updatedProducts] = await Products.update(productUpdateBody, {
-      where: {
-        [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
+    const [updated, updatedProducts] = await Products.update(
+      productUpdateBody,
+      {
+        where: {
+          [Op.or]: [{ id: req.params.product }, { slug: req.params.product }],
+        },
+        limit: 1,
+        returning: true,
+        individualHooks: true,
       },
-      limit: 1,
-      returning: true,
-      individualHooks: true,
-    });
+    );
 
     if (updated) {
       const updatedProduct = await updatedProducts[0].toMongo();
-      console.log("updatedProduct renvoyé au front", updatedProduct);
+      console.log('updatedProduct renvoyé au front', updatedProduct);
       return res.status(200).json(updatedProduct);
     }
 
@@ -380,8 +382,7 @@ async function getPriceDistribution(req, res, next) {
 
     res.status(200).json(priceDistribution);
   } catch (error) {
-    console.error('Error in getPriceDistribution:', error);
-    res.status(500).send('Internal Server Error');
+    return next(error);
   }
 }
 

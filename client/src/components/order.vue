@@ -24,27 +24,26 @@ interface Address {
   street: string;
   zipCode: string;
   city: string;
-  region: string;
-  country: string;
   phone: string;
+  deliveryChoiceId: string;
 }
 
 interface OrderItem {
-  _id: { $binary: { base64: string; subType: string } };
-  name: string;
-  quantity: number;
-  price: { $numberDecimal: string };
+  id: string;
+  price: string;
+  quantity?: number;
 }
 
 interface Order {
-  _id: { $binary: { base64: string; subType: string } };
+  _id: string;
   orderNumber: string;
-  deliveryDate: string;
-  address: Address;
-  status: { label: string };
-  totalPrice: { $numberDecimal: string };
-  items: OrderItem[];
   createdAt: string;
+  shippingDate: string;
+  deliveryStatus?: boolean;
+  address: Address;
+  items: OrderItem[];
+  paymentType: string;
+  status: { label: string };
 }
 
 const route = useRoute();
@@ -80,7 +79,7 @@ const getProductTitle = (productId: string) => {
 
 const computeOrderTotal = () => {
   const total = order.value?.items
-    .reduce((total, item) => total + parseFloat(item.price.$numberDecimal) * item.quantity, 0)
+    .reduce((total, item) => total + parseFloat(item.price) * (item.quantity || 1), 0)
     .toFixed(2);
 
   return total || '0.00';
@@ -148,7 +147,8 @@ const generateInvoice = async () => {
   doc.text(`${order.value.address.phone}`, 113, 160);
 
   const itemRows = order.value.items.map((item) => {
-    return [item.name, item.quantity, `${item.price.$numberDecimal} €`];
+    const product = products.value.find((p) => p.id === item.id);
+    return [product?.name || 'Unknown Product', item.quantity || 1, `${item.price} €`];
   });
 
   autoTable(doc, {
@@ -202,12 +202,13 @@ onMounted(async () => {
     order.value = await response.json();
 
     if (order.value && order.value.items) {
-      await fetchProductDetails(order.value.items.map((item) => item._id.base64));
+      await fetchProductDetails(order.value.items.map((item) => item.id));
     } else {
       console.warn('Order or order items are not available');
     }
   } catch (error) {
     console.error('Error fetching order:', error);
+    // Redirect to 404 page in case of any error
     router.push({ name: 'not-found' });
   }
 });
@@ -420,9 +421,7 @@ onMounted(async () => {
           <p class="flex justify-between text-sm sm:text-lg">
             Sous-total <span>{{ computeOrderTotal() }} €</span>
           </p>
-          <p class="flex justify-between text-sm py-1 sm:text-lg">
-            Livraison: <span>8 €</span>
-          </p>
+          <p class="flex justify-between text-sm py-1 sm:text-lg">Livraison: <span>8 €</span></p>
           <p class="flex justify-between text-sm py-1 sm:text-lg">Remise: <span>0 €</span></p>
 
           <p class="font-bold flex justify-between text-sm sm:text-lg">
