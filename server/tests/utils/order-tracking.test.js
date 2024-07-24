@@ -9,7 +9,7 @@ describe('generateTrackingEvents', () => {
         label: 'Delivered',
         _id: '123'
       },
-      shipping: {
+      address: {
         city: 'Lyon',
         zipCode: '69000'
       }
@@ -76,7 +76,7 @@ describe('generateTrackingEvents', () => {
         label: 'delivered',
         _id: '123'
       },
-      shipping: {
+      address: {
         city: 'Lyon',
         zipCode: '69000'
       }
