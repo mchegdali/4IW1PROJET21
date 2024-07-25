@@ -123,10 +123,15 @@ describe('Products Model', () => {
   });
 
   it('should convert to MongoDB format', async () => {
-    const category = await Categories.create({
-      name: faker.commerce.department(),
-      description: 'A test category',
-    });
+    let category;
+    try {
+      category = await Categories.create({
+        name: faker.lorem.words(),
+        description: 'A test category',
+      });
+    } catch (e) {
+      console.log('category', e);
+    }
 
     console.log('category', category);
 
