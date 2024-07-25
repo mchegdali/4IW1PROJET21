@@ -23,6 +23,7 @@ export const toastVariants = cva(
           'destructive group border-destructive bg-destructive text-destructive-foreground',
         success: 'border-2 border-tea-500 bg-background text-primary',
         danger: 'border-2 border-tea-500 bg-red-500 text-white',
+        warning: 'border-2 border-orange-500  bg-background text-orange-500'
       }
     },
     defaultVariants: {

@@ -7,12 +7,15 @@ import Button from '../ui/button/Button.vue';
 import { useBasketStore } from '@/stores/basket';
 import { useUserStore } from '@/stores/user';
 import { addProductToBasket, fetchBasket } from '@/api/basket';
-import { toast } from '../ui/toast';
+import { useToast } from '../ui/toast';
+import { useRouter } from 'vue-router';
 
 const { product } = defineProps<{ product: Product }>();
 
+const { toast } = useToast();
 const userStore = useUserStore();
 const basketStore = useBasketStore();
+const router = useRouter();
 
 async function handleAddToBasketClick() {
   if (userStore.isAuthenticated) {
@@ -28,15 +31,17 @@ async function handleAddToBasketClick() {
         basketStore.products = await response.json();
       }
     }
-  }
 
-  toast({
-    title: `${product.name} ajouté au panier`,
-    description: 'Vous pouvez maintenant vous déplacer dans votre panier',
-    type: 'foreground',
-    duration: 2500,
-    variant: 'success'
-  });
+    toast({
+      title: `${product.name} ajouté au panier`,
+      description: 'Vous pouvez maintenant vous déplacer dans votre panier',
+      type: 'foreground',
+      duration: 2500,
+      variant: 'success'
+    });
+  } else {
+    router.push({ name: 'login' });
+  }
 }
 </script>
 
