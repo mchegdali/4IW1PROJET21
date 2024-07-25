@@ -43,24 +43,16 @@ const filteredOrders = computed(() => {
       return false;
     }
     
-    // Le reste du code reste inchangé
     if (selectedStatus.value && order.status.label !== selectedStatus.value) {
       return false;
     }
     
-    const orderDate = new Date(order.createdAt);
-    const orderDateString = orderDate.toISOString().split('T')[0];
-    
-    if (selectedDate.value && orderDateString !== selectedDate.value) {
-      return false;
-    }
-    
-    if (selectedStartDate.value && orderDate < new Date(selectedStartDate.value)) {
-      return false;
-    }
-    
-    if (selectedEndDate.value && orderDate > new Date(selectedEndDate.value)) {
-      return false;
+    if (selectedStartDate.value) {
+      const orderDate = new Date(order.createdAt);
+      const startDate = new Date(selectedStartDate.value);
+      if (orderDate < startDate) {
+        return false;
+      }
     }
     
     return true;
