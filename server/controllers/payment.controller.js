@@ -1,6 +1,6 @@
 const httpErrors = require('http-errors');
 const sequelize = require('../models/sql');
-const { paymentCreateSchema } = require('../schemas/payments.schema');
+const { paymentCreateSchema , paymentQuerySchema , paymentUpdateSchema } = require('../schemas/payments.schema');
 const { NotFound } = httpErrors;
 const Payments = sequelize.model('payments');
 const OrdersMongo = require('../models/mongo/orders.mongo');
@@ -134,26 +134,23 @@ const handleStripeWebhook = async (req, res) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the event
   try {
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object;
-        const email = paymentIntent.receipt_email; // contains the email that will receive the receipt for the payment (user's email usually)
+        const email = paymentIntent.receipt_email; 
         console.log(`PaymentIntent was successful for ${email}!`);
 
-        // Ici, vous pouvez ajouter la logique pour mettre à jour votre base de données
-        // Par exemple, marquer une commande comme payée, envoyer un email de confirmation, etc.
+
         await handleSuccessfulPayment(paymentIntent);
 
         break;
       }
-      // Vous pouvez ajouter d'autres cas pour gérer différents types d'événements
+
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
 
-    // Return a 200 response to acknowledge receipt of the event
     res.json({ received: true });
   } catch (error) {
     console.error('Error processing webhook:', error);
@@ -165,13 +162,13 @@ const handleSuccessfulPayment = async (paymentIntent) => {
   console.log('Handling successful payment:', paymentIntent.id);
 
   try {
-    // Récupérer la session Stripe associée au PaymentIntent
+
     const session = await stripe.checkout.sessions.retrieve(
       paymentIntent.payment_intent,
     );
     const orderId = session.metadata.orderId;
 
-    // Récupérer l'ordre et l'utilisateur
+
     const order = await OrdersMongo.findById(orderId);
     if (!order) {
       throw new Error('Order not found');
@@ -182,14 +179,14 @@ const handleSuccessfulPayment = async (paymentIntent) => {
       throw new Error('User not found');
     }
 
-    // Calculer le prix total
+
     const totalPrice = order.items.reduce((total, item) => {
       return total + parseFloat(item.price.toString()) * (item.quantity || 1);
     }, 0);
 
-    // Créer le paiement dans les deux bases de données
+
     const result = await sequelize.transaction(async (t) => {
-      // Créer le paiement dans la base de données SQL
+
       const payment = await Payments.create(
         {
           userId: user._id,
@@ -201,7 +198,7 @@ const handleSuccessfulPayment = async (paymentIntent) => {
         { transaction: t },
       );
 
-      // Créer le paiement dans MongoDB
+  
       const paymentMongo = {
         _id: payment.id,
         user: {
@@ -235,14 +232,86 @@ const handleSuccessfulPayment = async (paymentIntent) => {
 
     console.log('Payment created successfully:', result);
 
-    // Vous pouvez ajouter ici d'autres actions, comme envoyer un e-mail de confirmation
+
   } catch (error) {
     console.error('Error creating payment:', error);
     // Gérer l'erreur de manière appropriée, peut-être en la signalant à un service de suivi des erreurs
   }
 };
+/**
+ *
+ * @type {import('express').RequestHandler}
+ * @returns
+ */
+async function getPayment(req, res, next) {
+  try {
+    const id = req.params.id;
+
+    const filter = {
+      _id: id,
+    };
+
+    const payment = await PaymentsMongo.findOne(filter);
+
+    if (!paymentQuerySchema) {
+      return res.sendStatus(404);
+    }
+    return res.sendStatus(204);
+  } catch (error) {
+    return next(error);
+  }
+}
+async function getPayments(req, res, next) {
+  try {
+    const payments = await PaymentsMongo.find({}).lean({});
+    return res.json(payments);
+  } catch (error) {
+    return next(error);
+  }
+}
+async function updatePayment(req, res, next) {
+  try {
+    const updateData = await paymentQuerySchema.parseAsync(req.body);
+
+    const id = req.params.id;
+
+    // Commencer une transaction SQL
+    const result = await sequelize.transaction(async (t) => {
+      // Mise à jour de la commande dans MongoDB
+      const updatedDeliveryChoiceMongo =
+        await PaymentsMongo.findByIdAndUpdate(id, updateData, {
+          new: true,
+          runValidators: true,
+        });
+
+      if (!updatedDeliveryChoiceMongo) {
+        throw new NotFound();
+      }
+
+      // Mise à jour de la commande dans SQL
+      const updatedDeliveryChoiceSQL = await DeliveryChoice.update(updateData, {
+        where: { id },
+        transaction: t,
+        returning: true,
+      });
+
+      if (updatedDeliveryChoiceSQL[0] === 0) {
+        throw new NotFound();
+      }
+
+      return updatedDeliveryChoiceSQL[1][0]; // retourne la commande mise à jour
+    });
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return next(error);
+  }
+}
 module.exports = {
   createPayment,
+  getPayment,
+  getPayments,
+
   createStripeSession,
   handleStripeWebhook,
 };
