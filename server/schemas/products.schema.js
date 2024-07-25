@@ -16,19 +16,26 @@ const productQuerySchema = z.object({
       message: `La limite doit être un des valeurs suivantes: ${pageSizeValues.join(', ')}`,
     }),
   text: z.string().min(2).optional(),
+  origin: z.string().optional(),
   minPrice: z.coerce.number().min(0).finite().optional(),
   maxPrice: z.coerce.number().min(0).finite().optional(),
 });
 
 const productCreateSchema = z.object({
   name: z.string().min(2),
-  price: z.number().min(0.01),
+  price: z.coerce.number().min(0.01),
   description: z.string().min(2),
   categoryId: z.string().uuid().or(z.null()).default(null),
   image: z
     .string()
     .url()
     .default('https://placehold.co/256x256/38664D/FFF/png'),
+  origin: z.string(),
+  brewingInstructions: z.object({
+    temperature: z.coerce.number().min(0).max(100),
+    steepTime: z.coerce.number().min(0),
+  }),
+  weightGrams: z.coerce.number().positive(),
 });
 
 const productUpdateSchema = productCreateSchema.partial().refine((a) => {

@@ -36,6 +36,7 @@ const router = useRouter();
 const searchStore = useSearchStore();
 
 const categories = ref<ProductCategory[]>([]);
+const origins = ref<string[]>([]);
 
 const products = ref<Product[]>([]);
 const metadata = ref({
@@ -92,6 +93,17 @@ function onUpdateCategory(value: string) {
     query: {
       ...router.currentRoute.value.query,
       category: value === 'all' ? undefined : value,
+      page: 1
+    }
+  });
+}
+
+function onUpdateOrigin(value: string) {
+  router.push({
+    name: 'products',
+    query: {
+      ...router.currentRoute.value.query,
+      origin: value === 'all' ? undefined : value,
       page: 1
     }
   });
@@ -168,6 +180,10 @@ watch(
       url.searchParams.set('maxPrice', query.maxPrice.toString());
     }
 
+    if (query.origin) {
+      url.searchParams.set('origin', query.origin.toString());
+    }
+
     const response = await fetch(url);
     if (!response.ok) {
       products.value = [];
@@ -191,13 +207,24 @@ watch(
 );
 
 onBeforeMount(async () => {
-  const response = await fetch(`${config.apiBaseUrl}/categories`);
-  if (!response.ok) {
-    return;
-  }
+  const [categoriesData, originsData] = await Promise.all([
+    fetch(`${config.apiBaseUrl}/categories`).then((response) => {
+      if (!response.ok) {
+        return;
+      }
 
-  const data: ProductCategory[] = await response.json();
-  categories.value = data;
+      return response.json() as Promise<ProductCategory[]>;
+    }),
+    fetch(`${config.apiBaseUrl}/products/origins`).then((response) => {
+      if (!response.ok) {
+        return;
+      }
+
+      return response.json() as Promise<string[]>;
+    })
+  ]);
+  categories.value = categoriesData;
+  origins.value = originsData;
 });
 
 searchStore.$subscribe((mutation, state) => {
@@ -266,6 +293,26 @@ searchStore.$subscribe((mutation, state) => {
                 :value="category.slug"
               >
                 {{ category.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </fieldset>
+        <fieldset>
+          <Label for="origin">Origine</Label>
+          <Select
+            v-if="!Array.isArray(router.currentRoute.value.query.origin)"
+            id="origin"
+            default-value="all"
+            :model-value="router.currentRoute.value.query.origin?.toString()"
+            @update:model-value="onUpdateOrigin"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Toutes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes</SelectItem>
+              <SelectItem v-for="origin in origins" :key="origin" :value="origin">
+                {{ origin }}
               </SelectItem>
             </SelectContent>
           </Select>

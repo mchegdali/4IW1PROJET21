@@ -22,19 +22,18 @@ const { handleSubmit, defineField } = useForm({
 const [, textField] = defineField('text');
 
 const submitHandler = handleSubmit((data) => {
-  if (data.text) {
-    searchStore.text = data.text;
-    router.push({ name: 'products', query: { text: data.text, page: 1, pageSize: 10 } });
-  }
+  const text = data.text && data.text.length > 0 ? data.text : undefined;
+  router.push({
+    name: 'products',
+    query: { text, page: 1, pageSize: 10 }
+  });
 });
 
 const handleInput = useDebounceFn((event: InputEvent) => {
   const target = event.target as HTMLInputElement;
   textField.onInput(event);
 
-  if (target.value.length >= 0) {
-    searchStore.text = target.value;
-  }
+  searchStore.text = target.value;
 }, 150);
 </script>
 

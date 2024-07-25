@@ -65,7 +65,7 @@ async function getProducts(req, res, next) {
   try {
     const category = req.params.category;
 
-    const { page, text, pageSize, minPrice, maxPrice } =
+    const { page, text, pageSize, minPrice, maxPrice, origin } =
       productQuerySchema.parse(req.query);
 
     /**
@@ -84,6 +84,7 @@ async function getProducts(req, res, next) {
           $search: text,
           $diacriticSensitive: false,
           $caseSensitive: false,
+          $language: 'french',
         },
       });
     }
@@ -91,6 +92,14 @@ async function getProducts(req, res, next) {
     if (category) {
       matchAndStage.push({
         $or: [{ 'category._id': category }, { 'category.slug': category }],
+      });
+    }
+
+    if (origin) {
+      matchAndStage.push({
+        origin: {
+          $eq: origin,
+        },
       });
     }
 
@@ -165,6 +174,19 @@ async function getProducts(req, res, next) {
         id: product._id.toString(),
       })),
     });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ *
+ * @type {import('express').RequestHandler}
+ */
+async function getTeaOrigins(req, res, next) {
+  try {
+    const origins = await ProductMongo.distinct('origin');
+    return res.status(200).json(origins);
   } catch (error) {
     return next(error);
   }
@@ -397,4 +419,5 @@ module.exports = {
   getProductCount,
   getProductDistributionByCategory,
   getPriceDistribution,
+  getTeaOrigins,
 };

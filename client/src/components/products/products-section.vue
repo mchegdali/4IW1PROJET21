@@ -17,10 +17,10 @@ const { products, title, description } = defineProps<{
 </script>
 
 <template>
-  <section class="space-y-4 w-full mb-2">
-    <header class="py-2 px-4">
+  <section class="space-y-2 w-full mb-2">
+    <header class="py-2">
       <slot name="header">
-        <h2 class="text-3xl font-semibold">{{ title }}</h2>
+        <h2 class="text-2xl font-semibold">{{ title }}</h2>
       </slot>
       <slot name="description" v-if="description">
         <p class="text-base text-gray-500">
@@ -31,7 +31,7 @@ const { products, title, description } = defineProps<{
     <slot>
       <Carousel class="relative w-full overflow-hidden">
         <CarouselContent class="gap-2">
-          <CarouselItem v-for="product in products" :key="product._id">
+          <CarouselItem v-for="product in products" :key="product._id" class="mb-2">
             <ProductCard v-if="product" :product="product" />
           </CarouselItem>
         </CarouselContent>

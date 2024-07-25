@@ -21,6 +21,9 @@ const ProductsSequelize = (sequelize) => {
           : null,
         image: this.image,
         price: this.price,
+        origin: this.origin,
+        brewingInstructions: this.brewingInstructions,
+        weightGrams: this.weightGrams,
       };
     }
 
@@ -105,6 +108,18 @@ const ProductsSequelize = (sequelize) => {
       image: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      origin: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      brewingInstructions: {
+        type: DataTypes.JSON,
+        allowNull: true,
+      },
+      weightGrams: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
       },
     },
     {

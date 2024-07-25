@@ -17,7 +17,7 @@ const products = computed(() => {
 </script>
 
 <template>
-  <main class="grow py-2">
+  <main class="grow py-4 px-2">
     <ProductsSection
       title="Nos best-sellers"
       :products="products"
