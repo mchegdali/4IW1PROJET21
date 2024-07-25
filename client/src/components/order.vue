@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { RouterLink } from 'vue-router';
-import { Calendar, FileText, MapPin, Package2, Phone, Truck } from 'lucide-vue-next';
+import { Calendar, FileText, MapPin, Package2, Phone } from 'lucide-vue-next';
 import config from '@/config';
 import { useUserStore } from '@/stores/user';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import DeliveryStatus from '../components/delivery-status.vue';
 
 const userStore = useUserStore();
 userStore.accessToken;
@@ -212,7 +212,6 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Error fetching order:', error);
-    // Redirect to 404 page in case of any error
     router.push({ name: 'not-found' });
   }
 });
@@ -262,128 +261,12 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Delivery Status -->
-        <div v-if="order.status.label === 'Shipped'" class="flex flex-col gap-2 p-2 sm:p-4">
-          <div class="flex justify-between items-center text-xs">
-            <p class="font-bold text-sm sm:text-lg">VOTRE COMMANDE A ÉTÉ EXPÉDIÉE !</p>
-            <p class="text-gray-700 sm:text-lg">{{ order.items.length }} <span>Produits</span></p>
-          </div>
-          <div class="sm:flex w-full items-center justify-between">
-            <p class="text-sm font-bold text-gray-700 sm:text-sm">
-              DATE PRÉVUE DE LIVRAISON :
-              {{
-                new Date(
-                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 3)
-                ).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric'
-                })
-              }}
-            </p>
-            <div class="bg-white py-2 text-sm flex items-center gap-2">
-              <Truck />
-              <RouterLink
-                :to="{ name: 'tracking', params: { id: order.orderNumber } }"
-                class="text-tea-600 sm:text-lg"
-              >
-                Suivre le colis
-              </RouterLink>
-            </div>
-          </div>
-          <div class="w-full h-3 bg-gray-200 overflow-hidden rounded-xl">
-            <div class="h-full bg-tea-600" :style="{ width: '75%' }"></div>
-          </div>
-          <p class="text-xs sm:text-sm">
-            Votre colis est en cours de livraison. Merci de votre patience et nous espérons que vous
-            apprécierez votre commande lorsqu'elle arrivera !
-          </p>
-        </div>
-
-        <div v-else-if="order.status.label === 'Delivered'" class="flex flex-col gap-2 p-2 sm:p-4">
-          <div class="flex justify-between items-center text-xs">
-            <p class="font-bold text-sm sm:text-lg">VOTRE COMMANDE A ÉTÉ LIVRÉE !</p>
-            <p class="text-gray-700 sm:text-lg">{{ order.items.length }} <span>Produits</span></p>
-          </div>
-          <div class="sm:flex w-full items-center justify-between">
-            <p class="text-sm font-bold text-gray-700 sm:text-sm">
-              LIVRAISON LE :
-              {{
-                new Date(
-                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 3)
-                ).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric'
-                })
-              }}
-            </p>
-            <div class="bg-white py-2 text-sm flex items-center gap-2">
-              <Truck />
-              <RouterLink
-                :to="{ name: 'tracking', params: { id: order.orderNumber } }"
-                class="text-tea-600 sm:text-lg"
-              >
-                Infos de la livraison
-              </RouterLink>
-            </div>
-          </div>
-          <div class="w-full h-3 bg-tea-600 rounded-xl"></div>
-          <p class="text-xs sm:text-sm">
-            Ca y est : votre colis a été livré. Nous espérons que vous aimerez votre commande !
-          </p>
-        </div>
-
-        <div v-if="order.status.label === 'Cancelled'" class="flex flex-col gap-2 p-2 sm:p-4">
-          <div class="flex justify-between items-center text-xs">
-            <p class="font-bold text-sm sm:text-lg">VOTRE COMMANDE A ÉTÉ ANNULÉE !</p>
-            <p class="text-gray-700 sm:text-lg">{{ order.items.length }} <span>Produits</span></p>
-          </div>
-          <div class="sm:flex w-full items-center justify-between">
-            <p class="text-sm font-bold text-gray-700 sm:text-sm">
-              DATE D'ANNULATION :
-              {{
-                new Date(
-                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate())
-                ).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric'
-                })
-              }}
-            </p>
-          </div>
-          <div class="w-full h-3 bg-gray-200 rounded-xl"></div>
-          <p class="text-xs sm:text-sm">Votre commande a été annulée.</p>
-        </div>
-
-        <div v-if="order.status.label === 'Pending'" class="flex flex-col gap-2 p-2 sm:p-4">
-          <div class="flex justify-between items-center text-xs">
-            <p class="font-bold text-sm sm:text-lg">VOTRE COMMANDE EST EN COURS DE TRAITEMENT !</p>
-            <p class="text-gray-700 sm:text-lg">{{ order.items.length }} <span>Produits</span></p>
-          </div>
-          <div class="sm:flex w-full items-center justify-between">
-            <p class="text-sm font-bold text-gray-700 sm:text-sm">
-              DATE PRÉVUE DE LIVRAISON :
-              {{
-                new Date(
-                  new Date(order.createdAt).setDate(new Date(order.createdAt).getDate() + 3)
-                ).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric'
-                })
-              }}
-            </p>
-          </div>
-          <div class="w-full h-3 bg-gray-200 overflow-hidden rounded-xl">
-            <div class="h-full bg-tea-600" :style="{ width: '15%' }"></div>
-          </div>
-          <p class="text-xs sm:text-sm">
-            Votre colis est en cours de traitement. Merci de votre patience et nous espérons que
-            vous apprécierez votre commande lorsqu'elle arrivera !
-          </p>
-        </div>
+        <DeliveryStatus
+          :status="order.status.label"
+          :itemCount="order.items.length"
+          :createdAt="order.createdAt"
+          :orderNumber="order.orderNumber"
+        />
 
         <!-- Order Items -->
         <div class="flex flex-col w-full gap-2 px-2 sm:px-4 pb-2">
