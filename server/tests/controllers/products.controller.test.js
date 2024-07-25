@@ -8,6 +8,7 @@ const generateAccessToken = require('../../utils/generate-access-token');
 const createUser = require('../__helpers__/create-user');
 const { faker } = require('@faker-js/faker');
 const { Op } = require('sequelize');
+const connection = require('../../models/mongo/db');
 
 const Products = sequelize.model('products');
 const Categories = sequelize.model('categories');
@@ -237,4 +238,9 @@ describe('products.controller', () => {
       expect(res.statusCode).toBe(403);
     });
   });
+});
+
+afterAll(async () => {
+  await sequelize.close();
+  await connection.close();
 });

@@ -1,9 +1,9 @@
-const { Sequelize } = require('sequelize');
 const { faker } = require('@faker-js/faker');
 const sequelize = require('../../../models/sql');
 const { ProductMongo } = require('../../../models/mongo/products.mongo');
 const UserMongo = require('../../../models/mongo/user.mongo');
 const CategoriesMongo = require('../../../models/mongo/categories.mongo');
+const connection = require('../../../models/mongo/db');
 
 const Products = sequelize.model('products');
 const Categories = sequelize.model('categories');
@@ -159,4 +159,9 @@ describe('Products Model', () => {
       price: (10.99).toString(10),
     });
   });
+});
+
+afterAll(async () => {
+  await sequelize.close();
+  await connection.close();
 });
