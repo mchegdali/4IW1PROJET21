@@ -4,21 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Package2, Truck } from 'lucide-vue-next';
 import { useUserStore } from '@/stores/user';
 import config from '@/config';
-
-interface Order {
-  _id: string;
-  id: string;
-  createdAt: string;
-  status: { label: string };
-  items: { _id: string }[];
-  orderNumber: string;
-  shippingDate?: string;
-}
-
-interface Product {
-  id: string;
-  image: string;
-}
+import type { Order, Product } from '../api/orders.api';
 
 const orders = ref<Order[]>([]);
 const itemDetails = ref<Record<string, Product>>({});
@@ -53,18 +39,23 @@ function statusClass(status: string): string {
 
 const filteredOrders = computed(() => {
   return orders.value.filter((order) => {
-    const matchesQuery = searchQuery.value ? order.id.includes(searchQuery.value) : true;
-    const matchesStatus = selectedStatus.value ? order.status.label === selectedStatus.value : true;
-    const matchesDate = selectedDate.value
-      ? new Date(order.createdAt).toISOString().split('T')[0] === selectedDate.value
-      : true;
-    const matchesStartDate = selectedStartDate.value
-      ? new Date(order.createdAt) >= new Date(selectedStartDate.value)
-      : true;
-    const matchesEndDate = selectedEndDate.value
-      ? new Date(order.createdAt) <= new Date(selectedEndDate.value)
-      : true;
-    return matchesQuery && matchesStatus && matchesDate && matchesStartDate && matchesEndDate;
+    if (searchQuery.value && !order.orderNumber.toLowerCase().includes(searchQuery.value.toLowerCase())) {
+      return false;
+    }
+    
+    if (selectedStatus.value && order.status.label !== selectedStatus.value) {
+      return false;
+    }
+    
+    if (selectedStartDate.value) {
+      const orderDate = new Date(order.createdAt);
+      const startDate = new Date(selectedStartDate.value);
+      if (orderDate < startDate) {
+        return false;
+      }
+    }
+    
+    return true;
   });
 });
 
@@ -123,13 +114,18 @@ window.addEventListener('resize', () => {
 
 <template>
   <div class="flex flex-col sm:flex-row sm:items-start sm:justify-center px-4 mt-2">
-    <!-- Filtres -->
-    <details
-      v-if="isMobile"
-      class="mb-4 w-full flex flex-col gap-4 sm:w-1/4 sm:mr-4 p-2 rounded-lg border border-tea-600"
-    >
-      <summary class="font-semibold text-gray-700 cursor-pointer">Filtrer</summary>
-      <div class="mt-4 p-2">
+    <div :class="[
+    'mb-4 w-full sm:w-1/4 sm:mr-4 rounded-lg',
+    isMobile ? 'border border-tea-600' : 'shadow-lg'
+  ]">
+    <div v-if="!isMobile" class="font-semibold text-white p-4 text-2xl bg-tea-600 rounded-t-lg">
+      Filtrer les commandes
+    </div>
+    <details :open="!isMobile">
+      <summary v-if="isMobile" class="p-2 font-semibold text-gray-700 cursor-pointer">
+        Filtrer
+      </summary>
+      <div :class="isMobile ? 'mt-4 p-2' : 'p-6'">
         <input
           v-model="searchQuery"
           type="text"
@@ -141,15 +137,17 @@ window.addEventListener('resize', () => {
           <select
             id="status"
             v-model="selectedStatus"
-            class="w-full p-2 border border-gray-300 rounded mb-4"
+            class="w-full p-2 border border-gray-300 rounded mb-4 bg-white"
           >
             <option value="">Tous</option>
             <option value="Delivered">Livré</option>
+            <option value="Shipped">Expédié</option>
             <option value="Pending">En cours</option>
+            <option value="Cancelled">Annulé</option>
           </select>
         </label>
         <label for="date" class="block text-gray-700 font-semibold mb-2">
-          Date de commande
+          Date précise
           <input
             type="date"
             id="date"
@@ -157,8 +155,8 @@ window.addEventListener('resize', () => {
             class="w-full p-2 border border-gray-300 rounded mb-4"
           />
         </label>
-        <div class="flex gap-4">
-          <label for="startDate" class="block text-gray-700 font-semibold mb-2">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <label for="startDate" class="block text-gray-700 font-semibold mb-2 w-full sm:w-1/2">
             Date de début
             <input
               type="date"
@@ -167,7 +165,7 @@ window.addEventListener('resize', () => {
               class="w-full p-2 border border-gray-300 rounded mb-4"
             />
           </label>
-          <label for="endDate" class="block text-gray-700 font-semibold mb-2">
+          <label for="endDate" class="block text-gray-700 font-semibold mb-2 w-full sm:w-1/2">
             Date de fin
             <input
               type="date"
@@ -179,67 +177,13 @@ window.addEventListener('resize', () => {
         </div>
       </div>
     </details>
-
-    <div v-else class="shadow-lg mb-4 w-full flex flex-col gap-4 sm:w-1/4 sm:mr-4 rounded-lg">
-      <div class="font-semibold text-white p-4 text-2xl bg-tea-600 rounded-t-lg">
-        Filtrer les commandes
-      </div>
-      <div class="p-6">
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Nº commande : 78524263"
-          class="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-        <label for="status" class="block font-semibold mb-2 text-gray-700">
-          Statut de la commande
-          <select
-            id="status"
-            v-model="selectedStatus"
-            class="w-full p-2 border border-gray-300 rounded mb-4 bg-white"
-          >
-            <option value="">Tous</option>
-            <option value="Delivered">Livré</option>
-            <option value="Pending">En cours</option>
-          </select>
-        </label>
-        <label for="date" class="block text-gray-700 font-semibold mb-2">
-          Date de commande
-          <input
-            type="date"
-            id="date"
-            v-model="selectedDate"
-            class="w-full p-2 border border-gray-300 rounded mb-4"
-          />
-        </label>
-        <div class="flex gap-4">
-          <label for="startDate" class="block text-gray-700 font-semibold mb-2">
-            Date de début
-            <input
-              type="date"
-              id="startDate"
-              v-model="selectedStartDate"
-              class="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-          </label>
-          <label for="endDate" class="block text-gray-700 font-semibold mb-2">
-            Date de fin
-            <input
-              type="date"
-              id="endDate"
-              v-model="selectedEndDate"
-              class="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-          </label>
-        </div>
-      </div>
-    </div>
+  </div>
 
     <!-- Commandes -->
     <div class="flex flex-col items-center w-full sm:w-3/4">
       <div
         v-for="order in filteredOrders"
-        :key="order.id"
+        :key="order._id"
         class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white w-full sm:w-full"
       >
         <router-link :to="{ name: 'order', params: { id: order._id } }">
