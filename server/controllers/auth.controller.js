@@ -40,7 +40,11 @@ const login = async (req, res, next) => {
       return res.sendStatus(403);
     }
 
-    const isValidPassword = await verify(user.password, password);
+    const isValidPassword = await verify(
+      user.password,
+      password,
+      authConfig.hashOptions,
+    );
 
     if (!isValidPassword) {
       return res.sendStatus(401);
@@ -49,8 +53,6 @@ const login = async (req, res, next) => {
     const { issuedAt, accessToken } = await generateAccessToken(user);
 
     const refreshToken = await generateRefreshToken(user, issuedAt);
-
-    console.log('login', user);
 
     return res.json({
       user: {
@@ -77,11 +79,9 @@ const login = async (req, res, next) => {
  */
 const refreshToken = async (req, res, next) => {
   try {
-    console.log(req.body);
-    const { data, success, error } = refreshTokenSchema.safeParse(req.body);
+    const { data, success } = refreshTokenSchema.safeParse(req.body);
 
     if (!success) {
-      console.log('refreshTokenSchema.safeParse', error);
       return res.sendStatus(401);
     }
 
@@ -115,7 +115,6 @@ const refreshToken = async (req, res, next) => {
 
     return res.send(accessToken);
   } catch (error) {
-    console.error('Error in refreshToken:', error);
     return next(error);
   }
 };

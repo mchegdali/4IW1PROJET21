@@ -29,7 +29,6 @@ productsRouter.get(
   checkAuth(authConfig.accessTokenSecret),
   checkRole(['admin']),
   getProductDistributionByCategory,
-  getProductDistributionByCategory,
 );
 
 productsRouter.get(
@@ -48,22 +47,22 @@ productsRouter
     checkAuth(authConfig.accessTokenSecret),
     checkRole(['admin']),
     upload.single('image'), // Utilisation de Multer pour gérer l'upload d'une image
-    updateProduct
+    updateProduct,
   )
   .delete(
     checkAuth(authConfig.accessTokenSecret),
     checkRole(['admin']),
-    deleteProduct
+    deleteProduct,
   );
 
-  productsRouter.route('/products')
+productsRouter
+  .route('/products')
   .get(getProducts)
   .post(
     checkAuth(authConfig.accessTokenSecret),
     checkRole(['admin']),
     upload.single('image'), // Utilisation de Multer pour gérer l'upload d'une image
-    createProduct
+    createProduct,
   );
-
 
 module.exports = productsRouter;
