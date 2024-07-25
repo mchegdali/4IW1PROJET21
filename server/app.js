@@ -2,12 +2,12 @@ const express = require('express');
 const cors = require('cors');
 // const logger = require('pino-http');
 const helmet = require('helmet');
-const path = require('path'); 
+const path = require('path');
 
 const corsOptions = {
-  // origin: process.env.APP_URL,
-  // optionsSuccessStatus: 200,
-  // credentials: true,
+  origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : '*',
+  optionsSuccessStatus: 204,
+  credentials: true,
 };
 
 const authRouter = require('./routes/auth.routes');
