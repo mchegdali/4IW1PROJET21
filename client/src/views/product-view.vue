@@ -2,30 +2,22 @@
 import type { Product } from '@/api/products.api';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useFetch } from '@vueuse/core';
-import ProductDescription from '@/components/products/product-description.vue';
 import ProductsSection from '@/components/products/products-section.vue';
 import { useBasketStore } from '@/stores/basket';
 import Button from '@/components/ui/button/Button.vue';
-import {
-  NumberField,
-  NumberFieldContent,
-  NumberFieldDecrement,
-  NumberFieldIncrement,
-  NumberFieldInput
-} from '@/components/ui/number-field';
 import { useUserStore } from '@/stores/user';
 import { addProductToBasket, fetchBasket } from '@/api/basket';
 
 const route = useRoute();
 const router = useRouter();
 const basketStore = useBasketStore();
+const userStore = useUserStore();
 
 const productId = route.params.id;
 const productUrl = ref(`${import.meta.env.VITE_API_BASE_URL}/products/${productId}`);
 const relatedProductsUrl = computed(() => `${productUrl.value}/related`);
 
-const product = ref<Product | null>(null);
+const product = ref<Product>();
 const relatedProducts = ref<Product[]>([]);
 const isLoading = ref(true);
 const hasError = ref(false);
@@ -54,45 +46,31 @@ async function fetchRelatedProducts() {
   }
 }
 
-const count = ref(0);
-
-function handleQuantityChange(value: number) {
-  if (value >= 0) {
-    count.value = value;
-  } else {
-    count.value = 0;
-  }
-}
-
 async function handleAddToBasketClick() {
   if (product.value) {
-    if (useUserStore().isAuthenticated) {
+    if (userStore.isAuthenticated) {
       const response = await addProductToBasket(
-        useUserStore().user?.id!,
-        useUserStore().accessToken!,
+        userStore.user?.id!,
+        userStore.accessToken!,
         product.value,
-        count.value
+        1
       );
 
       if (response.ok) {
-        const basketResponse = await fetchBasket(
-          useUserStore().user?.id!,
-          useUserStore().accessToken!
-        );
+        const basketResponse = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
 
         basketStore.products = await basketResponse.json();
       }
     }
-    count.value = 0;
   }
 }
 
 watch(
   () => route.params.id,
-  (id) => {
+  async (id) => {
     productUrl.value = `${import.meta.env.VITE_API_BASE_URL}/products/${id}`;
-    fetchProduct();
-    fetchRelatedProducts();
+    await fetchProduct();
+    await fetchRelatedProducts();
   },
   {
     immediate: true
@@ -100,9 +78,8 @@ watch(
 );
 </script>
 
-
 <template>
-  <main class="grow p-4">
+  <main class="grow p-4 container">
     <template v-if="product">
       <header class="flex flex-col gap-1 mb-4">
         <h1 class="text-4xl font-extrabold">{{ product.name }}</h1>
@@ -118,28 +95,37 @@ watch(
           />
         </span>
       </header>
-      <section class="flex flex-col gap-1 items-center">
+      <section class="flex flex-col gap-4 items-center mb-4">
         <p class="text-xl font-semibold">{{ product.price }}€</p>
-        <NumberField
-          :model-value="count"
-          :min="0"
-          @update:model-value="handleQuantityChange"
-          class="max-w-40"
-        >
-          <NumberFieldContent>
-            <NumberFieldDecrement />
-            <NumberFieldInput />
-            <NumberFieldIncrement />
-          </NumberFieldContent>
-        </NumberField>
         <Button class="uppercase font-medium" @click="handleAddToBasketClick">
           Ajouter au panier
         </Button>
       </section>
-      <section class="flex flex-col gap-1 w-full max-w-screen-xs">
-        <h2 class="text-3xl font-semibold">Détails du produit</h2>
-        <ProductDescription :product="product" />
+      <section class="flex flex-col gap-1">
+        <h1 class="text-2xl font-semibold">Détails du produit</h1>
+        <div>
+          <h2 class="text-base font-semibold">Description</h2>
+          <p>{{ product.description }}</p>
+        </div>
+        <div>
+          <h2 class="text-base font-semibold">Origine</h2>
+          <p>{{ product.origin }}</p>
+        </div>
+        <div>
+          <h2 class="text-base font-semibold">Instructions</h2>
+          <p>
+            Pour ce {{ product.category.name.toLocaleLowerCase() }}, nos experts vous conseillent de
+            faire bouillir votre eau à
+            <strong>{{ product.brewingInstructions.temperature }}°C</strong> pendant
+            <strong>{{ product.brewingInstructions.steepTime }}</strong> minutes.
+          </p>
+        </div>
+        <div>
+          <h2 class="text-base font-semibold">Poids</h2>
+          <p>{{ product.weightGrams }} g</p>
+        </div>
       </section>
+      <section class="flex flex-col gap-1 w-full max-w-screen-xs"></section>
       <ProductsSection title="Explorez d'autres saveurs" :products="relatedProducts" />
     </template>
   </main>

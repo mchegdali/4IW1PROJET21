@@ -1,5 +1,6 @@
 import type { Product } from '@/api/products.api';
 import { defineStore } from 'pinia';
+import { useUserStore } from './user';
 
 const defaultProducts: Product[] = [];
 
@@ -37,17 +38,24 @@ export const useBasketStore = defineStore('basket', {
     }
   },
   actions: {
-    async addProduct(product: Product, count: number) {
+    addProduct(product: Product, count: number) {
+      const userStore = useUserStore();
+      if (!userStore.isAuthenticated) return;
+
       for (let i = 0; i < count; i++) {
         this.products.push(product);
       }
       localStorage.setItem('basket', JSON.stringify(this.products));
     },
     setProducts(products: Product[]) {
+      const userStore = useUserStore();
+      if (!userStore.isAuthenticated) return;
       this.products = structuredClone(products);
       localStorage.setItem('basket', JSON.stringify(this.products));
     },
     setProductCount(product: Product, count: number) {
+      const userStore = useUserStore();
+      if (!userStore.isAuthenticated) return;
       const filteredProducts = this.products.filter((p) => p.id !== product.id);
       const newProducts = Array(count).fill(product);
       this.products = [...filteredProducts, ...newProducts];

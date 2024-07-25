@@ -52,6 +52,24 @@ const ProductSchema = new mongoose.Schema(
         return v.toString();
       },
     },
+    origin: {
+      type: String,
+      required: true,
+    },
+    brewingInstructions: {
+      temperature: {
+        type: Number,
+        required: true,
+      },
+      steepTime: {
+        type: Number,
+        required: true,
+      },
+    },
+    weightGrams: {
+      type: Number,
+      required: true,
+    },
   },
   {
     toObject: {

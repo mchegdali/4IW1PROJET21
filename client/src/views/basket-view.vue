@@ -22,15 +22,27 @@ onBeforeMount(async () => {
 const goToConfirmation = () => {
   router.push({ name: 'livraison' });
 };
+
+const goToLogin = () => {
+  router.push({ name: 'login' });
+};
 </script>
 
 <template>
   <main class="grow">
     <h1 class="text-3xl font-bold m-2">Panier</h1>
-    <BasketInformation />
-    <BasketList />
-    <div class="m-4">
-      <Button class="w-full" @click="goToConfirmation">Confirmer</Button>
-    </div>
+    <template v-if="userStore.isAuthenticated">
+      <BasketInformation />
+      <BasketList />
+      <div class="m-4">
+        <Button class="w-full" @click="goToConfirmation">Confirmer</Button>
+      </div>
+    </template>
+    <template v-else>
+      <div class="m-4">
+        <p>Pour accéder à votre panier, il est nécessaire de vous authentifier.</p>
+        <Button class="w-full" @click="goToLogin">Se connecter</Button>
+      </div>
+    </template>
   </main>
 </template>

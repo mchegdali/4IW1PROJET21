@@ -224,17 +224,19 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const userStore = useUserStore();
   const authRequired = to.meta?.requiresAuth === true;
+  const isAdminRequired = to.meta?.role === 'admin';
 
   if (authRequired && !userStore.isAuthenticated) {
     return {
-      name: 'login',
-      query: {
-        returnUrl: to.path
-      }
+      name: 'login'
     };
   }
 
-  
+  if (isAdminRequired && userStore.user?.role === 'admin') {
+    return {
+      name: 'login'
+    };
+  }
 });
 
 export default router;

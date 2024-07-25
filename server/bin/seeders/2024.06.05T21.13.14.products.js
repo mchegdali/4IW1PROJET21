@@ -40,6 +40,19 @@ const teaTypes = [
   'Thé Pu-erh',
 ];
 
+const teaOrigins = [
+  'Chine',
+  'Japon',
+  'Inde',
+  'Sri Lanka',
+  'Taïwan',
+  'Kenya',
+  'Népal',
+  'Turquie',
+  'Corée du Sud',
+  'Afrique du Sud',
+];
+
 function createTeaProduct(categoryId) {
   const id = crypto.randomUUID();
   const productIdLastPart = id.split('-').at(-1);
@@ -52,6 +65,14 @@ function createTeaProduct(categoryId) {
   const price = faker.commerce.price({ min: 5, max: 20 });
   const createdAt = faker.date.past();
 
+  // Nouvelles propriétés
+  const origin = faker.helpers.arrayElement(teaOrigins);
+  const brewingInstructions = {
+    temperature: faker.number.int({ min: 70, max: 100 }),
+    steepTime: faker.number.int({ min: 1, max: 5 }),
+  };
+  const weightGrams = faker.helpers.arrayElement([50, 100, 250, 500]);
+
   return {
     id,
     name,
@@ -62,6 +83,9 @@ function createTeaProduct(categoryId) {
     categoryId,
     createdAt: createdAt,
     updatedAt: createdAt,
+    origin,
+    brewingInstructions,
+    weightGrams,
   };
 }
 

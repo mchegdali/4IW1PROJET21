@@ -14,6 +14,12 @@ export interface Product {
   image: string;
   price: string;
   description: string;
+  origin: string;
+  brewingInstructions: {
+    temperature: number;
+    steepTime: number;
+  };
+  weightGrams: number;
 }
 
 export interface ProductsResponse {

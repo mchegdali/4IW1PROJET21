@@ -10,6 +10,7 @@ const {
   getProductDistributionByCategory,
   getPriceDistribution,
   getRecentProducts,
+  getTeaOrigins,
 } = require('../controllers/products.controller');
 const { checkAuth, checkRole } = require('../middlewares/auth.middleware');
 const authConfig = require('../config/auth.config');
@@ -17,6 +18,7 @@ const upload = require('../config/multerConfig');
 
 const productsRouter = Router({ mergeParams: true });
 
+productsRouter.get('/products/origins', getTeaOrigins);
 productsRouter.get(
   '/products/count',
   checkAuth(authConfig.accessTokenSecret),

@@ -5,9 +5,9 @@ const helmet = require('helmet');
 const path = require('path'); 
 
 const corsOptions = {
-  origin: process.env.APP_URL,
-  optionsSuccessStatus: 200,
-  credentials: true,
+  // origin: process.env.APP_URL,
+  // optionsSuccessStatus: 200,
+  // credentials: true,
 };
 
 const authRouter = require('./routes/auth.routes');
