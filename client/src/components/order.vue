@@ -6,7 +6,7 @@ import config from '@/config';
 import { useUserStore } from '@/stores/user';
 import DeliveryStatus from '../components/delivery-status.vue';
 import { generateInvoice } from '../utils/pdfGenerator';
-import { Order } from '../api/orders.api';
+import type { Order } from '../api/orders.api';
 
 const userStore = useUserStore();
 userStore.accessToken;

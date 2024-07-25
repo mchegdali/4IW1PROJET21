@@ -4,21 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Package2, Truck } from 'lucide-vue-next';
 import { useUserStore } from '@/stores/user';
 import config from '@/config';
-
-interface Order {
-  _id: string;
-  id: string;
-  createdAt: string;
-  status: { label: string };
-  items: { _id: string }[];
-  orderNumber: string;
-  shippingDate?: string;
-}
-
-interface Product {
-  id: string;
-  image: string;
-}
+import type { Order, Product } from '../api/orders.api';
 
 const orders = ref<Order[]>([]);
 const itemDetails = ref<Record<string, Product>>({});
