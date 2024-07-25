@@ -1,51 +1,65 @@
+
 <script setup lang="ts">
-import { ref, onBeforeMount } from 'vue';
-import { useBasketStore } from '@/stores/basket';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
-import { useRouter, RouterLink } from 'vue-router';
-import { fetchBasket } from '@/api/basket';
-import Button from '@/components/ui/button/Button.vue';
-import BasketInformation from '@/components/basket/basket-information.vue';
-import BasketList from '@/components/basket/basket-list.vue';
 
-const basketStore = useBasketStore();
+const route = useRoute();
 const userStore = useUserStore();
-const router = useRouter();
-const message = ref('');
+const order = ref(null);
+const error = ref('');
 
-onBeforeMount(async () => {
+const fetchOrder = async () => {
+  const orderId = route.params.id;
+  try {
+    const response =  await fetch(`${import.meta.env.VITE_API_URL}/order/${orderId}`, {
+      headers: {
+        'Authorization': `Bearer ${userStore.accessToken}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération de la commande');
+    }
+    
+    order.value = await response.json();
+  } catch (err) {
+    console.error('Erreur:', err);
+    error.value = 'Impossible de récupérer les détails de la commande. Veuillez réessayer.';
+  }
+};
+
+onMounted(() => {
   if (userStore.isAuthenticated) {
-    const response = await fetchBasket(userStore.user?.id!, userStore.accessToken!);
-    basketStore.products = await response.json();
+    fetchOrder();
   }
 });
-
-const goBackHome = () => {
-  router.push({ name: 'home' });
-};
 </script>
 
 <template>
   <main class="grow">
-    <h1 class="text-3xl font-bold m-2">Récapitulatif de vos achats</h1>
-    <BasketInformation />
-    <BasketList readonly />
+    <h1 class="text-3xl font-bold m-2">Récapitulatif de votre achat</h1>
+    
+    <div v-if="error" class="text-red-500">{{ error }}</div>
+    
+    <div v-if="order">
+      <h2>Commande #{{ order._id }}</h2>
+      <p>Statut : {{ order.status }}</p>
+      <ul>
+        <li v-for="item in order.items" :key="item._id">
+          {{ item.name }} - Quantité: {{ item.quantity }} - Prix: {{ item.price }}€
+        </li>
+      </ul>
+      <p>Total : {{ order.totalPrice }}€</p>
+    </div>
+    
     <div class="flex flex-col gap-4 m-4 items-center w-full">
-      <p>Paiement réaliser avec succès</p>
+      <p v-if="order && order.status === 'Paid'">Paiement réalisé avec succès</p>
       <div class="flex w-full justify-center gap-4">
-        <Button @click="goBackHome" class="w-fit" variant="outline">Retour a l'accueil</Button>
+        <Button @click="$router.push({ name: 'home' })" class="w-fit" variant="outline">
+          Retour à l'accueil
+        </Button>
       </div>
-      <p v-if="message" class="text-red-500">{{ message }}</p>
-      <p class="text-sm text-gray-600 m-4">
-        En cliquant sur "Procéder au paiement", vous acceptez nos
-        <RouterLink :to="{ name: 'conditions' }" class="text-tea-800 underline"
-          >conditions générales de vente</RouterLink
-        >
-        et notre
-        <RouterLink :to="{ name: 'confidentiality-declaration' }" class="text-tea-800 underline"
-          >politique de confidentialité</RouterLink
-        >.
-      </p>
     </div>
   </main>
 </template>
