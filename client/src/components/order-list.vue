@@ -183,7 +183,7 @@ window.addEventListener('resize', () => {
     <div class="flex flex-col items-center w-full sm:w-3/4">
       <div
         v-for="order in filteredOrders"
-        :key="order.id"
+        :key="order._id"
         class="rounded-lg p-5 shadow-lg flex flex-col gap-4 mb-4 bg-white w-full sm:w-full"
       >
         <router-link :to="{ name: 'order', params: { id: order._id } }">

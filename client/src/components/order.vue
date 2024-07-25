@@ -6,7 +6,7 @@ import config from '@/config';
 import { useUserStore } from '@/stores/user';
 import DeliveryStatus from '../components/delivery-status.vue';
 import { generateInvoice } from '../utils/pdfGenerator';
-import type { Order } from '../api/orders.api';
+import type { Order, Product } from '../api/orders.api';
 
 const userStore = useUserStore();
 userStore.accessToken;
@@ -75,7 +75,7 @@ onMounted(async () => {
     console.log(order.value);
 
     if (order.value && order.value.items) {
-      await fetchProductDetails(order.value.items.map((item) => item.id));
+      await fetchProductDetails(order.value.items.map((item) => item._id));
     } else {
       console.warn('Order or order items are not available');
     }

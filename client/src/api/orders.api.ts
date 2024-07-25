@@ -16,14 +16,14 @@ export interface Address {
 }
 
 export interface OrderItem {
-  id: string;
+  _id: string;
   name: string;
   quantity: number;
   price: string;
 }
 
 export interface Order {
-  id: string;
+  _id: string;
   orderNumber: string;
   createdAt: string;
   shippingDate: string;
