@@ -8,7 +8,7 @@
     "dev:legacy": "nodemon -L index.js",
     "lint": "eslint . --ext .js",
     "format": "prettier --write .",
-    "test": "jest --collectCoverage",
+    "test": "jest --collectCoverage --forceExit",
     "dev": "node --watch index.js",
     "db:migrate": "node bin/migrate.js",
     "db:seed:up": "node bin/seed.js up",

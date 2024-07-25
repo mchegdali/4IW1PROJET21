@@ -5,10 +5,29 @@ const connection = require('../../models/mongo/db');
 const sequelize = require('../../models/sql');
 const jose = require('jose');
 const authConfig = require('../../config/auth.config');
+const {
+  sendConfirmationEmail,
+  sendForgotPasswordEmail,
+} = require('../../config/email.config');
 
 const Users = sequelize.model('users');
 const { Op } = require('sequelize');
 const createUser = require('../__helpers__/create-user');
+
+jest.mock('../../config/email.config');
+jest.mock('../../config/auth.config', () => ({
+  accessTokenSecret: Buffer.from('mock-access-token-secret'),
+  refreshTokenSecret: Buffer.from('mock-refresh-token-secret'),
+  confirmationTokenSecret: Buffer.from('mock-confirmation-token-secret'),
+  forgotPasswordTokenSecret: Buffer.from('mock-forgot-password-token-secret'),
+  hashOptions: {
+    algorithm: 2, // Argon2id
+    parallelism: 1,
+    timeCost: 3,
+    salt: Buffer.from('mock-password-secret'),
+    memoryCost: 12288,
+  },
+}));
 
 const verifiedUser = createUser({
   password: 'Password1234.',
@@ -22,6 +41,15 @@ const unverifiedUser = createUser({
 describe('auth.controller', () => {
   let accessToken;
   let refreshToken;
+
+  beforeEach(() => {
+    sendConfirmationEmail.mockClear();
+    sendForgotPasswordEmail.mockClear();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
   beforeAll(async () => {
     await Users.bulkCreate([verifiedUser, unverifiedUser], {
@@ -102,21 +130,34 @@ describe('auth.controller', () => {
 
   describe('POST /auth/forgot-password', function () {
     test('should return 204 for existing email', async () => {
+      sendForgotPasswordEmail.mockResolvedValue();
       const response = await request(app)
         .post('/auth/forgot-password')
         .send({ email: verifiedUser.email })
         .set('Content-Type', 'application/json');
 
       expect(response.status).toBe(204);
+
+      expect(sendForgotPasswordEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: verifiedUser.email,
+          fullname: verifiedUser.fullname,
+        }),
+        expect.any(String),
+      );
     });
 
     test('should return 204 for non-existing email', async () => {
+      sendForgotPasswordEmail.mockResolvedValue();
+
       const response = await request(app)
         .post('/auth/forgot-password')
         .send({ email: 'nonexistent@example.com' })
         .set('Content-Type', 'application/json');
 
       expect(response.status).toBe(204);
+
+      expect(sendForgotPasswordEmail).not.toHaveBeenCalled();
     });
   });
 

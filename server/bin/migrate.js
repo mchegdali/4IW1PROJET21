@@ -1,9 +1,18 @@
 const sequelize = require('../models/sql');
 
-sequelize
-  .authenticate()
-  .then(() => sequelize.sync({ alter: true }))
-  .then(() => sequelize.close())
+async function migrate() {
+  await sequelize.authenticate();
+  await sequelize.sync({ alter: true });
+}
+
+migrate()
   .then(() => {
-    console.log('[SQL] Migrations completed');
+    console.log('[SQL] Migrations completed successfully.');
+    sequelize.close();
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('[SQL] Migrations failed:', error);
+    sequelize.close();
+    process.exit(1);
   });

@@ -2,6 +2,7 @@ const { Sequelize } = require('sequelize');
 const { faker } = require('@faker-js/faker');
 const sequelize = require('../../../models/sql');
 const UserMongo = require('../../../models/mongo/user.mongo');
+const connection = require('../../../models/mongo/db');
 
 const Users = sequelize.model('users');
 const Addresses = sequelize.model('addresses');
@@ -215,4 +216,8 @@ describe('Users Model', () => {
       deletedAt: user.deletedAt,
     });
   });
+});
+afterAll(async () => {
+  await sequelize.close();
+  await connection.close();
 });
