@@ -12,7 +12,7 @@ import logo from '@/assets/images/fanthesie.png';
         <div class="flex flex-col items-center md:items-start">
           <img :src="logo" alt="Fanthesie" class="w-32 mb-4" width="128" height="42" />
           <p class="text-sm text-center md:text-left">
-            Votre destination en ligne pour des thés et infusions de qualité.
+            Votre destination en ligne pour des thés de qualité.
           </p>
         </div>
 
