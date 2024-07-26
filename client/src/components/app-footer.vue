@@ -24,9 +24,6 @@ import logo from '@/assets/images/fanthesie.png';
               <RouterLink :to="{ name: 'products' }" class="hover:underline">Produits</RouterLink>
             </li>
             <li>
-              <RouterLink :to="{ name: 'basket' }" class="hover:underline">Panier</RouterLink>
-            </li>
-            <li>
               <RouterLink :to="{ name: 'account' }" class="hover:underline">Mon compte</RouterLink>
             </li>
           </ul>
