@@ -2,6 +2,7 @@
 import { ref, onBeforeMount } from 'vue';
 import { useBasketStore } from '@/stores/basket';
 import { useUserStore } from '@/stores/user';
+import { useOrderStore } from '@/stores/order';
 import { useRouter, RouterLink } from 'vue-router';
 import { fetchBasket } from '@/api/basket';
 import { loadStripe } from '@stripe/stripe-js';
@@ -9,8 +10,10 @@ import Button from '@/components/ui/button/Button.vue';
 import BasketInformation from '@/components/basket/basket-information.vue';
 import BasketList from '@/components/basket/basket-list.vue';
 import config from '@/config';
+ 
 
 const basketStore = useBasketStore();
+const orderStore = useOrderStore();
 const userStore = useUserStore();
 const router = useRouter();
 const stripe = ref(null);
@@ -74,7 +77,8 @@ const proceedToCheckout = async () => {
     }
 
     const orderResult = await orderResponse.json();
-
+    orderStore.setOrderId(orderResult.id);
+    console.log(orderStore)
     const stripeData = {
       order: orderResult.id
     };

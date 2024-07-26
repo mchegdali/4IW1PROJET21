@@ -30,8 +30,6 @@ paymentRouter.post(
 paymentRouter.post(
   '/stripe',
   checkAuth(authConfig.accessTokenSecret),
-  checkRole(['admin']),
-  checkRole(['accountant']),
   createStripeSession,
 );
 
