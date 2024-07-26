@@ -42,7 +42,7 @@ import logo from '@/assets/images/fanthesie.png';
             </li>
             <li>
               <RouterLink :to="{ name: 'confidentiality-declaration' }" class="hover:underline"
-                >déclaration de confidentialité</RouterLink
+                >Déclaration de confidentialité</RouterLink
               >
             </li>
             <li>
