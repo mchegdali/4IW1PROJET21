@@ -26,12 +26,14 @@ const customMessage = ref('Êtes-vous sûr de vouloir supprimer cette adresse ?'
 
 const getAddresses = async () => {
   try {
-    const response = await fetch(`${config.apiBaseUrl}/users/${userId}/addresses/`, {headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}});
+    const response = await fetch(`${config.apiBaseUrl}/users/${userId}/addresses/`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
-    console.log("Fetched addresses:", data);
+    console.log('Fetched addresses:', data);
     addresses.value = data;
   } catch (error) {
     console.error('Erreur lors de la récupération des adresses:', error);
@@ -39,7 +41,7 @@ const getAddresses = async () => {
 };
 
 const deleteAddress = (addressId: string) => {
-  console.log("Address ID to delete:", addressId);
+  console.log('Address ID to delete:', addressId);
   showModal.value = true;
   addressToDelete.value = addressId;
 };
@@ -57,7 +59,7 @@ const confirmDeletion = async () => {
       `${config.apiBaseUrl}/users/${userId}/addresses/${addressToDelete.value}`,
       {
         method: 'DELETE',
-        headers: {Authorization: `Bearer ${localStorage.getItem('accessToken')}`}
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       }
     );
     if (!response.ok) {
@@ -78,7 +80,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mx-4">
+  <main class="grow">
     <div class="flex items-center w-full relative align mt-2">
       <div class="block lg:hidden">
         <RouterLink :to="{ name: 'account' }"><MoveLeft /></RouterLink>
@@ -87,10 +89,10 @@ onMounted(() => {
       <h1 class="font-bold text-lg text-center w-full sm:text-3xl">Carnet d’adresses</h1>
     </div>
 
-    <div class="mt-4 flex">
+    <div class="mt-4 flex justify-center">
       <RouterLink
         :to="{ name: 'add-addresse' }"
-        class="w-full bg-tea-600 rounded-lg text-white p-2 text-center"
+        class="bg-tea-600 rounded-lg text-white p-2 text-center"
         >Ajouter une nouvelle adresse</RouterLink
       >
     </div>
@@ -122,7 +124,7 @@ onMounted(() => {
         </button>
       </div>
     </div>
-  </div>
+  </main>
 
   <ConfirmModal
     v-if="showModal"

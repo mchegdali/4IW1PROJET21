@@ -3,7 +3,7 @@ import openSources from '@/assets/open-sources.json';
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto p-6">
+  <main class="max-w-4xl mx-auto p-6">
     <h1 class="text-3xl font-bold mb-6 text-gray-800">Licences open-source</h1>
     <div v-for="pkg in openSources" :key="pkg.name" class="mb-6 p-4 bg-white shadow rounded-lg">
       <h2 class="text-xl font-semibold mb-2 text-gray-700">
@@ -29,5 +29,5 @@ import openSources from '@/assets/open-sources.json';
         <span v-else class="text-gray-500">{{ pkg.repositoryLink }}</span>
       </p>
     </div>
-  </div>
+  </main>
 </template>

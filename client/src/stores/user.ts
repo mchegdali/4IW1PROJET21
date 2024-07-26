@@ -130,14 +130,14 @@ export const useUserStore = defineStore('user', {
         ...data
       };
     },
-    async refreshAccessToken() {
+    async refreshAccessToken(refreshToken?: string) {
       const response = await fetch(`${config.apiBaseUrl}/auth/refresh-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          refreshToken: this.refreshToken
+          refreshToken: refreshToken ?? this.refreshToken
         })
       } as RequestInit);
 

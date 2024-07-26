@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AccountMenu from '@/components/account-menu.vue';
 import Button from '@/components/ui/button/Button.vue';
-import { LogOut } from "lucide-vue-next"
+import { LogOut } from 'lucide-vue-next';
 import { useUserStore } from '@/stores/user';
 import { useRouter } from 'vue-router';
 

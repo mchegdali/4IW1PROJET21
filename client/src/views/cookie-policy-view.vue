@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="container mx-auto p-4">
+  <main class="container mx-auto p-4">
     <h1 class="text-3xl font-bold m-2">Politique relative aux cookies</h1>
     <div class="text-justify mt-6 space-y-8 sm:p-8">
       <section>
@@ -108,5 +108,5 @@
         </p>
       </section>
     </div>
-  </div>
+  </main>
 </template>

@@ -4,7 +4,7 @@ import Button from '@/components/ui/button/Button.vue';
 </script>
 
 <template>
-  <main class="grow flex justify-center items-center p-16">
+  <main class="bg-blue-500 h-full w-full">
     <div class="border p-5 rounded-lg shadow-lg max-w-screen-md">
       <h1 class="text-3xl font-bold mb-5">Réinitialiser votre mot de passe</h1>
       <ForgotPasswordForm />

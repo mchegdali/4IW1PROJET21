@@ -14,7 +14,9 @@ basketStore.$subscribe((mutation, state) => {
 </script>
 
 <template>
-  <nav class="px-16 border border-y-2 border-y-slate-100 bg-white flex items-center justify-around">
+  <nav
+    class="h-12 w-full border border-y-2 border-y-slate-100 bg-white flex items-center justify-around"
+  >
     <AppbarLink :to="{ name: 'home' }">
       <template v-slot:icon>
         <Home class="w-6 h-6" />

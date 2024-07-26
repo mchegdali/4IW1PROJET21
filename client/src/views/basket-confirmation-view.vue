@@ -142,7 +142,7 @@ const proceedToCheckout = async () => {
         >
         et notre
         <RouterLink :to="{ name: 'confidentiality-declaration' }" class="text-tea-800 underline"
-          >politique de confidentialité</RouterLink
+          >déclaration de confidentialité</RouterLink
         >.
       </p>
     </div>

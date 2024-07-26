@@ -12,8 +12,8 @@ import { RouterLink } from 'vue-router';
         <p>
           En continuant, vous acceptez les
           <RouterLink :to="{ name: 'conditions' }" class="text-tea-600"
-            >conditions d'utilisation et de vente</RouterLink
-          >
+            >conditions générales de vente et d'utilisation
+          </RouterLink>
           de Fanthésie. Consultez notre
           <RouterLink :to="{ name: 'confidentiality-declaration' }" class="text-tea-600"
             >déclaration de confidentialité</RouterLink
