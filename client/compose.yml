@@ -1,0 +1,11 @@
+services:
+  client:
+    image: node:20.14.0-alpine
+    user: node
+    working_dir: /home/node
+    entrypoint: sh -c
+    command: '"npm install && npm run dev -- --host"'
+    ports:
+      - 5173:5173
+    volumes:
+      - .:/home/node

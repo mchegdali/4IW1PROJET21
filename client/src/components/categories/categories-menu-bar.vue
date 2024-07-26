@@ -1,21 +1,3 @@
-<template>
-  <nav class="bg-white text-tea-600 border-b border-tea-200">
-    <ul class="flex justify-evenly py-2">
-      <li v-for="category in categories" :key="category._id">
-        <RouterLink
-          :to="{ path: '/products', query: { category: category.slug } }"
-          class="transition-colors relative group pb-0.5"
-        >
-          {{ category.name }}
-          <span
-            class="absolute bottom-0 left-0 w-0 h-0.5 bg-tea-600 transition-all group-hover:w-full"
-          ></span>
-        </RouterLink>
-      </li>
-    </ul>
-  </nav>
-</template>
-
 <script setup lang="ts">
 import type { ProductCategory } from '@/api/products.api';
 import { ref, onMounted } from 'vue';
@@ -35,3 +17,21 @@ onMounted(async () => {
   }
 });
 </script>
+
+<template>
+  <div role="navigation" class="bg-white text-tea-500 border-b border-tea-200 font-semibold">
+    <ul class="flex justify-evenly py-2">
+      <li v-for="category in categories" :key="category._id">
+        <RouterLink
+          :to="{ path: '/products', query: { category: category.slug } }"
+          class="transition-colors relative group pb-0.5"
+        >
+          {{ category.name }}
+          <span
+            class="absolute bottom-0 left-0 w-0 h-0.5 bg-tea-500 transition-all group-hover:w-full"
+          ></span>
+        </RouterLink>
+      </li>
+    </ul>
+  </div>
+</template>

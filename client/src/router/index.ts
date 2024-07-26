@@ -7,6 +7,13 @@ import config from '@/config';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0 };
+    }
+  },
   routes: [
     {
       path: '/',
@@ -225,6 +232,11 @@ router.beforeEach(async (to) => {
   const userStore = useUserStore();
   const authRequired = to.meta?.requiresAuth === true;
   const isAdminRequired = to.meta?.role === 'admin';
+
+  const lsRefreshToken = localStorage.getItem('refreshToken');
+  if (lsRefreshToken) {
+    await userStore.refreshAccessToken(lsRefreshToken);
+  }
 
   if (authRequired && !userStore.isAuthenticated) {
     return {

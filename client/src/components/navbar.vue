@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/user';
 import { useBasketStore } from '@/stores/basket';
 import { ref } from 'vue';
 import ShoppingBasketWithCount from './shared/shopping-basket-with-count.vue';
+import CategoriesMenuBar from './categories/categories-menu-bar.vue';
 
 const userStore = useUserStore();
 const basketStore = useBasketStore();
@@ -24,27 +25,44 @@ basketStore.$subscribe((mutation, state) => {
 </script>
 
 <template>
-  <nav
-    class="bg-tea-600 flex justify-between items-center h-14 px-4 py-2">
-    <RouterLink :to="{ name: 'home' }" class="hidden lg:inline lg:justify-self-start h-full my-auto">
-      <img :src="logo" alt="Fanthesie" class="w-[120px] h-[40px] object-center" width="120" height="40" />
-    </RouterLink>
-    <div class="flex items-center gap-4 w-full lg:max-w-xl xl:max-w-4xl 2xl:max-w-5xl">
-      <ProductsSearchForm />
-    </div>
-    <div class="hidden lg:flex lg:h-full">
-      <Button variant="outline" as-child
-        class="bg-transparent text-white border border-transparent hover:border hover:border-primary-foreground">
-        <RouterLink :to="{ name: 'login' }" v-if="!isAuthenticated">Se connecter</RouterLink>
-        <RouterLink :to="{ name: 'account' }" v-else>Mon compte</RouterLink>
-      </Button>
-      <Button variant="outline" as-child
-        class="bg-transparent text-white border border-transparent hover:border hover:border-primary-foreground">
-        <RouterLink :to="{ name: 'basket' }" class="flex items-center gap-2">
-          Panier
-          <ShoppingBasketWithCount v-model:nbItems="nbItems" />
-        </RouterLink>
-      </Button>
-    </div>
-  </nav>
+  <header class="sticky top-0 bg-tea-600 h-fit">
+    <nav class="flex justify-between items-center h-14 px-4 py-2">
+      <RouterLink
+        :to="{ name: 'home' }"
+        class="hidden lg:inline lg:justify-self-start h-full my-auto"
+      >
+        <img
+          :src="logo"
+          alt="Fanthesie"
+          class="w-[120px] h-[40px] object-center"
+          width="120"
+          height="40"
+        />
+      </RouterLink>
+      <div class="flex items-center gap-4 w-full lg:max-w-xl xl:max-w-4xl 2xl:max-w-5xl">
+        <ProductsSearchForm />
+      </div>
+      <div class="hidden lg:flex lg:h-full">
+        <Button
+          variant="outline"
+          as-child
+          class="bg-transparent text-white border border-transparent hover:border hover:border-primary-foreground"
+        >
+          <RouterLink :to="{ name: 'login' }" v-if="!isAuthenticated">Se connecter</RouterLink>
+          <RouterLink :to="{ name: 'account' }" v-else>Mon compte</RouterLink>
+        </Button>
+        <Button
+          variant="outline"
+          as-child
+          class="bg-transparent text-white border border-transparent hover:border hover:border-primary-foreground"
+        >
+          <RouterLink :to="{ name: 'basket' }" class="flex items-center gap-2">
+            Panier
+            <ShoppingBasketWithCount v-model:nbItems="nbItems" />
+          </RouterLink>
+        </Button>
+      </div>
+    </nav>
+    <CategoriesMenuBar />
+  </header>
 </template>

@@ -114,10 +114,10 @@ watch(
         <div>
           <h2 class="text-base font-semibold">Instructions</h2>
           <p>
-            Pour ce {{ product.category.name }}, nos experts vous conseillent de faire bouillir
-            votre eau à <strong>{{ product.brewingInstructions.temperature }}°C</strong> et de la
-            laisser infuser pendant
-            <strong>{{ product.brewingInstructions.steepTime }}</strong> minutes.
+            Pour ce {{ product.category.name.toLocaleLowerCase() }}, nos experts vous conseillent de
+            faire bouillir votre eau à
+            <strong>{{ product.brewingInstructions.temperature }}°C</strong> et de la laisser
+            infuser pendant <strong>{{ product.brewingInstructions.steepTime }}</strong> minutes.
           </p>
         </div>
         <div>
